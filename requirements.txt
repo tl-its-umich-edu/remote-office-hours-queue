@@ -1,6 +1,0 @@
-django
-mozilla-django-oidc
-whitenoise
-dj-database-url
-psycopg2-binary
-
