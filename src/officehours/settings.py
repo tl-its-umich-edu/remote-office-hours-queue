@@ -63,6 +63,7 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 # Application definition
 
 INSTALLED_APPS = [
+    'bluejeans_queue.apps.BluejeansQueueConfig',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
