@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  selector:
+    matchLabels:
+      app: web
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: docker-registry.default.svc:5000/officehours-dev/officehours:latest
+        command: ["python", "src/manage.py", "runserver"]
+        args: ["0.0.0.0:8001"]
+        ports:
+        - containerPort: 8001
+        envFrom:
+        - secretRef:
+            name: secrets

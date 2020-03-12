@@ -1,0 +1,32 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  variant: dev
+  org: umich
+nameSuffix: -dev
+resources:
+- web-deployment.yaml
+- web-service.yaml
+- web-ingress.yaml
+commonLabels:
+  project: officehours
+namePrefix: officehours-
+secretGenerator:
+- name: secrets
+  files:
+  - secret/ALLOWED_HOSTS
+  - secret/DEBUG
+  - secret/SECRET_KEY
+  - secret/DATABASE_URL
+  - secret/OIDC_RP_CLIENT_ID
+  - secret/OIDC_RP_CLIENT_SECRET
+  - secret/OIDC_OP_AUTHORIZATION_ENDPOINT
+  - secret/OIDC_OP_TOKEN_ENDPOINT
+  - secret/OIDC_OP_USER_ENDPOINT
+  - secret/OIDC_OP_JWKS_ENDPOINT
+  type: Opaque
+- name: web-tls
+  type: "kubernetes.io/tls"
+  files:
+  - secret/tls.key
+  - secret/tls.crt
