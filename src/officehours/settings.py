@@ -15,20 +15,49 @@ import os
 import dj_database_url
 
 
+def csv_to_list(csv, delim=','):
+    try:
+        return [x.strip() for x in csv.split(delim) if x.strip()]
+    except Exception:
+        return []
+
+
+def str_to_bool(val):
+    return val.lower() in ('yes', 'true', 'on', '1')
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+        }
+    }
+}
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '_c8d6tdowj2bb50^t&kb)o3o-+oi!n0n@y+ik%#ty1-nd87uug'
+SECRET_KEY = os.getenv('SECRET_KEY', '_c8d6tdowj2bb50^t&kb)o3o-+oi!n0n@y+ik%#ty1-nd89uug')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = str_to_bool(os.getenv('DEBUG', 'off'))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 
 
 # Application definition
@@ -42,6 +71,32 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+LOGIN_REDIRECT_URL = '/'
+
+OIDC_RP_CLIENT_ID = os.getenv('OIDC_RP_CLIENT_ID')
+OIDC_RP_CLIENT_SECRET = os.getenv('OIDC_RP_CLIENT_SECRET')
+OIDC_OP_AUTHORIZATION_ENDPOINT = os.getenv('OIDC_OP_AUTHORIZATION_ENDPOINT')
+OIDC_OP_TOKEN_ENDPOINT = os.getenv('OIDC_OP_TOKEN_ENDPOINT')
+OIDC_OP_USER_ENDPOINT = os.getenv('OIDC_OP_USER_ENDPOINT')
+OIDC_RP_SIGN_ALGO = os.getenv('OIDC_RP_SIGN_ALGO', 'RS256')
+OIDC_OP_JWKS_ENDPOINT = os.getenv('OIDC_OP_JWKS_ENDPOINT')
+OIDC_USERNAME_ALGO = 'officehours.auth.generate_username'
+
+if (OIDC_RP_CLIENT_ID and OIDC_RP_CLIENT_SECRET and OIDC_OP_AUTHORIZATION_ENDPOINT
+        and OIDC_OP_TOKEN_ENDPOINT and OIDC_OP_USER_ENDPOINT):
+    INSTALLED_APPS += ['mozilla_django_oidc']
+    AUTHENTICATION_BACKENDS += ['mozilla_django_oidc.auth.OIDCAuthenticationBackend']
+else:
+    print('Skipping OIDCAuthenticationBackend as OIDC variables were not set.')
+
+# Work around OpenShift TLS Termination
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
