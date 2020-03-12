@@ -2,4 +2,4 @@ django
 mozilla-django-oidc
 whitenoise
 dj-database-url
-
+requests
