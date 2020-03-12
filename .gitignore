@@ -61,4 +61,4 @@ db.sqlite3
 *.swp
 *.swo
 
-/netdash/staticfiles/
+/src/staticfiles/
