@@ -10,6 +10,8 @@ services:
       - database
     environment:
       ALLOWED_HOSTS: "*"
+      DEBUG: "True"
+      DATABASE_URL: "postgresql://admin:admin@database/postgres"
     ports:
       - 127.0.0.1:8003:8000
     volumes:
