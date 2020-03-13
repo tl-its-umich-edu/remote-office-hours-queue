@@ -1260,20 +1260,7 @@ pre {
 	}
 }
 
-a.request-button {
-	position:relative;
-	display:block;
-	width:100%;
-	max-width:280px;
-	margin:1.5em 0 1.5em 0;
-	padding:.5em 10px .5em 10px;
-	background:#40658f;
-	border-radius:3px;
-	color:#ffffff;
-	text-decoration:none;
-	text-align:center;
-}
-a.request-button:hover {
-	color:#ffffff;
-	background:#567daa;
+div[role=main] {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 }
