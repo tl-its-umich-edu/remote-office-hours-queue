@@ -20,4 +20,12 @@
         {% endif %}
     </form>
 
+    {% if owner == request.user %}
+    <p class="alert alert-info col-lg">
+        This is your queue, you can <a href="{% url 'manage' %}">
+        manage it
+    </a>.
+    </p>
+    {% endif %}
+
 {% endblock %}

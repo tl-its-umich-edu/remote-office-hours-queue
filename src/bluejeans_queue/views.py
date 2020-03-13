@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView
+from django.views.generic import View, TemplateView
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from .models import BluejeansMeeting
@@ -9,6 +9,12 @@ from .models import BluejeansMeeting
 
 class IndexView(TemplateView):
     template_name = 'bluejeans_queue/index.html'
+
+
+class MeetingSearchView(View):
+    def get(self, request, *args, **kwargs):
+        owner = get_object_or_404(User, username=request.GET['uniqname'])
+        return HttpResponseRedirect(reverse('meeting', args=[owner.username]))
 
 
 class MeetingView(TemplateView):

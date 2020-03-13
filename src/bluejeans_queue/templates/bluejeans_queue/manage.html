@@ -28,7 +28,7 @@
 </form>
 <br>
 <p class="alert alert-info col-lg">
-    When you finish a meeting, remove the entry from the list above 
+    When you finish a meeting, remove the entry from the list above
     to update the line length for the other people in the queue.
 </p>
 {% else %}
@@ -36,5 +36,9 @@
     No one has joined your queue yet.
 </p>
 {% endif %}
+
+<a href="{% url 'meeting' request.user.username %}">
+    See you own queue as a visitor
+</a>
 
 {% endblock %}
