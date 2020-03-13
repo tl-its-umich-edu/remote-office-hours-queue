@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from requests import HTTPError
 
 from .bluejeans import Bluejeans
 
@@ -45,8 +46,11 @@ class BluejeansMeeting(models.Model):
 
     def deactivate(self):
         if bluejeans:
-            bluejeans.delete_meeting(self.bluejeans_user['id'],
-                                     self.bjn_meeting_id)
+            try:
+                bluejeans.delete_meeting(self.bluejeans_user['id'],
+                                        self.bjn_meeting_id)
+            except HTTPError as exc:
+                print(exc)
 
         self.is_active = False
         self.save()
