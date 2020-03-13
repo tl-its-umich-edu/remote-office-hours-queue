@@ -10,10 +10,11 @@ ENV GUNICORN_WORKERS=2
 ENV GUNICORN_THREADS=4
 
 RUN pip install gunicorn psycopg2-binary
-COPY src/requirements.txt /tmp
+COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
 ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
-CMD ["sh", "-c", "gunicorn --bind=0.0.0.0:8000 --workers=${GUNICORN_WORKERS} --threads=${GUNICORN_THREADS} --access-logfile=- --log-file=- officehours.wsgi"]
+CMD ["sh", "-c", "gunicorn --bind=0.0.0.0:8001 --workers=${GUNICORN_WORKERS} --threads=${GUNICORN_THREADS} --access-logfile=- --log-file=- officehours.wsgi"]
 
 COPY . /usr/src/app
+RUN chmod -R g+rw /usr/src/app

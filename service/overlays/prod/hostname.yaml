@@ -1,0 +1,3 @@
+- op: add
+  path: /spec/rules/0/host
+  value: officehours.it.umich.edu

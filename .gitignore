@@ -63,4 +63,4 @@ db.sqlite3
 *.swo
 
 /src/staticfiles/
-*/secret
+secret
