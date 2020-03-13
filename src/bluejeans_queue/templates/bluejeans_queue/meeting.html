@@ -3,7 +3,13 @@
 {% block content %}
     <p>Welcome to </strong>{{ owner.first_name }} {{ owner.last_name }}'s</strong> meeting queue.</p>
     <ul>
+        {% if not meeting %}
         <li>Number of people currently in line: <strong>{{ owner.owner.count }}</strong></li>
+        {% else %}
+        <li>You are in line to meet with {{ owner.first_name }} {{ owner.last_name }} <{{ owner.email }}</li>
+        <li><a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
+        <li>Number of people in line ahead of you: <strong>{{ owner.owner.count|add:"-1"}}</strong></li>
+        {% endif %}
     </ul>
 
     <form class="form-inline" method="post" action="{% url 'meeting' owner %}">
