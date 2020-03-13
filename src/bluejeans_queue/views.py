@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views.generic import TemplateView, DetailView
 from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
 from .models import BluejeansMeeting
 
 
@@ -29,7 +30,7 @@ class MeetingView(TemplateView):
     def post(self, request, *args, **kwargs):
         if 'join' in request.POST['action']:
             owner = get_object_or_404(User, username=self.kwargs['owner'])
-            meeting = BluejeansMeeting.objects.create(
+            meeting, created = BluejeansMeeting.objects.get_or_create(
                 owner=owner, attendee=request.user)
             meeting.save()
         elif 'leave' in request.POST['action']:
@@ -37,4 +38,4 @@ class MeetingView(TemplateView):
             meeting = BluejeansMeeting.objects.get(
                 owner=owner, attendee=request.user)
             meeting.delete()
-        return HttpResponseRedirect('')
+        return HttpResponseRedirect(reverse('meeting', args=[self.kwargs['owner']]))
