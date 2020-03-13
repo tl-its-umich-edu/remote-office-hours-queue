@@ -1,0 +1,11 @@
+{% extends "admin/login.html" %}
+
+{% block content %}
+  <br/>
+  <h1 style="text-align: center"><a class="button" href="{% url 'oidc_authentication_init' %}">Click Here to Login with SSO</a></h1>
+  <br/>
+  <details>
+    <summary><small>Or use the back door...</small></summary>
+    {{ block.super }}
+  </details>
+{% endblock %}

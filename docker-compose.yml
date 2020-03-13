@@ -1,0 +1,33 @@
+---
+version: '3.4'
+
+services:
+
+  web:
+    build:
+      context: .
+    depends_on:
+      - database
+    environment:
+      - ALLOWED_HOSTS=*
+      - DEBUG=True
+      - DATABASE_URL=postgresql://admin:admin@database/postgres
+      - FEEDBACK_EMAIL=office-hours-devs@umich.edu
+    # env_file:
+    #   - .env
+    ports:
+      - 127.0.0.1:8003:8000
+    volumes:
+      - ./src:/usr/src/app
+    command: "python manage.py runserver 0.0.0.0:8000"
+
+  database:
+    image: postgres:10.4-alpine
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=admin
+    volumes:
+      - officehours-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  officehours-postgres-data:

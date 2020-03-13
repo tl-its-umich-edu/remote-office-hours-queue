@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  tls:
+  - hosts:
+    - dev.officehours.it.umich.edu
+    secretName: web-tls
+  rules:
+  - host: dev.officehours.it.umich.edu
+    http:
+      paths:
+      - path: /
+        backend:
+         serviceName: web
+         servicePort: 80
