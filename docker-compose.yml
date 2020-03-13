@@ -5,7 +5,7 @@ services:
 
   web:
     build:
-      context: .
+      context: src
     depends_on:
       - database
     environment:
@@ -16,10 +16,10 @@ services:
     # env_file:
     #   - .env
     ports:
-      - 127.0.0.1:8003:8000
+      - 127.0.0.1:8003:8001
     volumes:
       - ./src:/usr/src/app
-    command: "python manage.py runserver 0.0.0.0:8000"
+    command: "python manage.py runserver 0.0.0.0:8001"
 
   database:
     image: postgres:10.4-alpine
