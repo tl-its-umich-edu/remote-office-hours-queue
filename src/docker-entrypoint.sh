@@ -2,7 +2,7 @@
 
 set -e
 
-python3 manage.py collectstatic --noinput
-python3 manage.py migrate
+python3 src/manage.py collectstatic --noinput
+python3 src/manage.py migrate
 
 exec "${@}"

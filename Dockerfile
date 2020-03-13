@@ -13,7 +13,8 @@ RUN pip install gunicorn psycopg2-binary
 COPY src/requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
-ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/src/app/src/docker-entrypoint.sh"]
 CMD ["sh", "-c", "gunicorn --bind=0.0.0.0:8000 --workers=${GUNICORN_WORKERS} --threads=${GUNICORN_THREADS} --access-logfile=- --log-file=- officehours.wsgi"]
 
 COPY . /usr/src/app
+RUN chmod -R g+rw /usr/src/app
