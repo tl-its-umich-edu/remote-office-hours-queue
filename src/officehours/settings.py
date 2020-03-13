@@ -48,8 +48,8 @@ LOGGING = {
 }
 
 
-BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID').strip()
-BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET').strip()
+BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
+BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
