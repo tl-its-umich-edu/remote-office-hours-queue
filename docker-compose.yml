@@ -9,9 +9,12 @@ services:
     depends_on:
       - database
     environment:
-      ALLOWED_HOSTS: "*"
-      DEBUG: "True"
-      DATABASE_URL: "postgresql://admin:admin@database/postgres"
+      - ALLOWED_HOSTS=*
+      - DEBUG=True
+      - DATABASE_URL=postgresql://admin:admin@database/postgres
+      - FEEDBACK_EMAIL=office-hours-devs@umich.edu
+    # env_file:
+    #   - .env
     ports:
       - 127.0.0.1:8003:8000
     volumes:
