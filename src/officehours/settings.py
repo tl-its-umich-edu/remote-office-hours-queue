@@ -74,7 +74,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'watchman',
 ]
+
+WATCHMAN_TOKENS = os.getenv('WATCHMAN_TOKENS')
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
