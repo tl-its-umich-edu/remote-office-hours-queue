@@ -63,7 +63,7 @@ class ManageView(TemplateView):
             meeting = BluejeansMeeting.objects.get(id=meeting_id)
             if meeting.owner != request.user:
                 return HttpResponse('Unauthorized', status=403)
-            meeting.delete()
+            meeting.deactivate()
         else:  # Remove All
             meetings = BluejeansMeeting.objects.filter(owner=request.user, is_active=True)
             for m in meetings:
