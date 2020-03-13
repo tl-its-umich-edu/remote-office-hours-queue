@@ -1,8 +1,9 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import TemplateView
 from django.core.exceptions import ObjectDoesNotExist
+from django.urls import reverse
 from .models import BluejeansMeeting
 
 
@@ -38,3 +39,26 @@ class MeetingView(TemplateView):
                 owner=owner, attendee=request.user)
             meeting.delete()
         return HttpResponseRedirect('')
+
+
+class ManageView(TemplateView):
+    template_name = 'bluejeans_queue/manage.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['queue'] = BluejeansMeeting.objects.filter(owner=self.request.user).order_by('id')
+        context['all_emails'] = ','.join(filter(None, meeting.attendee.email for meeting in context['queue']))
+        return context
+
+    def post(self, request, *args, **kwargs):
+        if request.POST['meeting'].isdigit():
+            meeting_id = int(request.POST['meeting'])
+            meeting = BluejeansMeeting.objects.get(id=meeting_id)
+            if meeting.owner != request.user:
+                return HttpResponse('Unauthorized', status=403)
+            meeting.delete()
+        else:  # Remove All
+            meetings = BluejeansMeeting.objects.filter(owner=request.user)
+            for m in meetings:
+                m.delete()
+        return HttpResponseRedirect(reverse('manage'))

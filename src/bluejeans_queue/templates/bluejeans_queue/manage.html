@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Manage Your Queue</h1>
+
+{% if queue %}
+<form method="post" action="">
+    {% csrf_token %}
+    <button type="submit" name="meeting" value="all" class="btn btn-danger float-right">
+        Remove All
+    </button>
+    <h2>People in Line:  <a class="btn btn-warning" target="_blank" href="mailto:{{all_emails}}">Email All</a></h2>
+    <ol class="list-group">
+        {% for m in queue %}
+        <li class="list-group-item">
+            <span>{{m.attendee.username}}</span>
+            <span> • </span>
+            <a href={{m.bjn.meeting_url}}>{{m.bjn_meeting_url}}</a>
+            <span class="float-right">
+                <span>{{m.created_at}}</span>
+                <button type="submit" name="meeting" value="{{m.id}}" class="btn btn-sm btn-danger">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </span>
+        </li>
+        {% endfor %}
+    </ol>
+</form>
+<br>
+<p class="alert alert-info col-lg">
+    When you finish a meeting, remove the entry from the list above 
+    to update the line length for the other people in the queue.
+</p>
+{% else %}
+<p class="lead">
+    No one has joined your queue yet.
+</p>
+{% endif %}
+
+{% endblock %}
