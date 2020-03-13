@@ -13,7 +13,8 @@ class IndexView(TemplateView):
 
 class MeetingSearchView(View):
     def get(self, request, *args, **kwargs):
-        owner = get_object_or_404(User, username=request.GET['uniqname'])
+        owner = get_object_or_404(
+            User, username=request.GET['uniqname'].lower())
         return HttpResponseRedirect(reverse('meeting', args=[owner.username]))
 
 
