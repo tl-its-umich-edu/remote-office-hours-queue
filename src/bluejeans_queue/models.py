@@ -20,6 +20,8 @@ class BluejeansMeeting(models.Model):
                                  on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    is_active = models.BooleanField(default=True)
+
     bjn_user_id = models.IntegerField(null=True)
     bjn_meeting_id = models.IntegerField(null=True)
     bjn_meeting_url = models.URLField(null=True)
@@ -41,12 +43,13 @@ class BluejeansMeeting(models.Model):
 
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def deactivate(self):
         if bluejeans:
             bluejeans.delete_meeting(self.bluejeans_user['id'],
                                      self.bjn_meeting_id)
 
-        super().delete(*args, **kwargs)
+        self.is_active = False
+        self.save()
 
     def __str__(self):
         return f'id={self.bjn_meeting_id} user_email={self.owner.email}'

@@ -20,10 +20,11 @@ class MeetingView(TemplateView):
         owner = get_object_or_404(User, username=self.kwargs['owner'])
         try:
             meeting = BluejeansMeeting.objects.get(
-                owner=owner, attendee=self.request.user)
+                owner=owner, attendee=self.request.user, is_active=True)
         except ObjectDoesNotExist:
             meeting = None
         context['owner'] = owner
+        context['queue_length'] = owner.owner.filter(is_active=True).count()
         context['meeting'] = meeting
         return context
 
@@ -31,13 +32,13 @@ class MeetingView(TemplateView):
         if 'join' in request.POST['action']:
             owner = get_object_or_404(User, username=self.kwargs['owner'])
             meeting, created = BluejeansMeeting.objects.get_or_create(
-                owner=owner, attendee=request.user)
+                owner=owner, attendee=request.user, is_active=True)
             meeting.save()
         elif 'leave' in request.POST['action']:
             owner = get_object_or_404(User, username=self.kwargs['owner'])
             meeting = BluejeansMeeting.objects.get(
-                owner=owner, attendee=request.user)
-            meeting.delete()
+                owner=owner, attendee=request.user, is_active=True)
+            meeting.deactivate()
         return HttpResponseRedirect(reverse('meeting', args=[self.kwargs['owner']]))
 
 
@@ -46,7 +47,7 @@ class ManageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['queue'] = BluejeansMeeting.objects.filter(owner=self.request.user).order_by('id')
+        context['queue'] = BluejeansMeeting.objects.filter(owner=self.request.user, is_active=True).order_by('id')
         context['all_emails'] = ','.join(filter(None, [meeting.attendee.email for meeting in context['queue']]))
         return context
 
@@ -60,5 +61,5 @@ class ManageView(TemplateView):
         else:  # Remove All
             meetings = BluejeansMeeting.objects.filter(owner=request.user)
             for m in meetings:
-                m.delete()
+                m.deactivate()
         return HttpResponseRedirect(reverse('manage'))
