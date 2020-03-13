@@ -46,7 +46,7 @@ class BluejeansMeeting(models.Model):
             bluejeans.delete_meeting(self.bluejeans_user['id'],
                                      self.bjn_meeting_id)
 
-            super().delete(*args, **kwargs)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f'id={self.bjn_meeting_id} user_email={self.owner.email}'
