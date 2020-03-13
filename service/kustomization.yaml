@@ -24,6 +24,8 @@ secretGenerator:
   - secret/OIDC_OP_TOKEN_ENDPOINT
   - secret/OIDC_OP_USER_ENDPOINT
   - secret/OIDC_OP_JWKS_ENDPOINT
+  - secret/BLUEJEANS_CLIENT_ID
+  - secret/BLUEJEANS_CLIENT_SECRET
   - secret/FEEDBACK_EMAIL
   type: Opaque
 - name: web-tls
