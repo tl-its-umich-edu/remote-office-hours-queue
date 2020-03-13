@@ -34,6 +34,7 @@ class Bluejeans:
         }
         resp = requests.post(self._base_url + '/oauth2/token?Client',
                              data=client_info)
+
         resp.raise_for_status()
         data = resp.json()
 
@@ -42,12 +43,14 @@ class Bluejeans:
         self._enterprise_id = data['scope']['enterprise']
 
     def get_user(self, user_email):
-        params = {}
-        params['emailId'] = user_email
+        params = {
+            'emailId': user_email,
+            'fields': 'username, firstName, middleName, lastName, email',
+        }
 
         resp = self.session.get(
-            self._base_url +
-            f'/v1/enterprise/{self._enterprise_id}/users?emailID={user_email}'
+            self._base_url + f'/v1/enterprise/{self._enterprise_id}/users',
+            params=params,
         )
         resp.raise_for_status()
         r = resp.json()
@@ -58,10 +61,8 @@ class Bluejeans:
 
         return r['users'][0]
 
-    def create_meeting(self, user_email, meeting_settings=None):
+    def create_meeting(self, user_id, meeting_settings=None):
         now = round(time.time()) * 1000
-
-        user = self.get_user(user_email)
 
         if not meeting_settings:
             meeting_settings = {
@@ -69,15 +70,13 @@ class Bluejeans:
                 'description': '',
                 'start': now,
                 'end': now + (60 * 30 * 1000),
-                'endlessMeeting': True,
-                'timelessMeeting': True,
                 'timezone': 'America/Detroit',
                 'endPointType': 'WEB_APP',
                 'endPointVersion': '2.10',
             }
 
         resp = self.session.post(
-            self._base_url + f'/v1/user/{user["id"]}/scheduled_meeting',
+            self._base_url + f'/v1/user/{user_id}/scheduled_meeting',
             json=meeting_settings,
         )
 
@@ -85,9 +84,17 @@ class Bluejeans:
 
         return resp.json()
 
-    def delete_meeting(self, meeting):
+    def read_meeting(self, user_id, meeting_id):
+        resp = self.session.get(
+            self._base_url + f'/v1/user/{user_id}' +
+            f'/scheduled_meeting/{meeting_id}'
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    def delete_meeting(self, user_id, meeting_id):
         resp = self.session.delete(
-            self._base_url + f'/v1/user/{meeting["moderator"]["id"]}' +
-            f'/scheduled_meeting/{meeting["id"]}'
+            self._base_url + f'/v1/user/{user_id}' +
+            f'/scheduled_meeting/{meeting_id}'
         )
         resp.raise_for_status()
