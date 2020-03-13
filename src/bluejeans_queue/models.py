@@ -12,7 +12,10 @@ bluejeans = Bluejeans(
 
 
 class BluejeansMeeting(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, related_name='owner',
+                              on_delete=models.CASCADE)
+    attendee = models.ForeignKey(User, related_name='attendee',
+                                 on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     bjn_user_id = models.IntegerField(null=True)
