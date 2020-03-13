@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <p>Welcome to </strong>{{ owner.first_name }} {{ owner.last_name }}'s</strong> meeting queue.</p>
+    <ul>
+        <li>Number of people currently in line: <strong>{{ owner.owner.count }}</strong></li>
+    </ul>
+
+    <form class="form-inline" method="post" action="{% url 'meeting' owner %}">
+        {% csrf_token %}
+        {% if not meeting %}
+        <button type="submit" name="action" value="join" class="btn btn-primary">Join the line</button>
+        {% else %}
+        <button type="submit" name="action" value="leave" class="btn btn-warning">Leave the line</button>
+        {% endif %}
+    </form>
+
+{% endblock %}
