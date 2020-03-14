@@ -1,3 +1,5 @@
+import time
+
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
@@ -36,8 +38,20 @@ class BluejeansMeeting(models.Model):
             if not self.bjn_meeting_id:
                 user = bluejeans.get_user(user_email=self.owner.email)
                 self.bjn_user_id = user['id']
+                now = round(time.time()) * 1000
 
-                meeting = bluejeans.create_meeting(self.bjn_user_id)
+                meeting = bluejeans.create_meeting(
+                    self.bjn_user_id,
+                    meeting_settings={
+                        'title': f'{self.owner.username}\'s Remote Office Hours',
+                        'description': '',
+                        'start': now,
+                        'end': now + (60 * 30 * 1000),
+                        'timezone': 'America/Detroit',
+                        'endPointType': 'WEB_APP',
+                        'endPointVersion': '2.10',
+                    }
+)
                 self.bjn_meeting_id = meeting['id']
                 self.bjn_meeting_url = \
                     f'https://bluejeans.com/{meeting["numericMeetingId"]}'
