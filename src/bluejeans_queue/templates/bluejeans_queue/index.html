@@ -4,7 +4,7 @@
 
 <div class="jumbotron">
   <h1 class="display-4">Office Hours</h1>
-  <p class="lead">Queue up for your remote meeting!</p>
+  <p class="lead">Enter the uniqname of the person whose meeting queue you would like to join!</p>
   {% if not request.user.is_authenticated and not netdash_modules %}
   <a href="{% url 'oidc_authentication_init' %}" class="btn btn-dark btn-lg">Login</a>
   {% else %}
