@@ -14,7 +14,8 @@ class IndexView(TemplateView):
 class MeetingSearchView(View):
     def get(self, request, *args, **kwargs):
         try:
-            owner = User.objects.get(username=request.GET['uniqname'].lower())
+            owner = User.objects.get(
+                username=request.GET['uniqname'].lower().strip())
         except ObjectDoesNotExist:
             return render(
                 request, 'bluejeans_queue/search.html',
