@@ -42,7 +42,14 @@ class MeetingView(LoginRequiredMixin, TemplateView):
         except ObjectDoesNotExist:
             meeting = None
         context['owner'] = owner
-        context['queue_length'] = owner.owner.filter(is_active=True).count()
+        queue = owner.owner.filter(is_active=True).order_by('id')
+        i = 0
+        for i in range(0, len(queue)):
+            if queue[i].attendee == self.request.user:
+                break
+
+        context['queued_ahead'] = i
+        context['queue_length'] = queue.count()
         context['meeting'] = meeting
         return context
 

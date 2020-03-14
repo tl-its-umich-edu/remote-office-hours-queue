@@ -2,14 +2,25 @@
 
 {% block content %}
 <p>Welcome to <strong>{{ owner.get_full_name }}'s</strong> meeting queue.</p>
-<ul>
   {% if not meeting %}
+  <ul>
   <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
   <li>You are in not in line</li>
   {% else %}
-  <li>You are in line to meet with {{ owner.get_full_name }}</li>
-  <li>Meet with them here: <a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
-  <li>New to using BlueJeans? <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank">Learn about using BlueJeans at U-M</a>.</li>
+    {% if queued_ahead == 0 %}
+      <div class="alert alert-success" role="alert">
+        <strong>It's your turn!</strong> If you haven't already joined the meeting, <a href="{{ meeting.bjn_meeting_url }}">join it now!</a>
+      </div>
+    {% elif queued_ahead <= 5 %}
+      <div class="alert alert-warning" role="alert">
+        <strong>Your turn is coming up!</strong> There are <strong>{{ queued_ahead }}</strong> people ahead of you. <a href="{{ meeting.bjn_meeting_url }}">Join the meeting now</a> so you are ready when {{ owner.get_full_name }} joins.
+      </div>
+    {% endif %}
+  <ul>
+    <li>You are in line to meet with {{ owner.get_full_name }}</li>
+    <li>There are {{ queued_ahead }} people in line ahead of you</li>
+    <li>Meet with them here: <a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
+    <li>New to using BlueJeans? <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank">Learn about using BlueJeans at U-M</a>.</li>
   {% endif %}
 </ul>
 
@@ -26,7 +37,7 @@
 
 {% if owner == request.user %}
 <p class="alert alert-info col-lg">
-  This is your queue, you can 
+  This is your queue, you can
   <a href="{% url 'manage' %}">manage it</a>.
 </p>
 {% endif %}
