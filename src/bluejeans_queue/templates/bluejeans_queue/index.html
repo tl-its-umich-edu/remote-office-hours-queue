@@ -6,7 +6,7 @@
   <h1 class="display-4">Office Hours</h1>
   <p class="lead">Enter the uniqname of the person whose meeting queue you would like to join!</p>
   {% if not request.user.is_authenticated and not netdash_modules %}
-  <a href="{% url 'oidc_authentication_init' %}" class="btn btn-dark btn-lg">Login</a>
+  <a href="{% url 'oidc_authentication_init' %}" class="btn btn-light btn-lg">Login</a>
   {% else %}
   {% include "bluejeans_queue/includes/search.html" %}
   <hr/>
