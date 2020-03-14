@@ -43,15 +43,20 @@ class BluejeansMeeting(models.Model):
                 meeting = bluejeans.create_meeting(
                     self.bjn_user_id,
                     meeting_settings={
-                        'title': f'{self.owner.username}\'s Remote Office Hours',
-                        'description': '',
+                        'title': (
+                            f'Remote Office Hours: {self.owner.username} / '
+                            f'{self.attendee.username}'),
+                        'description': (
+                            'This meeting was created by the Remote Office'
+                            'Hours Queue application. See '
+                            'https://documentation.its.umich.edu/node/1830'),
                         'start': now,
                         'end': now + (60 * 30 * 1000),
                         'timezone': 'America/Detroit',
                         'endPointType': 'WEB_APP',
                         'endPointVersion': '2.10',
                     }
-)
+                )
                 self.bjn_meeting_id = meeting['id']
                 self.bjn_meeting_url = \
                     f'https://bluejeans.com/{meeting["numericMeetingId"]}'
