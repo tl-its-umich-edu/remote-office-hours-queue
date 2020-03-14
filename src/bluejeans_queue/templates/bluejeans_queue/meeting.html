@@ -8,6 +8,11 @@
   <li>You are in not in line</li>
   {% else %}
   <li>You are in line to meet with {{ owner.get_full_name }}</li>
+  {% if queue_ahead > 0 %}
+  <li>There are {{ queue_ahead }} people ahead of you (total in queue: {{ queue_length }})</li>
+  {% else %}
+  <li><strong>You are at the front of the line. Join the meeting now!</strong></li>
+  {% endif %}
   <li>Meet with them here: <a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
   <li>New to using BlueJeans? <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank">Learn about using BlueJeans at U-M</a>.</li>
   {% endif %}
@@ -26,7 +31,7 @@
 
 {% if owner == request.user %}
 <p class="alert alert-info col-lg">
-  This is your queue, you can 
+  This is your queue, you can
   <a href="{% url 'manage' %}">manage it</a>.
 </p>
 {% endif %}
