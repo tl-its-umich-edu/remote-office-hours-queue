@@ -48,7 +48,7 @@ class MeetingView(LoginRequiredMixin, TemplateView):
             if queue[i].attendee == self.request.user:
                 break
 
-        context['queue_ahead'] = i
+        context['queued_ahead'] = i
         context['queue_length'] = queue.count()
         context['meeting'] = meeting
         return context
