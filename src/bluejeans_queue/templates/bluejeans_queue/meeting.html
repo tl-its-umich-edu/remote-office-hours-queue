@@ -5,7 +5,7 @@
   {% if not meeting %}
   <ul>
   <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
-  <li>You are in not in line</li>
+  <li>You are not in the meeting queue yet</li>
   {% else %}
     {% if queued_ahead == 0 %}
       <div class="alert alert-success" role="alert">
