@@ -2,7 +2,9 @@
 
 {% block content %}
 <h1>Not Found</h1>
-<strong>The user you searched for could not be found.</strong>
+<div class="alert alert-danger">
+    The user <strong>{{ username }}</strong> was not found.
+</div>
 <ul>
     <li>Users are created the first time they login to this tool</li>
     <li>Only usernames are valid (no email addresses, etc.)</li>
