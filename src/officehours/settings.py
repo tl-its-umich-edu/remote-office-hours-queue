@@ -43,6 +43,10 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'propagate': True,
+        },
+        'mozilla_django_oidc': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         }
     }
 }
@@ -98,7 +102,7 @@ OIDC_USERNAME_ALGO = 'officehours.auth.generate_username'
 if (OIDC_RP_CLIENT_ID and OIDC_RP_CLIENT_SECRET and OIDC_OP_AUTHORIZATION_ENDPOINT
         and OIDC_OP_TOKEN_ENDPOINT and OIDC_OP_USER_ENDPOINT):
     INSTALLED_APPS += ['mozilla_django_oidc']
-    AUTHENTICATION_BACKENDS += ['mozilla_django_oidc.auth.OIDCAuthenticationBackend']
+    AUTHENTICATION_BACKENDS += ['officehours.auth.UMichOIDCBackend']
 else:
     print('Skipping OIDCAuthenticationBackend as OIDC variables were not set.')
 
