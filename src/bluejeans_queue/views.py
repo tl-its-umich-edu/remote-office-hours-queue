@@ -25,6 +25,7 @@ class MeetingSearchView(LoginRequiredMixin, View):
                     'search_term': request.GET['uniqname'],
                     'username': username,
                 },
+                status=404,
             )
 
         return HttpResponseRedirect(reverse('meeting', args=[owner.username]))
@@ -41,6 +42,7 @@ class MeetingView(LoginRequiredMixin, View):
                 context={
                     'username': self.kwargs['owner'],
                 },
+                status=404,
             )
 
         try:
