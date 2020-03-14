@@ -13,7 +13,7 @@
       </div>
     {% elif queued_ahead <= 5 %}
       <div class="alert alert-warning" role="alert">
-        <strong>Your turn is coming up!</strong>There are <strong>{{ queued_ahead }}</strong> people ahead of you. <a href="{{ meeting.bjn_meeting_url }}">Join the meeting now</a> so you are ready when {{ owner.get_full_name }} joins.
+        <strong>Your turn is coming up!</strong> There are <strong>{{ queued_ahead }}</strong> people ahead of you. <a href="{{ meeting.bjn_meeting_url }}">Join the meeting now</a> so you are ready when {{ owner.get_full_name }} joins.
       </div>
     {% endif %}
   <ul>
