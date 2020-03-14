@@ -111,16 +111,16 @@ body {
 	background: #004881;
 }
 
-#aux-nav a:focus {
+#aux-nav .nav-item a:focus {
 	outline: 1px dotted #5a5454;
 	background: #004881;
 }
 
-#aux-nav a:hover {
+#aux-nav .nav-item a:hover {
 	background: #004881;
 }
 
-#aux-nav li:hover {
+#aux-nav .nav-item li:hover {
 	background: #003867;
 }
 
@@ -173,30 +173,16 @@ h3, .h3 {
 	border-color: #cecbc9 !important;
 }
 
-a {
-	display: inline-block;
-}
-
 a, a:link, a:visited {
 	color: #0075bc;
 }
 
 a:hover {
 	color: #0065a3;
-	/* 0075bc - 5% */
-}
-
-a:focus {
-	background: #0075bc;
-	color: #ffffff;
 }
 
 .jumbotron {
 	padding: 1.25rem;
-}
-
-span {
-	text-align: center
 }
 
 .btn-danger {
