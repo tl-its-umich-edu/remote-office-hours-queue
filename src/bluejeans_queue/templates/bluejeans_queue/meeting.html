@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p>Welcome to <strong>{{ owner.username }}'s</strong> meeting queue.</p>
+<p>Welcome to <strong>{{ owner.get_full_name }}'s</strong> meeting queue.</p>
 <ul>
   {% if not meeting %}
   <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
   <li>You are in not in line</li>
   {% else %}
-  <li>You are in line to meet with {{ owner.username }}</li>
+  <li>You are in line to meet with {{ owner.get_full_name }}</li>
   <li>Meet with them here: <a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
   <li>New to using BlueJeans? <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank">Learn about using BlueJeans at U-M</a>.</li>
   {% endif %}
@@ -26,9 +26,8 @@
 
 {% if owner == request.user %}
 <p class="alert alert-info col-lg">
-  This is your queue, you can <a href="{% url 'manage' %}">
-  manage it
-</a>.
+  This is your queue, you can 
+  <a href="{% url 'manage' %}">manage it</a>.
 </p>
 {% endif %}
 
