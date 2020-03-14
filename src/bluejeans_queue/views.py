@@ -4,6 +4,8 @@ from django.shortcuts import get_object_or_404, render
 from django.views.generic import View, TemplateView
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
+from django.contrib.auth.mixins import LoginRequiredMixin
+
 from .models import BluejeansMeeting
 
 
@@ -11,7 +13,7 @@ class IndexView(TemplateView):
     template_name = 'bluejeans_queue/index.html'
 
 
-class MeetingSearchView(View):
+class MeetingSearchView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
             owner = User.objects.get(
@@ -27,7 +29,7 @@ class MeetingSearchView(View):
         return HttpResponseRedirect(reverse('meeting', args=[owner.username]))
 
 
-class MeetingView(TemplateView):
+class MeetingView(LoginRequiredMixin, TemplateView):
     template_name = 'bluejeans_queue/meeting.html'
 
     def get_context_data(self, **kwargs):
@@ -58,7 +60,7 @@ class MeetingView(TemplateView):
         return HttpResponseRedirect(reverse('meeting', args=[self.kwargs['owner']]))
 
 
-class ManageView(TemplateView):
+class ManageView(LoginRequiredMixin, TemplateView):
     template_name = 'bluejeans_queue/manage.html'
 
     def get_context_data(self, **kwargs):
