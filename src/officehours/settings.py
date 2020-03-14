@@ -104,6 +104,7 @@ if (OIDC_RP_CLIENT_ID and OIDC_RP_CLIENT_SECRET and OIDC_OP_AUTHORIZATION_ENDPOI
         and OIDC_OP_TOKEN_ENDPOINT and OIDC_OP_USER_ENDPOINT):
     INSTALLED_APPS += ['mozilla_django_oidc']
     AUTHENTICATION_BACKENDS += ['officehours.auth.UMichOIDCBackend']
+    LOGIN_URL = '/oidc/authenticate/'
 else:
     print('Skipping OIDCAuthenticationBackend as OIDC variables were not set.')
 
