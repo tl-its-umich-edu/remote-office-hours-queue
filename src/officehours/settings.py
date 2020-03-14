@@ -43,6 +43,10 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'propagate': True,
+        },
+        'mozilla_django_oidc': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         }
     }
 }
@@ -94,11 +98,12 @@ OIDC_OP_USER_ENDPOINT = os.getenv('OIDC_OP_USER_ENDPOINT')
 OIDC_RP_SIGN_ALGO = os.getenv('OIDC_RP_SIGN_ALGO', 'RS256')
 OIDC_OP_JWKS_ENDPOINT = os.getenv('OIDC_OP_JWKS_ENDPOINT')
 OIDC_USERNAME_ALGO = 'officehours.auth.generate_username'
+OIDC_RP_SCOPES = 'openid email profile'
 
 if (OIDC_RP_CLIENT_ID and OIDC_RP_CLIENT_SECRET and OIDC_OP_AUTHORIZATION_ENDPOINT
         and OIDC_OP_TOKEN_ENDPOINT and OIDC_OP_USER_ENDPOINT):
     INSTALLED_APPS += ['mozilla_django_oidc']
-    AUTHENTICATION_BACKENDS += ['mozilla_django_oidc.auth.OIDCAuthenticationBackend']
+    AUTHENTICATION_BACKENDS += ['officehours.auth.UMichOIDCBackend']
 else:
     print('Skipping OIDCAuthenticationBackend as OIDC variables were not set.')
 

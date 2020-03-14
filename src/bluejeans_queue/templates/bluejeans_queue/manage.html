@@ -13,7 +13,7 @@
     <ol class="list-group">
         {% for m in queue %}
         <li class="list-group-item">
-            <span>{{m.attendee.username}}</span>
+            <span>{{m.attendee.get_full_name}}  <em>({{m.attendee.username}})</em></span>
             <span> • </span>
             <a href={{m.bjn_meeting_url}}>{{m.bjn_meeting_url}}</a>
             <span class="float-right">
