@@ -1,5 +1,5 @@
 function clearLastNotification() {
-    window.localStorage.setItem(url, '');
+    window.localStorage.setItem(location.href, '');
 }
 
 function getLastNotification() {
@@ -25,14 +25,21 @@ function isNotificationRepeat(type) {
     if (!last) return false;
     const now = new Date();
     return last.type === type
-        && new Date(last.timestamp.getTime() + 10 * 60 * 1000) > now;
+        && new Date(last.timestamp.getTime() + 60 * 60 * 1000) > now;
 }
 
 function notifyWithElement(selector) {
     const elem = document.querySelector(selector);
-    if (!elem) return;
-    if (isNotificationRepeat(selector)) return;
-    new Notification(elem.innerText);
+    if (!elem) {
+        console.log('selector not found: ' + selector);
+        return;
+    }
+    if (isNotificationRepeat(selector)) {
+        console.log('notification is a repeat for ' + selector);
+        return;
+    }
+    // new Notification(elem.innerText);
+    alert(elem.innerText);
     setLastNotification(selector);
 }
 
@@ -42,6 +49,7 @@ function requestNotify() {
     } else if (Notification.permission === "default") {
         Notification.requestPermission();
     }
+    document.querySelector('#enablenotifications').remove();
 }
 
 function notify() {
