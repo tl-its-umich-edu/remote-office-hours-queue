@@ -466,7 +466,6 @@ h3.alert-heading {
 }
 
 .form-control {
-	/*    margin:0.2rem;*/
 	border: 1px solid #cecbc9;
 }
 
@@ -474,29 +473,10 @@ h3.alert-heading {
 	margin: 0.2rem;
 }
 
-.custom-select {
-	border: 1px solid #cecbc9;
-}
-
-.custom-select.order-status-dropdown {
-	border-top-right-radius: .25rem;
-	border-bottom-right-radius: .25rem;
-}
-
-.input-group>.custom-select.order-status-dropdown {
-	border-top-right-radius: .25rem;
-	border-bottom-right-radius: .25rem;
-}
-
 .input-group-text {
 	border: 1px solid #cecbc9;
 	background-color: #f4f3f2;
 	color: #333333;
-}
-
-.input-group>.custom-select:not(:last-child), .input-group>.form-control:not(:last-child) {
-	border-top-right-radius: reset;
-	border-bottom-right-radius: reset;
 }
 
 .select2-container {
@@ -580,10 +560,6 @@ legend {
 
 pre {
 	width: inherit !important;
-}
-
-.r-align-text {
-	text-align: right;
 }
 
 .card-not-selected {
