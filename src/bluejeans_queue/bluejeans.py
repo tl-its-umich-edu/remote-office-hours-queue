@@ -98,3 +98,12 @@ class Bluejeans:
             f'/scheduled_meeting/{meeting_id}'
         )
         resp.raise_for_status()
+
+    def update_meeting(self, user_id, meeting_id, meeting):
+        resp = self.session.put(
+            self._base_url + f'/v1/user/{user_id}' +
+            f'/scheduled_meeting/{meeting_id}',
+            json=meeting,
+        )
+        resp.raise_for_status()
+        return resp.json()
