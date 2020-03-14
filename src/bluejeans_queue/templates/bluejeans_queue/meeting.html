@@ -24,7 +24,7 @@
   {% endif %}
 </ul>
 
-<form class="form-inline" method="post" onsubmit="submit.disabled = true; return true;" action="{% url 'meeting' owner %}">
+<form class="form-inline" method="post" onsubmit="submit.disabled = true; clearTimeout(reload_timer); return true;" action="{% url 'meeting' owner %}">
   {% csrf_token %}
   {% if not meeting %}
   <input type="hidden" name="action" value="join" />
@@ -51,6 +51,6 @@
 
 {% block scripts %}
 <script type="text/javascript">
-setTimeout(() => location.reload(), 10000);
+var reload_timer = setTimeout(() => location.reload(), 10000);
 </script>
 {% endblock %}
