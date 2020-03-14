@@ -60,7 +60,7 @@
                 <div class="dropdown-menu" aria-labelledby="userMenu">
                   <form action="{% url 'oidc_logout' %}" method="post">
                     {% csrf_token %}
-                    <input type="submit" value="logout" class="dropdown-item">
+                    <input type="submit" value="logout" style="background-color: white" class="dropdown-item">
                   </form>
                 </div>
               </li>
