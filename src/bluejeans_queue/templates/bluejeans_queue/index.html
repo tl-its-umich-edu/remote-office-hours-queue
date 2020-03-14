@@ -8,16 +8,16 @@
   {% if not request.user.is_authenticated and not netdash_modules %}
   <a href="{% url 'oidc_authentication_init' %}" class="btn btn-dark btn-lg">Login</a>
   {% else %}
-  <form class="form-inline" method="get" action="">
+  <form class="form-inline" method="get" action="{% url 'meeting_search' %}">
     <div class="input-group">
-      <input type="text" class="form-control" name="uniqname" placeholder="Uniqname..."/>
+      <input type="text" class="form-control" name="uniqname" placeholder="Organizer's uniqname..."/>
       <div class="input-group-append">
         <button type="submit" class="btn btn-primary">Visit Queue</button>
       </div>
     </div>
   </form>
   <hr/>
-  <a href="{% url 'manage' %}" class="btn btn-info">
+  <a href="{% url 'manage' %}">
     Manage Your Own Queue
   </a>
   {% endif %}

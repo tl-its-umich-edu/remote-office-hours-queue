@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from requests import HTTPError
 
 from .bluejeans import Bluejeans
 
@@ -19,6 +20,8 @@ class BluejeansMeeting(models.Model):
     attendee = models.ForeignKey(User, related_name='attendee',
                                  on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    is_active = models.BooleanField(default=True)
 
     bjn_user_id = models.IntegerField(null=True)
     bjn_meeting_id = models.IntegerField(null=True)
@@ -41,12 +44,16 @@ class BluejeansMeeting(models.Model):
 
         super().save(*args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def deactivate(self):
         if bluejeans:
-            bluejeans.delete_meeting(self.bluejeans_user['id'],
-                                     self.bjn_meeting_id)
+            try:
+                bluejeans.delete_meeting(self.bluejeans_user['id'],
+                                        self.bjn_meeting_id)
+            except HTTPError as exc:
+                print(exc)
 
-        super().delete(*args, **kwargs)
+        self.is_active = False
+        self.save()
 
     def __str__(self):
         return f'id={self.bjn_meeting_id} user_email={self.owner.email}'

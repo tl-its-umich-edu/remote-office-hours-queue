@@ -15,7 +15,7 @@
         <li class="list-group-item">
             <span>{{m.attendee.username}}</span>
             <span> • </span>
-            <a href={{m.bjn.meeting_url}}>{{m.bjn_meeting_url}}</a>
+            <a href={{m.bjn_meeting_url}}>{{m.bjn_meeting_url}}</a>
             <span class="float-right">
                 <span>{{m.created_at}}</span>
                 <button type="submit" name="meeting" value="{{m.id}}" class="btn btn-sm btn-danger">
@@ -28,7 +28,7 @@
 </form>
 <br>
 <p class="alert alert-info col-lg">
-    When you finish a meeting, remove the entry from the list above 
+    When you finish a meeting, remove the entry from the list above
     to update the line length for the other people in the queue.
 </p>
 {% else %}
@@ -36,5 +36,9 @@
     No one has joined your queue yet.
 </p>
 {% endif %}
+
+<a href="{% url 'meeting' request.user.username %}">
+    See your own queue as a visitor
+</a>
 
 {% endblock %}
