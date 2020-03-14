@@ -6,7 +6,7 @@
 {% if queue %}
 <form method="post" action="">
     {% csrf_token %}
-    <button type="submit" name="meeting" value="all" class="btn btn-danger float-right">
+    <button type="submit" name="meeting" value="all" onclick="return confirm('Are you sure?');" class="btn btn-danger float-right">
         Remove All
     </button>
     <h2>People in Line:</h2>
@@ -18,7 +18,7 @@
             <a href={{m.bjn_meeting_url}}>{{m.bjn_meeting_url}}</a>
             <span class="float-right">
                 <span>{{m.created_at}}</span>
-                <button type="submit" name="meeting" value="{{m.id}}" class="btn btn-sm btn-danger">
+                <button type="submit" name="meeting" value="{{m.id}}" onclick="return confirm('Are you sure?');" class="btn btn-sm btn-danger">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </span>

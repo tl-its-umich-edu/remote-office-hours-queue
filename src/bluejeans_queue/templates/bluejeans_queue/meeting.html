@@ -19,7 +19,7 @@
   <button type="submit" name="submit" class="btn btn-primary">Join the line</button>
   {% else %}
   <input type="hidden" name="action" value="leave" />
-  <button type="submit" name="submit" class="btn btn-warning">Leave the line</button>
+  <button type="submit" name="submit" onclick="return confirm('Are you sure?');" class="btn btn-warning">Leave the line</button>
   {% endif %}
 </form>
 
