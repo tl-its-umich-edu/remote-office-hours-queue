@@ -15,32 +15,42 @@ class IndexView(TemplateView):
 
 class MeetingSearchView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
+        username = request.GET['uniqname'].lower().strip()
         try:
-            owner = User.objects.get(
-                username=request.GET['uniqname'].lower().strip())
+            owner = User.objects.get(username=username)
         except ObjectDoesNotExist:
             return render(
                 request, 'bluejeans_queue/search.html',
                 context={
                     'search_term': request.GET['uniqname'],
+                    'username': username,
                 },
+                status=404,
             )
 
         return HttpResponseRedirect(reverse('meeting', args=[owner.username]))
 
 
-class MeetingView(LoginRequiredMixin, TemplateView):
-    template_name = 'bluejeans_queue/meeting.html'
+class MeetingView(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        try:
+            owner = User.objects.get(username=self.kwargs['owner'])
+        except ObjectDoesNotExist:
+            return render(
+                request, 'bluejeans_queue/search.html',
+                context={
+                    'username': self.kwargs['owner'],
+                },
+                status=404,
+            )
 
-        owner = get_object_or_404(User, username=self.kwargs['owner'])
         try:
             meeting = BluejeansMeeting.objects.get(
                 owner=owner, attendee=self.request.user, is_active=True)
         except ObjectDoesNotExist:
             meeting = None
+        context = {}
         context['owner'] = owner
         queue = owner.owner.filter(is_active=True).order_by('id')
         i = 0
@@ -51,7 +61,10 @@ class MeetingView(LoginRequiredMixin, TemplateView):
         context['queued_ahead'] = i
         context['queue_length'] = queue.count()
         context['meeting'] = meeting
-        return context
+        return render(
+            request, 'bluejeans_queue/meeting.html',
+            context=context,
+        )
 
     def post(self, request, *args, **kwargs):
         if 'join' in request.POST['action']:
