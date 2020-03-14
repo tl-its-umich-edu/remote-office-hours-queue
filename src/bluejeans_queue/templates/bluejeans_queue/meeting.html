@@ -5,6 +5,7 @@
 <ul>
   {% if not meeting %}
   <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
+  <li>You are in not in line</li>
   {% else %}
   <li>You are in line to meet with {{ owner.username }}</li>
   <li>Meet with them here: <a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
