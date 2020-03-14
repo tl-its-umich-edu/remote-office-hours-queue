@@ -12,12 +12,14 @@
   {% endif %}
 </ul>
 
-<form class="form-inline" method="post" action="{% url 'meeting' owner %}">
+<form class="form-inline" method="post" onsubmit="submit.disabled = true; return true;" action="{% url 'meeting' owner %}">
   {% csrf_token %}
   {% if not meeting %}
-  <button type="submit" name="action" value="join" class="btn btn-primary">Join the line</button>
+  <input type="hidden" name="action" value="join" />
+  <button type="submit" name="submit" class="btn btn-primary">Join the line</button>
   {% else %}
-  <button type="submit" name="action" value="leave" class="btn btn-warning">Leave the line</button>
+  <input type="hidden" name="action" value="leave" />
+  <button type="submit" name="submit" class="btn btn-warning">Leave the line</button>
   {% endif %}
 </form>
 
