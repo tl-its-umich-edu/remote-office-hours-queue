@@ -1,31 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <p>Welcome to </strong>{{ owner.username }}'s</strong> meeting queue.</p>
-    <ul>
-        {% if not meeting %}
-        <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
-        {% else %}
-        <li>You are in line to meet with {{ owner.username }}</li>
-        <li><a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
-        {% endif %}
-    </ul>
+<p>Welcome to </strong>{{ owner.username }}'s</strong> meeting queue.</p>
+<ul>
+  {% if not meeting %}
+  <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
+  {% else %}
+  <li>You are in line to meet with {{ owner.username }}</li>
+  <li><a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
+  {% endif %}
+</ul>
 
-    <form class="form-inline" method="post" action="{% url 'meeting' owner %}">
-        {% csrf_token %}
-        {% if not meeting %}
-        <button type="submit" name="action" value="join" class="btn btn-primary">Join the line</button>
-        {% else %}
-        <button type="submit" name="action" value="leave" class="btn btn-warning">Leave the line</button>
-        {% endif %}
-    </form>
+<form class="form-inline" method="post" action="{% url 'meeting' owner %}">
+  {% csrf_token %}
+  {% if not meeting %}
+  <button type="submit" name="action" value="join" class="btn btn-primary">Join the line</button>
+  {% else %}
+  <button type="submit" name="action" value="leave" class="btn btn-warning">Leave the line</button>
+  {% endif %}
+</form>
 
-    {% if owner == request.user %}
-    <p class="alert alert-info col-lg">
-        This is your queue, you can <a href="{% url 'manage' %}">
-        manage it
-    </a>.
-    </p>
-    {% endif %}
+{% if owner == request.user %}
+<p class="alert alert-info col-lg">
+  This is your queue, you can <a href="{% url 'manage' %}">
+  manage it
+</a>.
+</p>
+{% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+setTimeout(() => location.reload(), 10000);
+</script>
 {% endblock %}
