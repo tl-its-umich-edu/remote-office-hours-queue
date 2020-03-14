@@ -7,7 +7,8 @@
   <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
   {% else %}
   <li>You are in line to meet with {{ owner.username }}</li>
-  <li><a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
+  <li>When it's your turn, meet with <uniqname> here: <a href="{{ meeting.bjn_meeting_url }}">{{ meeting.bjn_meeting_url }}</a></li>
+  <li>New to using BlueJeans? <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank">Learn about using BlueJeans at U-M</a>.</li>
   {% endif %}
 </ul>
 
