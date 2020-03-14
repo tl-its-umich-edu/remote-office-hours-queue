@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p>Welcome to </strong>{{ owner.username }}'s</strong> meeting queue.</p>
+<p>Welcome to <strong>{{ owner.username }}'s</strong> meeting queue.</p>
 <ul>
   {% if not meeting %}
   <li>Number of people currently in line: <strong>{{ queue_length }}</strong></li>
