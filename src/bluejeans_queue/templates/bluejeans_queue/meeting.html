@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <p>Welcome to <strong>{{ owner.get_full_name }}'s</strong> meeting queue.</p>
@@ -8,11 +9,11 @@
   <li>You are not in the meeting queue yet</li>
   {% else %}
     {% if queued_ahead == 0 %}
-      <div class="alert alert-success" role="alert">
+      <div id="turn-now" class="alert alert-success" role="alert">
         <strong>It's your turn!</strong> If you haven't already joined the meeting, <a href="{{ meeting.bjn_meeting_url }}">join it now!</a>
       </div>
     {% elif queued_ahead <= 5 %}
-      <div class="alert alert-warning" role="alert">
+      <div id="turn-soon" class="alert alert-warning" role="alert">
         <strong>Your turn is coming up!</strong> There are <strong>{{ queued_ahead }}</strong> people ahead of you. <a href="{{ meeting.bjn_meeting_url }}">Join the meeting now</a> so you are ready when {{ owner.get_full_name }} joins.
       </div>
     {% endif %}
@@ -24,7 +25,7 @@
   {% endif %}
 </ul>
 
-<form class="form-inline" method="post" onsubmit="submit.disabled = true; clearTimeout(reload_timer); return true;" action="{% url 'meeting' owner %}">
+<form class="form-inline" method="post" onsubmit="submit.disabled = true; clearTimeout(reloadTimer); return true;" action="{% url 'meeting' owner %}">
   {% csrf_token %}
   {% if not meeting %}
   <input type="hidden" name="action" value="join" />
@@ -32,6 +33,7 @@
   {% else %}
   <input type="hidden" name="action" value="leave" />
   <button type="submit" name="submit" onclick="return confirm('Are you sure?');" class="btn btn-warning">Leave the line</button>
+  <!-- <button id="enablenotifications" type="button" onclick="requestNotify()" class="btn btn-info">Enable Notifications</button> -->
   {% endif %}
 </form>
 
@@ -50,7 +52,12 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{% static 'js/notification.js' %}"></script>
 <script type="text/javascript">
-var reload_timer = setTimeout(() => location.reload(), 10000);
+// if (Notification.permission === "granted") {
+//   document.querySelector('#enablenotifications').remove();
+// }
+const reloadTimer = setTimeout(() => location.reload(), 10000);
+notify();
 </script>
 {% endblock %}
