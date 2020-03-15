@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="jumbotron">
-  <h1 class="display-4">Remote Office Hours Queue</h1>
+  <h1 class="display-4">Private Remote Office Hours Queue</h1>
   {% if not request.user.is_authenticated %}
   <p class="lead">Join or host a queue for office hours over BlueJeans!</p>
   <a href="{% url 'oidc_authentication_init' %}" class="btn btn-light btn-lg">Login</a>
