@@ -54,10 +54,12 @@
 {% block scripts %}
 <script src="{% static 'js/notification.js' %}"></script>
 <script type="text/javascript">
-// if (Notification.permission === "granted") {
-//   document.querySelector('#enablenotifications').remove();
-// }
-const reloadTimer = setTimeout(() => location.reload(), 10000);
-notify();
+window.onload = () => {
+  // if (Notification.permission === "granted") {
+  //   document.querySelector('#enablenotifications').remove();
+  // }
+  const reloadTimer = setTimeout(() => location.reload(), 10000);
+  notify();
+}
 </script>
 {% endblock %}
