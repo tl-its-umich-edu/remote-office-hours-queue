@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Manage Your Queue</h1>
+<h1>Manage Your One-on-One Meeting Queue</h1>
 <button type=button onclick="location.reload()" class="btn btn-info">
     Refresh queue
 </button>
@@ -13,6 +13,10 @@
         Remove All
     </button>
     <h2>People in Line:</h2>
+    <p class="alert alert-info col-lg">
+        When you finish a meeting, remove the entry from the list above
+        to update the line length for the other people in the queue.
+    </p>
     <ol class="list-group">
         {% for m in queue %}
         <li class="list-group-item">
@@ -30,10 +34,6 @@
     </ol>
 </form>
 <br>
-<p class="alert alert-info col-lg">
-    When you finish a meeting, remove the entry from the list above
-    to update the line length for the other people in the queue.
-</p>
 {% else %}
 <p class="lead">
     No one has joined your queue yet.
@@ -46,7 +46,7 @@
 
 <hr />
 <a target="_blank" href="https://documentation.its.umich.edu/node/1830">
-    Documentation about managing your queue
+    Learn more about using Remote Office Hours Queue as a host
 </a>
 
 {% endblock %}
