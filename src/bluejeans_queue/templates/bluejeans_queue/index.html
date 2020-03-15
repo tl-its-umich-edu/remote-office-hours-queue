@@ -4,10 +4,11 @@
 
 <div class="jumbotron">
   <h1 class="display-4">Remote Office Hours Queue</h1>
-  <p class="lead">Enter the uniqname of the person whose meeting queue you would like to join!</p>
-  {% if not request.user.is_authenticated and not netdash_modules %}
+  {% if not request.user.is_authenticated %}
+  <p class="lead">Join or host a queue for office hours over BlueJeans!</p>
   <a href="{% url 'oidc_authentication_init' %}" class="btn btn-light btn-lg">Login</a>
   {% else %}
+  <p class="lead">Enter the uniqname of the person whose meeting queue you would like to join!</p>
   {% include "bluejeans_queue/includes/search.html" %}
   <hr/>
   <a href="{% url 'manage' %}">
