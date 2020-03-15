@@ -15,7 +15,7 @@
         <li class="list-group-item">
             <span>{{m.attendee.get_full_name}}  <em>({{m.attendee.username}})</em></span>
             <span> • </span>
-            <a href={{m.bjn_meeting_url}}>{{m.bjn_meeting_url}}</a>
+            <a target="_blank" href={{m.bjn_meeting_url}}>{{m.bjn_meeting_url}}</a>
             <span class="float-right">
                 <span>{{m.created_at}}</span>
                 <button type="submit" name="meeting" value="{{m.id}}" onclick="return confirm('Are you sure?');" class="btn btn-sm btn-danger">
