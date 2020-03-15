@@ -50,6 +50,9 @@ class BluejeansMeeting(models.Model):
                             'This meeting was created by the Remote Office'
                             'Hours Queue application. See '
                             'https://documentation.its.umich.edu/node/1830'),
+                        'advancedMeetingOptions': {
+                            'moderatorLess': True,
+                        },
                         'start': now,
                         'end': now + (60 * 30 * 1000),
                         'timezone': 'America/Detroit',
