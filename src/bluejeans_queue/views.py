@@ -74,9 +74,12 @@ class MeetingView(LoginRequiredMixin, View):
             meeting.save()
         elif 'leave' in request.POST['action']:
             owner = get_object_or_404(User, username=self.kwargs['owner'])
-            meeting = BluejeansMeeting.objects.get(
-                owner=owner, attendee=request.user, is_active=True)
-            meeting.deactivate()
+            try:
+                meeting = BluejeansMeeting.objects.get(
+                    owner=owner, attendee=request.user, is_active=True)
+                meeting.deactivate()
+            except ObjectDoesNotExist:
+                pass
         return HttpResponseRedirect(reverse('meeting', args=[self.kwargs['owner']]))
 
 
