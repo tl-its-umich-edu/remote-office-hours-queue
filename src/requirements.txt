@@ -4,3 +4,4 @@ whitenoise
 dj-database-url
 requests
 django-watchman
+djangorestframework

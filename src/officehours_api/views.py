@@ -1,12 +1,12 @@
-from django.shortcuts import render
 from django.contrib.auth.models import User
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 from officehours_api.models import Host, Queue, Meeting, Attendee
-from officehours_api.serializers import (UserSerializer, HostSerializer,
-    QueueSerializer, MeetingSerializer, AttendeeSerializer,
+from officehours_api.serializers import (
+    UserSerializer, HostSerializer, QueueSerializer,
+    MeetingSerializer, AttendeeSerializer,
 )
 
 
@@ -27,6 +27,7 @@ def api_root(request, format=None):
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
 
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
