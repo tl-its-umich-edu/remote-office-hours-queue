@@ -19,7 +19,7 @@ else:
 class BluejeansMeeting(models.Model):
     owner = models.ForeignKey(User, related_name='owner',
                               on_delete=models.CASCADE)
-    attendee = models.ForeignKey(User, related_name='attendee',
+    attendee = models.ForeignKey(User, related_name='bluejeans_attendee',
                                  on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
