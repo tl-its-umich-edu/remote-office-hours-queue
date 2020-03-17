@@ -18,6 +18,7 @@ from django.urls import re_path, path, include
 
 urlpatterns = [
     path('', include('bluejeans_queue.urls')),
+    path('api/', include('officehours_api.urls')),
     re_path(r'^oidc/', include('mozilla_django_oidc.urls')),
     path('status/', include('watchman.urls')),
     path('admin/', admin.site.urls),
