@@ -70,6 +70,7 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 # Application definition
 
 INSTALLED_APPS = [
+    'officehours_api.apps.OfficehoursApiConfig',
     'bluejeans_queue.apps.BluejeansQueueConfig',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
@@ -78,6 +79,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'watchman',
 ]
 
