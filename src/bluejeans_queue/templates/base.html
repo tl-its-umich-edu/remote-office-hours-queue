@@ -4,33 +4,18 @@
   <head>
   {% block head %}
 	<link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
-	<!-- Required meta tags -->
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-	<!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
-	<!-- FontAwesome CSS -->
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-
-	<!-- Custom CSS -->
   <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-
-	<!-- Fonts -->
 	<link rel="stylesheet" mo type="text/css" href="//fonts.googleapis.com/css?family=Roboto:400"/>
 	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:400i"/>
 	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700"/>
 	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700i"/>
-
-	<!-- Searchable select -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.7/css/select2.min.css"/>
-	<link rel="stylesheet" href="/static/select2-bootstrap4.css">
-
   {% block styles %}{% endblock %}
-
-	<title>Remote Office Hours Queue - {% block title %}{% endblock %}</title>
-
+  <title>Remote Office Hours Queue - {% block title %}{% endblock %}</title>
+  {{ spa_globals|json_script:"spa_globals" }}
   {% endblock %}
   </head>
 
@@ -81,12 +66,8 @@
   </div>
 
 	<div id="main-content" class="container" role="main">
-
-    {% block content %}{% endblock content %}
-    {% autoescape off %}
-    {{ content }}
-    {% endautoescape %}
-
+    {% block content %}{% endblock %}
+    {% csrf_token %}
 	</div>
 
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

@@ -1,7 +1,8 @@
 django
+djangorestframework
 mozilla-django-oidc
 whitenoise
 dj-database-url
 requests
 django-watchman
-djangorestframework
+django-webpack-loader==0.6.0

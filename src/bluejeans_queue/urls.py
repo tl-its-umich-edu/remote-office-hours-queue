@@ -1,11 +1,11 @@
 from django.urls import path
 
-from .views import IndexView, MeetingSearchView, MeetingView, ManageView
+from .views import SpaView
 
 
 urlpatterns = [
-    path('', IndexView.as_view(), name='home'),
-    path('queue/', MeetingSearchView.as_view(), name='meeting_search'),
-    path('queue/<str:owner>/', MeetingView.as_view(), name='meeting'),
-    path('manage/', ManageView.as_view(), name='manage'),
+    path('', SpaView.as_view(), name='home'),
+    path('queue/', SpaView.as_view()),
+    path('queue/<str:owner>/', SpaView.as_view()),
+    path('manage/', SpaView.as_view()),
 ]

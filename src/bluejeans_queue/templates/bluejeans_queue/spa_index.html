@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}Office Hours{% endblock %}
+
+{% block css %}
+    <!-- Webpack rendered CSS -->
+    {% render_bundle 'main' 'css' %}
+{% endblock %}
+
+{% block content %}
+    <div id="root"></div>
+    <!-- Webpack rendered JS -->
+    {% render_bundle 'main' 'js' %}
+{% endblock %}
