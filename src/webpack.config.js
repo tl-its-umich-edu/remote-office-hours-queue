@@ -2,7 +2,7 @@ const path = require('path')
 const BundleTracker = require('webpack-bundle-tracker')
 
 module.exports = {
-  entry: path.join(__dirname, 'assets/src/index'),
+  entry: path.join(__dirname, 'assets/src/index.ts'),
   output: {
     path: path.join(__dirname, 'assets/dist'),
     filename: '[name]-[hash].js'
