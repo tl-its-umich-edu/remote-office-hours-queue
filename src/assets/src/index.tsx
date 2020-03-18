@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import { App } from './containers/app';
+import { BrowserRouter, withRouter } from 'react-router-dom';
+import { AppRouter as App } from './containers/app';
 
 export interface User {
     username: string;
@@ -22,9 +22,9 @@ const globals = Object.freeze(JSON.parse(globalsElement.textContent));
 
 ReactDOM.render(
     (
-        <Router basename='/'>
+        <BrowserRouter basename='/'>
             <App globals={globals} />
-        </Router>
+        </BrowserRouter>
     ), document.getElementById('root')
 );
 
