@@ -14,9 +14,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['all']:
-            owners = User.objects.all()
+            owners = User.objects.filter(owner__isnull=False).distinct()
         else:
             owners = User.objects.filter(owner__is_active=True).distinct()
+
         for owner in owners:
             queue_details = {
                 'owner': owner.email,
