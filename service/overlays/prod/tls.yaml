@@ -6,4 +6,5 @@ spec:
   tls:
   - hosts:
     - officehours.it.umich.edu
+    - www.officehours.it.umich.edu
     secretName: web-tls

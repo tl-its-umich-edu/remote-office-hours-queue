@@ -8,9 +8,17 @@ spec:
   tls:
   - hosts:
     - dev.officehours.it.umich.edu
+    - www.dev.officehours.it.umich.edu
     secretName: web-tls
   rules:
   - host: dev.officehours.it.umich.edu
+    http:
+      paths:
+      - path: /
+        backend:
+         serviceName: web
+         servicePort: 80
+  - host: www.dev.officehours.it.umich.edu
     http:
       paths:
       - path: /
