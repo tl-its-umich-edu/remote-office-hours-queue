@@ -5,18 +5,22 @@ export interface User {
 }
 
 export interface Host {
+    id: number;
     user: User;
 }
 
 export interface Attendee {
+    id: number;
     user: User;
 }
 
 export interface Meeting {
+    id: number;
     attendees: Attendee[];
 }
 
 export interface Queue {
+    id: number;
     name: string;
     hosts: Host[];
     created_at: string;

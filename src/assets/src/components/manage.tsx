@@ -8,8 +8,23 @@ interface QueueDetailsProps {
 }
 
 function QueueDetails(props: QueueDetailsProps) {
+    const hosts = props.queue.hosts
+        .map(h => <dd>{h.user.username}</dd>);
+    const meetings = props.queue.meetings
+        .map(m => <dd>{m.attendees[0]!.user.username}</dd>)
     return (
-        <span>{props.queue.name}</span>
+        <dl>
+            <dt>ID</dt>
+            <dd>{props.queue.id}</dd>
+            <dt>Name</dt>
+            <dd>{props.queue.name}</dd>
+            <dt>Created At</dt>
+            <dd>{props.queue.created_at}</dd>
+            <dt>Hosted By</dt>
+            {hosts}
+            <dt>Meetings</dt>
+            {meetings}
+        </dl>
     )
 }
 
@@ -18,7 +33,7 @@ interface QueueListProps {
 }
 
 function QueueList(props: QueueListProps) {
-    const queues = props.queues.map((q) => <li><QueueDetails queue={q} /></li>)
+    const queues = props.queues.map((q) => <li><QueueDetails key={q.id} queue={q} /></li>)
     return (
         <ul>{queues}</ul>
     )

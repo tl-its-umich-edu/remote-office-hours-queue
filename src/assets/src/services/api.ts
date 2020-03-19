@@ -13,9 +13,11 @@ export const getQueuesFake = async (): Promise<Queue[]> => {
     await sleep(1000);
     return [
         {
+            id: 0,
             name: 'first queue',
             hosts: [
                 {
+                    id: 0,
                     user: {
                         username: 'jlost',
                         first_name: 'James',
@@ -26,6 +28,7 @@ export const getQueuesFake = async (): Promise<Queue[]> => {
             created_at: 'Todayish',
             meetings: [
                 {
+                    id: 1,
                     attendees: [
                         {
                             user: {
@@ -39,6 +42,7 @@ export const getQueuesFake = async (): Promise<Queue[]> => {
                 {
                     attendees: [
                         {
+                            id: 2,
                             user: {
                                 username: 'ericboyd',
                                 first_name: 'Eric',
@@ -50,9 +54,11 @@ export const getQueuesFake = async (): Promise<Queue[]> => {
             ]
         },
         {
+            id: 1,
             name: 'second queue',
             hosts: [
                 {
+                    id: 0,
                     user: {
                         username: 'jlost',
                         first_name: 'James',
@@ -60,11 +66,12 @@ export const getQueuesFake = async (): Promise<Queue[]> => {
                     }
                 }
             ],
-            created_at: 'Todayish',
+            created_at: 'Yesterdayish',
             meetings: [
                 {
                     attendees: [
                         {
+                            id: 2,
                             user: {
                                 username: 'steinhof',
                                 first_name: 'Kris',
@@ -76,6 +83,7 @@ export const getQueuesFake = async (): Promise<Queue[]> => {
                 {
                     attendees: [
                         {
+                            id: 4,
                             user: {
                                 username: 'ericboyd',
                                 first_name: 'Eric',
