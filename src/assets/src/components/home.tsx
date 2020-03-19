@@ -1,5 +1,5 @@
 import * as React from "react";
-import { User } from "..";
+import { User } from "../models";
 
 interface PageProps {
     user?: User;

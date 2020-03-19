@@ -2,12 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import { AppRouter as App } from './containers/app';
-
-export interface User {
-    username: string;
-    first_name: string;
-    last_name: string;
-}
+import { User } from './models';
 
 export interface Globals {
     user?: User;

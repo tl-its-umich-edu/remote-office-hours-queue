@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Route, withRouter, useParams } from 'react-router-dom'
 import { RouteComponentProps } from 'react-router'
-import { Globals, User } from "..";
+import { Globals } from "..";
 import { Home } from "../components/home";
 import { Manage } from "../components/manage";
 import { Queue } from "../components/queue";
