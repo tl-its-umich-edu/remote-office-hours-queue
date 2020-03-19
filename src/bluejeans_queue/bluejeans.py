@@ -59,7 +59,6 @@ class Bluejeans:
         elif r['count'] == 0:
             raise Exception('BlueJeans user not found.')
 
-
         return r['users'][0]
 
     def create_meeting(self, user_id, meeting_settings=None):

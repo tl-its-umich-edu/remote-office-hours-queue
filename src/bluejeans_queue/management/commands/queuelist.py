@@ -7,16 +7,16 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--all',
+            '--active-only',
             action='store_true',
-            help='get all active and inactive queues',
+            help='get only active queues',
         )
 
     def handle(self, *args, **options):
-        if options['all']:
-            owners = User.objects.filter(owner__isnull=False).distinct()
-        else:
+        if options['active_only']:
             owners = User.objects.filter(owner__is_active=True).distinct()
+        else:
+            owners = User.objects.filter(owner__isnull=False).distinct()
 
         for owner in owners:
             queue_details = {
