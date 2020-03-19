@@ -1,4 +1,5 @@
-import itertools
+from datetime import datetime
+import time
 
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
@@ -16,12 +17,19 @@ from .models import BluejeansMeeting
 @staff_member_required
 def usage(request):
     meetings = BluejeansMeeting.objects.annotate(
-        hour=TruncHour('created_at')).all()
+        hour=TruncHour('created_at')).order_by('created_at')
+
+    hours = (datetime.fromtimestamp(h) for h in range(
+        int(meetings.first().hour.timestamp()),
+        int(time.time()),
+        3600
+    ))
+
+    usage = ((h, meetings.filter(hour=h).count()) for h in hours)
+
     return HttpResponse(
-        'hour,queue_joins\n' +
-        '\n'.join(f'{h},{sum(1 for _ in g)}' for h, g in sorted(
-            itertools.groupby(meetings, lambda m: m.hour),
-            key=lambda g: g[0])),
+        'hour,queue_joins,\n' +
+        '\n'.join(f'{h},{c},{"*" * c}' for h, c in usage),
         content_type='text/plain')
 
 
