@@ -16,20 +16,15 @@
   {% else %}
     {% if queued_ahead == 0 %}
       <div id="turn-now" class="alert alert-success" role="alert">
-        <strong>It's your turn!</strong> If you haven't already joined the meeting, join it now!
+        <strong>It's your turn!</strong> If you haven't already joined the meeting, follow the directions on the right to join it now!
       </div>
     {% elif queued_ahead <= 5 %}
       <div id="turn-soon" class="alert alert-warning" role="alert">
-        <strong>Your turn is coming up!</strong> Join the meeting now so you are ready when {{ owner.get_full_name }} joins.
+        <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
       </div>
     {% endif %}
   <ul>
-    <li>You are in line to meet with {{ owner.get_full_name }}</li>
-    {% if queued_ahead == 1 %}
-      <li>There is <strong>{{ queued_ahead }} person</strong> in line ahead of you</li>
-    {% else %}
-      <li>There are <strong>{{ queued_ahead }} people</strong> in line ahead of you</li>
-    {% endif %}
+    <li>You are in line and there {% if queued_ahead == 1 %} is <strong>{{ queued_ahead }} person</strong>{% else %} are <strong>{{ queued_ahead }} people</strong>{% endif %} ahead of you</li>
     <li>{{ owner.get_full_name }} will join the BlueJeans meeting when it is your turn</li>
     <li>We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</li>
 </ul>
