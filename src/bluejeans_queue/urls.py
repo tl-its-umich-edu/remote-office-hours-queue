@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import IndexView, MeetingSearchView, MeetingView, ManageView
+from .views import IndexView, MeetingSearchView, MeetingView, ManageView, usage
 
 
 urlpatterns = [
@@ -8,4 +8,5 @@ urlpatterns = [
     path('queue/', MeetingSearchView.as_view(), name='meeting_search'),
     path('queue/<str:owner>/', MeetingView.as_view(), name='meeting'),
     path('manage/', ManageView.as_view(), name='manage'),
+    path('usage/', usage, name='usage'),
 ]

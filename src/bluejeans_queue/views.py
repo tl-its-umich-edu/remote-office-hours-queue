@@ -1,12 +1,27 @@
+import itertools
+
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import View, TemplateView
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models.functions import TruncHour
 
 from .models import BluejeansMeeting
+
+
+@staff_member_required
+def usage(request):
+    meetings = BluejeansMeeting.objects.annotate(
+        hour=TruncHour('created_at')).all()
+    return HttpResponse(
+        'hour,queue_joins\n' +
+        '\n'.join(f'{h},{sum(1 for _ in g)}' for h, g in itertools.groupby(
+            meetings, lambda m: m.hour)),
+        content_type='text/plain')
 
 
 class IndexView(TemplateView):
