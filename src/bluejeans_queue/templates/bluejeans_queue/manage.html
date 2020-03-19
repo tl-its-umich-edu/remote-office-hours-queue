@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="alert alert-primary" role="alert">
-    <strong>Please note:</strong> The number one requested new feature we are currently working to add is <em>shared queues</em>. These will allow multiple hosts to handle the same queue.
-</div>
 <h1>Manage Your One-on-One Meeting Queue</h1>
 <button type=button onclick="location.reload()" class="btn btn-info">
     Refresh queue
@@ -43,13 +40,15 @@
 </p>
 {% endif %}
 
-<a href="{% url 'meeting' request.user.username %}">
+<ul>
+<li><a href="{% url 'meeting' request.user.username %}">
     See your own queue as a visitor
-</a>
+</a></li>
 
-<hr />
-<a target="_blank" href="https://documentation.its.umich.edu/node/1830">
+<li><a target="_blank" href="https://documentation.its.umich.edu/node/1830">
     Learn more about using Remote Office Hours Queue as a host
-</a>
+</a></li>
+</ul>
 
+<p><strong>Please note:</strong> The most requested new feature for this application is <em>shared queues</em>. These will allow multiple hosts to handle the same queue. We are working hard to add this feature.</p>
 {% endblock %}
