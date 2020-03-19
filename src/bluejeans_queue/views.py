@@ -19,8 +19,9 @@ def usage(request):
         hour=TruncHour('created_at')).all()
     return HttpResponse(
         'hour,queue_joins\n' +
-        '\n'.join(f'{h},{sum(1 for _ in g)}' for h, g in itertools.groupby(
-            meetings, lambda m: m.hour)),
+        '\n'.join(f'{h},{sum(1 for _ in g)}' for h, g in sorted(
+            itertools.groupby(meetings, lambda m: m.hour),
+            key=lambda g: g[0])),
         content_type='text/plain')
 
 
