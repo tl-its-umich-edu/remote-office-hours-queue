@@ -47,7 +47,7 @@ class BluejeansMeeting(models.Model):
                             f'Remote Office Hours: {self.owner.username} / '
                             f'{self.attendee.username}'),
                         'description': (
-                            'This meeting was created by the Remote Office'
+                            'This meeting was created by the Remote Office '
                             'Hours Queue application. See '
                             'https://documentation.its.umich.edu/node/1830'),
                         'advancedMeetingOptions': {
