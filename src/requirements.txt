@@ -1,5 +1,7 @@
 django
 djangorestframework
+django-rest-swagger==2.2.0
+drf-yasg==1.17.0
 mozilla-django-oidc
 whitenoise
 dj-database-url

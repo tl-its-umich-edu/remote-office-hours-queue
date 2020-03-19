@@ -84,6 +84,11 @@ INSTALLED_APPS = [
     'webpack_loader',
 ]
 
+if DEBUG:
+    INSTALLED_APPS += [
+        'drf_yasg',
+    ]
+
 WATCHMAN_TOKENS = os.getenv('WATCHMAN_TOKENS')
 
 AUTHENTICATION_BACKENDS = [
