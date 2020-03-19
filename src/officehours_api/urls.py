@@ -23,7 +23,7 @@ if settings.DEBUG:
 
     yasg_view = get_yasg_view(
         openapi.Info(
-            title='NetDash API',
+            title='Office Hours API',
             default_version='v1',
         ),
     )
