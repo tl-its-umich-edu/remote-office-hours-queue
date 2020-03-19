@@ -4,3 +4,4 @@ whitenoise
 dj-database-url
 requests
 django-watchman
+django-redirect-to-non-www==0.1.1
