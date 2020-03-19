@@ -15,10 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import re_path, path, include
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('', include('bluejeans_queue.urls')),
     re_path(r'^oidc/', include('mozilla_django_oidc.urls')),
     path('status/', include('watchman.urls')),
     path('admin/', admin.site.urls),
+    path('403/', TemplateView.as_view(template_name='403.html')),
+    path('500/', TemplateView.as_view(template_name='500.html')),
 ]
