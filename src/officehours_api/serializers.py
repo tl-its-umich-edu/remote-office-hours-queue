@@ -10,11 +10,31 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class QueueSerializer(serializers.HyperlinkedModelSerializer):
-    hosts = UserSerializer(many=True)
+    hosts = UserSerializer(many=True, read_only=True)
+
+    host_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=User.objects.all(),
+        source='hosts',
+        write_only=True,
+    )
 
     class Meta:
         model = Queue
-        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'meeting_set']
+        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'host_ids']
+
+    def create(self, validated_data):
+        '''
+        Set current user as host if not provided
+        many-to-many fields cannot be set until the model is instantiated
+        '''
+        hosts = validated_data.pop('hosts')
+        instance = Queue.objects.create(**validated_data)
+        if hosts:
+            instance.hosts.set(hosts)
+        else:
+            instance.hosts.set([self.context['request'].user])
+        return instance
 
 
 class MeetingSerializer(serializers.HyperlinkedModelSerializer):
