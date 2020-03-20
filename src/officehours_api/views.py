@@ -48,6 +48,10 @@ class QueueList(generics.ListCreateAPIView):
     queryset = Queue.objects.all()
     serializer_class = QueueSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        return Queue.objects.filter(hosts__user__in=[user])
+
 
 class QueueDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Queue.objects.all()
