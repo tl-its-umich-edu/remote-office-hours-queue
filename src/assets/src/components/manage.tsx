@@ -9,7 +9,7 @@ interface MeetingEditorProps {
     remove: () => void;
 }
 
-function MeetingDetails(props: MeetingEditorProps) {
+function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0]!.user;
     return (
         <dd>
@@ -65,7 +65,7 @@ function QueueEditor(props: QueueEditorProps) {
     }
     const meetings = props.queue.meetings.map(m =>
         <li className="list-group-item">
-            <MeetingDetails meeting={m} remove={() => removeMeeting(m)}/>
+            <MeetingEditor meeting={m} remove={() => removeMeeting(m)}/>
         </li>
     );
     const addMeeting = () => {
