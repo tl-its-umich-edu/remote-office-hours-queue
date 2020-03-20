@@ -9,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models.functions import TruncHour
+from django.db.models.functions import TruncDate, TruncDay
 from django.utils.timezone import make_aware
 
 from .models import BluejeansMeeting
@@ -17,20 +17,23 @@ from .models import BluejeansMeeting
 
 @staff_member_required
 def usage(request):
-    meetings = BluejeansMeeting.objects.annotate(
-        hour=TruncHour('created_at')).order_by('created_at')
+    users = User.objects.annotate(
+        date_joined_date=TruncDate('date_joined'),
+        date_joined_day=TruncDay('date_joined'),
+        ).order_by('date_joined')
 
-    hours = (make_aware(datetime.fromtimestamp(h)) for h in range(
-        int(meetings.first().hour.timestamp()),
+    dates = (make_aware(datetime.fromtimestamp(d)).date() for d in range(
+        int(users.first().date_joined_day.timestamp()),
         int(time.time()),
-        3600
+        60 * 60 * 24
     ))
 
-    usage = ((h, meetings.filter(hour=h).count()) for h in hours)
+    usage = ((d, users.filter(date_joined_date=d).count()) for d in dates)
 
     return HttpResponse(
-        'hour,queue_joins,\n' +
-        '\n'.join(f'{h},{c},{" " * (5 - len(str(c)))}|{"*" * c}' for h, c in usage),
+        'date,new_users,\n' +
+        '\n'.join(f'{h},{c},{" " * (5 - len(str(c)))}|{"*" * c}' for h, c in
+                  usage),
         content_type='text/plain')
 
 
