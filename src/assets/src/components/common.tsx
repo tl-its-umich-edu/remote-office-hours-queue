@@ -12,19 +12,30 @@ export const UserDisplay = (props: UserDisplayProps) =>
 
 interface RemoveButtonProps {
     remove: () => void;
+    size?: "block"|"lg"|"sm";
 }
 
-export const RemoveButton: React.FC<RemoveButtonProps> = (props) =>
-    <button onClick={() => props.remove()} className="btn btn-sm btn-danger">
-        <span aria-hidden="true">&times;</span>
-        {props.children}
-    </button>
+export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
+    const className = "btn btn-danger " + (props.size ? ` btn-${props.size}` : "");
+    return (
+        <button onClick={() => props.remove()} className={className}>
+            <span aria-hidden="true">&times;</span>
+            {props.children}
+        </button>
+    );
+}
 
 interface AddButtonProps {
     add: () => void;
+    size?: "block"|"lg"|"sm";
 }
 
-export const AddButton: React.FC<AddButtonProps> = (props) =>
-    <button onClick={() => props.add()} className="btn btn-success">
-        +{props.children}
-    </button>
+export const AddButton: React.FC<AddButtonProps> = (props) => {
+    const className = "btn btn-success" + (props.size ? ` btn-${props.size}` : "");
+    return (
+        <button onClick={() => props.add()} className={className}>
+            <span aria-hidden="true">+</span>
+            {props.children}
+        </button>
+    );
+}

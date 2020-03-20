@@ -15,7 +15,7 @@ function MeetingEditor(props: MeetingEditorProps) {
         <dd>
             <UserDisplay user={user}/>
             <span className="float-right">
-                <RemoveButton remove={props.remove}/>
+                <RemoveButton remove={props.remove} size="sm"/>
             </span>
         </dd>
     );
@@ -28,7 +28,7 @@ interface HostEditorProps {
 
 function HostEditor(props: HostEditorProps) {
     const removeButton = props.remove
-        ? <RemoveButton remove={props.remove}/>
+        ? <RemoveButton remove={props.remove} size="sm"/>
         : undefined;
     return (
         <span>
