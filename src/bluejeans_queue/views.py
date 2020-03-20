@@ -32,8 +32,8 @@ def usage(request):
 
     return HttpResponse(
         'date,new_users,\n' +
-        '\n'.join(f'{h},{c},{" " * (5 - len(str(c)))}|{"*" * c}' for h, c in
-                  usage),
+        '\n'.join(f'{h},{c},{" " * (5 - len(str(c)))}|{"*" * int(c / 10)}'
+                  for h, c in usage),
         content_type='text/plain')
 
 
