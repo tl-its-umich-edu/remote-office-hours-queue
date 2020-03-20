@@ -19,10 +19,18 @@ export interface Meeting {
     attendees: Attendee[];
 }
 
-export interface Queue {
+export interface ManageQueue extends QueueBase {
+    meetings: Meeting[];
+}
+
+export interface AttendingQueue extends QueueBase {
+    queued_ahead?: number;
+    queue_length: number;
+}
+
+export interface QueueBase {
     id: number;
     name: string;
     hosts: Host[];
     created_at: string;
-    meetings: Meeting[];
 }

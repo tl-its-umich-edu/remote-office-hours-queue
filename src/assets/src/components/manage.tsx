@@ -1,41 +1,72 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { getQueuesFake, removeMeetingFake, addMeetingFake } from "../services/api";
-import { User, Queue, Meeting } from "../models";
+import { getQueuesFake, removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, addQueueFake, removeQueueFake } from "../services/api";
+import { User, ManageQueue, Meeting, Host } from "../models";
+import { UserDisplay, RemoveButton, AddButton } from "./common";
 
-interface MeetingDetailsProps {
+interface MeetingEditorProps {
     meeting: Meeting;
     remove: () => void;
 }
 
-function MeetingDetails(props: MeetingDetailsProps) {
+function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0]!.user;
-    const removeButton = (
-        <button onClick={() => props.remove()} className="btn btn-danger">X</button>
-    );
     return (
         <dd>
-            {props.meeting.id}: {user.username}
-            {removeButton}
+            <UserDisplay user={user}/>
+            <span className="float-right">
+                <RemoveButton remove={props.remove} size="sm"/>
+            </span>
         </dd>
-    )
+    );
 }
 
-interface QueueDetailsProps {
-    queue: Queue;
+interface HostEditorProps {
+    host: Host;
+    remove?: () => void;
+}
+
+function HostEditor(props: HostEditorProps) {
+    const removeButton = props.remove
+        ? <RemoveButton remove={props.remove} size="sm"/>
+        : undefined;
+    return (
+        <span>
+            <UserDisplay user={props.host.user}/>
+            {removeButton}
+        </span>
+    );
+}
+
+interface QueueEditorProps {
+    queue: ManageQueue;
     refresh: () => void;
 }
 
-function QueueDetails(props: QueueDetailsProps) {
+function QueueEditor(props: QueueEditorProps) {
+    const removeHost = (h: Host) => {
+        removeHostFake(props.queue.id, h.id);
+        props.refresh();
+    }
     const hosts = props.queue.hosts.map(h =>
-        <dd>{h.user.username}</dd>
+        <dd>
+            <HostEditor host={h} remove={() => removeHost(h)}/>
+        </dd>
     );
+    const addHost = () => {
+        const uniqname = prompt("Uniqname?", "aaaaaaaa");
+        if (!uniqname) return;
+        addHostFake(props.queue.id, uniqname);
+        props.refresh();
+    }
     const removeMeeting = (m: Meeting) => {
         removeMeetingFake(props.queue.id, m.id);
         props.refresh();
     }
     const meetings = props.queue.meetings.map(m =>
-        <MeetingDetails meeting={m} remove={() => removeMeeting(m)} />
+        <li className="list-group-item">
+            <MeetingEditor meeting={m} remove={() => removeMeeting(m)}/>
+        </li>
     );
     const addMeeting = () => {
         const uniqname = prompt("Uniqname?", "johndoe");
@@ -43,54 +74,70 @@ function QueueDetails(props: QueueDetailsProps) {
         addMeetingFake(props.queue.id, uniqname);
         props.refresh();
     }
-    const addButton = (
-        <button onClick={() => addMeeting()} className="btn btn-success">
-            +
-        </button>
-    )
     return (
-        <dl>
-            <dt>ID</dt>
-            <dd>{props.queue.id}</dd>
-            <dt>Name</dt>
-            <dd>{props.queue.name}</dd>
-            <dt>Created At</dt>
-            <dd>{props.queue.created_at}</dd>
-            <dt>Hosted By</dt>
-            {hosts}
-            <dt>Meetings</dt>
-            {meetings}
-            {addButton}
-        </dl>
-    )
+        <div>
+            <dl>
+                <dt>ID</dt>
+                <dd>{props.queue.id}</dd>
+                <dt>Name</dt>
+                <dd>{props.queue.name}</dd>
+                <dt>Created At</dt>
+                <dd>{props.queue.created_at}</dd>
+                <dt>Hosted By</dt>
+                {hosts}
+                <AddButton add={() => addHost()}> Add Host</AddButton>
+            </dl>
+            <h3>Queued Meetings</h3>
+            <ol className="list-group">
+                {meetings}
+            </ol>
+            <AddButton add={() => addMeeting()}> Force Add Attendee</AddButton>
+        </div>
+    );
 }
 
 interface QueueListProps {
-    queues: Queue[];
+    queues: ManageQueue[];
     refresh: () => void;
 }
 
 function QueueList(props: QueueListProps) {
+    const removeQueue = (q: ManageQueue) => {
+        removeQueueFake(q.id);
+        props.refresh();
+    }
     const queues = props.queues.map((q) => 
-        <li><QueueDetails key={q.id} queue={q} refresh={props.refresh}/></li>
-    )
+        <li>
+            <QueueEditor key={q.id} queue={q} refresh={props.refresh}/>
+            <RemoveButton remove={() => removeQueue(q)}> Delete Queue</RemoveButton>
+        </li>
+    );
+    const addQueue = () => {
+        const name = prompt("Queue name?", "Queueueueueue");
+        if (!name) return;
+        addQueueFake(name);
+        props.refresh();
+    }
     return (
-        <ul>{queues}</ul>
-    )
+        <div>
+            <ul>{queues}</ul>
+            <AddButton add={() => addQueue()}> Add Queue</AddButton>
+        </div>
+    );
 }
 
-interface ManageProps {
+interface ManagePageProps {
     user?: User;
 }
 
-export function Manage(props: ManageProps) {
-    const [queues, setQueue] = useState(undefined as Queue[] | undefined);
+export function ManagePage(props: ManagePageProps) {
+    const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
     const [isLoading, setIsLoading] = useState(true);
     const refresh = () => {
         setIsLoading(true);
         getQueuesFake()
             .then((data) => {
-                setQueue(data);
+                setQueues(data);
                 setIsLoading(false);
             })
             .catch((error) => {
@@ -105,5 +152,5 @@ export function Manage(props: ManageProps) {
         : <span>Loading...</span>;
     return (
         <div>{queueList}</div>
-    )
+    );
 }

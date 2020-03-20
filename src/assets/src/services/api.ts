@@ -1,15 +1,15 @@
-import { Queue } from "../models";
+import { ManageQueue, AttendingQueue } from "../models";
+
+export const getQueues = () =>
+    fetch("/api/queue", { method: "GET" })
+        .then((res) => res.json() as Promise<ManageQueue[]>);
 
 const sleep = async (ms: number): Promise<void> =>
     new Promise(resolve => {
       setTimeout(resolve, ms);
     });
 
-export const getQueues = () =>
-    fetch("/api/queue", { method: "GET" })
-        .then((res) => res.json() as Promise<Queue[]>);
-
-const fakeQueues: Queue[] = [
+const fakeQueues: ManageQueue[] = [
     {
         id: 0,
         name: 'first queue',
@@ -98,12 +98,12 @@ const fakeQueues: Queue[] = [
     },
 ]
 
-export const getQueuesFake = async (): Promise<Queue[]> => {
+export const getQueuesFake = async (): Promise<ManageQueue[]> => {
     await sleep(1000);
     return fakeQueues;
 }
 
-export const removeMeetingFake = async (queue_id: number, meeting_id: number): Promise<Queue> => {
+export const removeMeetingFake = async (queue_id: number, meeting_id: number): Promise<ManageQueue> => {
     await sleep(1000);
     const queue = fakeQueues.find(q => q.id === queue_id);
     if (!queue) throw new Error("Queue not found");
@@ -112,7 +112,7 @@ export const removeMeetingFake = async (queue_id: number, meeting_id: number): P
     return queue;
 }
 
-export const addMeetingFake = async (queue_id: number, username: string): Promise<Queue> => {
+export const addMeetingFake = async (queue_id: number, username: string): Promise<ManageQueue> => {
     await sleep(1000);
     const queue = fakeQueues.find(q => q.id === queue_id);
     if (!queue) throw new Error("Queue not found");
@@ -130,4 +130,109 @@ export const addMeetingFake = async (queue_id: number, username: string): Promis
         ]
     });
     return queue;
+}
+
+export const removeHostFake = async (queue_id: number, host_id: number): Promise<ManageQueue> => {
+    await sleep(1000);
+    const queue = fakeQueues.find(q => q.id === queue_id);
+    if (!queue) throw new Error("Queue not found");
+    const hostAt = queue.hosts.findIndex(h => h.id === host_id);
+    queue.hosts.splice(hostAt, 1);
+    return queue;
+}
+
+export const addHostFake = async (queue_id: number, username: string): Promise<ManageQueue> => {
+    await sleep(1000);
+    const queue = fakeQueues.find(q => q.id === queue_id);
+    if (!queue) throw new Error("Queue not found");
+    queue.hosts.push({
+        id: 888,
+        user: {
+            username,
+            first_name: "Joseph",
+            last_name: "Joestar",
+        }
+    });
+    return queue;
+}
+
+export const removeQueueFake = async (queue_id: number): Promise<void> => {
+    await sleep(1000);
+    const queueAt = fakeQueues.findIndex(q => q.id === queue_id);
+    if (!queueAt) throw new Error("Queue not found");
+    fakeQueues.splice(queueAt, 1);
+}
+
+export const addQueueFake = async (name: string): Promise<ManageQueue> => {
+    await sleep(1000);
+    const queue = {
+        id: 777,
+        name,
+        hosts: [
+            {
+                id: 666,
+                user: {
+                    username: 'yourself',
+                    first_name: 'Michael',
+                    last_name: 'Jackson',
+                }
+            }
+        ],
+        created_at: 'Just now',
+        meetings: [],
+    };
+    fakeQueues.push(queue);
+    return queue;
+}
+
+const getQueueAttendingFakeSync = (queue_id: number, uniqname: string): AttendingQueue => {
+    const queue = fakeQueues.find(q => q.id === queue_id);
+    if (!queue) throw new Error("Queue not found!");
+    const queuedAt = queue.meetings.findIndex(m => 
+        m.attendees.find(a => a.user.username === uniqname)
+    );
+    return {
+        id: queue.id,
+        name: queue.name,
+        hosts: queue.hosts,
+        created_at: queue.created_at,
+        queue_length: queue.meetings.length,
+        queued_ahead: queuedAt === -1 ? undefined : queuedAt,
+    };
+}
+
+export const getQueueAttendingFake = async (queue_id: number, uniqname: string): Promise<AttendingQueue> => {
+    await sleep(1000);
+    return getQueueAttendingFakeSync(queue_id, uniqname);
+}
+
+export const joinQueueFake = async (queue_id: number, uniqname: string): Promise<AttendingQueue> => {
+    await sleep(1000);
+    const queue = fakeQueues.find(q => q.id === queue_id);
+    if (!queue) throw new Error("Queue not found!");
+    queue.meetings.push({
+        id: 555,
+        attendees: [
+            {
+                id: 400,
+                user: {
+                    username: uniqname,
+                    first_name: "Tibald",
+                    last_name: "Tremulous",
+                }
+            }
+        ]
+    });
+    return getQueueAttendingFakeSync(queue_id, uniqname);
+}
+
+export const leaveQueueFake = async (queue_id: number, uniqname: string): Promise<AttendingQueue> => {
+    await sleep(1000);
+    const queue = fakeQueues.find(q => q.id === queue_id);
+    if (!queue) throw new Error("Queue not found!");
+    const meetingAt = queue.meetings.findIndex(m => 
+        m.attendees.find(a => a.user.username === uniqname)
+    );
+    queue.meetings.splice(meetingAt, 1);
+    return getQueueAttendingFakeSync(queue_id, uniqname);
 }
