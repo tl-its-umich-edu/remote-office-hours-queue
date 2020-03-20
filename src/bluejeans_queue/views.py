@@ -29,7 +29,7 @@ def usage(request):
 
     return HttpResponse(
         'hour,queue_joins,\n' +
-        '\n'.join(f'{h},{c},{"*" * c}' for h, c in usage),
+        '\n'.join(f'{h},{c},{" " * (5 - len(str(c)))}|{"*" * c}' for h, c in usage),
         content_type='text/plain')
 
 
