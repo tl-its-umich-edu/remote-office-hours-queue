@@ -26,7 +26,6 @@ class Queue(models.Model):
 class Meeting(models.Model):
     queue = models.ForeignKey(
         Queue, on_delete=models.CASCADE,
-        related_name='queue',
         null=True
     )
 
@@ -39,7 +38,6 @@ class Attendee(models.Model):
     meeting = models.ForeignKey(
         Meeting,
         on_delete=models.CASCADE,
-        related_name='meeting'
     )
 
     def __str__(self):
