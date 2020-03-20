@@ -8,6 +8,7 @@ from officehours_api.serializers import (
     UserSerializer, HostSerializer, QueueSerializer,
     MeetingSerializer, AttendeeSerializer,
 )
+from officehours_api.permissions import IsCurrentUser, IsHostOrReadOnly
 
 
 @api_view(['GET'])
@@ -32,6 +33,7 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (IsCurrentUser,)
 
 
 class HostList(generics.ListCreateAPIView):
@@ -42,6 +44,7 @@ class HostList(generics.ListCreateAPIView):
 class HostDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Host.objects.all()
     serializer_class = HostSerializer
+    permission_classes = (IsHostOrReadOnly,)
 
 
 class QueueList(generics.ListCreateAPIView):
