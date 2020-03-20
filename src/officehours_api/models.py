@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django.db.models.signals import post_save
 
 
-class Host(models.Model):
+class Profile(models.Model):
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -16,7 +16,7 @@ class Host(models.Model):
 
 class Queue(models.Model):
     name = models.CharField(max_length=100)
-    hosts = models.ManyToManyField(Host)
+    hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -47,6 +47,6 @@ class Attendee(models.Model):
 @receiver(post_save, sender=User)
 def post_save_user_signal_handler(sender, instance, created, **kwargs):
     try:
-        instance.host
-    except User.host.RelatedObjectDoesNotExist:
-        instance.host = Host.objects.create(user=instance)
+        instance.profile
+    except User.profile.RelatedObjectDoesNotExist:
+        instance.profile = Profile.objects.create(user=instance)

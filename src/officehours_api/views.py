@@ -3,9 +3,9 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
-from officehours_api.models import Host, Queue, Meeting, Attendee
+from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.serializers import (
-    UserSerializer, HostSerializer, QueueSerializer,
+    UserSerializer, QueueSerializer,
     MeetingSerializer, AttendeeSerializer,
 )
 from officehours_api.permissions import IsCurrentUser, IsHostOrReadOnly
@@ -18,7 +18,6 @@ def api_root(request, format=None):
     '''
     return Response({
         'users': reverse('user-list', request=request, format=format),
-        'hosts': reverse('host-list', request=request, format=format),
         'queues': reverse('queue-list', request=request, format=format),
         'meetings': reverse('meeting-list', request=request, format=format),
         'attendees': reverse('attendee-list', request=request, format=format),
@@ -34,17 +33,6 @@ class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsCurrentUser,)
-
-
-class HostList(generics.ListCreateAPIView):
-    queryset = Host.objects.all()
-    serializer_class = HostSerializer
-
-
-class HostDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Host.objects.all()
-    serializer_class = HostSerializer
-    permission_classes = (IsHostOrReadOnly,)
 
 
 class QueueList(generics.ListCreateAPIView):

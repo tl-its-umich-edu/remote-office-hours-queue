@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from officehours_api.models import Host, Queue, Meeting, Attendee
+from officehours_api.models import Queue, Meeting, Attendee
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -9,14 +9,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['id', 'url', 'username', 'email']
 
 
-class HostSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Host
-        fields = ['id', 'url', 'user']
-
-
 class QueueSerializer(serializers.HyperlinkedModelSerializer):
-    hosts = HostSerializer(many=True)
+    hosts = UserSerializer(many=True)
 
     class Meta:
         model = Queue
