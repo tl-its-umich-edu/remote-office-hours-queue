@@ -15,7 +15,7 @@ function App(props: AppProps) {
         <>
             <Route path='/' exact render={p => <HomePage {...p} user={props.globals.user} />} />
             <Route path='/manage' exact render={p => <ManagePage {...p} user={props.globals.user} />} />
-            <Route path='/queue/:uniqname' exact render={p => <QueuePage {...p} user={props.globals.user} />} />
+            <Route path='/queue/:queue_id' exact render={p => <QueuePage {...p} user={props.globals.user} />} />
         </>
     );
 }

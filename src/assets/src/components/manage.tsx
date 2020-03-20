@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { getQueuesFake, removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, addQueueFake, removeQueueFake } from "../services/api";
-import { User, Queue, Meeting, Host } from "../models";
+import { User, ManageQueue, Meeting, Host } from "../models";
 import { UserDisplay, RemoveButton, AddButton } from "./common";
 
 interface MeetingEditorProps {
@@ -39,7 +39,7 @@ function HostEditor(props: HostEditorProps) {
 }
 
 interface QueueEditorProps {
-    queue: Queue;
+    queue: ManageQueue;
     refresh: () => void;
 }
 
@@ -97,12 +97,12 @@ function QueueEditor(props: QueueEditorProps) {
 }
 
 interface QueueListProps {
-    queues: Queue[];
+    queues: ManageQueue[];
     refresh: () => void;
 }
 
 function QueueList(props: QueueListProps) {
-    const removeQueue = (q: Queue) => {
+    const removeQueue = (q: ManageQueue) => {
         removeQueueFake(q.id);
         props.refresh();
     }
@@ -131,13 +131,13 @@ interface ManagePageProps {
 }
 
 export function ManagePage(props: ManagePageProps) {
-    const [queues, setQueue] = useState(undefined as Queue[] | undefined);
+    const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
     const [isLoading, setIsLoading] = useState(true);
     const refresh = () => {
         setIsLoading(true);
         getQueuesFake()
             .then((data) => {
-                setQueue(data);
+                setQueues(data);
                 setIsLoading(false);
             })
             .catch((error) => {
