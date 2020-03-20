@@ -23,6 +23,16 @@ class QueueSerializer(serializers.HyperlinkedModelSerializer):
         model = Queue
         fields = ['id', 'url', 'name', 'created_at', 'hosts', 'host_ids']
 
+    def validate_host_ids(self, host_ids):
+        '''
+        Require empty hosts_ids (default to current user) or
+        require current user in host_ids
+        '''
+        if host_ids and self.context['request'].user not in host_ids:
+            raise serializers.ValidationError('Must include self as host')
+        else:
+            return host_ids
+
     def create(self, validated_data):
         '''
         Set current user as host if not provided
