@@ -41,7 +41,7 @@ class QueueList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Queue.objects.filter(hosts__user__in=[user])
+        return Queue.objects.filter(hosts__in=[user])
 
 
 class QueueDetail(generics.RetrieveUpdateDestroyAPIView):
