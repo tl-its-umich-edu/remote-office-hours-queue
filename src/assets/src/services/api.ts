@@ -155,3 +155,32 @@ export const addHostFake = async (queue_id: number, username: string): Promise<Q
     });
     return queue;
 }
+
+export const removeQueueFake = async (queue_id: number): Promise<void> => {
+    await sleep(1000);
+    const queueAt = fakeQueues.findIndex(q => q.id === queue_id);
+    if (!queueAt) throw new Error("Queue not found");
+    fakeQueues.splice(queueAt, 1);
+}
+
+export const addQueueFake = async (name: string): Promise<Queue> => {
+    await sleep(1000);
+    const queue = {
+        id: 777,
+        name,
+        hosts: [
+            {
+                id: 666,
+                user: {
+                    username: 'yourself',
+                    first_name: 'Michael',
+                    last_name: 'Jackson',
+                }
+            }
+        ],
+        created_at: 'Just now',
+        meetings: [],
+    };
+    fakeQueues.push(queue);
+    return queue;
+}

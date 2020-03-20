@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { getQueuesFake, removeMeetingFake, addMeetingFake, removeHostFake, addHostFake } from "../services/api";
+import { getQueuesFake, removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, addQueueFake, removeQueueFake } from "../services/api";
 import { User, Queue, Meeting, Host } from "../models";
 import { UserDisplay, RemoveButton, AddButton } from "./common";
 
@@ -102,19 +102,35 @@ interface QueueListProps {
 }
 
 function QueueList(props: QueueListProps) {
+    const removeQueue = (q: Queue) => {
+        removeQueueFake(q.id);
+        props.refresh();
+    }
     const queues = props.queues.map((q) => 
-        <li><QueueEditor key={q.id} queue={q} refresh={props.refresh}/></li>
+        <li>
+            <QueueEditor key={q.id} queue={q} refresh={props.refresh}/>
+            <RemoveButton remove={() => removeQueue(q)}> Delete Queue</RemoveButton>
+        </li>
     );
+    const addQueue = () => {
+        const name = prompt("Queue name?", "Queueueueueue");
+        if (!name) return;
+        addQueueFake(name);
+        props.refresh();
+    }
     return (
-        <ul>{queues}</ul>
+        <div>
+            <ul>{queues}</ul>
+            <AddButton add={() => addQueue()}> Add Queue</AddButton>
+        </div>
     );
 }
 
-interface ManageProps {
+interface ManagePageProps {
     user?: User;
 }
 
-export function Manage(props: ManageProps) {
+export function ManagePage(props: ManagePageProps) {
     const [queues, setQueue] = useState(undefined as Queue[] | undefined);
     const [isLoading, setIsLoading] = useState(true);
     const refresh = () => {

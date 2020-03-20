@@ -1,11 +1,11 @@
 import * as React from "react";
 import { User } from "../models";
 
-interface PageProps {
+interface HomePageProps {
     user?: User;
 }
 
-export function Home(props: PageProps) {
+export function HomePage(props: HomePageProps) {
     const hello = `Hello, ${props.user?.username}!`;
     return <p>{hello}</p>;
 }

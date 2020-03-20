@@ -2,11 +2,11 @@ import * as React from "react";
 import { useParams } from "react-router-dom";
 import { User } from "../models";
 
-interface PageProps {
+interface QueuePageProps {
     user?: User;
 }
 
-export function Queue(props: PageProps) {
+export function QueuePage(props: QueuePageProps) {
     let { uniqname } = useParams();
     const hello = `Queue for ${uniqname}!`;
     return <p>{hello}</p>;
