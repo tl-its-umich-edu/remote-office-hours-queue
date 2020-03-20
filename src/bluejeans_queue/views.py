@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.functions import TruncHour
+from django.utils.timezone import make_aware
 
 from .models import BluejeansMeeting
 
@@ -19,7 +20,7 @@ def usage(request):
     meetings = BluejeansMeeting.objects.annotate(
         hour=TruncHour('created_at')).order_by('created_at')
 
-    hours = (datetime.fromtimestamp(h) for h in range(
+    hours = (make_aware(datetime.fromtimestamp(h)) for h in range(
         int(meetings.first().hour.timestamp()),
         int(time.time()),
         3600
