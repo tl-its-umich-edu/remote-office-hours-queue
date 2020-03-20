@@ -4,10 +4,9 @@ from officehours_api.models import Host, Queue, Meeting, Attendee
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
-
     class Meta:
         model = User
-        fields = ('id', 'url', 'username', 'email')
+        fields = ['id', 'url', 'username', 'email']
 
 
 class HostSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,9 +16,11 @@ class HostSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class QueueSerializer(serializers.HyperlinkedModelSerializer):
+    hosts = HostSerializer(many=True)
+
     class Meta:
         model = Queue
-        fields = ['id', 'url', 'name', 'created_at', 'hosts']
+        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'meeting_set']
 
 
 class MeetingSerializer(serializers.HyperlinkedModelSerializer):
