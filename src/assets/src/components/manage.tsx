@@ -1,41 +1,72 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { getQueuesFake, removeMeetingFake, addMeetingFake } from "../services/api";
-import { User, Queue, Meeting } from "../models";
+import { getQueuesFake, removeMeetingFake, addMeetingFake, removeHostFake, addHostFake } from "../services/api";
+import { User, Queue, Meeting, Host } from "../models";
+import { UserDisplay, RemoveButton, AddButton } from "./common";
 
-interface MeetingDetailsProps {
+interface MeetingEditorProps {
     meeting: Meeting;
     remove: () => void;
 }
 
-function MeetingDetails(props: MeetingDetailsProps) {
+function MeetingDetails(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0]!.user;
-    const removeButton = (
-        <button onClick={() => props.remove()} className="btn btn-danger">X</button>
-    );
     return (
         <dd>
-            {props.meeting.id}: {user.username}
-            {removeButton}
+            <UserDisplay user={user}/>
+            <span className="float-right">
+                <RemoveButton remove={props.remove}/>
+            </span>
         </dd>
-    )
+    );
 }
 
-interface QueueDetailsProps {
+interface HostEditorProps {
+    host: Host;
+    remove?: () => void;
+}
+
+function HostEditor(props: HostEditorProps) {
+    const removeButton = props.remove
+        ? <RemoveButton remove={props.remove}/>
+        : undefined;
+    return (
+        <span>
+            <UserDisplay user={props.host.user}/>
+            {removeButton}
+        </span>
+    );
+}
+
+interface QueueEditorProps {
     queue: Queue;
     refresh: () => void;
 }
 
-function QueueDetails(props: QueueDetailsProps) {
+function QueueEditor(props: QueueEditorProps) {
+    const removeHost = (h: Host) => {
+        removeHostFake(props.queue.id, h.id);
+        props.refresh();
+    }
     const hosts = props.queue.hosts.map(h =>
-        <dd>{h.user.username}</dd>
+        <dd>
+            <HostEditor host={h} remove={() => removeHost(h)}/>
+        </dd>
     );
+    const addHost = () => {
+        const uniqname = prompt("Uniqname?", "aaaaaaaa");
+        if (!uniqname) return;
+        addHostFake(props.queue.id, uniqname);
+        props.refresh();
+    }
     const removeMeeting = (m: Meeting) => {
         removeMeetingFake(props.queue.id, m.id);
         props.refresh();
     }
     const meetings = props.queue.meetings.map(m =>
-        <MeetingDetails meeting={m} remove={() => removeMeeting(m)} />
+        <li className="list-group-item">
+            <MeetingDetails meeting={m} remove={() => removeMeeting(m)}/>
+        </li>
     );
     const addMeeting = () => {
         const uniqname = prompt("Uniqname?", "johndoe");
@@ -43,26 +74,26 @@ function QueueDetails(props: QueueDetailsProps) {
         addMeetingFake(props.queue.id, uniqname);
         props.refresh();
     }
-    const addButton = (
-        <button onClick={() => addMeeting()} className="btn btn-success">
-            +
-        </button>
-    )
     return (
-        <dl>
-            <dt>ID</dt>
-            <dd>{props.queue.id}</dd>
-            <dt>Name</dt>
-            <dd>{props.queue.name}</dd>
-            <dt>Created At</dt>
-            <dd>{props.queue.created_at}</dd>
-            <dt>Hosted By</dt>
-            {hosts}
-            <dt>Meetings</dt>
-            {meetings}
-            {addButton}
-        </dl>
-    )
+        <div>
+            <dl>
+                <dt>ID</dt>
+                <dd>{props.queue.id}</dd>
+                <dt>Name</dt>
+                <dd>{props.queue.name}</dd>
+                <dt>Created At</dt>
+                <dd>{props.queue.created_at}</dd>
+                <dt>Hosted By</dt>
+                {hosts}
+                <AddButton add={() => addHost()}> Add Host</AddButton>
+            </dl>
+            <h3>Queued Meetings</h3>
+            <ol className="list-group">
+                {meetings}
+            </ol>
+            <AddButton add={() => addMeeting()}> Force Add Attendee</AddButton>
+        </div>
+    );
 }
 
 interface QueueListProps {
@@ -72,11 +103,11 @@ interface QueueListProps {
 
 function QueueList(props: QueueListProps) {
     const queues = props.queues.map((q) => 
-        <li><QueueDetails key={q.id} queue={q} refresh={props.refresh}/></li>
-    )
+        <li><QueueEditor key={q.id} queue={q} refresh={props.refresh}/></li>
+    );
     return (
         <ul>{queues}</ul>
-    )
+    );
 }
 
 interface ManageProps {
@@ -105,5 +136,5 @@ export function Manage(props: ManageProps) {
         : <span>Loading...</span>;
     return (
         <div>{queueList}</div>
-    )
+    );
 }
