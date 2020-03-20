@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from safedelete.models import SafeDeleteModel, SOFT_DELETE
 
 
 class Profile(models.Model):
@@ -14,7 +15,8 @@ class Profile(models.Model):
         return f'user={self.user.username}'
 
 
-class Queue(models.Model):
+class Queue(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -23,7 +25,8 @@ class Queue(models.Model):
         return self.name
 
 
-class Meeting(models.Model):
+class Meeting(SafeDeleteModel):
+    _safedelete_policy = SOFT_DELETE
     queue = models.ForeignKey(
         Queue, on_delete=models.CASCADE,
         null=True

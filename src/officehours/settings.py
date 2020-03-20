@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'safedelete',
     'watchman',
     'webpack_loader',
 ]
@@ -213,6 +214,10 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 FEEDBACK_EMAIL = os.getenv('FEEDBACK_EMAIL')
+
+
+# safedelete
+SAFE_DELETE_INTERPRET_UNDELETED_OBJECTS_AS_CREATED = True
 
 
 # # Security
