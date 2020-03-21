@@ -4,6 +4,17 @@ export const getQueues = () =>
     fetch("/api/queue", { method: "GET" })
         .then((res) => res.json() as Promise<ManageQueue[]>);
 
+export const getQueue = (id: number) =>
+    fetch("/api/queue/" + id, { method: "GET" })
+        .then((res) => res.json() as Promise<ManageQueue>);
+
+export const createQueue = (name: string) =>
+    fetch("/api/queue", { method: "POST" })
+        .then((res) => res.json() as Promise<ManageQueue>);
+
+export const deleteQueue = (id: number) =>
+    fetch("/api/queue/" + id, { method: "DELETE" });
+
 const sleep = async (ms: number): Promise<void> =>
     new Promise(resolve => {
       setTimeout(resolve, ms);
