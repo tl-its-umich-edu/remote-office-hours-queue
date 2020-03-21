@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import { AppRouter as App } from './containers/app';
 import { User } from './models';
 
@@ -17,9 +17,9 @@ const globals = Object.freeze(JSON.parse(globalsElement.textContent));
 
 ReactDOM.render(
     (
-        <BrowserRouter basename='/'>
+        <Router basename='/'>
             <App globals={globals} />
-        </BrowserRouter>
+        </Router>
     ), document.getElementById('root')
 );
 

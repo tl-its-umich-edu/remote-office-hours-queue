@@ -6,7 +6,7 @@ from officehours_api.models import Queue, Meeting, Attendee
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'url', 'username', 'email']
+        fields = ['id', 'url', 'username', 'email', 'first_name', 'last_name']
 
 
 class QueueSerializer(serializers.HyperlinkedModelSerializer):

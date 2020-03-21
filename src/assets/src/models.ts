@@ -4,11 +4,6 @@ export interface User {
     last_name: string;
 }
 
-export interface Host {
-    id: number;
-    user: User;
-}
-
 export interface Attendee {
     id: number;
     user: User;
@@ -31,6 +26,6 @@ export interface AttendingQueue extends QueueBase {
 export interface QueueBase {
     id: number;
     name: string;
-    hosts: Host[];
+    hosts: User[];
     created_at: string;
 }

@@ -158,7 +158,6 @@ STATICFILES_DIRS = (
 
 WEBPACK_LOADER = {
     'DEFAULT': {
-        'CACHE': False,
         'BUNDLE_DIR_NAME': 'dist/',
     }
 }

@@ -15,12 +15,9 @@ const fakeQueues: ManageQueue[] = [
         name: 'first queue',
         hosts: [
             {
-                id: 0,
-                user: {
-                    username: 'jlost',
-                    first_name: 'James',
-                    last_name: 'Ostrander',
-                }
+                username: 'jlost',
+                first_name: 'James',
+                last_name: 'Ostrander',
             }
         ],
         created_at: 'Todayish',
@@ -58,12 +55,9 @@ const fakeQueues: ManageQueue[] = [
         name: 'second queue',
         hosts: [
             {
-                id: 0,
-                user: {
-                    username: 'jlost',
-                    first_name: 'James',
-                    last_name: 'Ostrander',
-                }
+                username: 'jlost',
+                first_name: 'James',
+                last_name: 'Ostrander',
             }
         ],
         created_at: 'Yesterdayish',
@@ -109,7 +103,7 @@ export const removeMeetingFake = async (queue_id: number, meeting_id: number): P
     if (!queue) throw new Error("Queue not found");
     const attendeeAt = queue.meetings.findIndex(m => m.id === meeting_id);
     queue.meetings.splice(attendeeAt, 1);
-    return queue;
+    return JSON.parse(JSON.stringify(queue));
 }
 
 export const addMeetingFake = async (queue_id: number, username: string): Promise<ManageQueue> => {
@@ -129,16 +123,16 @@ export const addMeetingFake = async (queue_id: number, username: string): Promis
             }
         ]
     });
-    return queue;
+    return JSON.parse(JSON.stringify(queue));
 }
 
-export const removeHostFake = async (queue_id: number, host_id: number): Promise<ManageQueue> => {
+export const removeHostFake = async (queue_id: number, username: string): Promise<ManageQueue> => {
     await sleep(1000);
     const queue = fakeQueues.find(q => q.id === queue_id);
     if (!queue) throw new Error("Queue not found");
-    const hostAt = queue.hosts.findIndex(h => h.id === host_id);
+    const hostAt = queue.hosts.findIndex(h => h.username === username);
     queue.hosts.splice(hostAt, 1);
-    return queue;
+    return JSON.parse(JSON.stringify(queue));
 }
 
 export const addHostFake = async (queue_id: number, username: string): Promise<ManageQueue> => {
@@ -146,14 +140,11 @@ export const addHostFake = async (queue_id: number, username: string): Promise<M
     const queue = fakeQueues.find(q => q.id === queue_id);
     if (!queue) throw new Error("Queue not found");
     queue.hosts.push({
-        id: 888,
-        user: {
-            username,
-            first_name: "Joseph",
-            last_name: "Joestar",
-        }
+        username,
+        first_name: "Joseph",
+        last_name: "Joestar",
     });
-    return queue;
+    return JSON.parse(JSON.stringify(queue));
 }
 
 export const removeQueueFake = async (queue_id: number): Promise<void> => {
@@ -170,19 +161,16 @@ export const addQueueFake = async (name: string): Promise<ManageQueue> => {
         name,
         hosts: [
             {
-                id: 666,
-                user: {
-                    username: 'yourself',
-                    first_name: 'Michael',
-                    last_name: 'Jackson',
-                }
+                username: 'yourself',
+                first_name: 'Michael',
+                last_name: 'Jackson',
             }
         ],
         created_at: 'Just now',
         meetings: [],
     };
     fakeQueues.push(queue);
-    return queue;
+    return JSON.parse(JSON.stringify(queue));
 }
 
 const getQueueAttendingFakeSync = (queue_id: number, uniqname: string): AttendingQueue => {
@@ -235,4 +223,11 @@ export const leaveQueueFake = async (queue_id: number, uniqname: string): Promis
     );
     queue.meetings.splice(meetingAt, 1);
     return getQueueAttendingFakeSync(queue_id, uniqname);
+}
+
+export const getQueueFake = async (queue_id: number): Promise<ManageQueue> => {
+    await sleep(1000);
+    const queue = fakeQueues.find(q => q.id === queue_id);
+    if (!queue) throw new Error("Queue not found!");
+    return queue;
 }

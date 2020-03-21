@@ -5,6 +5,7 @@ import { Globals } from "..";
 import { HomePage } from "../components/home";
 import { ManagePage } from "../components/manage";
 import { QueuePage } from "../components/queue";
+import { QueueEditorPage } from "../components/edit";
 
 interface AppProps extends RouteComponentProps {
     globals: Globals;
@@ -15,6 +16,7 @@ function App(props: AppProps) {
         <>
             <Route path='/' exact render={p => <HomePage {...p} user={props.globals.user} />} />
             <Route path='/manage' exact render={p => <ManagePage {...p} user={props.globals.user} />} />
+            <Route path='/manage/:queue_id' exact render={p => <QueueEditorPage {...p} user={props.globals.user} />} />
             <Route path='/queue/:queue_id' exact render={p => <QueuePage {...p} user={props.globals.user} />} />
         </>
     );

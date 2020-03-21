@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { User, AttendingQueue } from "../models";
 import { UserDisplay } from "./common";
 import { useState, useEffect } from "react";
@@ -86,6 +86,9 @@ function QueueAttending(props: QueueAttendingProps) {
         <div className="container-fluid content">
             <h1>Manage Your One-on-One Meeting Queue</h1>
             {content}
+            <p className="alert alert-info col-lg">
+                This is your queue, you can <Link to={"/manage/" + props.queue.id}>manage it</Link>.
+            </p>
         </div>
     );
 }
@@ -95,7 +98,7 @@ interface QueuePageProps {
 }
 
 export function QueuePage(props: QueuePageProps) {
-    let { queue_id } = useParams();
+    const { queue_id } = useParams();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
