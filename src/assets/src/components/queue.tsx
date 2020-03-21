@@ -7,6 +7,7 @@ import { getQueueAttendingFake, joinQueueFake, leaveQueueFake } from "../service
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
+    user: User;
     joinQueue: () => void;
     leaveQueue: () => void;
 }
@@ -80,15 +81,18 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 
 function QueueAttending(props: QueueAttendingProps) {
     const content = props.queue.queued_ahead === undefined
-        ? <QueueAttendingNotJoined queue={props.queue} joinQueue={props.joinQueue} leaveQueue={props.leaveQueue}/>
-        : <QueueAttendingJoined queue={props.queue} joinQueue={props.joinQueue} leaveQueue={props.leaveQueue}/>
+        ? <QueueAttendingNotJoined {...props}/>
+        : <QueueAttendingJoined {...props}/>
+    const yourQueueAlert = props.queue.hosts.find(h => h.username === props.user.username)
+        ? <p className="alert alert-info col-lg">
+            This is your queue, you can <Link to={"/manage/" + props.queue.id}>manage it</Link>.
+        </p>
+        : undefined;
     return (
         <div className="container-fluid content">
             <h1>Manage Your One-on-One Meeting Queue</h1>
             {content}
-            <p className="alert alert-info col-lg">
-                This is your queue, you can <Link to={"/manage/" + props.queue.id}>manage it</Link>.
-            </p>
+            {yourQueueAlert}
         </div>
     );
 }
@@ -127,7 +131,7 @@ export function QueuePage(props: QueuePageProps) {
             .then((q) => setQueue(q));
     }
     const queueDisplay = queue !== undefined
-        ? <QueueAttending queue={queue} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
+        ? <QueueAttending queue={queue} user={props.user} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
         : <span>Loading...</span>;
     return queueDisplay;
 }
