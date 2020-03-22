@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { User, AttendingQueue } from "../models";
 import { UserDisplay } from "./common";
 import { useState, useEffect } from "react";
-import { getQueueAttendingFake, joinQueueFake, leaveQueueFake } from "../services/api";
+import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
@@ -110,7 +110,7 @@ export function QueuePage(props: QueuePageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const refresh = () => {
         setIsLoading(true);
-        getQueueAttendingFake(queueIdParsed, props.user!.username)
+        apiGetQueueAttending(queueIdParsed, props.user!.username)
             .then((data) => {
                 setQueue(data);
                 setIsLoading(false);
@@ -123,11 +123,11 @@ export function QueuePage(props: QueuePageProps) {
         refresh();
     }, [queue]);
     const joinQueue = () => {
-        joinQueueFake(queueIdParsed, props.user!.username)
+        apiJoinQueue(queueIdParsed, props.user!.username)
             .then((q) => setQueue(q));
     }
     const leaveQueue = () => {
-        leaveQueueFake(queueIdParsed, props.user!.username)
+        apiLeaveQueue(queueIdParsed, props.user!.username)
             .then((q) => setQueue(q));
     }
     const queueDisplay = queue !== undefined

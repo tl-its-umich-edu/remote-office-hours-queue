@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { getQueuesFake, removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, addQueueFake, removeQueueFake } from "../services/api";
+import { getQueuesFake as apiGetQueues, addQueueFake as apiAddQueue, removeQueueFake as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue, Meeting } from "../models";
 import { UserDisplay, RemoveButton, AddButton } from "./common";
 import { Link } from "react-router-dom";
@@ -12,7 +12,7 @@ interface QueueListProps {
 
 function QueueList(props: QueueListProps) {
     const removeQueue = (q: ManageQueue) => {
-        removeQueueFake(q.id);
+        apiRemoveQueue(q.id);
         props.refresh();
     }
     const queues = props.queues.map((q) => 
@@ -26,7 +26,7 @@ function QueueList(props: QueueListProps) {
     const addQueue = () => {
         const name = prompt("Queue name?", "Queueueueueue");
         if (!name) return;
-        addQueueFake(name);
+        apiAddQueue(name);
         props.refresh();
     }
     return (
@@ -46,7 +46,7 @@ export function ManagePage(props: ManagePageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const refresh = () => {
         setIsLoading(true);
-        getQueuesFake()
+        apiGetQueues()
             .then((data) => {
                 setQueues(data);
                 setIsLoading(false);

@@ -1,19 +1,25 @@
 import { ManageQueue, AttendingQueue } from "../models";
 
 export const getQueues = () =>
-    fetch("/api/queue", { method: "GET" })
+    fetch("/api/queues", { method: "GET" })
         .then((res) => res.json() as Promise<ManageQueue[]>);
 
 export const getQueue = (id: number) =>
-    fetch("/api/queue/" + id, { method: "GET" })
+    fetch("/api/queues/" + id, { method: "GET" })
         .then((res) => res.json() as Promise<ManageQueue>);
 
 export const createQueue = (name: string) =>
-    fetch("/api/queue", { method: "POST" })
+    fetch("/api/queues", { 
+        method: "POST",
+        body: JSON.stringify({
+            name,
+            "host_ids": [],  //Ideally, this wouldn't be required
+        }),
+    })
         .then((res) => res.json() as Promise<ManageQueue>);
 
 export const deleteQueue = (id: number) =>
-    fetch("/api/queue/" + id, { method: "DELETE" });
+    fetch("/api/queues/" + id, { method: "DELETE" });
 
 const sleep = async (ms: number): Promise<void> =>
     new Promise(resolve => {
