@@ -94,14 +94,14 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
         setIsLoading(true);
         getQueueFake(queueIdParsed)
             .then((data) => {
                 setQueue(data);
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -117,7 +117,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             .then((q) => {
                 setQueue(q);
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -132,7 +132,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             .then((q) => {
                 setQueue(q);
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -145,7 +145,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             .then((q) => {
                 setQueue(q);
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -160,7 +160,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             .then((q) => {
                 setQueue(q);
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -168,16 +168,13 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             });
     }
     const loadingDisplay = isLoading
-        ? <span>Loading...</span>
-        : undefined;
+        && <span>Loading...</span>
     const errorDisplay = error
-        ? <p className="alert alert-danger">{error}</p>
-        : undefined;
+        && <p className="alert alert-danger">{error.toString()}</p>
     const queueEditor = queue
-        ? <QueueEditor queue={queue} 
+        && <QueueEditor queue={queue} 
             addHost={addHost} removeHost={removeHost} 
             addMeeting={addMeeting} removeMeeting={removeMeeting} />
-        : undefined;
     return (
         <>
         {loadingDisplay}

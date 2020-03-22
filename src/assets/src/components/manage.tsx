@@ -35,14 +35,14 @@ interface ManagePageProps {
 export function ManagePage(props: ManagePageProps) {
     const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
         setIsLoading(true);
         apiGetQueues()
             .then((data) => {
                 setQueues(data);
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -53,12 +53,13 @@ export function ManagePage(props: ManagePageProps) {
         refresh();
     }, []);
     const removeQueue = (q: ManageQueue) => {
+        console.log(q);
         setIsLoading(true);
         apiRemoveQueue(q.id)
             .then((data) => {
                 refresh();
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
                 setIsLoading(false);
             });
@@ -71,20 +72,17 @@ export function ManagePage(props: ManagePageProps) {
             .then((data) => {
                 refresh();
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
                 setIsLoading(false);
             });
     }
     const loadingDisplay = isLoading
-        ? <span>Loading...</span>
-        : undefined;
+        && <span>Loading...</span>
     const errorDisplay = error
-        ? <p className="alert alert-error">{error}</p>
-        : undefined;
+        && <p className="alert alert-danger">{error.toString()}</p>
     const queueList = queues !== undefined
-        ? <QueueList queues={queues} removeQueue={removeQueue} addQueue={addQueue}/>
-        : undefined;
+        && <QueueList queues={queues} removeQueue={removeQueue} addQueue={addQueue}/>
     return (
         <div>
             {loadingDisplay}

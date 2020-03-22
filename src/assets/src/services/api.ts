@@ -167,7 +167,7 @@ export const addHostFake = async (queue_id: number, username: string): Promise<M
 export const removeQueueFake = async (queue_id: number): Promise<void> => {
     await sleep(1000);
     const queueAt = fakeQueues.findIndex(q => q.id === queue_id);
-    if (!queueAt) throw new Error("Queue not found");
+    if (queueAt === -1) throw new Error("Queue not found");
     fakeQueues.splice(queueAt, 1);
 }
 

@@ -84,10 +84,9 @@ function QueueAttending(props: QueueAttendingProps) {
         ? <QueueAttendingNotJoined {...props}/>
         : <QueueAttendingJoined {...props}/>
     const yourQueueAlert = props.queue.hosts.find(h => h.username === props.user.username)
-        ? <p className="alert alert-info col-lg">
+        && <p className="alert alert-info col-lg">
             This is your queue, you can <Link to={"/manage/" + props.queue.id}>manage it</Link>.
         </p>
-        : undefined;
     return (
         <>
         <h1>Manage Your One-on-One Meeting Queue</h1>
@@ -108,7 +107,7 @@ export function QueuePage(props: QueuePageProps) {
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(false);
+    const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
         setIsLoading(true);
         apiGetQueueAttending(queueIdParsed, props.user!.username)
@@ -116,7 +115,7 @@ export function QueuePage(props: QueuePageProps) {
                 setQueue(data);
                 setIsLoading(false);
             })
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -130,7 +129,7 @@ export function QueuePage(props: QueuePageProps) {
         setIsLoading(true);
         apiJoinQueue(queueIdParsed, props.user!.username)
             .then((q) => setQueue(q))
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -141,7 +140,7 @@ export function QueuePage(props: QueuePageProps) {
         setIsLoading(true);
         apiLeaveQueue(queueIdParsed, props.user!.username)
             .then((q) => setQueue(q))
-            .catch((error) => {
+            .catch((error: Error) => {
                 setError(error);
             })
             .finally(() => {
@@ -149,14 +148,11 @@ export function QueuePage(props: QueuePageProps) {
             });
     }
     const loadingDisplay = isLoading
-        ? <span>Loading...</span>
-        : undefined;
+        && <span>Loading...</span>
     const errorDisplay = error
-        ? <p className="alert alert-danger">{error}</p>
-        : undefined;
+        && <p className="alert alert-danger">{error.toString()}</p>
     const queueDisplay = queue !== undefined
-        ? <QueueAttending queue={queue} user={props.user} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
-        : undefined;
+        && <QueueAttending queue={queue} user={props.user} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
     return (
         <div className="container-fluid content">
             {loadingDisplay}
