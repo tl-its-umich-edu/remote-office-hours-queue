@@ -53,7 +53,6 @@ export function ManagePage(props: ManagePageProps) {
         refresh();
     }, []);
     const removeQueue = (q: ManageQueue) => {
-        console.log(q);
         setIsLoading(true);
         apiRemoveQueue(q.id)
             .then((data) => {
