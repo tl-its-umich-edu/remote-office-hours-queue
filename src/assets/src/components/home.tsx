@@ -11,7 +11,7 @@ function QueueLookup() {
                 <input type="text" 
                     className="form-control" 
                     name="uniqname" 
-                    placeholder="Organizer's uniqname..." 
+                    placeholder="Meeting ID..." 
                     value={lookup}
                     onChange={(e) => setLookup(e.target.value)}
                     />
@@ -35,6 +35,10 @@ export function HomePage(props: HomePageProps) {
                 Enter the ID of the meeting queue you would like to join!
             </p>
             <QueueLookup/>
+            <hr/>
+            <Link to="/manage">
+                Manage Your Own Queue
+            </Link>
             </>
         )
         : (
@@ -49,10 +53,6 @@ export function HomePage(props: HomePageProps) {
         <div className="jumbotron">
             <h1 className="display-4">Remote Office Hours Queue</h1>
             {body}
-            <hr/>
-            <Link to="/manage">
-                Manage Your Own Queue
-            </Link>
         </div>
     );
 }
