@@ -94,64 +94,95 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(false);
     const refresh = () => {
         setIsLoading(true);
         getQueueFake(queueIdParsed)
             .then((data) => {
                 setQueue(data);
-                setIsLoading(false);
             })
             .catch((error) => {
-                throw new Error(error);
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }
     React.useEffect(() => {
         refresh();
-    }, [queue]);
-    if (!queue) return <span>Loading...</span>
+    }, []);
     const removeHost = (h: User) => {
-        removeHostFake(queue.id, h.username)
+        setIsLoading(true);
+        removeHostFake(queue!.id, h.username)
             .then((q) => {
                 setQueue(q);
             })
             .catch((error) => {
-                throw new Error(error);
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }
     const addHost = () => {
         const uniqname = prompt("Uniqname?", "aaaaaaaa");
         if (!uniqname) return;
-        addHostFake(queue.id, uniqname)
+        setIsLoading(true);
+        addHostFake(queue!.id, uniqname)
             .then((q) => {
                 setQueue(q);
             })
             .catch((error) => {
-                throw new Error(error);
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }
     const removeMeeting = (m: Meeting) => {
-        removeMeetingFake(queue.id, m.id)
+        setIsLoading(true);
+        removeMeetingFake(queue!.id, m.id)
             .then((q) => {
                 setQueue(q);
             })
             .catch((error) => {
-                throw new Error(error);
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }
     const addMeeting = () => {
         const uniqname = prompt("Uniqname?", "johndoe");
         if (!uniqname) return;
-        addMeetingFake(queue.id, uniqname)
+        setIsLoading(true);
+        addMeetingFake(queue!.id, uniqname)
             .then((q) => {
                 setQueue(q);
             })
             .catch((error) => {
-                throw new Error(error);
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }
-    return (
-        <QueueEditor queue={queue} 
+    const loadingDisplay = isLoading
+        ? <span>Loading...</span>
+        : undefined;
+    const errorDisplay = error
+        ? <p className="alert alert-danger">{error}</p>
+        : undefined;
+    const queueEditor = queue
+        ? <QueueEditor queue={queue} 
             addHost={addHost} removeHost={removeHost} 
             addMeeting={addMeeting} removeMeeting={removeMeeting} />
+        : undefined;
+    return (
+        <>
+        {loadingDisplay}
+        {errorDisplay}
+        {queueEditor}
+        </>
     );
 }

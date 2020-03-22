@@ -89,11 +89,11 @@ function QueueAttending(props: QueueAttendingProps) {
         </p>
         : undefined;
     return (
-        <div className="container-fluid content">
-            <h1>Manage Your One-on-One Meeting Queue</h1>
-            {content}
-            {yourQueueAlert}
-        </div>
+        <>
+        <h1>Manage Your One-on-One Meeting Queue</h1>
+        {content}
+        {yourQueueAlert}
+        </>
     );
 }
 
@@ -108,6 +108,7 @@ export function QueuePage(props: QueuePageProps) {
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(false);
     const refresh = () => {
         setIsLoading(true);
         apiGetQueueAttending(queueIdParsed, props.user!.username)
@@ -116,22 +117,51 @@ export function QueuePage(props: QueuePageProps) {
                 setIsLoading(false);
             })
             .catch((error) => {
-                throw new Error(error);
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
             });
     }
     useEffect(() => {
         refresh();
-    }, [queue]);
+    }, []);
     const joinQueue = () => {
+        setIsLoading(true);
         apiJoinQueue(queueIdParsed, props.user!.username)
-            .then((q) => setQueue(q));
+            .then((q) => setQueue(q))
+            .catch((error) => {
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }
     const leaveQueue = () => {
+        setIsLoading(true);
         apiLeaveQueue(queueIdParsed, props.user!.username)
-            .then((q) => setQueue(q));
+            .then((q) => setQueue(q))
+            .catch((error) => {
+                setError(error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     }
+    const loadingDisplay = isLoading
+        ? <span>Loading...</span>
+        : undefined;
+    const errorDisplay = error
+        ? <p className="alert alert-danger">{error}</p>
+        : undefined;
     const queueDisplay = queue !== undefined
         ? <QueueAttending queue={queue} user={props.user} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
-        : <span>Loading...</span>;
-    return queueDisplay;
+        : undefined;
+    return (
+        <div className="container-fluid content">
+            {loadingDisplay}
+            {errorDisplay}
+            {queueDisplay}
+        </div>
+    );
 }
