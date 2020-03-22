@@ -1,8 +1,8 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { getQueuesFake as apiGetQueues, addQueueFake as apiAddQueue, removeQueueFake as apiRemoveQueue } from "../services/api";
-import { User, ManageQueue, Meeting } from "../models";
-import { UserDisplay, RemoveButton, AddButton } from "./common";
+import { User, ManageQueue } from "../models";
+import { RemoveButton, AddButton } from "./common";
 import { Link } from "react-router-dom";
 
 interface QueueListProps {
