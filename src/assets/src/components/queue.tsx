@@ -11,6 +11,7 @@ interface QueueAttendingProps {
     user: User;
     joinQueue: () => void;
     leaveQueue: () => void;
+    disabled: boolean;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -24,7 +25,9 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <button onClick={() => props.joinQueue()} type="button" className="btn btn-primary">Join the line</button>
+                <button disabled={props.disabled} onClick={() => props.joinQueue()} type="button" className="btn btn-primary">
+                    Join the line
+                </button>
             </div>
         </div>
         </>
@@ -73,7 +76,9 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <button onClick={() => props.leaveQueue()} type="button" className="btn btn-warning">Leave the line</button>
+                <button disabled={props.disabled} onClick={() => props.leaveQueue()} type="button" className="btn btn-warning">
+                    Leave the line
+                </button>
             </div>
         </div>
         </>
@@ -139,7 +144,7 @@ export function QueuePage(props: QueuePageProps) {
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueDisplay = queue
-        && <QueueAttending queue={queue} user={props.user} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
+        && <QueueAttending queue={queue} user={props.user} disabled={isLoading} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
     return (
         <div className="container-fluid content">
             {loadingDisplay}

@@ -12,13 +12,14 @@ export const UserDisplay = (props: UserDisplayProps) =>
 
 interface RemoveButtonProps {
     remove: () => void;
+    disabled: boolean;
     size?: "block"|"lg"|"sm";
 }
 
 export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
     const className = "btn btn-danger " + (props.size ? ` btn-${props.size}` : "");
     return (
-        <button onClick={() => props.remove()} className={className}>
+        <button onClick={() => props.remove()} disabled={props.disabled} className={className}>
             <span aria-hidden="true">&times;</span>
             {props.children}
         </button>
@@ -27,13 +28,14 @@ export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
 
 interface AddButtonProps {
     add: () => void;
+    disabled: boolean;
     size?: "block"|"lg"|"sm";
 }
 
 export const AddButton: React.FC<AddButtonProps> = (props) => {
     const className = "btn btn-success" + (props.size ? ` btn-${props.size}` : "");
     return (
-        <button onClick={() => props.add()} className={className}>
+        <button onClick={() => props.add()} disabled={props.disabled} className={className}>
             <span aria-hidden="true">+</span>
             {props.children}
         </button>

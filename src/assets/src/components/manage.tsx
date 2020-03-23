@@ -10,6 +10,7 @@ interface QueueListProps {
     queues: ManageQueue[];
     removeQueue: (q: ManageQueue) => void;
     addQueue: () => void;
+    disabled: boolean;
 }
 
 function QueueList(props: QueueListProps) {
@@ -18,13 +19,13 @@ function QueueList(props: QueueListProps) {
             <Link to={`/manage/${q.id}`}>
                 {q.id}: {q.name}
             </Link>
-            <RemoveButton remove={() => props.removeQueue(q)}> Delete Queue</RemoveButton>
+            <RemoveButton remove={() => props.removeQueue(q)} disabled={props.disabled}> Delete Queue</RemoveButton>
         </li>
     );
     return (
         <div>
             <ul>{queues}</ul>
-            <AddButton add={() => props.addQueue()}> Add Queue</AddButton>
+            <AddButton add={() => props.addQueue()} disabled={props.disabled}> Add Queue</AddButton>
         </div>
     );
 }
@@ -77,7 +78,7 @@ export function ManagePage(props: ManagePageProps) {
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
-        && <QueueList queues={queues} removeQueue={removeQueue} addQueue={addQueue}/>
+        && <QueueList queues={queues} disabled={isLoading} removeQueue={removeQueue} addQueue={addQueue}/>
     return (
         <div>
             {loadingDisplay}
