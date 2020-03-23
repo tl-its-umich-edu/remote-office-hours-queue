@@ -4,7 +4,14 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.28",
     "@fortawesome/free-solid-svg-icons": "^5.13.0",
-    "@fortawesome/react-fontawesome": "^0.1.9"
+    "@fortawesome/react-fontawesome": "^0.1.9",
+    "popper.js": "~1.14.7",
+    "react": "^16.10.2",
+    "react-app-polyfill": "~0.2.2",
+    "react-dev-utils": "~8.0.0",
+    "react-dom": "^16.10.2",
+    "react-ga": "~2.5.7",
+    "react-router-dom": "^5.0.0"
   },
   "scripts": {
     "prod": "webpack --config webpack.config.js --mode production",
@@ -12,15 +19,6 @@
     "watch": "webpack --config webpack.config.js --watch --mode development --display-error-details",
     "check-types": "tsc"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
   "devDependencies": {
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
@@ -31,13 +29,6 @@
     "css-loader": "~2.1.1",
     "file-loader": "3.0.1",
     "mini-css-extract-plugin": "0.5.0",
-    "popper.js": "~1.14.7",
-    "react": "^16.10.2",
-    "react-app-polyfill": "~0.2.2",
-    "react-dev-utils": "~8.0.0",
-    "react-dom": "^16.10.2",
-    "react-ga": "~2.5.7",
-    "react-router-dom": "^5.0.0",
     "style-loader": "~0.23.1",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.3",
