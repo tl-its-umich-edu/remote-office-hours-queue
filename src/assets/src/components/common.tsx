@@ -1,4 +1,6 @@
 import * as React from "react";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
 import { User } from "../models";
 
 interface UserDisplayProps {
@@ -49,8 +51,8 @@ interface LoadingDisplayProps {
 export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
     if (!props.loading) return null;
     return (
-        <p className="alert alert-info">
-            Loading...
+        <p className="bottom-right alert alert-info">
+            <FontAwesomeIcon icon={faSyncAlt} spin />
         </p>
     )
 }

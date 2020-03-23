@@ -181,6 +181,12 @@ a:hover {
 	color: #0065a3;
 }
 
+.bottom-right {
+	position: absolute;
+	bottom: 0;
+	right: 12px;
+}
+
 .jumbotron {
 	padding: 1.25rem;
 }
