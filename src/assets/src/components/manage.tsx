@@ -15,16 +15,18 @@ interface QueueListProps {
 
 function QueueList(props: QueueListProps) {
     const queues = props.queues.map((q) => 
-        <li>
+        <li className="list-group-item">
             <Link to={`/manage/${q.id}`}>
                 {q.id}: {q.name}
             </Link>
-            <RemoveButton remove={() => props.removeQueue(q)} disabled={props.disabled}> Delete Queue</RemoveButton>
+            <span className="float-right">
+                <RemoveButton remove={() => props.removeQueue(q)} size="sm" disabled={props.disabled}> Delete Queue</RemoveButton>
+            </span>
         </li>
     );
     return (
         <div>
-            <ul>{queues}</ul>
+            <ul className="list-group">{queues}</ul>
             <AddButton add={() => props.addQueue()} disabled={props.disabled}> Add Queue</AddButton>
         </div>
     );
