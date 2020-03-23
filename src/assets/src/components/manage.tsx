@@ -4,6 +4,7 @@ import { getQueuesFake as apiGetQueues, addQueueFake as apiAddQueue, removeQueue
 import { User, ManageQueue } from "../models";
 import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link } from "react-router-dom";
+import { pageTaskAsync } from "../utils";
 
 interface QueueListProps {
     queues: ManageQueue[];
@@ -37,18 +38,12 @@ export function ManagePage(props: ManagePageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
-        setIsLoading(true);
-        apiGetQueues()
-            .then((data) => {
-                setQueues(data);
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => apiGetQueues(),
+            setQueues,
+            setIsLoading,
+            setError,
+        );
     }
     useEffect(() => {
         refresh();

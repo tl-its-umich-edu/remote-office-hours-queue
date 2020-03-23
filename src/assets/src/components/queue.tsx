@@ -1,9 +1,10 @@
 import * as React from "react";
 import { useParams, Link } from "react-router-dom";
 import { User, AttendingQueue } from "../models";
-import { UserDisplay, ErrorDisplay, LoadingDisplay } from "./common";
+import { ErrorDisplay, LoadingDisplay } from "./common";
 import { useState, useEffect } from "react";
 import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
+import { pageTaskAsync } from "../utils";
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
@@ -109,46 +110,31 @@ export function QueuePage(props: QueuePageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
-        setIsLoading(true);
-        apiGetQueueAttending(queueIdParsed, props.user!.username)
-            .then((data) => {
-                setQueue(data);
-                setIsLoading(false);
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => apiGetQueueAttending(queueIdParsed, props.user!.username),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     useEffect(() => {
         refresh();
     }, []);
     const joinQueue = () => {
-        setIsLoading(true);
-        apiJoinQueue(queueIdParsed, props.user!.username)
-            .then((q) => setQueue(q))
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => apiJoinQueue(queueIdParsed, props.user!.username),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     const leaveQueue = () => {
-        setIsLoading(true);
-        apiLeaveQueue(queueIdParsed, props.user!.username)
-            .then((q) => setQueue(q))
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => apiLeaveQueue(queueIdParsed, props.user!.username),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>

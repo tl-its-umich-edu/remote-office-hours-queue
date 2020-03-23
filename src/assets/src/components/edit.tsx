@@ -4,6 +4,7 @@ import { User, ManageQueue, Meeting } from "../models";
 import { UserDisplay, RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
+import { pageTaskAsync } from "../utils";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -96,81 +97,51 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
-        setIsLoading(true);
-        getQueueFake(queueIdParsed)
-            .then((data) => {
-                setQueue(data);
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => getQueueFake(queueIdParsed),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     React.useEffect(() => {
         refresh();
     }, []);
     const removeHost = (h: User) => {
-        setIsLoading(true);
-        removeHostFake(queue!.id, h.username)
-            .then((q) => {
-                setQueue(q);
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => removeHostFake(queue!.id, h.username),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     const addHost = () => {
         const uniqname = prompt("Uniqname?", "aaaaaaaa");
         if (!uniqname) return;
-        setIsLoading(true);
-        addHostFake(queue!.id, uniqname)
-            .then((q) => {
-                setQueue(q);
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => addHostFake(queue!.id, uniqname),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     const removeMeeting = (m: Meeting) => {
-        setIsLoading(true);
-        removeMeetingFake(queue!.id, m.id)
-            .then((q) => {
-                setQueue(q);
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => removeMeetingFake(queue!.id, m.id),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     const addMeeting = () => {
         const uniqname = prompt("Uniqname?", "johndoe");
         if (!uniqname) return;
-        setIsLoading(true);
-        addMeetingFake(queue!.id, uniqname)
-            .then((q) => {
-                setQueue(q);
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-            })
-            .finally(() => {
-                setIsLoading(false);
-            });
+        pageTaskAsync(
+            () => addMeetingFake(queue!.id, uniqname),
+            setQueue,
+            setIsLoading,
+            setError,
+        );
     }
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
