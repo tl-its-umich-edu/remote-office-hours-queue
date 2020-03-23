@@ -73,16 +73,18 @@ function QueueEditor(props: QueueEditorProps) {
                 <dd>{props.queue.created_at}</dd>
                 <dt>Hosted By</dt>
                 {hosts}
-                <AddButton add={() => props.addHost()} disabled={props.disabled}> Add Host</AddButton>
+                <AddButton add={() => props.addHost()} disabled={props.disabled} size="sm"> Add Host</AddButton>
             </dl>
             <h3>Queued Meetings</h3>
             <ol className="list-group">
                 {meetings}
             </ol>
             <AddButton add={() => props.addMeeting()} disabled={props.disabled}> Force Add Attendee</AddButton>
-            <Link to={"/queue/" + props.queue.id}>
-                See this queue as a visitor
-            </Link>
+            <div>
+                <Link to={"/queue/" + props.queue.id}>
+                    See this queue as a visitor
+                </Link>
+            </div>
         </div>
     );
 }
