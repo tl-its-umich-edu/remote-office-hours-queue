@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useParams, Link } from "react-router-dom";
 import { User, AttendingQueue } from "../models";
-import { UserDisplay } from "./common";
+import { UserDisplay, ErrorDisplay, LoadingDisplay } from "./common";
 import { useState, useEffect } from "react";
 import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
 
@@ -116,6 +116,7 @@ export function QueuePage(props: QueuePageProps) {
                 setIsLoading(false);
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
@@ -130,6 +131,7 @@ export function QueuePage(props: QueuePageProps) {
         apiJoinQueue(queueIdParsed, props.user!.username)
             .then((q) => setQueue(q))
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
@@ -141,17 +143,16 @@ export function QueuePage(props: QueuePageProps) {
         apiLeaveQueue(queueIdParsed, props.user!.username)
             .then((q) => setQueue(q))
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
                 setIsLoading(false);
             });
     }
-    const loadingDisplay = isLoading
-        && <span>Loading...</span>
-    const errorDisplay = error
-        && <p className="alert alert-danger">{error.toString()}</p>
-    const queueDisplay = queue !== undefined
+    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const errorDisplay = <ErrorDisplay error={error}/>
+    const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
     return (
         <div className="container-fluid content">

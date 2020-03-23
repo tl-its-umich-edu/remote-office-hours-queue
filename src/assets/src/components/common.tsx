@@ -39,3 +39,29 @@ export const AddButton: React.FC<AddButtonProps> = (props) => {
         </button>
     );
 }
+
+interface LoadingDisplayProps {
+    loading: boolean;
+}
+
+export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
+    if (!props.loading) return null;
+    return (
+        <p className="alert alert-info">
+            Loading...
+        </p>
+    )
+}
+
+interface ErrorDisplayProps {
+    error?: Error;
+}
+
+export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
+    if (!props.error) return null;
+    return (
+        <p className="alert alert-danger">
+            {props.error.toString()}
+        </p>
+    )
+}

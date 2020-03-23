@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { getQueuesFake as apiGetQueues, addQueueFake as apiAddQueue, removeQueueFake as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue } from "../models";
-import { RemoveButton, AddButton } from "./common";
+import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link } from "react-router-dom";
 
 interface QueueListProps {
@@ -43,6 +43,7 @@ export function ManagePage(props: ManagePageProps) {
                 setQueues(data);
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
@@ -59,6 +60,7 @@ export function ManagePage(props: ManagePageProps) {
                 refresh();
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
                 setIsLoading(false);
             });
@@ -72,14 +74,13 @@ export function ManagePage(props: ManagePageProps) {
                 refresh();
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
                 setIsLoading(false);
             });
     }
-    const loadingDisplay = isLoading
-        && <span>Loading...</span>
-    const errorDisplay = error
-        && <p className="alert alert-danger">{error.toString()}</p>
+    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
         && <QueueList queues={queues} removeQueue={removeQueue} addQueue={addQueue}/>
     return (

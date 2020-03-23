@@ -1,7 +1,7 @@
 import * as React from "react";
 import { removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, getQueueFake } from "../services/api";
 import { User, ManageQueue, Meeting } from "../models";
-import { UserDisplay, RemoveButton, AddButton } from "./common";
+import { UserDisplay, RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link, useParams } from "react-router-dom";
 import { useState } from "react";
 
@@ -102,6 +102,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
                 setQueue(data);
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
@@ -118,6 +119,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
                 setQueue(q);
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
@@ -133,6 +135,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
                 setQueue(q);
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
@@ -146,6 +149,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
                 setQueue(q);
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
@@ -161,16 +165,15 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
                 setQueue(q);
             })
             .catch((error: Error) => {
+                console.error(error);
                 setError(error);
             })
             .finally(() => {
                 setIsLoading(false);
             });
     }
-    const loadingDisplay = isLoading
-        && <span>Loading...</span>
-    const errorDisplay = error
-        && <p className="alert alert-danger">{error.toString()}</p>
+    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} 
             addHost={addHost} removeHost={removeHost} 
