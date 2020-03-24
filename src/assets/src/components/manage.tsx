@@ -1,10 +1,11 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getQueuesFake as apiGetQueues, addQueueFake as apiAddQueue, removeQueueFake as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue } from "../models";
 import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
-import { Link } from "react-router-dom";
-import { pageTaskAsync } from "../utils";
+import { pageTaskAsync } from "../hooks/useTaskAsync";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 interface QueueListProps {
     queues: ManageQueue[];
@@ -51,7 +52,9 @@ export function ManagePage(props: ManagePageProps) {
     useEffect(() => {
         refresh();
     }, []);
+    const [interactions] = useAutoRefresh(refresh);
     const removeQueue = (q: ManageQueue) => {
+        interactions.next(true);
         setIsLoading(true);
         apiRemoveQueue(q.id)
             .then((data) => {
@@ -64,8 +67,10 @@ export function ManagePage(props: ManagePageProps) {
             });
     }
     const addQueue = () => {
+        interactions.next(true);
         const name = prompt("Queue name?", "Queueueueueue");
         if (!name) return;
+        interactions.next(true);
         setIsLoading(true);
         apiAddQueue(name)
             .then((data) => {

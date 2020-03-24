@@ -3,8 +3,9 @@ import { removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, getQueu
 import { User, ManageQueue, Meeting } from "../models";
 import { UserDisplay, RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
-import { pageTaskAsync } from "../utils";
+import { useState, useEffect } from "react";
+import { pageTaskAsync } from "../hooks/useTaskAsync";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -109,10 +110,12 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             setError,
         );
     }
-    React.useEffect(() => {
+    useEffect(() => {
         refresh();
     }, []);
+    const [interactions] = useAutoRefresh(refresh);
     const removeHost = (h: User) => {
+        interactions.next(true);
         pageTaskAsync(
             () => removeHostFake(queue!.id, h.username),
             setQueue,
@@ -121,8 +124,10 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         );
     }
     const addHost = () => {
+        interactions.next(true);
         const uniqname = prompt("Uniqname?", "aaaaaaaa");
         if (!uniqname) return;
+        interactions.next(true);
         pageTaskAsync(
             () => addHostFake(queue!.id, uniqname),
             setQueue,
@@ -131,6 +136,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         );
     }
     const removeMeeting = (m: Meeting) => {
+        interactions.next(true);
         pageTaskAsync(
             () => removeMeetingFake(queue!.id, m.id),
             setQueue,
@@ -139,8 +145,10 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         );
     }
     const addMeeting = () => {
+        interactions.next(true);
         const uniqname = prompt("Uniqname?", "johndoe");
         if (!uniqname) return;
+        interactions.next(true);
         pageTaskAsync(
             () => addMeetingFake(queue!.id, uniqname),
             setQueue,

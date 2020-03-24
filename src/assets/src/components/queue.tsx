@@ -1,14 +1,12 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { interval, Subject, merge } from "rxjs";
-import { debounce, tap, debounceTime, throttle, delay, skipWhile, withLatestFrom, filter, map } from "rxjs/operators";
 
 import { User, AttendingQueue } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
 import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
-import { pageTaskAsync } from "../utils";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import { useTaskAsync, useTaskAsyncInit } from "../hooks/useTaskAsync";
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
@@ -118,45 +116,24 @@ export function QueuePage(props: QueuePageProps) {
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(undefined as Error | undefined);
-    const refresh = () => {
-        if (isLoading) {
-            return;
-        }
-        pageTaskAsync(
-            () => apiGetQueueAttending(queueIdParsed, props.user!.username),
-            setQueue,
-            setIsLoading,
-            setError,
-            );
-        }
-    const [interactions] = useAutoRefresh(refresh);
-    useEffect(() => {
-        refresh();
-    }, []);
-    const joinQueue = () => {
-        pageTaskAsync(
-            () => apiJoinQueue(queueIdParsed, props.user!.username),
-            setQueue,
-            setIsLoading,
-            setError,
-        );
+    const refresh = () => apiGetQueueAttending(queueIdParsed, props.user!.username);
+    const [doRefresh, refreshLoading, refreshError] = useTaskAsyncInit(refresh, setQueue);
+    const [interactions] = useAutoRefresh(doRefresh);
+    const joinQueue = () =>  {
         interactions.next(false);
+        return apiJoinQueue(queueIdParsed, props.user!.username);
     }
+    const [doJoinQueue, joinQueueLoading, joinQueueError] = useTaskAsync(joinQueue, setQueue);
     const leaveQueue = () => {
-        pageTaskAsync(
-            () => apiLeaveQueue(queueIdParsed, props.user!.username),
-            setQueue,
-            setIsLoading,
-            setError,
-        );
         interactions.next(false);
+        return apiLeaveQueue(queueIdParsed, props.user!.username);
     }
+    const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = useTaskAsync(leaveQueue, setQueue);
+    const isLoading = refreshLoading || joinQueueLoading || leaveQueueLoading;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={error}/>
+    const errorDisplay = <ErrorDisplay error={refreshError || joinQueueError || leaveQueueError}/>
     const queueDisplay = queue
-        && <QueueAttending queue={queue} user={props.user} disabled={isLoading} joinQueue={joinQueue} leaveQueue={leaveQueue}/>
+        && <QueueAttending queue={queue} user={props.user} disabled={isLoading} joinQueue={doJoinQueue} leaveQueue={doLeaveQueue}/>
     return (
         <div className="container-fluid content">
             {loadingDisplay}
