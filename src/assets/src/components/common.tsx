@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
 import { User } from "../models";
 
+export const DisabledMessage = <em> (Loading...)</em>
+
 interface UserDisplayProps {
     user: User;
 }
@@ -20,10 +22,12 @@ interface RemoveButtonProps {
 
 export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
     const className = "btn btn-danger " + (props.size ? ` btn-${props.size}` : "");
+    const disabledMessage = props.disabled && DisabledMessage;
     return (
         <button onClick={() => props.remove()} disabled={props.disabled} className={className}>
             <span aria-hidden="true">&times;</span>
             {props.children}
+            {disabledMessage}
         </button>
     );
 }
@@ -36,10 +40,12 @@ interface AddButtonProps {
 
 export const AddButton: React.FC<AddButtonProps> = (props) => {
     const className = "btn btn-success" + (props.size ? ` btn-${props.size}` : "");
+    const disabledMessage = props.disabled && DisabledMessage;
     return (
         <button onClick={() => props.add()} disabled={props.disabled} className={className}>
             <span aria-hidden="true">+</span>
             {props.children}
+            {disabledMessage}
         </button>
     );
 }

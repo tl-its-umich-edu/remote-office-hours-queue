@@ -1,8 +1,11 @@
 import * as React from "react";
-import { useParams, Link } from "react-router-dom";
-import { User, AttendingQueue } from "../models";
-import { ErrorDisplay, LoadingDisplay } from "./common";
 import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { interval, Subject, merge } from "rxjs";
+import { debounce, tap, debounceTime, throttle, delay, skipWhile, withLatestFrom, filter, map } from "rxjs/operators";
+
+import { User, AttendingQueue } from "../models";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
 import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
 import { pageTaskAsync } from "../utils";
 
@@ -27,6 +30,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
             <div className="col-lg">
                 <button disabled={props.disabled} onClick={() => props.joinQueue()} type="button" className="btn btn-primary">
                     Join the line
+                    {props.disabled && DisabledMessage}
                 </button>
             </div>
         </div>
@@ -78,6 +82,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <div className="col-lg">
                 <button disabled={props.disabled} onClick={() => props.leaveQueue()} type="button" className="btn btn-warning">
                     Leave the line
+                    {props.disabled && DisabledMessage}
                 </button>
             </div>
         </div>
@@ -112,9 +117,33 @@ export function QueuePage(props: QueuePageProps) {
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(undefined as Error | undefined);
+    const [interactions] = useState(() => {
+        const subj = new Subject<boolean>();
+        subj.subscribe(console.log);
+        return subj;
+    });
+    const [interactionsEnable] = useState(() => {
+        return interactions.pipe(
+            debounceTime(6000),
+            map(() => true),
+        );
+    });
+    useEffect(() => {
+        interval(3000).pipe(
+            withLatestFrom(merge(interactions, interactionsEnable)),
+            map(v => v[1]),
+            filter((v) => v),
+        ).subscribe(() => {
+            refresh()
+        });
+        interactions.next(true);
+    }, []);
     const refresh = () => {
+        if (isLoading) {
+            return;
+        }
         pageTaskAsync(
             () => apiGetQueueAttending(queueIdParsed, props.user!.username),
             setQueue,
@@ -132,6 +161,7 @@ export function QueuePage(props: QueuePageProps) {
             setIsLoading,
             setError,
         );
+        interactions.next(false);
     }
     const leaveQueue = () => {
         pageTaskAsync(
@@ -140,6 +170,7 @@ export function QueuePage(props: QueuePageProps) {
             setIsLoading,
             setError,
         );
+        interactions.next(false);
     }
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
