@@ -8,6 +8,7 @@ import { User, AttendingQueue } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
 import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
 import { pageTaskAsync } from "../utils";
+import { useAutoRefresh } from "../hooks/useAutoRefresh";
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
@@ -119,27 +120,6 @@ export function QueuePage(props: QueuePageProps) {
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(undefined as Error | undefined);
-    const [interactions] = useState(() => {
-        const subj = new Subject<boolean>();
-        subj.subscribe(console.log);
-        return subj;
-    });
-    const [interactionsEnable] = useState(() => {
-        return interactions.pipe(
-            debounceTime(6000),
-            map(() => true),
-        );
-    });
-    useEffect(() => {
-        interval(3000).pipe(
-            withLatestFrom(merge(interactions, interactionsEnable)),
-            map(v => v[1]),
-            filter((v) => v),
-        ).subscribe(() => {
-            refresh()
-        });
-        interactions.next(true);
-    }, []);
     const refresh = () => {
         if (isLoading) {
             return;
@@ -149,8 +129,9 @@ export function QueuePage(props: QueuePageProps) {
             setQueue,
             setIsLoading,
             setError,
-        );
-    }
+            );
+        }
+    const [interactions] = useAutoRefresh(refresh);
     useEffect(() => {
         refresh();
     }, []);
