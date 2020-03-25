@@ -71,7 +71,7 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 
 INSTALLED_APPS = [
     'officehours_api.apps.OfficehoursApiConfig',
-    'bluejeans_queue.apps.BluejeansQueueConfig',
+    'officehours_ui.apps.OfficehoursUiConfig',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -158,8 +158,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'bluejeans_queue.context_processors.feedback',
-                'bluejeans_queue.context_processors.spa_globals',
+                'officehours_ui.context_processors.feedback',
+                'officehours_ui.context_processors.spa_globals',
             ],
         },
     },
