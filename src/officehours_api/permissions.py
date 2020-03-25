@@ -1,5 +1,5 @@
 from rest_framework import permissions
-  
+
 
 class IsCurrentUser(permissions.BasePermission):
     '''
@@ -21,4 +21,23 @@ class IsHostOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         else:
-            return request.user.host in obj.hosts.all()
+            return request.user in obj.hosts.all()
+
+
+class IsHostOrAttendee(permissions.BasePermission):
+    '''
+    Custom permission to only allow meeting owners or
+    hosts of the meeting's queue to edit the meeting.
+    '''
+
+    def has_object_permission(self, request, view, obj):
+        for attendee in obj.attendee_set.all():
+            if request.user == attendee.user:
+                return True
+
+        if hasattr(obj, 'queue') and hasattr(obj.queue, 'hosts'):
+            is_host = request.user in obj.queue.hosts.all()
+        else:
+            is_host = False
+
+        return is_host
