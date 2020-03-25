@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 
 import { User, AttendingQueue } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
-import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
+import { getQueue as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { useTaskAsync, useTaskAsyncInit } from "../hooks/useTaskAsync";
 import { redirectToLogin } from "../utils";
@@ -120,7 +120,7 @@ export function QueuePage(props: QueuePageProps) {
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
-    const refresh = () => apiGetQueueAttending(queueIdParsed, props.user!.username);
+    const refresh = () => apiGetQueueAttending(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = useTaskAsyncInit(refresh, setQueue);
     const [interactions] = useAutoRefresh(doRefresh);
     const joinQueue = () =>  {

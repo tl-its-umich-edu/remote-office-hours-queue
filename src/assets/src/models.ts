@@ -14,7 +14,7 @@ export interface Meeting {
     attendees: Attendee[];
 }
 
-export interface ManageQueue extends QueueBase {
+export interface ManageQueue extends AttendingQueue {
     meetings: Meeting[];
 }
 

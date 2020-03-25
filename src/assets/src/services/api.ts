@@ -17,7 +17,7 @@ export const getQueue = async (id: number) => {
     if (!resp.ok) {
         throw  new Error(resp.statusText);
     }
-    return await resp.json() as ManageQueue;
+    return await resp.json() as ManageQueue | AttendingQueue;
 }
 
 export const createQueue = async (name: string) => {
@@ -68,6 +68,7 @@ const fakeQueues: ManageQueue[] = [
             }
         ],
         created_at: 'Todayish',
+        queue_length: 2,
         meetings: [
             {
                 id: 1,
@@ -108,6 +109,7 @@ const fakeQueues: ManageQueue[] = [
             }
         ],
         created_at: 'Yesterdayish',
+        queue_length: 2,
         meetings: [
             {
                 id: 3,
@@ -214,6 +216,7 @@ export const addQueueFake = async (name: string): Promise<ManageQueue> => {
             }
         ],
         created_at: 'Just now',
+        queue_length: 1,
         meetings: [],
     };
     fakeQueues.push(queue);

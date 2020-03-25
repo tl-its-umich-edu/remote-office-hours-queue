@@ -48,7 +48,7 @@ class PublicQueueSerializer(serializers.HyperlinkedModelSerializer):
             return None
 
 
-class QueueSerializer(serializers.HyperlinkedModelSerializer):
+class QueueSerializer(PublicQueueSerializer):
     hosts = NestedUserSerializer(many=True, read_only=True)
     meeting_set = NestedMeetingSerializer(many=True, read_only=True)
 
@@ -61,7 +61,7 @@ class QueueSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set']
+        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'line_place']
 
     def validate_host_ids(self, host_ids):
         '''
