@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getQueuesFake as apiGetQueues, addQueueFake as apiAddQueue, removeQueueFake as apiRemoveQueue } from "../services/api";
+import { getQueues as apiGetQueues, createQueue as apiAddQueue, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue } from "../models";
 import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { pageTaskAsync } from "../hooks/useTaskAsync";

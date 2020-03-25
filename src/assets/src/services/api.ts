@@ -1,25 +1,55 @@
 import { ManageQueue, AttendingQueue } from "../models";
 
-export const getQueues = () =>
-    fetch("/api/queues", { method: "GET" })
-        .then((res) => res.json() as Promise<ManageQueue[]>);
+const getCsrfToken = () => {
+    return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
+}
 
-export const getQueue = (id: number) =>
-    fetch("/api/queues/" + id, { method: "GET" })
-        .then((res) => res.json() as Promise<ManageQueue>);
+export const getQueues = async () => {
+    const resp = await fetch("/api/queues/", { method: "GET" });
+    if (!resp.ok) {
+        throw  new Error(resp.statusText);
+    }
+    return await resp.json() as ManageQueue[];
+}
 
-export const createQueue = (name: string) =>
-    fetch("/api/queues", { 
+export const getQueue = async (id: number) => {
+    const resp = await fetch("/api/queues/" + id, { method: "GET" });
+    if (!resp.ok) {
+        throw  new Error(resp.statusText);
+    }
+    return await resp.json() as ManageQueue;
+}
+
+export const createQueue = async (name: string) => {
+    const resp = await fetch("/api/queues/", { 
         method: "POST",
         body: JSON.stringify({
             name,
-            "host_ids": [],  //Ideally, this wouldn't be required
+            host_ids: [],  //Ideally, this wouldn't be required
         }),
-    })
-        .then((res) => res.json() as Promise<ManageQueue>);
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfToken(),
+        },
+    });
+    if (!resp.ok) {
+        throw  new Error(resp.statusText);
+    }
+    return await resp.json() as ManageQueue;
+}
 
-export const deleteQueue = (id: number) =>
-    fetch("/api/queues/" + id, { method: "DELETE" });
+export const deleteQueue = async (id: number) => {
+    const resp = await fetch("/api/queues/" + id, { 
+        method: "DELETE",
+        headers: {
+            'X-CSRFToken': getCsrfToken(),
+        }
+    });
+    if (!resp.ok) {
+        throw  new Error(resp.statusText);
+    }
+    return resp;
+}
 
 const sleep = async (ms: number): Promise<void> =>
     new Promise(resolve => {
