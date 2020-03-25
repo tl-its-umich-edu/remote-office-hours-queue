@@ -66,6 +66,12 @@ function QueueEditor(props: QueueEditorProps) {
     );
     return (
         <div>
+            <h1>Manage: {props.queue.name}</h1>
+            <div>
+                <Link to={"/queue/" + props.queue.id}>
+                    See this queue as a visitor
+                </Link>
+            </div>
             <dl>
                 <dt>ID</dt>
                 <dd>{props.queue.id}</dd>
@@ -82,11 +88,6 @@ function QueueEditor(props: QueueEditorProps) {
                 {meetings}
             </ol>
             <AddButton add={() => props.addMeeting()} disabled={props.disabled}> Force Add Attendee</AddButton>
-            <div>
-                <Link to={"/queue/" + props.queue.id}>
-                    See this queue as a visitor
-                </Link>
-            </div>
         </div>
     );
 }
