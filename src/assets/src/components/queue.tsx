@@ -7,6 +7,7 @@ import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
 import { getQueueAttendingFake as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { useTaskAsync, useTaskAsyncInit } from "../hooks/useTaskAsync";
+import { redirectToLogin } from "../utils";
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
@@ -111,6 +112,9 @@ interface QueuePageProps {
 }
 
 export function QueuePage(props: QueuePageProps) {
+    if (!props.user) {
+        redirectToLogin()
+    }
     const { queue_id } = useParams();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");

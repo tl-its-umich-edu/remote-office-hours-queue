@@ -6,6 +6,7 @@ import { User, ManageQueue } from "../models";
 import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { pageTaskAsync } from "../hooks/useTaskAsync";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import { redirectToLogin } from "../utils";
 
 interface QueueListProps {
     queues: ManageQueue[];
@@ -38,6 +39,9 @@ interface ManagePageProps {
 }
 
 export function ManagePage(props: ManagePageProps) {
+    if (!props.user) {
+        redirectToLogin()
+    }
     const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(undefined as Error | undefined);

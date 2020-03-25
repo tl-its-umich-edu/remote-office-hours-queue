@@ -6,6 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { pageTaskAsync } from "../hooks/useTaskAsync";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
+import { redirectToLogin } from "../utils";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -95,6 +96,9 @@ interface QueueEditorPageProps {
 }
 
 export function QueueEditorPage(props: QueueEditorPageProps) {
+    if (!props.user) {
+        redirectToLogin()
+    }
     const { queue_id } = useParams();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
