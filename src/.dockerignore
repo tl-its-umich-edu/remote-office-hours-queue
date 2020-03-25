@@ -120,7 +120,8 @@ dmypy.json
 
 .data/
 .data
-node_modules/
+node_modules
+staticfiles
 
 webpack-stats.json
 
