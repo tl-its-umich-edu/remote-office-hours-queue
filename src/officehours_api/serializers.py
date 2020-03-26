@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.nested_serializers import (
     NestedMeetingSerializer, NestedAttendeeSerializer, NestedUserSerializer,
-    NestedAttendeeSetSerializer,
+    NestedAttendeeSetSerializer, NestedQueueMeetingSerializer,
 )
 
 
@@ -24,28 +24,19 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class PublicQueueSerializer(serializers.HyperlinkedModelSerializer):
     hosts = NestedUserSerializer(many=True, read_only=True)
     line_length = serializers.SerializerMethodField(read_only=True)
-    line_place = serializers.SerializerMethodField(read_only=True)
+    my_meeting = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Queue
-        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'line_length', 'line_place']
+        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'line_length', 'my_meeting']
 
     def get_line_length(self, obj):
         return obj.meeting_set.count()
 
-    def get_line_place(self, obj):
-        i = 0
-        in_line = False
-        meetings = obj.meeting_set.order_by('id')
-        for i in range(0, len(meetings)):
-            if self.context['request'].user in meetings[i].attendees.all():
-                in_line = True
-                break
-
-        if in_line:
-            return i
-        else:
-            return None
+    def get_my_meeting(self, obj):
+        my_meeting = obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
+        serializer = PublicQueueNestedMeetingSerializer(my_meeting, context={'request': self.context['request']})
+        return serializer.data
 
 
 class QueueSerializer(PublicQueueSerializer):
