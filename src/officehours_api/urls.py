@@ -9,6 +9,7 @@ urlpatterns = [
     path('users/<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
     path('queues/', views.QueueList.as_view(), name='queue-list'),
     path('queues/<int:pk>/', views.QueueDetail.as_view(), name='queue-detail'),
+    path('queues/<int:pk>/hosts/<int:user_id>/', views.QueueHostDetail.as_view(), name='queuehost-detail'),
     path('meetings/', views.MeetingList.as_view(), name='meeting-list'),
     path('meetings/<int:pk>/', views.MeetingDetail.as_view(), name='meeting-detail'),
     path('attendees/', views.AttendeeList.as_view(), name='attendee-list'),
