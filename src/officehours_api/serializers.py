@@ -52,7 +52,7 @@ class QueueSerializer(PublicQueueSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'line_place']
+        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set', 'line_length']
 
     def validate_host_ids(self, host_ids):
         '''
