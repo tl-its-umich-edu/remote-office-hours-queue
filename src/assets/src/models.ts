@@ -1,7 +1,9 @@
 export interface User {
+    id: number;
     username: string;
     first_name: string;
     last_name: string;
+    attendee_set?: Attendee[];
 }
 
 export interface Attendee {
@@ -11,6 +13,7 @@ export interface Attendee {
 
 export interface Meeting {
     id: number;
+    place_in_line: number;
     attendees: Attendee[];
 }
 
@@ -19,7 +22,7 @@ export interface ManageQueue extends AttendingQueue {
 }
 
 export interface AttendingQueue extends QueueBase {
-    queued_ahead?: number;
+    my_meeting?: Meeting;
     queue_length: number;
 }
 

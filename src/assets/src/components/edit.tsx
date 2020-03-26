@@ -1,5 +1,5 @@
 import * as React from "react";
-import { removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, getQueueFake } from "../services/api";
+import { removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, getQueueFake, getUsersFake } from "../services/api";
 import { User, ManageQueue, Meeting } from "../models";
 import { UserDisplay, RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link, useParams } from "react-router-dom";
@@ -110,6 +110,11 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         doRefresh();
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
+    const [users, setUsers] = useState(undefined as User[] | undefined);
+    const [doRefreshUsers, refreshUsersLoading, refreshUsersError] = usePromise(() => getUsersFake(), setUsers);
+    useEffect(() => {
+        doRefreshUsers();
+    }, []);
     const removeHost = async (h: User) => {
         interactions.next(true);
         return await removeHostFake(queue!.id, h.username);
@@ -119,8 +124,10 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         interactions.next(true);
         const uniqname = prompt("Uniqname?", "aaaaaaaa");
         if (!uniqname) return;
+        const user = users!.find(u => u.username === uniqname);
+        if (!user) throw new Error(user + " is not a valid user.");
         interactions.next(true);
-        return await addHostFake(queue!.id, uniqname);
+        return await addHostFake(queue!.id, user.id);
     }
     const [doAddHost, addHostLoading, addHostError] = usePromise(addHost, setQueue);
     const removeMeeting = async (m: Meeting) => {
