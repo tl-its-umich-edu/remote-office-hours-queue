@@ -18,13 +18,14 @@ class NestedMeetingSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class NestedAttendeeSerializer(serializers.HyperlinkedModelSerializer):
+    user_id = serializers.ReadOnlyField(source='user.id')
     username = serializers.ReadOnlyField(source='user.username')
     first_name = serializers.ReadOnlyField(source='user.first_name')
     last_name = serializers.ReadOnlyField(source='user.last_name')
 
     class Meta:
         model = Attendee
-        fields = ['url', 'username', 'first_name', 'last_name']
+        fields = ['user_id', 'url', 'username', 'first_name', 'last_name']
 
 
 class NestedMeetingSetSerializer(serializers.HyperlinkedModelSerializer):
