@@ -55,7 +55,7 @@ class QueueSerializer(PublicQueueSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set', 'line_length']
+        fields = ['id', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'my_meeting']
 
     def validate_host_ids(self, host_ids):
         '''
@@ -79,7 +79,6 @@ class QueueSerializer(PublicQueueSerializer):
         else:
             instance.hosts.set([self.context['request'].user])
         return instance
-
 
 class MeetingSerializer(serializers.ModelSerializer):
     attendees = NestedAttendeeSerializer(many=True, source='attendee_set', read_only=True)
