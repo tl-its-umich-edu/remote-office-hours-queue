@@ -136,12 +136,13 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         return await addMeetingFake(queue!.id, uniqname);
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting, setQueue);
-    const isLoading = refreshLoading || removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading;
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading;
+    const isLoading = refreshLoading || isChanging;
     const error = refreshError || removeHostError || addHostError || removeMeetingError || addMeetingError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue} disabled={isLoading}
+        && <QueueEditor queue={queue} disabled={isChanging}
             addHost={doAddHost} removeHost={doRemoveHost} 
             addMeeting={doAddMeeting} removeMeeting={doRemoveMeeting} />
     return (

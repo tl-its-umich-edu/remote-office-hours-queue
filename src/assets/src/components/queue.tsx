@@ -136,11 +136,12 @@ export function QueuePage(props: QueuePageProps) {
         return await apiLeaveQueue(queueIdParsed, props.user!.username);
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue, setQueue);
-    const isLoading = refreshLoading || joinQueueLoading || leaveQueueLoading;
+    const isChanging = joinQueueLoading || leaveQueueLoading;
+    const isLoading = refreshLoading || isChanging;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={refreshError || joinQueueError || leaveQueueError}/>
     const queueDisplay = queue
-        && <QueueAttending queue={queue} user={props.user} disabled={isLoading} joinQueue={doJoinQueue} leaveQueue={doLeaveQueue}/>
+        && <QueueAttending queue={queue} user={props.user} disabled={isChanging} joinQueue={doJoinQueue} leaveQueue={doLeaveQueue}/>
     return (
         <div className="container-fluid content">
             {loadingDisplay}

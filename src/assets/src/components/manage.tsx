@@ -64,12 +64,13 @@ export function ManagePage(props: ManagePageProps) {
         doRefresh();
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
-    const isLoading = refreshLoading || removeQueueLoading || addQueueLoading;
+    const isChanging = removeQueueLoading || addQueueLoading;
+    const isLoading = refreshLoading || isChanging;
     const error = refreshError || removeQueueError || addQueueError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
-        && <QueueList queues={queues} disabled={isLoading} removeQueue={doRemoveQueue} addQueue={doAddQueue}/>
+        && <QueueList queues={queues} disabled={isChanging} removeQueue={doRemoveQueue} addQueue={doAddQueue}/>
     return (
         <div>
             {loadingDisplay}
