@@ -5,7 +5,6 @@ import { debounceTime, map, withLatestFrom, filter } from "rxjs/operators";
 export const useAutoRefresh = (refresh: () => void) => {
     const [interactions] = useState(() => {
         const subj = new Subject<boolean>();
-        subj.subscribe(console.log);
         return subj;
     });
     const [interactionsEnable] = useState(() => {
