@@ -4,7 +4,7 @@ import { User, ManageQueue, Meeting } from "../models";
 import { UserDisplay, RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { pageTaskAsync } from "../hooks/useTaskAsync";
+import { pagePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
 
@@ -108,7 +108,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
-        pageTaskAsync(
+        pagePromise(
             () => getQueueFake(queueIdParsed),
             setQueue,
             setIsLoading,
@@ -121,7 +121,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const [interactions] = useAutoRefresh(refresh);
     const removeHost = (h: User) => {
         interactions.next(true);
-        pageTaskAsync(
+        pagePromise(
             () => removeHostFake(queue!.id, h.username),
             setQueue,
             setIsLoading,
@@ -133,7 +133,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         const uniqname = prompt("Uniqname?", "aaaaaaaa");
         if (!uniqname) return;
         interactions.next(true);
-        pageTaskAsync(
+        pagePromise(
             () => addHostFake(queue!.id, uniqname),
             setQueue,
             setIsLoading,
@@ -142,7 +142,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     }
     const removeMeeting = (m: Meeting) => {
         interactions.next(true);
-        pageTaskAsync(
+        pagePromise(
             () => removeMeetingFake(queue!.id, m.id),
             setQueue,
             setIsLoading,
@@ -154,7 +154,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         const uniqname = prompt("Uniqname?", "johndoe");
         if (!uniqname) return;
         interactions.next(true);
-        pageTaskAsync(
+        pagePromise(
             () => addMeetingFake(queue!.id, uniqname),
             setQueue,
             setIsLoading,

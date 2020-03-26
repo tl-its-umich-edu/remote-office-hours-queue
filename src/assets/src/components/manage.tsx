@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { getQueues as apiGetQueues, createQueue as apiAddQueue, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue } from "../models";
 import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
-import { pageTaskAsync } from "../hooks/useTaskAsync";
+import { pagePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
 
@@ -46,7 +46,7 @@ export function ManagePage(props: ManagePageProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(undefined as Error | undefined);
     const refresh = () => {
-        pageTaskAsync(
+        pagePromise(
             () => apiGetQueues(),
             setQueues,
             setIsLoading,
