@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
 import { User } from "../models";
 
-export const DisabledMessage = <em> (Loading...)</em>
+export const DisabledMessage = <em></em>
 
 interface UserDisplayProps {
     user: User;
