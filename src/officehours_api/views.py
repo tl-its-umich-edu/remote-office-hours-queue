@@ -1,8 +1,11 @@
 from django.contrib.auth.models import User
-from rest_framework import generics
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.serializers import (
     UserListSerializer, UserSerializer, QueueSerializer, PublicQueueSerializer,
@@ -58,6 +61,40 @@ class QueueDetail(generics.RetrieveUpdateDestroyAPIView):
         else:
             serializer = PublicQueueSerializer(queue, context={'request': request})
         return Response(serializer.data)
+
+
+class QueueHostDetail(APIView):
+
+    def check_queue_permission(self, request, queue):
+        if request.user not in queue.hosts.all():
+            self.permission_denied(request)
+
+    def get(self, request, pk, user_id, format=None):
+        queue = get_object_or_404(Queue, pk=pk)
+        self.check_queue_permission(request, queue)
+
+        try:
+            host = queue.hosts.get(pk=user_id)
+        except ObjectDoesNotExist:
+            return Response({'detail': 'Host not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserListSerializer(host, context={'request': request})
+        return Response(serializer.data)
+
+    def post(self, request, pk, user_id, format=None):
+        queue = get_object_or_404(Queue, pk=pk)
+        self.check_queue_permission(request, queue)
+        host = get_object_or_404(User, pk=user_id)
+        queue.hosts.add(host)
+        serializer = UserListSerializer(host, context={'request': request})
+        return Response(serializer.data)
+
+    def delete(self, request, pk, user_id, format=None):
+        queue = get_object_or_404(Queue, pk=pk)
+        self.check_queue_permission(request, queue)
+        host = get_object_or_404(User, pk=user_id)
+        queue.hosts.remove(host)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class MeetingList(generics.ListCreateAPIView):
