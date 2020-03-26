@@ -35,8 +35,11 @@ class PublicQueueSerializer(serializers.ModelSerializer):
 
     def get_my_meeting(self, obj):
         my_meeting = obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
-        serializer = PublicQueueNestedMeetingSerializer(my_meeting, context={'request': self.context['request']})
-        return serializer.data
+        if my_meeting:
+            serializer = PublicQueueNestedMeetingSerializer(my_meeting, context={'request': self.context['request']})
+            return serializer.data
+        else:
+            return None
 
 
 class QueueSerializer(PublicQueueSerializer):
