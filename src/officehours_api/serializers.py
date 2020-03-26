@@ -7,36 +7,39 @@ from officehours_api.nested_serializers import (
 )
 
 
-class UserListSerializer(serializers.HyperlinkedModelSerializer):
+class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'url', 'username', 'first_name', 'last_name']
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     attendee_set = NestedAttendeeSetSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'url', 'username', 'email', 'first_name', 'last_name', 'attendee_set']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'attendee_set']
 
 
-class PublicQueueSerializer(serializers.HyperlinkedModelSerializer):
+class PublicQueueSerializer(serializers.ModelSerializer):
     hosts = NestedUserSerializer(many=True, read_only=True)
     line_length = serializers.SerializerMethodField(read_only=True)
     my_meeting = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Queue
-        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'line_length', 'my_meeting']
+        fields = ['id', 'name', 'created_at', 'hosts', 'line_length', 'my_meeting']
 
     def get_line_length(self, obj):
         return obj.meeting_set.count()
 
     def get_my_meeting(self, obj):
         my_meeting = obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
-        serializer = PublicQueueNestedMeetingSerializer(my_meeting, context={'request': self.context['request']})
-        return serializer.data
+        if my_meeting:
+            serializer = PublicQueueNestedMeetingSerializer(my_meeting, context={'request': self.context['request']})
+            return serializer.data
+        else:
+            return None
 
 
 class QueueSerializer(PublicQueueSerializer):
@@ -52,7 +55,7 @@ class QueueSerializer(PublicQueueSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'url', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set', 'line_length']
+        fields = ['id', 'name', 'created_at', 'hosts', 'host_ids', 'meeting_set', 'line_length']
 
     def validate_host_ids(self, host_ids):
         '''
@@ -78,7 +81,7 @@ class QueueSerializer(PublicQueueSerializer):
         return instance
 
 
-class MeetingSerializer(serializers.HyperlinkedModelSerializer):
+class MeetingSerializer(serializers.ModelSerializer):
     attendees = NestedAttendeeSerializer(many=True, source='attendee_set', read_only=True)
 
     attendee_ids = serializers.PrimaryKeyRelatedField(
@@ -90,10 +93,10 @@ class MeetingSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Meeting
-        fields = ['id', 'url', 'queue', 'attendees', 'attendee_ids']
+        fields = ['id', 'queue', 'attendees', 'attendee_ids']
 
 
-class AttendeeSerializer(serializers.HyperlinkedModelSerializer):
+class AttendeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Attendee
-        fields = ['id', 'url', 'user', 'meeting']
+        fields = ['id', 'user', 'meeting']
