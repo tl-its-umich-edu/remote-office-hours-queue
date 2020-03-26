@@ -41,3 +41,26 @@ class NestedAttendeeSetSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Attendee
         fields = ['url', 'meeting']
+
+
+# TODO: add backend_metadata
+class PublicQueueNestedMeetingSerializer(serializers.HyperlinkedModelSerializer):
+    line_place = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Meeting
+        fields = ['id', 'url', 'line_place']
+
+    def get_line_place(self, obj):
+        i = 0
+        in_line = False
+        meetings = obj.queue.meeting_set.order_by('id')
+        for i in range(0, len(meetings)):
+            if self.context['request'].user in meetings[i].attendees.all():
+                in_line = True
+                break
+
+        if in_line:
+            return i
+        else:
+            return None
