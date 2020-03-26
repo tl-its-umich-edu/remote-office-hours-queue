@@ -10,7 +10,7 @@ from officehours_api.nested_serializers import (
 class UserListSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'url', 'username']
+        fields = ['id', 'url', 'username', 'first_name', 'last_name']
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
