@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.nested_serializers import (
     NestedMeetingSerializer, NestedAttendeeSerializer, NestedUserSerializer,
-    NestedAttendeeSetSerializer, NestedQueueMeetingSerializer,
+    NestedAttendeeSetSerializer, PublicQueueNestedMeetingSerializer,
 )
 
 
