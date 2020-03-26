@@ -4,14 +4,14 @@ import { Link } from "react-router-dom";
 import { getQueues as apiGetQueues, createQueue as apiAddQueue, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue } from "../models";
 import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
-import { pagePromise } from "../hooks/usePromise";
+import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
 
 interface QueueListProps {
     queues: ManageQueue[];
-    removeQueue: (q: ManageQueue) => void;
-    addQueue: () => void;
+    removeQueue: (q: ManageQueue) => Promise<void>;
+    addQueue: () => Promise<void>;
     disabled: boolean;
 }
 
@@ -43,53 +43,33 @@ export function ManagePage(props: ManagePageProps) {
         redirectToLogin()
     }
     const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(undefined as Error | undefined);
-    const refresh = () => {
-        pagePromise(
-            () => apiGetQueues(),
-            setQueues,
-            setIsLoading,
-            setError,
-        );
-    }
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueues(), setQueues);
     useEffect(() => {
-        refresh();
+        doRefresh();
     }, []);
-    const [interactions] = useAutoRefresh(refresh);
-    const removeQueue = (q: ManageQueue) => {
+    const [interactions] = useAutoRefresh(doRefresh);
+    const removeQueue = async (q: ManageQueue) => {
+        console.log(q);
         interactions.next(true);
-        setIsLoading(true);
-        apiRemoveQueue(q.id)
-            .then((data) => {
-                refresh();
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-                setIsLoading(false);
-            });
+        await apiRemoveQueue(q.id)
+        doRefresh();
     }
-    const addQueue = () => {
+    const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue)
+    const addQueue = async () => {
         interactions.next(true);
         const name = prompt("Queue name?", "Queueueueueue");
         if (!name) return;
         interactions.next(true);
-        setIsLoading(true);
-        apiAddQueue(name)
-            .then((data) => {
-                refresh();
-            })
-            .catch((error: Error) => {
-                console.error(error);
-                setError(error);
-                setIsLoading(false);
-            });
+        await apiAddQueue(name);
+        doRefresh();
     }
+    const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
+    const isLoading = refreshLoading || removeQueueLoading || addQueueLoading;
+    const error = refreshError || removeQueueError || addQueueError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
-        && <QueueList queues={queues} disabled={isLoading} removeQueue={removeQueue} addQueue={addQueue}/>
+        && <QueueList queues={queues} disabled={isLoading} removeQueue={doRemoveQueue} addQueue={doAddQueue}/>
     return (
         <div>
             {loadingDisplay}

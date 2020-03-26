@@ -1,12 +1,12 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 
 import { User, AttendingQueue } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
 import { getQueue as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
-import { usePromise, usePromiseInit } from "../hooks/usePromise";
+import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
 
 interface QueueAttendingProps {
@@ -121,16 +121,19 @@ export function QueuePage(props: QueuePageProps) {
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
     const refresh = () => apiGetQueueAttending(queueIdParsed);
-    const [doRefresh, refreshLoading, refreshError] = usePromiseInit(refresh, setQueue);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
+    useEffect(() => {
+        doRefresh();
+    }, []);
     const [interactions] = useAutoRefresh(doRefresh);
-    const joinQueue = () =>  {
+    const joinQueue = async () =>  {
         interactions.next(false);
-        return apiJoinQueue(queueIdParsed, props.user!.username);
+        return await apiJoinQueue(queueIdParsed, props.user!.username);
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue, setQueue);
-    const leaveQueue = () => {
+    const leaveQueue = async () => {
         interactions.next(false);
-        return apiLeaveQueue(queueIdParsed, props.user!.username);
+        return await apiLeaveQueue(queueIdParsed, props.user!.username);
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue, setQueue);
     const isLoading = refreshLoading || joinQueueLoading || leaveQueueLoading;
