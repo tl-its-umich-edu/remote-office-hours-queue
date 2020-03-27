@@ -102,11 +102,18 @@ function QueueAttending(props: QueueAttendingProps) {
             </p>
             </>
         );
+    const footer = (
+        <a target="_blank" href="https://documentation.its.umich.edu/node/1833">
+            Learn more about using Remote Office Hours Queue as an attendee
+        </a>
+    );
     return (
         <>
         <h2>Welcome to the {props.queue.name} meeting queue.</h2>
         {content}
         {yourQueueAlert}
+        <hr/>
+        {footer}
         </>
     );
 }
