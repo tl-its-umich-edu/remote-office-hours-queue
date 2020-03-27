@@ -41,7 +41,6 @@ class UserDetail(generics.RetrieveAPIView):
 
 
 class QueueList(generics.ListCreateAPIView):
-    queryset = Queue.objects.all()
     serializer_class = QueueSerializer
 
     def get_queryset(self):
@@ -98,8 +97,11 @@ class QueueHostDetail(APIView):
 
 
 class MeetingList(generics.ListCreateAPIView):
-    queryset = Meeting.objects.all()
     serializer_class = MeetingSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return Meeting.objects.filter(attendees__in=[user])
 
 
 class MeetingDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -108,11 +110,14 @@ class MeetingDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (IsHostOrAttendee,)
 
 
-class AttendeeList(generics.ListCreateAPIView):
-    queryset = Attendee.objects.all()
+class AttendeeList(generics.ListAPIView):
     serializer_class = AttendeeSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        return Attendee.objects.filter(user=user)
 
-class AttendeeDetail(generics.RetrieveUpdateDestroyAPIView):
+
+class AttendeeDetail(generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
