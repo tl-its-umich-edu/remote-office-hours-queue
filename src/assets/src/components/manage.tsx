@@ -26,9 +26,13 @@ function QueueList(props: QueueListProps) {
             </span>
         </li>
     );
+    const queueList = queues.length
+        ? <ul className="list-group">{queues}</ul>
+        : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>
     return (
         <div>
-            <ul className="list-group">{queues}</ul>
+            <h2>My Meeting Queues</h2>
+            {queueList}
             <AddButton add={() => props.addQueue()} disabled={props.disabled}> Add Queue</AddButton>
         </div>
     );
@@ -75,6 +79,8 @@ export function ManagePage(props: ManagePageProps) {
         <div>
             {loadingDisplay}
             {errorDisplay}
+            <h1>Virtual Office Hours</h1>
+            <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
             {queueList}
         </div>
     );
