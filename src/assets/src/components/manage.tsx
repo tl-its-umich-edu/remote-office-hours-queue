@@ -82,6 +82,10 @@ export function ManagePage(props: ManagePageProps) {
             <h1>Virtual Office Hours</h1>
             <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
             {queueList}
+            <hr/>
+            <a target="_blank" href="https://documentation.its.umich.edu/node/1830">
+                Learn more about using Remote Office Hours Queue as a host
+            </a>
         </div>
     );
 }
