@@ -185,6 +185,7 @@ a:hover {
 	position: absolute;
 	bottom: 0;
 	right: 12px;
+	z-index: 9999
 }
 
 .jumbotron {
@@ -196,7 +197,8 @@ a:hover {
 	border-color: #cc0000;
 }
 
-.btn-danger:hover, .btn-danger:focus {
+.btn-danger:hover.btn-danger:not(:disabled), .btn-danger:focus.btn-danger:not(:disabled) {
+/* .btn-danger:hover, .btn-danger:focus { */
 	background-color: #BF0102;
 	border-color: #BF0102;
 }
