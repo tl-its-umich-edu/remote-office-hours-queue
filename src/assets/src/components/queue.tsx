@@ -40,12 +40,12 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
 
 const TurnNowAlert = () =>
     <div className="alert alert-success" role="alert">
-        <strong>It's your turn!</strong> If you haven't already joined the meeting, join it now!
+        <strong>It's your turn!</strong> If you haven't already joined the meeting, follow the directions on the right to join it now!
     </div>
 
 const TurnSoonAlert = () =>
     <div className="alert alert-warning" role="alert">
-        <strong>Your turn is coming up!</strong> Join the meeting now so you are ready when the host joins.
+        <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
     </div>
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
@@ -60,8 +60,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <div className="col-lg">
                 {alert}
                 <ul>
-                    <li>You are in line to meet with the host.</li>
-                    <li>There are <strong>{props.queue.my_meeting!.line_place} people</strong> in line ahead of you</li>
+                    <li>You are in line and there are <strong>{props.queue.my_meeting!.line_place} people</strong> in line ahead of you</li>
                     <li>The host will join the BlueJeans meeting when it is your turn</li>
                     <li>We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</li>
                 </ul>
@@ -95,9 +94,14 @@ function QueueAttending(props: QueueAttendingProps) {
         ? <QueueAttendingNotJoined {...props}/>
         : <QueueAttendingJoined {...props}/>
     const yourQueueAlert = props.queue.hosts.find(h => h.username === props.user.username)
-        && <p className="alert alert-info col-lg">
-            This is your queue, you can <Link to={"/manage/" + props.queue.id}>manage it</Link>.
-        </p>
+        && (
+            <>
+            <br/>
+            <p className="alert alert-info col-lg">
+                This is your queue, you can <Link to={"/manage/" + props.queue.id}>manage it</Link>.
+            </p>
+            </>
+        );
     return (
         <>
         <h1>Manage Your One-on-One Meeting Queue</h1>
