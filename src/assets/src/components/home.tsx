@@ -11,7 +11,7 @@ function QueueLookup() {
                 <input type="text" 
                     className="form-control" 
                     name="uniqname" 
-                    placeholder="Meeting ID..." 
+                    placeholder="Queue ID..." 
                     value={lookup}
                     onChange={(e) => setLookup(e.target.value)}
                     />
