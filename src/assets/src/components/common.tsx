@@ -2,6 +2,7 @@ import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
 import { User } from "../models";
+import { useState } from "react";
 
 export const DisabledMessage = <em></em>
 
@@ -74,4 +75,24 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
             {props.error.toString()}
         </p>
     )
+}
+
+interface SingleInputFormProps {
+    placeholder: string;
+    disabled: boolean;
+    onSubmit: (value: string) => void;
+}
+
+export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
+    const [value, setValue] = useState("");
+    return (
+        <form onSubmit={(e) => { props.onSubmit(value); e.preventDefault(); setValue(""); }} className="input-group">
+            <input onChange={(e) => setValue(e.target.value)} value={value} type="text" className="form-control" placeholder={props.placeholder}/>
+            <div className="input-group-append">
+                <button className="btn btn-primary" type="submit">
+                    {props.children}
+                </button>
+            </div>
+        </form>
+    );
 }

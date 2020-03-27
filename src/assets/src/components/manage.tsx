@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getQueues as apiGetQueues, createQueue as apiAddQueue, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue } from "../models";
-import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
+import { RemoveButton, AddButton, ErrorDisplay, LoadingDisplay, SingleInputForm } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
@@ -11,7 +11,7 @@ import { redirectToLogin } from "../utils";
 interface QueueListProps {
     queues: ManageQueue[];
     removeQueue: (q: ManageQueue) => Promise<void>;
-    addQueue: () => Promise<void>;
+    addQueue: (uniqname: string) => Promise<void>;
     disabled: boolean;
 }
 
@@ -33,7 +33,12 @@ function QueueList(props: QueueListProps) {
         <div>
             <h2>My Meeting Queues</h2>
             {queueList}
-            <AddButton add={() => props.addQueue()} disabled={props.disabled}> Add Queue</AddButton>
+            <SingleInputForm 
+                placeholder="Queue name..." 
+                onSubmit={props.addQueue} 
+                disabled={props.disabled}>
+                    + Add Queue
+            </SingleInputForm>
         </div>
     );
 }
@@ -59,12 +64,10 @@ export function ManagePage(props: ManagePageProps) {
         doRefresh();
     }
     const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue)
-    const addQueue = async () => {
+    const addQueue = async (queueName: string) => {
         interactions.next(true);
-        const name = prompt("Queue name?", "Queueueueueue");
-        if (!name) return;
-        interactions.next(true);
-        await apiAddQueue(name);
+        if (!queueName) return;
+        await apiAddQueue(queueName);
         doRefresh();
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
