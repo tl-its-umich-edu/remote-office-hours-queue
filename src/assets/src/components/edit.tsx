@@ -68,24 +68,22 @@ function QueueEditor(props: QueueEditorProps) {
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     return (
         <div>
-            <h1>Manage: {props.queue.name}</h1>
-            <div>
+            <h1>Manage: <strong>{props.queue.name}</strong></h1>
+            <p>
                 <Link to={"/queue/" + props.queue.id}>
-                    See this queue as a visitor
+                    View as visitor
                 </Link>
-            </div>
+            </p>
             <dl>
-                <dt>URL</dt>
+                <dt>Queue URL:</dt>
                 <dd><a href={absoluteUrl}>{absoluteUrl}</a></dd>
-                <dt>Name</dt>
-                <dd>{props.queue.name}</dd>
-                <dt>Created At</dt>
+                <dt>Created:</dt>
                 <dd>{props.queue.created_at}</dd>
-                <dt>Hosted By</dt>
+                <dt>Hosted By:</dt>
                 {hosts}
                 <AddButton add={() => props.addHost()} disabled={props.disabled} size="sm"> Add Host</AddButton>
             </dl>
-            <h3>Queued Meetings</h3>
+            <h3>Meetings Up Next</h3>
             <ol className="list-group">
                 {meetings}
             </ol>
