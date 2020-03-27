@@ -7,6 +7,7 @@ def feedback(request):
 
 def spa_globals(request):
     user_data = {
+        'id': request.user.id,
         'username': request.user.username,
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,

@@ -1,29 +1,26 @@
+"use strict";
+
 export interface User {
     id: number;
     username: string;
     first_name: string;
     last_name: string;
-    attendee_set?: Attendee[];
-}
-
-export interface Attendee {
-    id: number;
-    user: User;
+    attendee_set?: User[];
 }
 
 export interface Meeting {
     id: number;
-    place_in_line: number;
-    attendees: Attendee[];
+    line_place: number;
+    attendees: User[];
 }
 
 export interface ManageQueue extends AttendingQueue {
-    meetings: Meeting[];
+    meeting_set: Meeting[];
 }
 
 export interface AttendingQueue extends QueueBase {
-    my_meeting?: Meeting;
-    queue_length: number;
+    my_meeting: Meeting | null;
+    line_length: number;
 }
 
 export interface QueueBase {

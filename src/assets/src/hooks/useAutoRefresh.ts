@@ -14,7 +14,7 @@ export const useAutoRefresh = (refresh: () => void) => {
         );
     });
     useEffect(() => {
-        interval(3000).pipe(
+        const subscription = interval(3000).pipe(
             withLatestFrom(merge(interactions, interactionsEnable)),
             map(v => v[1]),
             filter((v) => v),
@@ -22,6 +22,9 @@ export const useAutoRefresh = (refresh: () => void) => {
             refresh()
         });
         interactions.next(true);
+        return () => {
+            subscription.unsubscribe();
+        }
     }, []);
     return [interactions]
 }

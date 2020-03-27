@@ -4,7 +4,7 @@ import { useParams, Link } from "react-router-dom";
 
 import { User, AttendingQueue } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
-import { getQueue as apiGetQueueAttending, joinQueueFake as apiJoinQueue, leaveQueueFake as apiLeaveQueue } from "../services/api";
+import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
@@ -22,7 +22,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
         <>
         <div className="row">
             <ul className="col-lg">
-                <li>Number of people currently in line: <strong>{props.queue.queue_length}</strong></li>
+                <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
                 <li>You are not in the meeting queue yet</li>
             </ul>
         </div>
@@ -49,9 +49,9 @@ const TurnSoonAlert = () =>
     </div>
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
-    const alert = props.queue.queued_ahead === 0
+    const alert = props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
-        : props.queue.queued_ahead && props.queue.queued_ahead <= 5
+        : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
             ? <TurnSoonAlert/>
             : undefined;
     return (
@@ -61,7 +61,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 {alert}
                 <ul>
                     <li>You are in line to meet with the host.</li>
-                    <li>There are <strong>{props.queue.queued_ahead} people</strong> in line ahead of you</li>
+                    <li>There are <strong>{props.queue.my_meeting!.line_place} people</strong> in line ahead of you</li>
                     <li>The host will join the BlueJeans meeting when it is your turn</li>
                     <li>We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</li>
                 </ul>
@@ -91,7 +91,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 }
 
 function QueueAttending(props: QueueAttendingProps) {
-    const content = props.queue.queued_ahead === undefined
+    const content = !props.queue.my_meeting
         ? <QueueAttendingNotJoined {...props}/>
         : <QueueAttendingJoined {...props}/>
     const yourQueueAlert = props.queue.hosts.find(h => h.username === props.user.username)
@@ -128,14 +128,16 @@ export function QueuePage(props: QueuePageProps) {
     const [interactions] = useAutoRefresh(doRefresh);
     const joinQueue = async () =>  {
         interactions.next(false);
-        return await apiJoinQueue(queueIdParsed, props.user!.username);
+        await apiAddMeeting(queueIdParsed, props.user!.id);
+        await doRefresh();
     }
-    const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue, setQueue);
+    const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
     const leaveQueue = async () => {
         interactions.next(false);
-        return await apiLeaveQueue(queueIdParsed, props.user!.username);
+        await apiRemoveMeeting(queue!.my_meeting!.id);
+        await doRefresh();
     }
-    const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue, setQueue);
+    const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
     const isChanging = joinQueueLoading || leaveQueueLoading;
     const isLoading = refreshLoading || isChanging;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>

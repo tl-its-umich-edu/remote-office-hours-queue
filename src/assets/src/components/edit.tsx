@@ -1,5 +1,5 @@
 import * as React from "react";
-import { removeMeetingFake, addMeetingFake, removeHostFake, addHostFake, getQueueFake, getUsersFake } from "../services/api";
+import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers } from "../services/api";
 import { User, ManageQueue, Meeting } from "../models";
 import { UserDisplay, RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
 import { Link, useParams } from "react-router-dom";
@@ -15,7 +15,7 @@ interface MeetingEditorProps {
 }
 
 function MeetingEditor(props: MeetingEditorProps) {
-    const user = props.meeting.attendees[0]!.user;
+    const user = props.meeting.attendees[0];
     return (
         <dd>
             <UserDisplay user={user}/>
@@ -59,7 +59,7 @@ function QueueEditor(props: QueueEditorProps) {
             <HostEditor host={h} remove={() => props.removeHost(h)} disabled={props.disabled}/>
         </dd>
     );
-    const meetings = props.queue.meetings.map(m =>
+    const meetings = props.queue.meeting_set.map(m =>
         <li className="list-group-item">
             <MeetingEditor meeting={m} remove={() => props.removeMeeting(m)} disabled={props.disabled}/>
         </li>
@@ -105,21 +105,22 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => getQueueFake(queueIdParsed), setQueue);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueue(queueIdParsed) as Promise<ManageQueue>, setQueue);
     useEffect(() => {
         doRefresh();
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [users, setUsers] = useState(undefined as User[] | undefined);
-    const [doRefreshUsers, refreshUsersLoading, refreshUsersError] = usePromise(() => getUsersFake(), setUsers);
+    const [doRefreshUsers, refreshUsersLoading, refreshUsersError] = usePromise(() => apiGetUsers(), setUsers);
     useEffect(() => {
         doRefreshUsers();
     }, []);
     const removeHost = async (h: User) => {
         interactions.next(true);
-        return await removeHostFake(queue!.id, h.username);
+        await apiRemoveHost(queue!.id, h.id);
+        await doRefresh();
     }
-    const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost, setQueue);
+    const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
     const addHost = async () => {
         interactions.next(true);
         const uniqname = prompt("Uniqname?", "aaaaaaaa");
@@ -127,25 +128,30 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(user + " is not a valid user.");
         interactions.next(true);
-        return await addHostFake(queue!.id, user.id);
+        await apiAddHost(queue!.id, user.id);
+        await doRefresh();
     }
-    const [doAddHost, addHostLoading, addHostError] = usePromise(addHost, setQueue);
+    const [doAddHost, addHostLoading, addHostError] = usePromise(addHost);
     const removeMeeting = async (m: Meeting) => {
         interactions.next(true);
-        return await removeMeetingFake(queue!.id, m.id);
+        await apiRemoveMeeting(m.id);
+        await doRefresh();
     }
-    const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting, setQueue);
+    const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
     const addMeeting = async () => {
         interactions.next(true);
         const uniqname = prompt("Uniqname?", "johndoe");
         if (!uniqname) return;
+        const user = users!.find(u => u.username === uniqname);
+        if (!user) throw new Error(user + " is not a valid user.");
         interactions.next(true);
-        return await addMeetingFake(queue!.id, uniqname);
+        await apiAddMeeting(queue!.id, user.id);
+        await doRefresh();
     }
-    const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting, setQueue);
+    const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading;
-    const isLoading = refreshLoading || isChanging;
-    const error = refreshError || removeHostError || addHostError || removeMeetingError || addMeetingError;
+    const isLoading = refreshLoading || refreshUsersLoading || isChanging;
+    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
