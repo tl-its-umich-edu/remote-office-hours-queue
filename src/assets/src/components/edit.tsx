@@ -87,7 +87,7 @@ function QueueEditor(props: QueueEditorProps) {
             <ol className="list-group">
                 {meetings}
             </ol>
-            <AddButton add={() => props.addMeeting()} disabled={props.disabled}> Force Add Attendee</AddButton>
+            <AddButton add={() => props.addMeeting()} disabled={props.disabled}> Add Attendee</AddButton>
         </div>
     );
 }
