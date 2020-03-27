@@ -9,3 +9,4 @@ requests
 django-watchman
 django-webpack-loader==0.6.0
 django-safedelete==0.5.4
+jsonfield==3.1.0

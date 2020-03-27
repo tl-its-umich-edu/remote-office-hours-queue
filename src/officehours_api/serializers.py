@@ -92,7 +92,8 @@ class MeetingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meeting
-        fields = ['id', 'queue', 'attendees', 'attendee_ids']
+        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'backend_type', 'backend_metadata']
+        read_only_fields = ['backend_metadata']
 
 
 class AttendeeSerializer(serializers.ModelSerializer):
