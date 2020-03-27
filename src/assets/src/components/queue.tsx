@@ -104,7 +104,7 @@ function QueueAttending(props: QueueAttendingProps) {
         );
     return (
         <>
-        <h1>Manage Your One-on-One Meeting Queue</h1>
+        <h2>Welcome to the {props.queue.name} meeting queue.</h2>
         {content}
         {yourQueueAlert}
         </>
