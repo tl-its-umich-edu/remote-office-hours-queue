@@ -58,7 +58,7 @@ class Bluejeans:
         if r['count'] > 1:
             raise Exception(f'Too many users match "{user_email}"')
         elif r['count'] == 0:
-            return None
+            raise Exception('BlueJeans user not found.')
 
         return r['users'][0]
 
