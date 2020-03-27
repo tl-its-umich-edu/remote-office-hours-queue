@@ -65,6 +65,7 @@ function QueueEditor(props: QueueEditorProps) {
             <MeetingEditor meeting={m} remove={() => props.removeMeeting(m)} disabled={props.disabled}/>
         </li>
     );
+    const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     return (
         <div>
             <h1>Manage: {props.queue.name}</h1>
@@ -74,8 +75,8 @@ function QueueEditor(props: QueueEditorProps) {
                 </Link>
             </div>
             <dl>
-                <dt>ID</dt>
-                <dd>{props.queue.id}</dd>
+                <dt>URL</dt>
+                <dd><a href={absoluteUrl}>{absoluteUrl}</a></dd>
                 <dt>Name</dt>
                 <dd>{props.queue.name}</dd>
                 <dt>Created At</dt>
