@@ -54,9 +54,10 @@ interface QueueEditorProps {
 }
 
 function QueueEditor(props: QueueEditorProps) {
+    const lastHost = props.queue.hosts.length === 1;
     const hosts = props.queue.hosts.map(h =>
         <dd>
-            <HostEditor host={h} remove={() => props.removeHost(h)} disabled={props.disabled}/>
+            <HostEditor host={h} remove={() => props.removeHost(h)} disabled={props.disabled || lastHost}/>
         </dd>
     );
     const meetings = props.queue.meeting_set.map(m =>
