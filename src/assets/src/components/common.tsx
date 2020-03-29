@@ -72,7 +72,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
     if (!props.error) return null;
     return (
         <p className="alert alert-danger">
-            {props.error.toString()}
+            {props.error.message}
         </p>
     )
 }
@@ -81,18 +81,44 @@ interface SingleInputFormProps {
     placeholder: string;
     disabled: boolean;
     onSubmit: (value: string) => void;
+    buttonType: "info"|"warning"|"success"|"primary"|"alternate"|"danger";
 }
 
 export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     const [value, setValue] = useState("");
+    const [error, setError] = useState(undefined as Error | undefined);
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            props.onSubmit(value);
+            setValue("");
+        } catch(e) {
+            setError(e);
+        }
+    }
+    const errorDisplay = error && <ErrorDisplay error={error}/>
+    const buttonClass = "btn btn-" + props.buttonType;
     return (
-        <form onSubmit={(e) => { props.onSubmit(value); e.preventDefault(); setValue(""); }} className="input-group">
-            <input onChange={(e) => setValue(e.target.value)} value={value} type="text" className="form-control" placeholder={props.placeholder}/>
-            <div className="input-group-append">
-                <button className="btn btn-primary" type="submit">
-                    {props.children}
-                </button>
-            </div>
-        </form>
+        <div className="row">
+            <form onSubmit={submit} className="input-group col-md-6">
+                <input onChange={(e) => setValue(e.target.value)} value={value} type="text" className="form-control" placeholder={props.placeholder}/>
+                <div className="input-group-append">
+                    <button className={buttonClass} type="submit">
+                        {props.children}
+                    </button>
+                </div>
+                {errorDisplay}
+            </form>
+        </div>
     );
 }
+
+export const invalidUniqnameMessage = (uniqname: string) =>
+    uniqname + " is not a valid user. Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
+
+interface DateDisplayProps {
+    date: string;
+}
+
+export const DateDisplay = (props: DateDisplayProps) =>
+    <span>{new Date(props.date).toDateString()}</span>

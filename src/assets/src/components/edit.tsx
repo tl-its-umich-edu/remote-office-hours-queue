@@ -1,7 +1,7 @@
 import * as React from "react";
 import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers } from "../services/api";
 import { User, ManageQueue, Meeting } from "../models";
-import { UserDisplay, RemoveButton, AddButton, ErrorDisplay, LoadingDisplay } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay } from "./common";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { usePromise } from "../hooks/usePromise";
@@ -46,9 +46,9 @@ function HostEditor(props: HostEditorProps) {
 
 interface QueueEditorProps {
     queue: ManageQueue;
-    addMeeting: () => void;
+    addMeeting: (uniqname: string) => void;
     removeMeeting: (m: Meeting) => void;
-    addHost: () => void;
+    addHost: (uniqname: string) => void;
     removeHost: (h: User) => void;
     disabled: boolean;
 }
@@ -78,16 +78,28 @@ function QueueEditor(props: QueueEditorProps) {
                 <dt>Queue URL:</dt>
                 <dd><a href={absoluteUrl}>{absoluteUrl}</a></dd>
                 <dt>Created:</dt>
-                <dd>{props.queue.created_at}</dd>
+                <dd><DateDisplay date={props.queue.created_at}/></dd>
                 <dt>Hosted By:</dt>
                 {hosts}
-                <AddButton add={() => props.addHost()} disabled={props.disabled} size="sm"> Add Host</AddButton>
+                <SingleInputForm 
+                    placeholder="Uniqname..."
+                    buttonType="success"
+                    onSubmit={props.addHost}
+                    disabled={props.disabled}>
+                        + Add Host
+                </SingleInputForm>
             </dl>
             <h3>Meetings Up Next</h3>
             <ol className="list-group">
                 {meetings}
             </ol>
-            <AddButton add={() => props.addMeeting()} disabled={props.disabled}> Add Attendee</AddButton>
+            <SingleInputForm
+                placeholder="Uniqname..."
+                buttonType="success"
+                onSubmit={props.addMeeting}
+                disabled={props.disabled}>
+                    + Add Attendee
+            </SingleInputForm>
         </div>
     );
 }
@@ -121,12 +133,10 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         await doRefresh();
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
-    const addHost = async () => {
+    const addHost = async (uniqname: string) => {
         interactions.next(true);
-        const uniqname = prompt("Uniqname?", "aaaaaaaa");
-        if (!uniqname) return;
         const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(user + " is not a valid user.");
+        if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         interactions.next(true);
         await apiAddHost(queue!.id, user.id);
         await doRefresh();
@@ -138,12 +148,10 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         await doRefresh();
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
-    const addMeeting = async () => {
+    const addMeeting = async (uniqname: string) => {
         interactions.next(true);
-        const uniqname = prompt("Uniqname?", "johndoe");
-        if (!uniqname) return;
         const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(user + " is not a valid user.");
+        if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         interactions.next(true);
         await apiAddMeeting(queue!.id, user.id);
         await doRefresh();
