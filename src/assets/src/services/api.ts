@@ -4,6 +4,19 @@ const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
 }
 
+const getPostHeaders = () => {
+    return {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCsrfToken(),
+    };
+}
+
+const getDeleteHeaders = () => {
+    return {
+        'X-CSRFToken': getCsrfToken(),
+    };
+}
+
 export const getUsers = async () => {
     const resp = await fetch("/api/users/", { method: "GET" });
     if (!resp.ok) {
@@ -21,7 +34,7 @@ export const getQueues = async () => {
 }
 
 export const getQueue = async (id: number) => {
-    const resp = await fetch("/api/queues/" + id, { method: "GET" });
+    const resp = await fetch(`/api/queues/${id}/`, { method: "GET" });
     if (!resp.ok) {
         throw new Error(resp.statusText);
     }
@@ -35,10 +48,7 @@ export const createQueue = async (name: string) => {
             name: name,
             host_ids: [],  //Ideally, this wouldn't be required
         }),
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-        },
+        headers: getPostHeaders(),
     });
     if (!resp.ok) {
         throw new Error(resp.statusText);
@@ -47,11 +57,9 @@ export const createQueue = async (name: string) => {
 }
 
 export const deleteQueue = async (id: number) => {
-    const resp = await fetch("/api/queues/" + id, { 
+    const resp = await fetch(`/api/queues/${id}/`, { 
         method: "DELETE",
-        headers: {
-            'X-CSRFToken': getCsrfToken(),
-        }
+        headers: getDeleteHeaders(),
     });
     if (!resp.ok) {
         throw new Error(resp.statusText);
@@ -66,10 +74,7 @@ export const addMeeting = async (queue_id: number, user_id: number) => {
             queue: queue_id,
             attendee_ids: [user_id],
         }),
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfToken(),
-        },
+        headers: getPostHeaders(),
     });
     if (!resp.ok) {
         throw new Error(resp.statusText);
@@ -80,9 +85,7 @@ export const addMeeting = async (queue_id: number, user_id: number) => {
 export const removeMeeting = async (meeting_id: number) => {
     const resp = await fetch("/api/meetings/" + meeting_id, {
         method: "DELETE",
-        headers: {
-            'X-CSRFToken': getCsrfToken(),
-        }
+        headers: getDeleteHeaders(),
     });
     if (!resp.ok) {
         throw new Error(resp.statusText);
@@ -91,7 +94,10 @@ export const removeMeeting = async (meeting_id: number) => {
 }
 
 export const addHost = async (queue_id: number, user_id: number) => {
-    const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, { method: "POST" });
+    const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, {
+        method: "POST",
+        headers: getPostHeaders(),
+    });
     if (!resp.ok) {
         throw new Error(resp.statusText);
     }
@@ -99,7 +105,10 @@ export const addHost = async (queue_id: number, user_id: number) => {
 }
 
 export const removeHost = async (queue_id: number, user_id: number) => {
-    const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, { method: "DELETE" });
+    const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, {
+        method: "DELETE",
+        headers: getDeleteHeaders(),
+    });
     if (!resp.ok) {
         throw new Error(resp.statusText);
     }
