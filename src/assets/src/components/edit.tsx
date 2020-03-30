@@ -1,7 +1,7 @@
 import * as React from "react";
 import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers } from "../services/api";
 import { User, ManageQueue, Meeting } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField } from "./common";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { usePromise } from "../hooks/usePromise";
@@ -76,7 +76,7 @@ function QueueEditor(props: QueueEditorProps) {
             </p>
             <dl>
                 <dt>Queue URL:</dt>
-                <dd><a href={absoluteUrl}>{absoluteUrl}</a></dd>
+                <dd><CopyField text={absoluteUrl}/></dd>
                 <dt>Created:</dt>
                 <dd><DateDisplay date={props.queue.created_at}/></dd>
                 <dt>Hosted By:</dt>

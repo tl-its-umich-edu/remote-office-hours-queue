@@ -1,8 +1,8 @@
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSyncAlt } from '@fortawesome/free-solid-svg-icons'
+import { faSyncAlt, faClipboard, faClipboardCheck } from '@fortawesome/free-solid-svg-icons'
 import { User } from "../models";
-import { useState } from "react";
+import { useState, createRef } from "react";
 
 export const DisabledMessage = <em></em>
 
@@ -122,3 +122,35 @@ interface DateDisplayProps {
 
 export const DateDisplay = (props: DateDisplayProps) =>
     <span>{new Date(props.date).toDateString()}</span>
+
+interface CopyFieldProps {
+    text: string;
+}
+
+export const CopyField: React.FC<CopyFieldProps> = (props) => {
+    const [copied, setCopied] = useState(false);
+    const inputRef = createRef<HTMLInputElement>();
+    const copy = () => {
+        inputRef.current!.select();
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1000);
+    }
+    const buttonInner = copied
+        ? (
+            <span><FontAwesomeIcon icon={faClipboardCheck}/> Copied!</span>
+        )
+        : (
+            <span><FontAwesomeIcon icon={faClipboard}/> Copy</span>
+        );
+    return (
+        <div className="input-group col-md-6">
+            <input readOnly ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
+            <div className="input-group-append">
+                <button type="button" onClick={copy} className="btn btn-primary">
+                    {buttonInner}
+                </button>
+            </div>
+        </div>
+    );
+}
