@@ -80,6 +80,7 @@ class QueueSerializer(PublicQueueSerializer):
             instance.hosts.set([self.context['request'].user])
         return instance
 
+
 class MeetingSerializer(serializers.ModelSerializer):
     attendees = NestedAttendeeSerializer(many=True, source='attendee_set', read_only=True)
 
@@ -93,7 +94,16 @@ class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meeting
         fields = ['id', 'queue', 'attendees', 'attendee_ids', 'backend_type', 'backend_metadata']
-        read_only_fields = ['backend_metadata']
+        read_only_fields = ['attendees', 'backend_metadata']
+
+    def validate_attendee_ids(self, attendee_ids):
+        '''
+        Attendees may only be in one meeting at a time.
+        '''
+        for user in attendee_ids:
+            if user.meeting_set.exists():
+                raise serializers.ValidationError(f'{user} is already in a meeting.')
+        return attendee_ids
 
 
 class AttendeeSerializer(serializers.ModelSerializer):
