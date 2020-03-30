@@ -99,17 +99,15 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     const errorDisplay = error && <ErrorDisplay error={error}/>
     const buttonClass = "btn btn-" + props.buttonType;
     return (
-        <div className="row">
-            <form onSubmit={submit} className="input-group col-md-6">
-                <input onChange={(e) => setValue(e.target.value)} value={value} type="text" className="form-control" placeholder={props.placeholder}/>
-                <div className="input-group-append">
-                    <button className={buttonClass} type="submit">
-                        {props.children}
-                    </button>
-                </div>
-                {errorDisplay}
-            </form>
-        </div>
+        <form onSubmit={submit} className="input-group">
+            <input onChange={(e) => setValue(e.target.value)} value={value} type="text" className="form-control" placeholder={props.placeholder}/>
+            <div className="input-group-append">
+                <button className={buttonClass} type="submit">
+                    {props.children}
+                </button>
+            </div>
+            {errorDisplay}
+        </form>
     );
 }
 
@@ -144,7 +142,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
             <span><FontAwesomeIcon icon={faClipboard}/> Copy</span>
         );
     return (
-        <div className="input-group col-md-6">
+        <div className="input-group">
             <input readOnly ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
             <div className="input-group-append">
                 <button type="button" onClick={copy} className="btn btn-primary">

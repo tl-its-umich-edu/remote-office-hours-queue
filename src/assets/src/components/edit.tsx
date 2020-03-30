@@ -39,7 +39,7 @@ function HostEditor(props: HostEditorProps) {
     return (
         <span>
             <UserDisplay user={props.host}/>
-            {removeButton}
+            <span className="float-right">{removeButton}</span>
         </span>
     );
 }
@@ -56,9 +56,9 @@ interface QueueEditorProps {
 function QueueEditor(props: QueueEditorProps) {
     const lastHost = props.queue.hosts.length === 1;
     const hosts = props.queue.hosts.map(h =>
-        <dd>
+        <li className="list-group-item">
             <HostEditor host={h} remove={() => props.removeHost(h)} disabled={props.disabled || lastHost}/>
-        </dd>
+        </li>
     );
     const meetings = props.queue.meeting_set.map(m =>
         <li className="list-group-item">
@@ -74,32 +74,54 @@ function QueueEditor(props: QueueEditorProps) {
                     View as visitor
                 </Link>
             </p>
-            <dl>
-                <dt>Queue URL:</dt>
-                <dd><CopyField text={absoluteUrl}/></dd>
-                <dt>Created:</dt>
-                <dd><DateDisplay date={props.queue.created_at}/></dd>
-                <dt>Hosted By:</dt>
-                {hosts}
-                <SingleInputForm 
-                    placeholder="Uniqname..."
-                    buttonType="success"
-                    onSubmit={props.addHost}
-                    disabled={props.disabled}>
-                        + Add Host
-                </SingleInputForm>
-            </dl>
+            <div>
+                <div className="form-group row">
+                    <label className="col-md-2 col-form-label">Queue URL:</label>
+                    <div className="col-md-6">
+                        <CopyField text={absoluteUrl}/>
+                    </div>
+                </div>
+                <div className="form-group row">
+                    <label className="col-md-2 col-form-label">Created:</label>
+                    <div className="col-md-6">
+                        <DateDisplay date={props.queue.created_at}/>
+                    </div>
+                </div>
+                <div className="row">
+                    <label className="col-md-2 col-form-label">Hosted By:</label>
+                    <div className="col-md-6">
+                        <ul className="list-group">
+                            {hosts}
+                        </ul>
+                        <SingleInputForm 
+                            placeholder="Uniqname..."
+                            buttonType="success"
+                            onSubmit={props.addHost}
+                            disabled={props.disabled}>
+                                + Add Host
+                        </SingleInputForm>
+                    </div>
+                </div>
+            </div>
             <h3>Meetings Up Next</h3>
-            <ol className="list-group">
-                {meetings}
-            </ol>
-            <SingleInputForm
-                placeholder="Uniqname..."
-                buttonType="success"
-                onSubmit={props.addMeeting}
-                disabled={props.disabled}>
-                    + Add Attendee
-            </SingleInputForm>
+            <div className="row">
+                <div className="col-md-8">
+                    <ol className="list-group">
+                        {meetings}
+                    </ol>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col-md-4">
+                    <SingleInputForm
+                        placeholder="Uniqname..."
+                        buttonType="success"
+                        onSubmit={props.addMeeting}
+                        disabled={props.disabled}>
+                            + Add Attendee
+                    </SingleInputForm>
+                </div>
+            </div>
         </div>
     );
 }
