@@ -64,6 +64,8 @@ class Meeting(SafeDeleteModel):
         return bool(not(self.removed_at or self.ended_at))
 
     def save(self, *args, **kwargs):
+        if not self.backend_type and bluejeans:
+            self.backend_type = 'bluejeans'
         if self.backend_type:
             backend = globals()[self.backend_type]
             if backend:
