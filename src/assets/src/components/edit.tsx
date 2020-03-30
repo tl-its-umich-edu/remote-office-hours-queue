@@ -127,6 +127,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     useEffect(() => {
         doRefreshUsers();
     }, []);
+    useAutoRefresh(doRefreshUsers, 6000);
     const removeHost = async (h: User) => {
         interactions.next(true);
         await apiRemoveHost(queue!.id, h.id);
