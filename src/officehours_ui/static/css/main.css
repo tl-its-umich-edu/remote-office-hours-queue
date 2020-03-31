@@ -242,6 +242,10 @@ a:hover {
 	padding: 10px;
 }
 
+#aux-nav .nav-link {
+	color: white;
+}
+
 .navbar-light .navbar-nav .show>.nav-link, .navbar-light .navbar-nav .active>.nav-link, .navbar-light .navbar-nav .nav-link.show, .navbar-light .navbar-nav .nav-link.active {
 	background-color: #e4e1df;
 }
