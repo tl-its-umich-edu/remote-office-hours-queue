@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'safedelete',
     'watchman',
     'webpack_loader',
+    'rest_framework_tracking',
 ]
 
 if DEBUG:
@@ -233,15 +234,8 @@ FEEDBACK_EMAIL = os.getenv('FEEDBACK_EMAIL')
 SAFE_DELETE_INTERPRET_UNDELETED_OBJECTS_AS_CREATED = True
 
 
-# # Security
-
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# CSRF_COOKIE_HTTPONLY = True
-# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-# SESSION_COOKIE_AGE = os.getenv('SESSION_COOKIE_AGE', 1209600)
-
-# SECURE_HSTS_SECONDS = os.getenv('SECURE_HSTS_SECONDS', 3600)
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# SECURE_BROWSER_XSS_FILTER = True
+# drf-api-tracking
+DRF_TRACKING_ADMIN_LOG_READONLY = True
+LOGGING_METHODS = csv_to_list(
+    os.getenv('LOGGING_METHODS', ['POST', 'PUT', 'PATCH', 'DELETE'])
+)
