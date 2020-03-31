@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
@@ -6,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
+from rest_framework_tracking.mixins import LoggingMixin
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.serializers import (
     UserListSerializer, UserSerializer, QueueSerializer, PublicQueueSerializer,
@@ -40,7 +42,8 @@ class UserDetail(generics.RetrieveAPIView):
     permission_classes = (IsCurrentUser,)
 
 
-class QueueList(generics.ListCreateAPIView):
+class QueueList(LoggingMixin, generics.ListCreateAPIView):
+    logging_methods = settings.LOGGING_METHODS
     serializer_class = QueueSerializer
 
     def get_queryset(self):
@@ -48,7 +51,8 @@ class QueueList(generics.ListCreateAPIView):
         return Queue.objects.filter(hosts__in=[user])
 
 
-class QueueDetail(generics.RetrieveUpdateDestroyAPIView):
+class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
+    logging_methods = settings.LOGGING_METHODS
     queryset = Queue.objects.all()
     serializer_class = QueueSerializer
     permission_classes = (IsHostOrReadOnly,)
@@ -62,7 +66,8 @@ class QueueDetail(generics.RetrieveUpdateDestroyAPIView):
         return Response(serializer.data)
 
 
-class QueueHostDetail(APIView):
+class QueueHostDetail(LoggingMixin, APIView):
+    logging_methods = settings.LOGGING_METHODS
 
     def check_queue_permission(self, request, queue):
         if request.user not in queue.hosts.all():
@@ -96,7 +101,8 @@ class QueueHostDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class MeetingList(generics.ListCreateAPIView):
+class MeetingList(LoggingMixin, generics.ListCreateAPIView):
+    logging_methods = settings.LOGGING_METHODS
     serializer_class = MeetingSerializer
 
     def get_queryset(self):
@@ -104,7 +110,8 @@ class MeetingList(generics.ListCreateAPIView):
         return Meeting.objects.filter(attendees__in=[user])
 
 
-class MeetingDetail(generics.RetrieveUpdateDestroyAPIView):
+class MeetingDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
+    logging_methods = settings.LOGGING_METHODS
     queryset = Meeting.objects.all()
     serializer_class = MeetingSerializer
     permission_classes = (IsHostOrAttendee,)
