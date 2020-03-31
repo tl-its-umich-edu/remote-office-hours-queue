@@ -11,6 +11,7 @@ class NestedUserSerializer(serializers.ModelSerializer):
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
     attendees = NestedUserSerializer(many=True, read_only=True)
+    backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
@@ -30,6 +31,7 @@ class NestedAttendeeSerializer(serializers.ModelSerializer):
 
 class NestedMeetingSetSerializer(serializers.ModelSerializer):
     queue = serializers.ReadOnlyField(source='queue.name')
+    backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
@@ -46,6 +48,7 @@ class NestedAttendeeSetSerializer(serializers.ModelSerializer):
 
 class PublicQueueNestedMeetingSerializer(serializers.ModelSerializer):
     line_place = serializers.SerializerMethodField(read_only=True)
+    backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting

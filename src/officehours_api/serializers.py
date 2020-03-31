@@ -83,13 +83,14 @@ class QueueSerializer(PublicQueueSerializer):
 
 class MeetingSerializer(serializers.ModelSerializer):
     attendees = NestedAttendeeSerializer(many=True, source='attendee_set', read_only=True)
-
     attendee_ids = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=User.objects.all(),
         source='attendees',
         write_only=True,
     )
+    backend_metadata = serializers.JSONField(read_only=True)
+
 
     class Meta:
         model = Meeting
