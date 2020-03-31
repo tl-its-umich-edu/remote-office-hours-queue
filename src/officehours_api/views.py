@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 from rest_framework_tracking.mixins import LoggingMixin
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.serializers import (
-    UserListSerializer, UserSerializer, QueueSerializer, PublicQueueSerializer,
-    MeetingSerializer, AttendeeSerializer,
+    UserListSerializer, UserSerializer, QueueAttendeeSerializer,
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
 )
 from officehours_api.permissions import (
     IsCurrentUser, IsHostOrReadOnly, IsHostOrAttendee,
@@ -44,25 +44,24 @@ class UserDetail(generics.RetrieveAPIView):
 
 class QueueList(LoggingMixin, generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
-    serializer_class = QueueSerializer
+    serializer_class = QueueHostSerializer
 
     def get_queryset(self):
         user = self.request.user
         return Queue.objects.filter(hosts__in=[user])
 
-
 class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Queue.objects.all()
-    serializer_class = QueueSerializer
+    serializer_class = QueueHostSerializer
     permission_classes = (IsHostOrReadOnly,)
 
     def get(self, request, pk, format=None):
         queue = self.get_object()
         if request.user in queue.hosts.all():
-            serializer = QueueSerializer(queue, context={'request': request})
+            serializer = QueueHostSerializer(queue, context={'request': request})
         else:
-            serializer = PublicQueueSerializer(queue, context={'request': request})
+            serializer = QueueAttendeeSerializer(queue, context={'request': request})
         return Response(serializer.data)
 
 

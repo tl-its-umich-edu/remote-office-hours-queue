@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.nested_serializers import (
     NestedMeetingSerializer, NestedAttendeeSerializer, NestedUserSerializer,
-    NestedAttendeeSetSerializer, PublicQueueNestedMeetingSerializer,
+    NestedAttendeeSetSerializer, NestedMyMeetingSerializer,
 )
 
 
@@ -21,7 +21,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'attendee_set']
 
 
-class PublicQueueSerializer(serializers.ModelSerializer):
+class QueueAttendeeSerializer(serializers.ModelSerializer):
+    '''
+    Serializer used when viewing queue as an attendee.
+    '''
     hosts = NestedUserSerializer(many=True, read_only=True)
     line_length = serializers.SerializerMethodField(read_only=True)
     my_meeting = serializers.SerializerMethodField(read_only=True)
@@ -36,16 +39,17 @@ class PublicQueueSerializer(serializers.ModelSerializer):
     def get_my_meeting(self, obj):
         my_meeting = obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
         if my_meeting:
-            serializer = PublicQueueNestedMeetingSerializer(my_meeting, context={'request': self.context['request']})
+            serializer = NestedMyMeetingSerializer(my_meeting, context={'request': self.context['request']})
             return serializer.data
         else:
             return None
 
 
-class QueueSerializer(PublicQueueSerializer):
-    hosts = NestedUserSerializer(many=True, read_only=True)
+class QueueHostSerializer(QueueAttendeeSerializer):
+    '''
+    Serializer used when viewing queue as a host.
+    '''
     meeting_set = NestedMeetingSerializer(many=True, read_only=True)
-
     host_ids = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=User.objects.all(),

@@ -18,35 +18,7 @@ class NestedMeetingSerializer(serializers.ModelSerializer):
         fields = ['id', 'attendees', 'backend_type', 'backend_metadata']
 
 
-class NestedAttendeeSerializer(serializers.ModelSerializer):
-    user_id = serializers.ReadOnlyField(source='user.id')
-    username = serializers.ReadOnlyField(source='user.username')
-    first_name = serializers.ReadOnlyField(source='user.first_name')
-    last_name = serializers.ReadOnlyField(source='user.last_name')
-
-    class Meta:
-        model = Attendee
-        fields = ['id', 'user_id', 'username', 'first_name', 'last_name']
-
-
-class NestedMeetingSetSerializer(serializers.ModelSerializer):
-    queue = serializers.ReadOnlyField(source='queue.name')
-    backend_metadata = serializers.JSONField(read_only=True)
-
-    class Meta:
-        model = Meeting
-        fields = ['id', 'queue', 'is_active', 'backend_type', 'backend_metadata']
-
-
-class NestedAttendeeSetSerializer(serializers.ModelSerializer):
-    meeting = NestedMeetingSetSerializer(read_only=True)
-
-    class Meta:
-        model = Attendee
-        fields = ['id', 'meeting']
-
-
-class PublicQueueNestedMeetingSerializer(serializers.ModelSerializer):
+class NestedMyMeetingSerializer(serializers.ModelSerializer):
     line_place = serializers.SerializerMethodField(read_only=True)
     backend_metadata = serializers.JSONField(read_only=True)
 
@@ -67,3 +39,31 @@ class PublicQueueNestedMeetingSerializer(serializers.ModelSerializer):
             return i
         else:
             return None
+
+
+class NestedMeetingSetSerializer(serializers.ModelSerializer):
+    queue = serializers.ReadOnlyField(source='queue.name')
+    backend_metadata = serializers.JSONField(read_only=True)
+
+    class Meta:
+        model = Meeting
+        fields = ['id', 'queue', 'is_active', 'backend_type', 'backend_metadata']
+
+
+class NestedAttendeeSerializer(serializers.ModelSerializer):
+    user_id = serializers.ReadOnlyField(source='user.id')
+    username = serializers.ReadOnlyField(source='user.username')
+    first_name = serializers.ReadOnlyField(source='user.first_name')
+    last_name = serializers.ReadOnlyField(source='user.last_name')
+
+    class Meta:
+        model = Attendee
+        fields = ['id', 'user_id', 'username', 'first_name', 'last_name']
+
+
+class NestedAttendeeSetSerializer(serializers.ModelSerializer):
+    meeting = NestedMeetingSetSerializer(read_only=True)
+
+    class Meta:
+        model = Attendee
+        fields = ['id', 'meeting']
