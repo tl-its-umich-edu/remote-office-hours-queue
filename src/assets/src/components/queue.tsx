@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 
-import { User, AttendingQueue } from "../models";
+import { User, AttendingQueue, BluejeansMetadata } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage } from "./common";
 import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -48,12 +48,37 @@ const TurnSoonAlert = () =>
         <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
     </div>
 
+interface HowToBlueJeansProps {
+    metadata: BluejeansMetadata;
+}
+
+function HowToBlueJeans(props: HowToBlueJeansProps) {
+    const meetingId = props.metadata.meeting_id;
+    const joinLink = (
+        <a href={props.metadata.meeting_url} target="_blank" className="card-link">
+            Join the Meeting
+        </a>
+    );
+    return (
+        <div className="card-body">
+            <h5 className="card-title">Join the BlueJeans Meeting</h5>
+            <p className="card-text">Join now so you can make sure you are set up and ready. Download the app and test your audio before it is your turn.</p>
+            <p className="card-text">Having problems with video? As a back-up, you can call 1.312.216.0325 from the USA (or 1.416.900.2956 from Canada) from any phone and enter {meetingId}#. You are not a moderator, so you do not need a moderator passcode.</p>
+            {joinLink}
+            <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank" className="card-link">How to use BlueJeans at U-M</a>
+        </div>
+    );
+}
+
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const alert = props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
             ? <TurnSoonAlert/>
             : undefined;
+    const howTo = props.queue.my_meeting!.backend_type === "bluejeans"
+        ? <HowToBlueJeans metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}/>
+        : undefined;
     return (
         <>
         <div className="row">
@@ -61,19 +86,13 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 {alert}
                 <ul>
                     <li>You are in line and there are <strong>{props.queue.my_meeting!.line_place} people</strong> in line ahead of you</li>
-                    <li>The host will join the BlueJeans meeting when it is your turn</li>
+                    <li>The host will join the meeting when it is your turn</li>
                     <li>We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</li>
                 </ul>
             </div>
             <div className="col-sm">
                 <div className="card">
-                    <div className="card-body">
-                        <h5 className="card-title">Join the BlueJeans Meeting</h5>
-                        <p className="card-text">Join now so you can make sure you are set up and ready. Download the app and test your audio before it is your turn.</p>
-                        <p className="card-text">Having problems with video? As a back-up, you can call 1.312.216.0325 from the USA (or 1.416.900.2956 from Canada) from any phone and enter BLUEJEANS_NUMBER_HERE#. You are not a moderator, so you do not need a moderator passcode.</p>
-                        <a href="BLUEJEANS_NUMBER_HERE" target="_blank" className="card-link">Join the meeting</a>
-                        <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank" className="card-link">How to use BlueJeans at U-M</a>
-                    </div>
+                    {howTo}
                 </div>
             </div>
         </div>

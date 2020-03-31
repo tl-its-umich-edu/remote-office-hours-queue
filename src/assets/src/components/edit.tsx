@@ -1,6 +1,6 @@
 import * as React from "react";
 import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers } from "../services/api";
-import { User, ManageQueue, Meeting } from "../models";
+import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField } from "./common";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -16,10 +16,19 @@ interface MeetingEditorProps {
 
 function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0];
+    const joinUrl = props.meeting.backend_type === "bluejeans"
+        ? (props.meeting.backend_metadata as BluejeansMetadata).meeting_url
+        : undefined;
+    const joinLink = joinUrl && (
+        <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2">
+            Start Meeting
+        </a>
+    );
     return (
         <dd>
             <UserDisplay user={user}/>
             <span className="float-right">
+                {joinLink}
                 <RemoveButton remove={props.remove} size="sm" disabled={props.disabled}/>
             </span>
         </dd>

@@ -1,5 +1,3 @@
-"use strict";
-
 export interface User {
     id: number;
     username: string;
@@ -8,10 +6,19 @@ export interface User {
     attendee_set?: User[];
 }
 
+export interface BluejeansMetadata {
+    user_email: string;
+    user_id: number;
+    meeting_id: number;
+    meeting_url: string;
+}
+
 export interface Meeting {
     id: number;
     line_place: number;
     attendees: User[];
+    backend_type?: "bluejeans"|"zoom";
+    backend_metadata?: BluejeansMetadata;
 }
 
 export interface ManageQueue extends AttendingQueue {

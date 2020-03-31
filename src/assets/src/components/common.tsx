@@ -71,7 +71,7 @@ interface ErrorDisplayProps {
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
     if (!props.error) return null;
     return (
-        <p className="alert alert-danger">
+        <p className="alert alert-danger" role="alert">
             {props.error.message}
         </p>
     )
@@ -145,7 +145,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
         <div className="input-group">
             <input readOnly ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
             <div className="input-group-append">
-                <button type="button" onClick={copy} className="btn btn-primary">
+                <button type="button" onClick={copy} className="btn btn-secondary">
                     {buttonInner}
                 </button>
             </div>

@@ -173,7 +173,7 @@ h3, .h3 {
 	border-color: #cecbc9 !important;
 }
 
-a, a:link, a:visited {
+a:not(.btn), a:link:not(.btn), a:visited:not(.btn) {
 	color: #0075bc;
 }
 
