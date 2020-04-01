@@ -33,6 +33,7 @@ module.exports = {
             }
         ]
     },
+    devtool: 'inline-source-map',
     plugins: [
         new BundleTracker({
             path: __dirname,

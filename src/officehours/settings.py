@@ -174,6 +174,7 @@ STATICFILES_DIRS = (
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'dist/',
+        'IGNORE': [r'.+\.hot-update.js']
     }
 }
 
