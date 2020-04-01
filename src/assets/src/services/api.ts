@@ -17,27 +17,33 @@ const getDeleteHeaders = () => {
     };
 }
 
+const handleErrors = async (resp: Response) => {
+    if (resp.ok) return;
+    if (resp.status === 400) {
+        const json = await resp.json();
+        const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
+        const formatted = messages.join("\n");
+        throw new Error(formatted);
+    }
+    console.error(await resp.text());
+    throw new Error(resp.statusText);
+}
+
 export const getUsers = async () => {
     const resp = await fetch("/api/users/", { method: "GET" });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return await resp.json() as User[];
 }
 
 export const getQueues = async () => {
     const resp = await fetch("/api/queues/", { method: "GET" });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return await resp.json() as ManageQueue[];
 }
 
 export const getQueue = async (id: number) => {
     const resp = await fetch(`/api/queues/${id}/`, { method: "GET" });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return await resp.json() as ManageQueue | AttendingQueue;
 }
 
@@ -50,9 +56,7 @@ export const createQueue = async (name: string) => {
         }),
         headers: getPostHeaders(),
     });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return await resp.json() as ManageQueue;
 }
 
@@ -61,9 +65,7 @@ export const deleteQueue = async (id: number) => {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return resp;
 }
 
@@ -76,9 +78,7 @@ export const addMeeting = async (queue_id: number, user_id: number) => {
         }),
         headers: getPostHeaders(),
     });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return resp;
 }
 
@@ -87,9 +87,7 @@ export const removeMeeting = async (meeting_id: number) => {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return resp;
 }
 
@@ -98,9 +96,7 @@ export const addHost = async (queue_id: number, user_id: number) => {
         method: "POST",
         headers: getPostHeaders(),
     });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return resp;
 }
 
@@ -109,8 +105,6 @@ export const removeHost = async (queue_id: number, user_id: number) => {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    if (!resp.ok) {
-        throw new Error(resp.statusText);
-    }
+    await handleErrors(resp);
     return resp;
 }
