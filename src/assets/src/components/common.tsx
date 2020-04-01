@@ -1,8 +1,10 @@
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSyncAlt, faClipboard, faClipboardCheck } from '@fortawesome/free-solid-svg-icons'
+import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
 import { User } from "../models";
 import { useState, createRef } from "react";
+
+type BootstrapButtonTypes = "info"|"warning"|"success"|"primary"|"alternate"|"danger";
 
 export const DisabledMessage = <em></em>
 
@@ -61,7 +63,7 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
         <p className="bottom-right alert alert-info">
             <FontAwesomeIcon icon={faSyncAlt} spin />
         </p>
-    )
+    );
 }
 
 interface ErrorDisplayProps {
@@ -74,33 +76,38 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
         <p className="alert alert-danger" role="alert">
             {props.error.message}
         </p>
-    )
+    );
 }
 
 interface SingleInputFormProps {
     placeholder: string;
     disabled: boolean;
     onSubmit: (value: string) => void;
-    buttonType: "info"|"warning"|"success"|"primary"|"alternate"|"danger";
+    buttonType: BootstrapButtonTypes;
 }
 
-export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
-    const [value, setValue] = useState("");
-    const [error, setError] = useState(undefined as Error | undefined);
+interface StatelessSingleInputFormProps extends SingleInputFormProps {
+    value: string;
+    setValue: (value: string) => void;
+    error?: Error;
+    setError: (error: Error|undefined) => void;
+}
+
+const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props) => {
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
-            props.onSubmit(value);
-            setValue("");
+            props.onSubmit(props.value);
+            props.setValue("");
         } catch(e) {
-            setError(e);
+            props.setError(e);
         }
     }
-    const errorDisplay = error && <ErrorDisplay error={error}/>
+    const errorDisplay = props.error && <ErrorDisplay error={props.error}/>
     const buttonClass = "btn btn-" + props.buttonType;
     return (
         <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => setValue(e.target.value)} value={value} type="text" className="form-control" placeholder={props.placeholder}/>
+            <input onChange={(e) => props.setValue(e.target.value)} value={props.value} type="text" className="form-control" placeholder={props.placeholder}/>
             <div className="input-group-append">
                 <button className={buttonClass} type="submit">
                     {props.children}
@@ -108,6 +115,18 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
             </div>
             {errorDisplay}
         </form>
+    );
+}
+
+export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
+    const [value, setValue] = useState("");
+    const [error, setError] = useState(undefined as Error | undefined);
+    return (
+        <StatelessSingleInputForm
+            value={value} setValue={setValue}
+            error={error} setError={setError}
+            {...props}
+            />
     );
 }
 
@@ -135,12 +154,8 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
         setTimeout(() => setCopied(false), 1000);
     }
     const buttonInner = copied
-        ? (
-            <span><FontAwesomeIcon icon={faClipboardCheck}/> Copied!</span>
-        )
-        : (
-            <span><FontAwesomeIcon icon={faClipboard}/> Copy</span>
-        );
+        ? <span><FontAwesomeIcon icon={faClipboardCheck}/> Copied!</span>
+        : <span><FontAwesomeIcon icon={faClipboard}/> Copy</span>
     return (
         <div className="input-group">
             <input readOnly ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
@@ -151,4 +166,46 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
             </div>
         </div>
     );
+}
+
+interface EditToggleFieldProps {
+    text: string;
+    disabled: boolean;
+    onSubmit: (value: string) => void;
+    buttonType: BootstrapButtonTypes;
+}
+
+export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
+    const [editing, setEditing] = useState(false);
+    const [editorValue, setEditorValue] = useState(props.text);
+    const [editorError, setEditorError] = useState(undefined as Error | undefined);
+    const submit = (value: string) => {
+        props.onSubmit(value);
+        setEditing(false);
+    }
+    const enableEditMode = () => {
+        setEditing(true);
+        setEditorValue(props.text);
+    }
+    const contents = (editing && !props.disabled)
+        ? (
+            <StatelessSingleInputForm 
+                onSubmit={submit}
+                value={editorValue} setValue={setEditorValue}
+                error={editorError} setError={setEditorError}
+                placeholder="New name..." disabled={props.disabled}
+                buttonType="success">
+                    {props.children}
+            </StatelessSingleInputForm>
+        )
+        : (
+            <div className="input-group">
+                <span>{props.text}</span>
+                <button onClick={enableEditMode} type="button" className="btn btn-sm">
+                    <FontAwesomeIcon icon={faPencilAlt}/>
+                    Edit
+                </button>
+            </div>
+        );
+    return contents;
 }

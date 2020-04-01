@@ -11,6 +11,8 @@ const getPostHeaders = () => {
     };
 }
 
+const getPatchHeaders = getPostHeaders;
+
 const getDeleteHeaders = () => {
     return {
         'X-CSRFToken': getCsrfToken(),
@@ -83,7 +85,7 @@ export const addMeeting = async (queue_id: number, user_id: number) => {
 }
 
 export const removeMeeting = async (meeting_id: number) => {
-    const resp = await fetch("/api/meetings/" + meeting_id, {
+    const resp = await fetch(`/api/meetings/${meeting_id}`, {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
@@ -107,4 +109,16 @@ export const removeHost = async (queue_id: number, user_id: number) => {
     });
     await handleErrors(resp);
     return resp;
+}
+
+export const changeQueueName = async (queue_id: number, name: string) => {
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            name: name,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
 }

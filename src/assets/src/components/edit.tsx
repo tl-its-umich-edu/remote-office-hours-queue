@@ -1,7 +1,7 @@
 import * as React from "react";
-import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers } from "../services/api";
+import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField } from "./common";
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { usePromise } from "../hooks/usePromise";
@@ -59,6 +59,7 @@ interface QueueEditorProps {
     removeMeeting: (m: Meeting) => void;
     addHost: (uniqname: string) => void;
     removeHost: (h: User) => void;
+    changeName: (name: string) => void;
     disabled: boolean;
 }
 
@@ -77,7 +78,12 @@ function QueueEditor(props: QueueEditorProps) {
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     return (
         <div>
-            <h1>Manage: <strong>{props.queue.name}</strong></h1>
+            <h1 className="form-inline">
+                <span className="mr-2">Manage: </span>
+                <EditToggleField text={props.queue.name} disabled={props.disabled} onSubmit={props.changeName} buttonType="success">
+                    Change
+                </EditToggleField>
+            </h1>
             <p>
                 <Link to={"/queue/" + props.queue.id}>
                     View as visitor
@@ -187,15 +193,21 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         await doRefresh();
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading;
+    const changeName = async (name: string) => {
+        interactions.next(true);
+        return await apiChangeQueueName(queue!.id, name);
+    }
+    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue)
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError;
+    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging}
             addHost={doAddHost} removeHost={doRemoveHost} 
-            addMeeting={doAddMeeting} removeMeeting={doRemoveMeeting} />
+            addMeeting={doAddMeeting} removeMeeting={doRemoveMeeting} 
+            changeName={doChangeName} />
     return (
         <>
         {loadingDisplay}
