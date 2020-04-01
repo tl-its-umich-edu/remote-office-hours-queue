@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.nested_serializers import (
     NestedMeetingSerializer, NestedAttendeeSerializer, NestedUserSerializer,
-    NestedAttendeeSetSerializer, NestedMyMeetingSerializer,
+    NestedMyMeetingSerializer,
 )
 
 
@@ -14,11 +14,20 @@ class UserListSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    attendee_set = NestedAttendeeSetSerializer(many=True, read_only=True)
+    my_queue = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'attendee_set']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue']
+
+    def get_my_queue(self, obj):
+        try:
+            meeting = obj.meeting_set.get()
+        except Meeting.DoesNotExist:
+            return None
+
+        serializer = QueueAttendeeSerializer(meeting.queue, context={'request': self.context['request']})
+        return serializer.data
 
 
 class QueueAttendeeSerializer(serializers.ModelSerializer):
@@ -94,7 +103,6 @@ class MeetingSerializer(serializers.ModelSerializer):
         write_only=True,
     )
     backend_metadata = serializers.JSONField(read_only=True)
-
 
     class Meta:
         model = Meeting
