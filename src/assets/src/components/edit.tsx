@@ -141,7 +141,7 @@ interface QueueEditorPageProps {
 
 export function QueueEditorPage(props: QueueEditorPageProps) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin();
     }
     const { queue_id } = useParams();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
@@ -169,7 +169,6 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         interactions.next(true);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
-        interactions.next(true);
         await apiAddHost(queue!.id, user.id);
         await doRefresh();
     }
@@ -184,7 +183,6 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         interactions.next(true);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
-        interactions.next(true);
         await apiAddMeeting(queue!.id, user.id);
         await doRefresh();
     }
