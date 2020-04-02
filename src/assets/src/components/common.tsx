@@ -171,6 +171,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
 
 interface EditToggleFieldProps {
     text: string;
+    placeholder: string;
     disabled: boolean;
     onSubmit: (value: string) => void;
     buttonType: BootstrapButtonTypes;
@@ -194,7 +195,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
                 onSubmit={submit}
                 value={editorValue} setValue={setEditorValue}
                 error={editorError} setError={setEditorError}
-                placeholder="New name..." disabled={props.disabled}
+                placeholder={props.placeholder} disabled={props.disabled}
                 buttonType="success">
                     {props.children}
             </StatelessSingleInputForm>

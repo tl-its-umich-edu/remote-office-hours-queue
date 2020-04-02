@@ -131,6 +131,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 }
 
 function QueueAttending(props: QueueAttendingProps) {
+    const description = props.queue.description.trim()
+        && <p className="lead">{props.queue.description.trim()}</p>
     const content = !props.queue.my_meeting
         ? <QueueAttendingNotJoined {...props}/>
         : <QueueAttendingJoined {...props}/>
@@ -151,6 +153,7 @@ function QueueAttending(props: QueueAttendingProps) {
     return (
         <>
         <h2>Welcome to the {props.queue.name} meeting queue.</h2>
+        {description}
         {content}
         {yourQueueAlert}
         <hr/>

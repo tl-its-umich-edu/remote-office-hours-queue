@@ -1,5 +1,5 @@
 import * as React from "react";
-import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName } from "../services/api";
+import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField } from "./common";
 import { Link, useParams } from "react-router-dom";
@@ -60,6 +60,7 @@ interface QueueEditorProps {
     addHost: (uniqname: string) => void;
     removeHost: (h: User) => void;
     changeName: (name: string) => void;
+    changeDescription: (description: string) => void;
     disabled: boolean;
 }
 
@@ -80,8 +81,9 @@ function QueueEditor(props: QueueEditorProps) {
         <div>
             <h1 className="form-inline">
                 <span className="mr-2">Manage: </span>
-                <EditToggleField text={props.queue.name} disabled={props.disabled} onSubmit={props.changeName} buttonType="success">
-                    Change
+                <EditToggleField text={props.queue.name} disabled={props.disabled} 
+                    onSubmit={props.changeName} buttonType="success" placeholder="New name...">
+                        Change
                 </EditToggleField>
             </h1>
             <p>
@@ -100,6 +102,15 @@ function QueueEditor(props: QueueEditorProps) {
                     <label className="col-md-2 col-form-label">Created:</label>
                     <div className="col-md-6">
                         <DateDisplay date={props.queue.created_at}/>
+                    </div>
+                </div>
+                <div className="form-group row">
+                    <label className="col-md-2 col-form-label">Description:</label>
+                    <div className="col-md-6">
+                        <EditToggleField text={props.queue.description} disabled={props.disabled} 
+                            onSubmit={props.changeDescription} buttonType="success" placeholder="New description...">
+                                Change
+                        </EditToggleField>
                     </div>
                 </div>
                 <div className="row">
@@ -198,16 +209,21 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         return await apiChangeQueueName(queue!.id, name);
     }
     const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue)
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading;
+    const changeDescription = async (description: string) => {
+        interactions.next(true);
+        return await apiChangeQueueDescription(queue!.id, description);
+    }
+    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueue)
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError;
+    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError || changeDescriptionError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging}
             addHost={doAddHost} removeHost={doRemoveHost} 
             addMeeting={doAddMeeting} removeMeeting={doRemoveMeeting} 
-            changeName={doChangeName} />
+            changeName={doChangeName} changeDescription={doChangeDescription}/>
     return (
         <>
         {loadingDisplay}

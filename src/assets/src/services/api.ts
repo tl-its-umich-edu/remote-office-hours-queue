@@ -123,6 +123,18 @@ export const changeQueueName = async (queue_id: number, name: string) => {
     return await resp.json();
 }
 
+export const changeQueueDescription = async (queue_id: number, description: string) => {
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            description: description,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
+
 export const getMyUser = async (user_id: number) => {
     const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
     await handleErrors(resp);

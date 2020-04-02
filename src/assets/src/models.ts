@@ -37,6 +37,7 @@ export interface AttendingQueue extends QueueBase {
 export interface QueueBase {
     id: number;
     name: string;
+    description: string;
     hosts: User[];
     created_at: string;
 }

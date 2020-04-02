@@ -48,12 +48,6 @@ export function HomePage(props: HomePageProps) {
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueAlert = user?.my_queue
         && <JoinedQueueAlert joinedQueue={user.my_queue}/>
-    const queueLink = user?.my_queue
-        && (
-            <Link to={`/queue/${user.my_queue.id}`}>
-                Return to Previous Queue
-            </Link>
-        );
     const body = props.user
         ? (
             <>
@@ -61,7 +55,6 @@ export function HomePage(props: HomePageProps) {
                 Enter the ID of the meeting queue you would like to join!
             </p>
             {queueAlert}
-            {queueLink}
             <QueueLookup/>
             <hr/>
             <Link to="/manage">
