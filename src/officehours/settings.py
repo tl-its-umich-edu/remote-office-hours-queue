@@ -33,15 +33,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
     'handlers': {
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'mail_admins'],
             'propagate': True,
         },
         'mozilla_django_oidc': {
@@ -145,6 +155,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'redirect_to_non_www.middleware.RedirectToNonWww',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
 ]
 
 ROOT_URLCONF = 'officehours.urls'
@@ -240,3 +251,10 @@ DRF_TRACKING_ADMIN_LOG_READONLY = True
 LOGGING_METHODS = csv_to_list(
     os.getenv('LOGGING_METHODS', ['POST', 'PUT', 'PATCH', 'DELETE'])
 )
+
+
+# Email
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+
+ADMINS = [('Admins', os.getenv('ADMIN_EMAIL'))]
+MANAGERS = ADMINS
