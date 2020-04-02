@@ -6,7 +6,7 @@ import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
-import { redirectToLogin } from "../utils";
+import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -184,6 +184,8 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
     const addHost = async (uniqname: string) => {
         interactions.next(true);
+        uniqname = sanitizeUniqname(uniqname);
+        validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         await apiAddHost(queue!.id, user.id);
@@ -198,6 +200,8 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
     const addMeeting = async (uniqname: string) => {
         interactions.next(true);
+        uniqname = sanitizeUniqname(uniqname);
+        validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         await apiAddMeeting(queue!.id, user.id);
