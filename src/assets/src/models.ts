@@ -6,6 +6,10 @@ export interface User {
     attendee_set?: User[];
 }
 
+export interface MyUser extends User {
+    my_queue: AttendingQueue | null;
+}
+
 export interface BluejeansMetadata {
     user_email: string;
     user_id: number;

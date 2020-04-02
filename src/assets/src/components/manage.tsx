@@ -17,7 +17,7 @@ interface QueueListProps {
 
 function QueueList(props: QueueListProps) {
     const queues = props.queues.map((q) => 
-        <li className="list-group-item">
+        <li className="list-group-item" key={q.id}>
             <Link to={`/manage/${q.id}`}>
                 {q.id}: {q.name}
             </Link>

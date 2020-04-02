@@ -14,10 +14,18 @@ interface AppProps extends RouteComponentProps {
 function App(props: AppProps) {
     return (
         <>
-            <Route path='/' exact render={p => <HomePage {...p} user={props.globals.user} />} />
-            <Route path='/manage' exact render={p => <ManagePage {...p} user={props.globals.user} />} />
-            <Route path='/manage/:queue_id' exact render={p => <QueueEditorPage {...p} user={props.globals.user} />} />
-            <Route path='/queue/:queue_id' exact render={p => <QueuePage {...p} user={props.globals.user} />} />
+            <Route path='/' exact render={p => 
+                <HomePage {...p} user={props.globals.user} />
+            }/>
+            <Route path='/manage' exact render={p => 
+                <ManagePage {...p} user={props.globals.user} />
+            }/>
+            <Route path='/manage/:queue_id' exact render={p => 
+                <QueueEditorPage {...p} user={props.globals.user} key={(p.match.params as any).queue_id} />
+            }/>
+            <Route path='/queue/:queue_id' exact render={p => 
+                <QueuePage {...p} user={props.globals.user} key={(p.match.params as any).queue_id} />
+            }/>
         </>
     );
 }
