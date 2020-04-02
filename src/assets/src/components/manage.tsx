@@ -19,7 +19,7 @@ function QueueList(props: QueueListProps) {
     const queues = props.queues.map((q) => 
         <li className="list-group-item" key={q.id}>
             <Link to={`/manage/${q.id}`}>
-                {q.id}: {q.name}
+                {q.name}
             </Link>
             <span className="float-right">
                 <RemoveButton remove={() => props.removeQueue(q)} size="sm" disabled={props.disabled}> Delete Queue</RemoveButton>
