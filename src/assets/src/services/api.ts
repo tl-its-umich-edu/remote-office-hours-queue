@@ -1,4 +1,4 @@
-import { ManageQueue, AttendingQueue, User } from "../models";
+import { ManageQueue, AttendingQueue, User, MyUser } from "../models";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -121,4 +121,22 @@ export const changeQueueName = async (queue_id: number, name: string) => {
     });
     await handleErrors(resp);
     return await resp.json();
+}
+
+export const changeQueueDescription = async (queue_id: number, description: string) => {
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            description: description,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
+
+export const getMyUser = async (user_id: number) => {
+    const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
+    await handleErrors(resp);
+    return await resp.json() as MyUser;
 }

@@ -1,8 +1,9 @@
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
-import { User } from "../models";
+import { User, AttendingQueue } from "../models";
 import { useState, createRef } from "react";
+import { Link } from "react-router-dom";
 
 type BootstrapButtonTypes = "info"|"warning"|"success"|"primary"|"alternate"|"danger";
 
@@ -170,6 +171,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
 
 interface EditToggleFieldProps {
     text: string;
+    placeholder: string;
     disabled: boolean;
     onSubmit: (value: string) => void;
     buttonType: BootstrapButtonTypes;
@@ -193,7 +195,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
                 onSubmit={submit}
                 value={editorValue} setValue={setEditorValue}
                 error={editorError} setError={setEditorError}
-                placeholder="New name..." disabled={props.disabled}
+                placeholder={props.placeholder} disabled={props.disabled}
                 buttonType="success">
                     {props.children}
             </StatelessSingleInputForm>
@@ -208,4 +210,22 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
             </div>
         );
     return contents;
+}
+
+interface JoinedQueueAlertProps {
+    joinedQueue: AttendingQueue;
+}
+
+export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) => {
+    return (
+        <p className="col-lg alert alert-danger" role="alert">
+            <strong>You may only join one queue. </strong>
+            You are currently in {props.joinedQueue.name}. 
+            If you choose to join another queue, you will lose your current place in line.
+            <br/>
+            <Link to={`/queue/${props.joinedQueue.id}`} className="btn btn-danger">
+                Return to Previous Queue
+            </Link>
+        </p>
+    );
 }

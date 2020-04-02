@@ -6,6 +6,10 @@ export interface User {
     attendee_set?: User[];
 }
 
+export interface MyUser extends User {
+    my_queue: AttendingQueue | null;
+}
+
 export interface BluejeansMetadata {
     user_email: string;
     user_id: number;
@@ -33,6 +37,7 @@ export interface AttendingQueue extends QueueBase {
 export interface QueueBase {
     id: number;
     name: string;
+    description: string;
     hosts: User[];
     created_at: string;
 }
