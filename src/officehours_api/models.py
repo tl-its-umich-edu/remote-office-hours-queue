@@ -35,6 +35,7 @@ class Queue(SafeDeleteModel):
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(blank=True)
 
     def __str__(self):
         return self.name
