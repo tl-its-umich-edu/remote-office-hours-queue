@@ -2,7 +2,7 @@ import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
 import { User, AttendingQueue } from "../models";
-import { useState, createRef } from "react";
+import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 type BootstrapButtonTypes = "info"|"warning"|"success"|"primary"|"alternate"|"danger";
@@ -92,9 +92,15 @@ interface StatelessSingleInputFormProps extends SingleInputFormProps {
     setValue: (value: string) => void;
     error?: Error;
     setError: (error: Error|undefined) => void;
+    autofocus?: boolean;
 }
 
 const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props) => {
+    const inputRef = createRef<HTMLInputElement>();
+    useEffect(() => {
+        if (!props.autofocus) return;
+        inputRef.current!.focus();
+    }, []);
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
@@ -108,7 +114,7 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
     const buttonClass = "btn btn-" + props.buttonType;
     return (
         <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => props.setValue(e.target.value)} value={props.value} type="text" className="form-control" placeholder={props.placeholder}/>
+            <input onChange={(e) => props.setValue(e.target.value)} value={props.value} ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}/>
             <div className="input-group-append">
                 <button className={buttonClass} type="submit">
                     {props.children}
@@ -192,6 +198,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     const contents = (editing && !props.disabled)
         ? (
             <StatelessSingleInputForm 
+                autofocus={true}
                 onSubmit={submit}
                 value={editorValue} setValue={setEditorValue}
                 error={editorError} setError={setEditorError}
