@@ -11,6 +11,7 @@ export const usePromise = <T, F extends (...args: any) => Promise<T>>(
         return task(args)
             .then((data: T) => {
                 set && set(data);
+                setError(undefined);
             })
             .catch((error: Error) => {
                 console.error(error);
