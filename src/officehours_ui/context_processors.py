@@ -5,6 +5,10 @@ def feedback(request):
     return {'FEEDBACK_EMAIL': getattr(settings, 'FEEDBACK_EMAIL', None)}
 
 
+def debug(request):
+    return {'DEBUG': settings.DEBUG}
+
+
 def spa_globals(request):
     user_data = {
         'id': request.user.id,

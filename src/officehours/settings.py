@@ -172,6 +172,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'officehours_ui.context_processors.feedback',
+                'officehours_ui.context_processors.debug',
                 'officehours_ui.context_processors.spa_globals',
             ],
         },
