@@ -1,5 +1,5 @@
 import * as React from "react";
-import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription } from "../services/api";
+import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField } from "./common";
 import { Link, useParams } from "react-router-dom";
@@ -62,6 +62,7 @@ interface QueueEditorProps {
     removeHost: (h: User) => void;
     changeName: (name: string) => void;
     changeDescription: (description: string) => void;
+    removeQueue: () => void;
     disabled: boolean;
 }
 
@@ -80,13 +81,18 @@ function QueueEditor(props: QueueEditorProps) {
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     return (
         <div>
-            <h1 className="form-inline">
+            <div className="float-right">
+                <button onClick={props.removeQueue} disabled={props.disabled} className="btn btn-danger">
+                    Delete Queue
+                </button>
+            </div>            <h1 className="form-inline">
                 <span className="mr-2">Manage: </span>
                 <EditToggleField text={props.queue.name} disabled={props.disabled} 
                     onSubmit={props.changeName} buttonType="success" placeholder="New name...">
                         Change
                 </EditToggleField>
             </h1>
+
             <p>
                 <Link to={"/queue/" + props.queue.id}>
                     View as visitor
@@ -240,22 +246,42 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         interactions.next(true);
         return await apiChangeQueueName(queue!.id, name);
     }
-    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue)
+    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue);
     const changeDescription = async (description: string) => {
         interactions.next(true);
         return await apiChangeQueueDescription(queue!.id, description);
     }
-    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueue)
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading;
+    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueue);
+    const removeQueue = async () => {
+        interactions.next(true);
+        await apiRemoveQueue(queue!.id)
+        location.href = '/manage';
+    }
+    const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue);
+    const confirmRemoveQueue = () => {
+        interactions.next(true);
+        dialogRef.current!.show({
+            title: "Delete Queue?",
+            body: `Are you sure you want to permanently delete this queue?`,
+            actions: [
+                Dialog.CancelAction(),
+                Dialog.OKAction(() => {
+                    doRemoveQueue();
+                }),
+            ],
+        });
+    }
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError || changeDescriptionError;
+    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError || changeDescriptionError || removeQueueError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging}
             addHost={doAddHost} removeHost={confirmRemoveHost} 
             addMeeting={doAddMeeting} removeMeeting={confirmRemoveMeeting} 
-            changeName={doChangeName} changeDescription={doChangeDescription}/>
+            changeName={doChangeName} changeDescription={doChangeDescription}
+            removeQueue={confirmRemoveQueue}/>
     return (
         <>
         <Dialog ref={dialogRef}/>

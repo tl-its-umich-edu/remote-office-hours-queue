@@ -10,7 +10,6 @@ import { redirectToLogin } from "../utils";
 
 interface QueueListProps {
     queues: ManageQueue[];
-    removeQueue: (q: ManageQueue) => Promise<void>;
     addQueue: (uniqname: string) => Promise<void>;
     disabled: boolean;
 }
@@ -21,9 +20,6 @@ function QueueList(props: QueueListProps) {
             <Link to={`/manage/${q.id}`}>
                 {q.name}
             </Link>
-            <span className="float-right">
-                <RemoveButton remove={() => props.removeQueue(q)} size="sm" disabled={props.disabled}> Delete Queue</RemoveButton>
-            </span>
         </li>
     );
     const queueList = queues.length
@@ -58,13 +54,6 @@ export function ManagePage(props: ManagePageProps) {
         doRefresh();
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
-    const removeQueue = async (q: ManageQueue) => {
-        console.log(q);
-        interactions.next(true);
-        await apiRemoveQueue(q.id)
-        doRefresh();
-    }
-    const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue)
     const addQueue = async (queueName: string) => {
         interactions.next(true);
         if (!queueName) return;
@@ -72,13 +61,13 @@ export function ManagePage(props: ManagePageProps) {
         doRefresh();
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
-    const isChanging = removeQueueLoading || addQueueLoading;
+    const isChanging = addQueueLoading;
     const isLoading = refreshLoading || isChanging;
-    const error = refreshError || removeQueueError || addQueueError;
+    const error = refreshError || addQueueError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
-        && <QueueList queues={queues} disabled={isChanging} removeQueue={doRemoveQueue} addQueue={doAddQueue}/>
+        && <QueueList queues={queues} disabled={isChanging} addQueue={doAddQueue}/>
     return (
         <div>
             {loadingDisplay}
