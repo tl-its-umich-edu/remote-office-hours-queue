@@ -160,12 +160,15 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
         inputRef.current!.select();
         document.execCommand("copy");
         setCopied(true);
-        setTimeout(() => setCopied(false), 1000);
+        setTimeout(() => setCopied(false), 3000);
     }
     const buttonInner = copied
         ? <span><FontAwesomeIcon icon={faClipboardCheck}/> Copied!</span>
         : <span><FontAwesomeIcon icon={faClipboard}/> Copy</span>
+    const copiedSrAlert = copied
+        && <span className="sr-only" role="alert" aria-live="polite">Copied</span>
     return (
+        <>
         <div className="input-group">
             <input readOnly ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
             <div className="input-group-append">
@@ -174,6 +177,8 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
                 </button>
             </div>
         </div>
+        {copiedSrAlert}
+        </>
     );
 }
 
