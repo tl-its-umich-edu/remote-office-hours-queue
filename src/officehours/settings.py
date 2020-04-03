@@ -23,7 +23,7 @@ def csv_to_list(csv, delim=','):
 
 
 def str_to_bool(val):
-    return val.lower() in ('yes', 'true', 'on', '1')
+    return val.lower().strip() in ('yes', 'true', 'on', '1')
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
