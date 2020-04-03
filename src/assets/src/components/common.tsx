@@ -114,9 +114,11 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
     const buttonClass = "btn btn-" + props.buttonType;
     return (
         <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => props.setValue(e.target.value)} value={props.value} ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}/>
+            <input onChange={(e) => props.setValue(e.target.value)} value={props.value} 
+                ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}
+                disabled={props.disabled}/>
             <div className="input-group-append">
-                <button className={buttonClass} type="submit">
+                <button className={buttonClass} type="submit" disabled={props.disabled}>
                     {props.children}
                 </button>
             </div>
