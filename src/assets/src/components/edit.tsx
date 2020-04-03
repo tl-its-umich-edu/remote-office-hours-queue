@@ -3,10 +3,11 @@ import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeH
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField } from "./common";
 import { Link, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
+import Dialog from "react-bootstrap-dialog";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -176,12 +177,26 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         doRefreshUsers();
     }, []);
     useAutoRefresh(doRefreshUsers, 6000);
+    const dialogRef = createRef<Dialog>();
     const removeHost = async (h: User) => {
         interactions.next(true);
         await apiRemoveHost(queue!.id, h.id);
         await doRefresh();
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
+    const confirmRemoveHost = (h: User) => {
+        interactions.next(true);
+        dialogRef.current!.show({
+            title: "Remove Host?",
+            body: `Are you sure you want to remove host ${h.username}?`,
+            actions: [
+                Dialog.CancelAction(),
+                Dialog.OKAction(() => {
+                    doRemoveHost(h);
+                }),
+            ],
+        });
+    }
     const addHost = async (uniqname: string) => {
         interactions.next(true);
         uniqname = sanitizeUniqname(uniqname);
@@ -198,6 +213,19 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         await doRefresh();
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
+    const confirmRemoveMeeting = (m: Meeting) => {
+        interactions.next(true);
+        dialogRef.current!.show({
+            title: "Remove Meeting?",
+            body: `Are you sure you want to remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}?`,
+            actions: [
+                Dialog.CancelAction(),
+                Dialog.OKAction(() => {
+                    doRemoveMeeting(m);
+                }),
+            ],
+        });
+    }
     const addMeeting = async (uniqname: string) => {
         interactions.next(true);
         uniqname = sanitizeUniqname(uniqname);
@@ -225,11 +253,12 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging}
-            addHost={doAddHost} removeHost={doRemoveHost} 
-            addMeeting={doAddMeeting} removeMeeting={doRemoveMeeting} 
+            addHost={doAddHost} removeHost={confirmRemoveHost} 
+            addMeeting={doAddMeeting} removeMeeting={confirmRemoveMeeting} 
             changeName={doChangeName} changeDescription={doChangeDescription}/>
     return (
         <>
+        <Dialog ref={dialogRef}/>
         {loadingDisplay}
         {errorDisplay}
         {queueEditor}
