@@ -20,5 +20,6 @@ def spa_globals(request):
         'spa_globals': {
             'user': user_data,
             'feedback_email': getattr(settings, 'FEEDBACK_EMAIL', None),
+            'debug': settings.DEBUG,
         }
     }
