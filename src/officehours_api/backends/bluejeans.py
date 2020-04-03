@@ -146,6 +146,7 @@ class Bluejeans:
             backend_metadata.update({
                 'user_id': user['id'],
                 'meeting_id': meeting['id'],
+                'numeric_meeting_id': meeting['numericMeetingId'],
                 'meeting_url': f'https://bluejeans.com/{meeting["numericMeetingId"]}',
             })
 
