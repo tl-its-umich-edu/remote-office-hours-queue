@@ -13,24 +13,25 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(js|mjs|jsx|ts|tsx)$/,
+                test: /\.(ts|tsx)$/,
                 loader: 'ts-loader',
+                exclude: /node_modules/,
                 options: {
                     configFile: path.join(__dirname, 'tsconfig.json')
                 }
             },
-            {
-                test: /\.css$/,
-                use: ['style-loader', 'css-loader']
-            },
-            {
-                test: /\.(bmp|gif|jpeg|png|woff|woff2|eot|ttf|svg)$/,
-                loader: 'url-loader',
-                options: {
-                    limit: 10000,
-                    name: 'static/[name].[hash:8].[ext]'
-                }
-            }
+            // {
+            //     test: /\.css$/,
+            //     use: ['style-loader', 'css-loader']
+            // },
+            // {
+            //     test: /\.(bmp|gif|jpeg|png|woff|woff2|eot|ttf|svg)$/,
+            //     loader: 'url-loader',
+            //     options: {
+            //         limit: 10000,
+            //         name: 'static/[name].[hash:8].[ext]'
+            //     }
+            // }
         ]
     },
     devtool: 'inline-source-map',

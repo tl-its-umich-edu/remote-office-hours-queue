@@ -3,12 +3,18 @@
 		"target": "es6",
         "moduleResolution": "node",
         "lib": ["es6", "dom"],
-		"allowJs": true,
 		"strict": true,
         "esModuleInterop": true,
-        "jsx": "react"
+        "jsx": "react",
+		"skipLibCheck": true,
+		"sourceMap": true
 	},
 	"include": [
 		"assets/src"
+	],
+	"exclude": [
+		"assets/dist",
+		"node_modules",
+		"staticfiles"
 	]
 }
