@@ -1,3 +1,4 @@
+import './models';  // Work around definition files not triggering reload https://github.com/TypeStrong/ts-loader/issues/808
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
