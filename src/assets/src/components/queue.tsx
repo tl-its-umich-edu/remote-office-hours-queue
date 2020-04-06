@@ -70,22 +70,34 @@ const TurnSoonAlert = () =>
         <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
     </div>
 
+interface BlueJeansOneTouchDialLinkProps {
+    phone: string; // "." delimited
+    meetingNumber: string;
+}
+
+const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps) => 
+    <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
+        {props.phone}
+    </a>
+
 interface HowToBlueJeansProps {
     metadata: BluejeansMetadata;
 }
 
 function HowToBlueJeans(props: HowToBlueJeansProps) {
-    const meetingId = props.metadata.meeting_id;
     const joinLink = (
         <a href={props.metadata.meeting_url} target="_blank" className="card-link">
             Join the Meeting
         </a>
     );
+    const meetingNumber = props.metadata.numeric_meeting_id;
+    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={meetingNumber} />
+    const phoneLinkCanada = <BlueJeansOneTouchDialLink phone="1.416.900.2956" meetingNumber={meetingNumber} />
     return (
         <div className="card-body">
             <h5 className="card-title">Join the BlueJeans Meeting</h5>
             <p className="card-text">Join now so you can make sure you are set up and ready. Download the app and test your audio before it is your turn.</p>
-            <p className="card-text">Having problems with video? As a back-up, you can call 1.312.216.0325 from the USA (or 1.416.900.2956 from Canada) from any phone and enter {meetingId}#. You are not a moderator, so you do not need a moderator passcode.</p>
+            <p className="card-text">Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#. You are not a moderator, so you do not need a moderator passcode.</p>
             {joinLink}
             <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank" className="card-link">How to use BlueJeans at U-M</a>
         </div>

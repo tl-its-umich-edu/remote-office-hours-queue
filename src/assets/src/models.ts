@@ -15,6 +15,7 @@ export interface BluejeansMetadata {
     user_id: number;
     meeting_id: number;
     meeting_url: string;
+    numeric_meeting_id: string;  // Number for dial-in / URL
 }
 
 export interface Meeting {
