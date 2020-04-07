@@ -21,7 +21,7 @@ function MeetingEditor(props: MeetingEditorProps) {
         ? (props.meeting.backend_metadata as BluejeansMetadata).meeting_url
         : undefined;
     const joinLink = joinUrl && (
-        <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2">
+        <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
             Start Meeting
         </a>
     );
@@ -30,7 +30,7 @@ function MeetingEditor(props: MeetingEditorProps) {
             <UserDisplay user={user}/>
             <span className="float-right">
                 {joinLink}
-                <RemoveButton remove={props.remove} size="sm" disabled={props.disabled}/>
+                <RemoveButton remove={props.remove} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
             </span>
         </dd>
     );
@@ -44,7 +44,7 @@ interface HostEditorProps {
 
 function HostEditor(props: HostEditorProps) {
     const removeButton = props.remove
-        ? <RemoveButton remove={props.remove} size="sm" disabled={props.disabled}/>
+        ? <RemoveButton remove={props.remove} size="sm" disabled={props.disabled} screenReaderLabel="Remove Host"/>
         : undefined;
     return (
         <span>
@@ -85,9 +85,10 @@ function QueueEditor(props: QueueEditorProps) {
                 <button onClick={props.removeQueue} disabled={props.disabled} className="btn btn-danger">
                     Delete Queue
                 </button>
-            </div>            <h1 className="form-inline">
+            </div>
+            <h1 className="form-inline">
                 <span className="mr-2">Manage: </span>
-                <EditToggleField text={props.queue.name} disabled={props.disabled} 
+                <EditToggleField text={props.queue.name} disabled={props.disabled} id="name"
                     onSubmit={props.changeName} buttonType="success" placeholder="New name...">
                         Change
                 </EditToggleField>
@@ -100,9 +101,9 @@ function QueueEditor(props: QueueEditorProps) {
             </p>
             <div>
                 <div className="form-group row">
-                    <label className="col-md-2 col-form-label">Queue URL:</label>
+                    <label htmlFor="url" className="col-md-2 col-form-label">Queue URL:</label>
                     <div className="col-md-6">
-                        <CopyField text={absoluteUrl}/>
+                        <CopyField text={absoluteUrl} id="url"/>
                     </div>
                 </div>
                 <div className="form-group row">
@@ -112,9 +113,9 @@ function QueueEditor(props: QueueEditorProps) {
                     </div>
                 </div>
                 <div className="form-group row">
-                    <label className="col-md-2 col-form-label">Description:</label>
+                    <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
-                        <EditToggleField text={props.queue.description} disabled={props.disabled} 
+                        <EditToggleField text={props.queue.description} disabled={props.disabled} id="description"
                             onSubmit={props.changeDescription} buttonType="success" placeholder="New description...">
                                 Change
                         </EditToggleField>
@@ -127,6 +128,7 @@ function QueueEditor(props: QueueEditorProps) {
                             {hosts}
                         </ul>
                         <SingleInputForm 
+                            id="add_host"
                             placeholder="Uniqname..."
                             buttonType="success"
                             onSubmit={props.addHost}
@@ -147,6 +149,7 @@ function QueueEditor(props: QueueEditorProps) {
             <div className="row">
                 <div className="col-md-4">
                     <SingleInputForm
+                        id="add_attendee"
                         placeholder="Uniqname..."
                         buttonType="success"
                         onSubmit={props.addMeeting}

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getQueues as apiGetQueues, createQueue as apiAddQueue, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue } from "../models";
-import { RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm } from "./common";
+import { ErrorDisplay, LoadingDisplay, SingleInputForm } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
@@ -30,6 +30,7 @@ function QueueList(props: QueueListProps) {
             <h2>My Meeting Queues</h2>
             {queueList}
             <SingleInputForm 
+                id="add_queue"
                 placeholder="Queue name..." 
                 buttonType="success"
                 onSubmit={props.addQueue} 

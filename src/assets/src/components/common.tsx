@@ -22,13 +22,14 @@ interface RemoveButtonProps {
     remove: () => void;
     disabled: boolean;
     size?: "block"|"lg"|"sm";
+    screenReaderLabel: string;
 }
 
 export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
     const className = "btn btn-danger " + (props.size ? ` btn-${props.size}` : "");
     const disabledMessage = props.disabled && DisabledMessage;
     return (
-        <button onClick={() => props.remove()} disabled={props.disabled} className={className}>
+        <button onClick={() => props.remove()} disabled={props.disabled} className={className} aria-label={props.screenReaderLabel}>
             <span aria-hidden="true">&times;</span>
             {props.children}
             {disabledMessage}
@@ -40,13 +41,14 @@ interface AddButtonProps {
     add: () => void;
     disabled: boolean;
     size?: "block"|"lg"|"sm";
+    screenReaderLabel: string;
 }
 
 export const AddButton: React.FC<AddButtonProps> = (props) => {
     const className = "btn btn-success" + (props.size ? ` btn-${props.size}` : "");
     const disabledMessage = props.disabled && DisabledMessage;
     return (
-        <button onClick={() => props.add()} disabled={props.disabled} className={className}>
+        <button onClick={() => props.add()} disabled={props.disabled} className={className} aria-label={props.screenReaderLabel}>
             <span aria-hidden="true">+</span>
             {props.children}
             {disabledMessage}
@@ -85,6 +87,7 @@ interface SingleInputFormProps {
     disabled: boolean;
     onSubmit: (value: string) => void;
     buttonType: BootstrapButtonTypes;
+    id: string;
 }
 
 interface StatelessSingleInputFormProps extends SingleInputFormProps {
@@ -116,7 +119,7 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
         <form onSubmit={submit} className="input-group">
             <input onChange={(e) => props.setValue(e.target.value)} value={props.value} 
                 ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}
-                disabled={props.disabled}/>
+                disabled={props.disabled} id={props.id}/>
             <div className="input-group-append">
                 <button className={buttonClass} type="submit" disabled={props.disabled}>
                     {props.children}
@@ -132,6 +135,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     const [error, setError] = useState(undefined as Error | undefined);
     return (
         <StatelessSingleInputForm
+            id={props.id}
             value={value} setValue={setValue}
             error={error} setError={setError}
             {...props}
@@ -151,6 +155,7 @@ export const DateDisplay = (props: DateDisplayProps) =>
 
 interface CopyFieldProps {
     text: string;
+    id: string;
 }
 
 export const CopyField: React.FC<CopyFieldProps> = (props) => {
@@ -170,7 +175,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
     return (
         <>
         <div className="input-group">
-            <input readOnly ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
+            <input readOnly id={props.id} ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
             <div className="input-group-append">
                 <button type="button" onClick={copy} className="btn btn-secondary">
                     {buttonInner}
@@ -188,6 +193,7 @@ interface EditToggleFieldProps {
     disabled: boolean;
     onSubmit: (value: string) => void;
     buttonType: BootstrapButtonTypes;
+    id: string;
 }
 
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
@@ -205,6 +211,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     const contents = (editing && !props.disabled)
         ? (
             <StatelessSingleInputForm 
+                id={props.id}
                 autofocus={true}
                 onSubmit={submit}
                 value={editorValue} setValue={setEditorValue}
