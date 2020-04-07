@@ -18,7 +18,8 @@ from django.urls import re_path, path, include
 from django.views.generic import TemplateView
 
 urlpatterns = [
-    path('', include('bluejeans_queue.urls')),
+    path('', include('officehours_ui.urls')),
+    path('api/', include('officehours_api.urls')),
     re_path(r'^oidc/', include('mozilla_django_oidc.urls')),
     path('status/', include('watchman.urls')),
     path('admin/', admin.site.urls),

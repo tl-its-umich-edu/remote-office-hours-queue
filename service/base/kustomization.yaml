@@ -26,6 +26,8 @@ secretGenerator:
   - secret/BLUEJEANS_CLIENT_ID
   - secret/BLUEJEANS_CLIENT_SECRET
   - secret/FEEDBACK_EMAIL
+  - secret/ADMIN_EMAIL
+  - secret/EMAIL_HOST
   type: Opaque
 - name: web-tls
   type: "kubernetes.io/tls"

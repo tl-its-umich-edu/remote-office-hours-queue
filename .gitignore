@@ -64,3 +64,5 @@ db.sqlite3
 
 /src/staticfiles/
 secret
+node_modules
+webpack-stats.json

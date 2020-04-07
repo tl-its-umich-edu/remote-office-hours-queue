@@ -6,8 +6,6 @@ services:
   web:
     build:
       context: src
-    depends_on:
-      - database
     environment:
       - ALLOWED_HOSTS=*
       - DEBUG=True
@@ -16,10 +14,13 @@ services:
     # env_file:
     #   - .env
     ports:
-      - 127.0.0.1:8003:8001
+      - 8003:8001
     volumes:
       - ./src:/usr/src/app
     command: "python manage.py runserver 0.0.0.0:8001"
+    depends_on:
+      - database
+      - webpack_watcher
 
   database:
     image: postgres:10.4-alpine
@@ -28,6 +29,14 @@ services:
       - POSTGRES_DB=admin
     volumes:
       - officehours-postgres-data:/var/lib/postgresql/data
+
+  webpack_watcher:
+    build:
+      context: src
+      target: node-webpack
+    command: npm run watch
+    volumes:
+      - ./src:/usr/src/app
 
 volumes:
   officehours-postgres-data:

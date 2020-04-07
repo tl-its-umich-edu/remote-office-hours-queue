@@ -23,7 +23,7 @@ def csv_to_list(csv, delim=','):
 
 
 def str_to_bool(val):
-    return val.lower() in ('yes', 'true', 'on', '1')
+    return val.lower().strip() in ('yes', 'true', 'on', '1')
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -33,15 +33,25 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
     'handlers': {
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'handlers': ['console', 'mail_admins'],
             'propagate': True,
         },
         'mozilla_django_oidc': {
@@ -70,7 +80,8 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 # Application definition
 
 INSTALLED_APPS = [
-    'bluejeans_queue.apps.BluejeansQueueConfig',
+    'officehours_api.apps.OfficehoursApiConfig',
+    'officehours_ui.apps.OfficehoursUiConfig',
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -78,8 +89,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'safedelete',
     'watchman',
+    'webpack_loader',
+    'rest_framework_tracking',
 ]
+
+if DEBUG:
+    INSTALLED_APPS += [
+        'drf_yasg',
+    ]
 
 WATCHMAN_TOKENS = os.getenv('WATCHMAN_TOKENS')
 
@@ -113,6 +133,18 @@ else:
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
+# Django Rest Framework
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+}
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -123,6 +155,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'redirect_to_non_www.middleware.RedirectToNonWww',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
 ]
 
 ROOT_URLCONF = 'officehours.urls'
@@ -138,11 +171,24 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'bluejeans_queue.context_processors.feedback',
+                'officehours_ui.context_processors.feedback',
+                'officehours_ui.context_processors.debug',
+                'officehours_ui.context_processors.spa_globals',
             ],
         },
     },
 ]
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'assets'),
+)
+
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'dist/',
+        'IGNORE': [r'.+\.hot-update.js']
+    }
+}
 
 WSGI_APPLICATION = 'officehours.wsgi.application'
 
@@ -197,15 +243,19 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 FEEDBACK_EMAIL = os.getenv('FEEDBACK_EMAIL')
 
 
-# # Security
+# safedelete
+SAFE_DELETE_INTERPRET_UNDELETED_OBJECTS_AS_CREATED = True
 
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# CSRF_COOKIE_HTTPONLY = True
-# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-# SESSION_COOKIE_AGE = os.getenv('SESSION_COOKIE_AGE', 1209600)
 
-# SECURE_HSTS_SECONDS = os.getenv('SECURE_HSTS_SECONDS', 3600)
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# SECURE_BROWSER_XSS_FILTER = True
+# drf-api-tracking
+DRF_TRACKING_ADMIN_LOG_READONLY = True
+LOGGING_METHODS = csv_to_list(
+    os.getenv('LOGGING_METHODS', 'POST, PUT, PATCH, DELETE')
+)
+
+
+# Email
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+
+ADMINS = [('Admins', os.getenv('ADMIN_EMAIL'))]
+MANAGERS = ADMINS
