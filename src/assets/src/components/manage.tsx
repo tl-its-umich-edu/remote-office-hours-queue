@@ -8,13 +8,13 @@ import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
 
-interface QueueListProps {
+interface ManageQueueListProps {
     queues: ManageQueue[];
     addQueue: (uniqname: string) => Promise<void>;
     disabled: boolean;
 }
 
-function QueueList(props: QueueListProps) {
+function ManageQueueList(props: ManageQueueListProps) {
     const queues = props.queues.map((q) => 
         <li className="list-group-item" key={q.id}>
             <Link to={`/manage/${q.id}`}>
@@ -68,7 +68,7 @@ export function ManagePage(props: ManagePageProps) {
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
-        && <QueueList queues={queues} disabled={isChanging} addQueue={doAddQueue}/>
+        && <ManageQueueList queues={queues} disabled={isChanging} addQueue={doAddQueue}/>
     return (
         <div>
             {loadingDisplay}

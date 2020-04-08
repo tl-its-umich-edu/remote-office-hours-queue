@@ -7,7 +7,7 @@ import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert } from 
 import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting, getMyUser as apiGetMyUser } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
-import { redirectToLogin } from "../utils";
+import { redirectToLogin, redirectToSearch } from "../utils";
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
@@ -183,16 +183,21 @@ export function QueuePage(props: QueuePageProps) {
         redirectToLogin()
     }
     const { queue_id } = useParams();
-    console.log(queue_id);
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
-    console.log(queueIdParsed)
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
     const refresh = () => apiGetQueueAttending(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
-        doRefresh();
+        if (isNaN(queueIdParsed)) {
+            return redirectToSearch(queue_id);
+        }
+        doRefresh().catch((err: Error) => {
+            if (err.message === "Not Found") {
+                redirectToSearch(queue_id);
+            }
+        });
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);

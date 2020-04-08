@@ -2,6 +2,10 @@ export const redirectToLogin = () => {
     location.href = '/oidc/authenticate/?next=' + location.pathname;
 }
 
+export const redirectToSearch = (term: string) => {
+    location.href = `/search/${term}/`;
+}
+
 export const validateUniqname = (uniqname: string) => {
     if (uniqname.length < 3) throw new Error("Uniqnames must be at least 3 characters long.");
     if (uniqname.length > 8) throw new Error("Uniqnames must be at most 8 characters long.");

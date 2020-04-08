@@ -10,16 +10,17 @@ import { LoadingDisplay, ErrorDisplay, JoinedQueueAlert } from "./common";
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
     return (
-        <form className="form-inline" method="get" action={"/queue/" + lookup}>
-            <div className="input-group">
+        <form className="form-inline row" method="get" action={"/search/" + lookup}>
+            <div className="input-group col-sm-12 col-md-8 col-lg-6">
                 <input type="text" 
+                    aria-label="Queue name or host uniqname"
                     className="form-control" 
-                    placeholder="Queue ID..." 
+                    placeholder="Queue name or host uniqname..." 
                     value={lookup}
                     onChange={(e) => setLookup(e.target.value)}
                     />
                 <div className="input-group-append">
-                    <button type="submit" className="btn btn-primary">Visit Queue</button>
+                    <button type="submit" className="btn btn-primary">Search Queues</button>
                 </div>
             </div>
         </form>
@@ -51,7 +52,7 @@ export function HomePage(props: HomePageProps) {
         ? (
             <>
             <p className="lead">
-                Enter the ID of the meeting queue you would like to join!
+                Enter the name of the queue or the uniqname of the host to get started!
             </p>
             {queueAlert}
             <QueueLookup/>

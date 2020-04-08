@@ -6,6 +6,7 @@ import { HomePage } from "../components/home";
 import { ManagePage } from "../components/manage";
 import { QueuePage } from "../components/queue";
 import { QueueEditorPage } from "../components/edit";
+import { SearchPage } from "../components/search";
 
 interface AppProps extends RouteComponentProps {
     globals: Globals;
@@ -25,6 +26,9 @@ function App(props: AppProps) {
             }/>
             <Route path='/queue/:queue_id' exact render={p => 
                 <QueuePage {...p} user={props.globals.user} key={(p.match.params as any).queue_id} />
+            }/>
+            <Route path='/search/:term' exact render={p =>
+                <SearchPage {...p} user={props.globals.user} />
             }/>
         </>
     );
