@@ -55,7 +55,7 @@ class QueueListSearch(generics.ListAPIView):
     queryset = Queue.objects.all()
     serializer_class = QueueAttendeeSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ['name']
+    search_fields = ['name', '=hosts__username']
 
 
 class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
