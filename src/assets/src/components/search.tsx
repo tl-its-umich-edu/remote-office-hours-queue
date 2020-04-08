@@ -1,12 +1,12 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, RouteComponentProps } from "react-router-dom";
 
 import { AttendingQueue, User } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay } from "./common";
-import { redirectToLogin } from "../utils";
+import { redirectToLogin, redirectToSearch } from "../utils";
 
 interface AttendingQueueListProps {
     queues: AttendingQueue[];
@@ -27,15 +27,19 @@ function AttendingQueueList(props: AttendingQueueListProps) {
     );
 }
 
-interface SearchPageProps {
+interface SearchPageParams {
+    term: string;
+}
+
+interface SearchPageProps extends RouteComponentProps<SearchPageParams> {
     user?: User;
 }
 
 export function SearchPage(props: SearchPageProps) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin();
     }
-    const { term } = useParams();
+    const term = props.match.params.term;
     const [searchResults, setSearchResults] = useState(undefined as AttendingQueue[] | undefined);
     const [doSearch, searchLoading, searchError] = usePromise(
         (term: string) => apiSearchQueue(term),
@@ -44,13 +48,6 @@ export function SearchPage(props: SearchPageProps) {
     useEffect(() => {
         if (term) doSearch(term);
     }, []);
-    if (!term) {
-        return (
-            <div>
-                <ErrorDisplay error={new Error("You must enter a search term.")}/>
-            </div>
-        );
-    }
     const loadingDisplay = <LoadingDisplay loading={searchLoading}/>
     const errorDisplay = <ErrorDisplay error={searchError}/>
     const resultsDisplay = searchResults === undefined
@@ -62,10 +59,17 @@ export function SearchPage(props: SearchPageProps) {
                 </p>
             )
             : <AttendingQueueList queues={searchResults} />
+    const redirectAlert = props.location.search.includes("redirected=true")
+        && (
+            <p className="alert alert-warning">
+                We didn't find a queue there! It's ok, we recently made a change that moved some queues around--it's us, not you. To help you find the queue you were looking for, we searched for any queues hosted by {term}.
+            </p>
+        );
     return (
         <div className="">
             {loadingDisplay}
             {errorDisplay}
+            {redirectAlert}
             <h1>Search Results: "{term}"</h1>
             <p className="lead">Select a queue to join.</p>
             {resultsDisplay}

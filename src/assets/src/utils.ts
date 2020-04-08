@@ -3,7 +3,7 @@ export const redirectToLogin = () => {
 }
 
 export const redirectToSearch = (term: string) => {
-    location.href = `/search/${term}/`;
+    location.href = `/search/${term}/?redirected=true`;
 }
 
 export const validateUniqname = (uniqname: string) => {
