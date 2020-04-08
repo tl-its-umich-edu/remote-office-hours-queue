@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import generics, status
+from rest_framework import generics, status, filters
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
@@ -49,6 +49,14 @@ class QueueList(LoggingMixin, generics.ListCreateAPIView):
     def get_queryset(self):
         user = self.request.user
         return Queue.objects.filter(hosts__in=[user])
+
+
+class QueueListSearch(generics.ListAPIView):
+    queryset = Queue.objects.all()
+    serializer_class = QueueAttendeeSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ['id', 'name']
+
 
 class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
