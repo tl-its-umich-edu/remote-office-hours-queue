@@ -67,6 +67,7 @@ export function SearchPage(props: SearchPageProps) {
             {loadingDisplay}
             {errorDisplay}
             <h1>Search Results: "{term}"</h1>
+            <p className="lead">Select a queue to join.</p>
             {resultsDisplay}
         </div>
     );
