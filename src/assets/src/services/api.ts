@@ -140,3 +140,9 @@ export const getMyUser = async (user_id: number) => {
     await handleErrors(resp);
     return await resp.json() as MyUser;
 }
+
+export const searchQueue = async (term: string) => {
+    const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
+    await handleErrors(resp);
+    return await resp.json() as AttendingQueue[];
+}
