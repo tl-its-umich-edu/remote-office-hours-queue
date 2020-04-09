@@ -11,8 +11,6 @@ services:
       - DEBUG=True
       - DATABASE_URL=postgresql://admin:admin@database/postgres
       - FEEDBACK_EMAIL=office-hours-devs@umich.edu
-    # env_file:
-    #   - .env
     ports:
       - 8003:8001
     volumes:
@@ -36,7 +34,8 @@ services:
       target: node-webpack
     command: npm run watch
     volumes:
-      - ./src:/usr/src/app
+      - ./src:/usr/src/app:delegated
+      - /usr/src/app/node_modules/
 
 volumes:
   officehours-postgres-data:
