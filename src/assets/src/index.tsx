@@ -8,6 +8,8 @@ import { User } from './models';
 export interface Globals {
     user?: User;
     feedback_email: string;
+    debug: boolean;
+    ga_tracking_id?: string;
 }
 
 const globalsId = 'spa_globals';

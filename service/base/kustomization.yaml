@@ -28,6 +28,7 @@ secretGenerator:
   - secret/FEEDBACK_EMAIL
   - secret/ADMIN_EMAIL
   - secret/EMAIL_HOST
+  - secret/GA_TRACKING_ID
   type: Opaque
 - name: web-tls
   type: "kubernetes.io/tls"

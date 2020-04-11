@@ -7,12 +7,14 @@ import { ManagePage } from "../components/manage";
 import { QueuePage } from "../components/queue";
 import { QueueEditorPage } from "../components/edit";
 import { SearchPage } from "../components/search";
+import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
 
 interface AppProps extends RouteComponentProps {
     globals: Globals;
 }
 
 function App(props: AppProps) {
+    useGoogleAnalytics(props.globals.ga_tracking_id, props.globals.debug);
     return (
         <>
             <Route path='/' exact render={p => 

@@ -21,5 +21,6 @@ def spa_globals(request):
             'user': user_data,
             'feedback_email': getattr(settings, 'FEEDBACK_EMAIL', None),
             'debug': settings.DEBUG,
+            'ga_tracking_id': settings.GA_TRACKING_ID,
         }
     }

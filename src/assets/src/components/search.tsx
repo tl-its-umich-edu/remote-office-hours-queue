@@ -1,12 +1,12 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useParams, Link, RouteComponentProps } from "react-router-dom";
+import { Link, RouteComponentProps } from "react-router-dom";
 
 import { AttendingQueue, User } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay } from "./common";
-import { redirectToLogin, redirectToSearch } from "../utils";
+import { redirectToLogin } from "../utils";
 
 interface AttendingQueueListProps {
     queues: AttendingQueue[];
