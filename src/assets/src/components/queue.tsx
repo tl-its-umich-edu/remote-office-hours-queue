@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import * as ReactGA from "react-ga";
 
 import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert } from "./common";
@@ -209,17 +210,30 @@ export function QueuePage(props: QueuePageProps) {
     useAutoRefresh(doRefreshMyUser, 10000);
     const joinQueue = async () => {
         interactions.next(false);
+        ReactGA.event({
+            category: "Attending",
+            action: "Joined Queue",
+        });
         await apiAddMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
     const leaveQueue = async () => {
         interactions.next(false);
+        ReactGA.event({
+            category: "Attending",
+            action: "Left Queue",
+        });
         await apiRemoveMeeting(queue!.my_meeting!.id);
         await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
     const leaveAndJoinQueue = async () => {
+        interactions.next(false);
+        ReactGA.event({
+            category: "Attending",
+            action: "Left Previous Queue and Joined New Queue",
+        });
         await apiRemoveMeeting(myUser!.my_queue!.my_meeting!.id);
         await apiAddMeeting(queueIdParsed, props.user!.id);
         await doRefresh();

@@ -1,13 +1,15 @@
 import * as React from "react";
+import { useState, useEffect, createRef } from "react";
+import { Link, useParams } from "react-router-dom";
+import * as ReactGA from "react-ga";
+import Dialog from "react-bootstrap-dialog";
+
 import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField } from "./common";
-import { Link, useParams } from "react-router-dom";
-import { useState, useEffect, createRef } from "react";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
-import Dialog from "react-bootstrap-dialog";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -166,6 +168,13 @@ interface QueueEditorPageProps {
     user?: User;
 }
 
+const recordQueueManagementEvent = (action: string) => {
+    ReactGA.event({
+        category: "Queue Management",
+        action,
+    });
+}
+
 export function QueueEditorPage(props: QueueEditorPageProps) {
     if (!props.user) {
         redirectToLogin();
@@ -189,6 +198,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const dialogRef = createRef<Dialog>();
     const removeHost = async (h: User) => {
         interactions.next(true);
+        recordQueueManagementEvent("Removed Host");
         await apiRemoveHost(queue!.id, h.id);
         await doRefresh();
     }
@@ -212,12 +222,14 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
+        recordQueueManagementEvent("Added Host");
         await apiAddHost(queue!.id, user.id);
         await doRefresh();
     }
     const [doAddHost, addHostLoading, addHostError] = usePromise(addHost);
     const removeMeeting = async (m: Meeting) => {
         interactions.next(true);
+        recordQueueManagementEvent("Removed Meeting");
         await apiRemoveMeeting(m.id);
         await doRefresh();
     }
@@ -241,22 +253,26 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
+        recordQueueManagementEvent("Added Meeting");
         await apiAddMeeting(queue!.id, user.id);
         await doRefresh();
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {
         interactions.next(true);
+        recordQueueManagementEvent("Changed Name");
         return await apiChangeQueueName(queue!.id, name);
     }
     const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue);
     const changeDescription = async (description: string) => {
         interactions.next(true);
+        recordQueueManagementEvent("Changed Description");
         return await apiChangeQueueDescription(queue!.id, description);
     }
     const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueue);
     const removeQueue = async () => {
         interactions.next(true);
+        recordQueueManagementEvent("Removed Host");
         await apiRemoveQueue(queue!.id)
         location.href = '/manage';
     }

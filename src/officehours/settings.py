@@ -259,3 +259,7 @@ EMAIL_HOST = os.getenv('EMAIL_HOST')
 
 ADMINS = [('Admins', os.getenv('ADMIN_EMAIL'))]
 MANAGERS = ADMINS
+
+
+# Google Analytics
+GA_TRACKING_ID = os.getenv('GA_TRACKING_ID')
