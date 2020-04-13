@@ -1,4 +1,5 @@
 import { ManageQueue, AttendingQueue, User, MyUser } from "../models";
+import { redirectToLogin } from "../utils";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -21,14 +22,18 @@ const getDeleteHeaders = () => {
 
 const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
-    if (resp.status === 400) {
-        const json = await resp.json();
-        const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
-        const formatted = messages.join("\n");
-        throw new Error(formatted);
+    switch (resp.status) {
+        case 400:
+            const json = await resp.json();
+            const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
+            const formatted = messages.join("\n");
+            throw new Error(formatted);
+        case 403:
+            return redirectToLogin();
+        default:
+            console.error(await resp.text());
+            throw new Error(resp.statusText);
     }
-    console.error(await resp.text());
-    throw new Error(resp.statusText);
 }
 
 export const getUsers = async () => {
