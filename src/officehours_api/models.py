@@ -31,7 +31,7 @@ class Profile(models.Model):
 
 
 class Queue(SafeDeleteModel):
-    _safedelete_policy = SOFT_DELETE
+    _safedelete_policy = SOFT_DELETE_CASCADE
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -42,7 +42,7 @@ class Queue(SafeDeleteModel):
 
 
 class Meeting(SafeDeleteModel):
-    _safedelete_policy = SOFT_DELETE_CASCADE
+    _safedelete_policy = HARD_DELETE
     queue = models.ForeignKey(
         Queue, on_delete=models.CASCADE,
         null=True
@@ -84,7 +84,6 @@ class Attendee(SafeDeleteModel):
     Attendee must subclass SafeDeleteModel in order to be safedeleted
     when a Meeting is safedeleted
     '''
-    # SOFT_DELETE is breaking some interactions, need to investigate
     _safedelete_policy = HARD_DELETE
     user = models.ForeignKey(
         User,
