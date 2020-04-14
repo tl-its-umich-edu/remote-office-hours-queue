@@ -29,6 +29,8 @@ const handleErrors = async (resp: Response) => {
             const formatted = messages.join("\n");
             throw new Error(formatted);
         case 403:
+            console.error(await resp.text());
+            console.error("Redirecting to login...");
             return redirectToLogin();
         default:
             console.error(await resp.text());
