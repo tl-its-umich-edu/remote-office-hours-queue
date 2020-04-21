@@ -1,6 +1,6 @@
 from django.contrib import admin
 from safedelete.admin import SafeDeleteAdmin, highlight_deleted
-from officehours_api.models import Queue, Meeting
+from officehours_api.models import Queue, Meeting, Attendee
 
 
 @admin.register(Queue)
@@ -10,8 +10,14 @@ class QueueAdmin(SafeDeleteAdmin):
     search_fields = ['id', 'name']
 
 
+class AttendeeInline(admin.TabularInline):
+    model = Attendee
+    extra = 1
+
+
 @admin.register(Meeting)
 class MeetingAdmin(admin.ModelAdmin):
     list_display = ('id', 'queue', 'created_at')
     list_filter = ('queue',)
     search_fields = ['id', 'queue__name']
+    inlines = (AttendeeInline,)
