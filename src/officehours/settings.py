@@ -94,6 +94,7 @@ INSTALLED_APPS = [
     'watchman',
     'webpack_loader',
     'rest_framework_tracking',
+    'django_filters',
 ]
 
 if DEBUG:
