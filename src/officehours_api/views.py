@@ -8,6 +8,7 @@ from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework_tracking.mixins import LoggingMixin
+from django_filters.rest_framework import DjangoFilterBackend
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.serializers import (
     UserListSerializer, UserSerializer, QueueAttendeeSerializer,
@@ -54,8 +55,9 @@ class QueueList(LoggingMixin, generics.ListCreateAPIView):
 class QueueListSearch(generics.ListAPIView):
     queryset = Queue.objects.all()
     serializer_class = QueueAttendeeSerializer
-    filter_backends = (filters.SearchFilter,)
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['name', '=hosts__username']
+    filterset_fields = ['status']
 
 
 class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
