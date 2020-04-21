@@ -7,6 +7,7 @@ import { ErrorDisplay, LoadingDisplay, SingleInputForm } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
+import { PageProps } from "./page";
 
 interface ManageQueueListProps {
     queues: ManageQueue[];
@@ -41,16 +42,12 @@ function ManageQueueList(props: ManageQueueListProps) {
     );
 }
 
-interface ManagePageProps {
-    user?: User;
-}
-
-export function ManagePage(props: ManagePageProps) {
+export function ManagePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin()
     }
     const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueues(), setQueues);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueues(props.triggerLoginModal), setQueues);
     useEffect(() => {
         doRefresh();
     }, []);
@@ -58,7 +55,7 @@ export function ManagePage(props: ManagePageProps) {
     const addQueue = async (queueName: string) => {
         interactions.next(true);
         if (!queueName) return;
-        await apiAddQueue(queueName);
+        await apiAddQueue(queueName, props.triggerLoginModal);
         doRefresh();
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);

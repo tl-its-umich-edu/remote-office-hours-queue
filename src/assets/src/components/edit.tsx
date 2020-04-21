@@ -10,6 +10,7 @@ import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputFor
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
+import { PageProps } from "./page";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -164,10 +165,6 @@ function QueueEditor(props: QueueEditorProps) {
     );
 }
 
-interface QueueEditorPageProps {
-    user?: User;
-}
-
 const recordQueueManagementEvent = (action: string) => {
     ReactGA.event({
         category: "Queue Management",
@@ -175,16 +172,20 @@ const recordQueueManagementEvent = (action: string) => {
     });
 }
 
-export function QueueEditorPage(props: QueueEditorPageProps) {
+interface EditPageParams {
+    queue_id: string;
+}
+
+export function QueueEditorPage(props: PageProps<EditPageParams>) {
     if (!props.user) {
         redirectToLogin();
     }
-    const { queue_id } = useParams();
+    const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueue(queueIdParsed) as Promise<ManageQueue>, setQueue);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueue(queueIdParsed, props.triggerLoginModal) as Promise<ManageQueue>, setQueue);
     useEffect(() => {
         doRefresh();
     }, []);
@@ -199,7 +200,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const removeHost = async (h: User) => {
         interactions.next(true);
         recordQueueManagementEvent("Removed Host");
-        await apiRemoveHost(queue!.id, h.id);
+        await apiRemoveHost(queue!.id, h.id, props.triggerLoginModal);
         await doRefresh();
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
@@ -223,14 +224,14 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Host");
-        await apiAddHost(queue!.id, user.id);
+        await apiAddHost(queue!.id, user.id, props.triggerLoginModal);
         await doRefresh();
     }
     const [doAddHost, addHostLoading, addHostError] = usePromise(addHost);
     const removeMeeting = async (m: Meeting) => {
         interactions.next(true);
         recordQueueManagementEvent("Removed Meeting");
-        await apiRemoveMeeting(m.id);
+        await apiRemoveMeeting(m.id, props.triggerLoginModal);
         await doRefresh();
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
@@ -254,26 +255,26 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
-        await apiAddMeeting(queue!.id, user.id);
+        await apiAddMeeting(queue!.id, user.id, props.triggerLoginModal);
         await doRefresh();
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {
         interactions.next(true);
         recordQueueManagementEvent("Changed Name");
-        return await apiChangeQueueName(queue!.id, name);
+        return await apiChangeQueueName(queue!.id, name, props.triggerLoginModal);
     }
     const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue);
     const changeDescription = async (description: string) => {
         interactions.next(true);
         recordQueueManagementEvent("Changed Description");
-        return await apiChangeQueueDescription(queue!.id, description);
+        return await apiChangeQueueDescription(queue!.id, description, props.triggerLoginModal);
     }
     const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueue);
     const removeQueue = async () => {
         interactions.next(true);
         recordQueueManagementEvent("Removed Host");
-        await apiRemoveQueue(queue!.id)
+        await apiRemoveQueue(queue!.id, props.triggerLoginModal);
         location.href = '/manage';
     }
     const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue);

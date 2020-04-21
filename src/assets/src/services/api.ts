@@ -20,7 +20,7 @@ const getDeleteHeaders = () => {
     };
 }
 
-const handleErrors = async (resp: Response) => {
+const handleErrors = async (resp: Response, on403: () => void = () => {}) => {
     if (resp.ok) return;
     switch (resp.status) {
         case 400:
@@ -29,34 +29,35 @@ const handleErrors = async (resp: Response) => {
             const formatted = messages.join("\n");
             throw new Error(formatted);
         case 403:
-            console.error(await resp.text());
-            console.error("Redirecting to login...");
-            return redirectToLogin();
+            const text = await resp.text();
+            console.error(text);
+            on403();
+            throw new Error(text);
         default:
             console.error(await resp.text());
             throw new Error(resp.statusText);
     }
 }
 
-export const getUsers = async () => {
+export const getUsers = async (on403: () => void = () => {}) => {
     const resp = await fetch("/api/users/", { method: "GET" });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json() as User[];
 }
 
-export const getQueues = async () => {
+export const getQueues = async (on403: () => void = () => {}) => {
     const resp = await fetch("/api/queues/", { method: "GET" });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json() as ManageQueue[];
 }
 
-export const getQueue = async (id: number) => {
+export const getQueue = async (id: number, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/queues/${id}/`, { method: "GET" });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json() as ManageQueue | AttendingQueue;
 }
 
-export const createQueue = async (name: string) => {
+export const createQueue = async (name: string, on403: () => void = () => {}) => {
     const resp = await fetch("/api/queues/", { 
         method: "POST",
         body: JSON.stringify({
@@ -65,20 +66,20 @@ export const createQueue = async (name: string) => {
         }),
         headers: getPostHeaders(),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json() as ManageQueue;
 }
 
-export const deleteQueue = async (id: number) => {
+export const deleteQueue = async (id: number, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/queues/${id}/`, { 
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return resp;
 }
 
-export const addMeeting = async (queue_id: number, user_id: number) => {
+export const addMeeting = async (queue_id: number, user_id: number, on403: () => void = () => {}) => {
     const resp = await fetch("/api/meetings/", {
         method: "POST",
         body: JSON.stringify({
@@ -87,38 +88,38 @@ export const addMeeting = async (queue_id: number, user_id: number) => {
         }),
         headers: getPostHeaders(),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return resp;
 }
 
-export const removeMeeting = async (meeting_id: number) => {
+export const removeMeeting = async (meeting_id: number, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/meetings/${meeting_id}`, {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return resp;
 }
 
-export const addHost = async (queue_id: number, user_id: number) => {
+export const addHost = async (queue_id: number, user_id: number, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, {
         method: "POST",
         headers: getPostHeaders(),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return resp;
 }
 
-export const removeHost = async (queue_id: number, user_id: number) => {
+export const removeHost = async (queue_id: number, user_id: number, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return resp;
 }
 
-export const changeQueueName = async (queue_id: number, name: string) => {
+export const changeQueueName = async (queue_id: number, name: string, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/queues/${queue_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
@@ -126,11 +127,11 @@ export const changeQueueName = async (queue_id: number, name: string) => {
             name: name,
         }),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json();
 }
 
-export const changeQueueDescription = async (queue_id: number, description: string) => {
+export const changeQueueDescription = async (queue_id: number, description: string, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/queues/${queue_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
@@ -138,18 +139,18 @@ export const changeQueueDescription = async (queue_id: number, description: stri
             description: description,
         }),
     });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json();
 }
 
-export const getMyUser = async (user_id: number) => {
+export const getMyUser = async (user_id: number, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json() as MyUser;
 }
 
-export const searchQueue = async (term: string) => {
+export const searchQueue = async (term: string, on403: () => void = () => {}) => {
     const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
-    await handleErrors(resp);
+    await handleErrors(resp, on403);
     return await resp.json() as AttendingQueue[];
 }

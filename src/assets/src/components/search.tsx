@@ -7,6 +7,7 @@ import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay } from "./common";
 import { redirectToLogin } from "../utils";
+import { PageProps } from "./page";
 
 interface AttendingQueueListProps {
     queues: AttendingQueue[];
@@ -31,11 +32,7 @@ interface SearchPageParams {
     term: string;
 }
 
-interface SearchPageProps extends RouteComponentProps<SearchPageParams> {
-    user?: User;
-}
-
-export function SearchPage(props: SearchPageProps) {
+export function SearchPage(props: PageProps<SearchPageParams>) {
     if (!props.user) {
         redirectToLogin();
     }

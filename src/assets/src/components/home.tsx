@@ -6,6 +6,7 @@ import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { getMyUser as apiGetUser } from "../services/api";
 import { LoadingDisplay, ErrorDisplay, JoinedQueueAlert } from "./common";
+import { PageProps } from "./page";
 
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
@@ -27,11 +28,7 @@ function QueueLookup() {
     );
 }
 
-interface HomePageProps {
-    user?: User;
-}
-
-export function HomePage(props: HomePageProps) {
+export function HomePage(props: PageProps) {
     const getUser = async () => {
         if (!props.user) return;
         return await apiGetUser(props.user.id)
