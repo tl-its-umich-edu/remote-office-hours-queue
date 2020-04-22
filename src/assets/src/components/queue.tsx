@@ -1,10 +1,10 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 
 import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert } from "./common";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog } from "./common";
 import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting, getMyUser as apiGetMyUser } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -189,7 +189,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
-    const refresh = () => apiGetQueueAttending(queueIdParsed, props.triggerLoginModal);
+    const refresh = () => apiGetQueueAttending(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
         if (isNaN(queueIdParsed)) {
@@ -203,7 +203,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
-    const refreshMyUser = () => apiGetMyUser(props.user!.id, props.triggerLoginModal);
+    const refreshMyUser = () => apiGetMyUser(props.user!.id);
     const [doRefreshMyUser, refreshMyUserLoading, refreshMyUserError] = usePromise(refreshMyUser, setMyUser);
     useEffect(() => {
         doRefreshMyUser();
@@ -215,7 +215,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Joined Queue",
         });
-        await apiAddMeeting(queueIdParsed, props.user!.id, props.triggerLoginModal);
+        await apiAddMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
@@ -225,7 +225,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Left Queue",
         });
-        await apiRemoveMeeting(queue!.my_meeting!.id, props.triggerLoginModal);
+        await apiRemoveMeeting(queue!.my_meeting!.id);
         await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
@@ -235,21 +235,25 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Left Previous Queue and Joined New Queue",
         });
-        await apiRemoveMeeting(myUser!.my_queue!.my_meeting!.id, props.triggerLoginModal);
-        await apiAddMeeting(queueIdParsed, props.user!.id, props.triggerLoginModal);
+        await apiRemoveMeeting(myUser!.my_queue!.my_meeting!.id);
+        await apiAddMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
+    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
+    const error = errorTypes.find(e => e);
+    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={refreshError || joinQueueError || leaveQueueError || refreshMyUserError || leaveAndJoinQueueError}/>
+    const errorDisplay = <ErrorDisplay error={error}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} joinQueue={doJoinQueue} leaveQueue={doLeaveQueue}
             leaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div className="container-fluid content">
+            <LoginDialog visible={loginDialogVisible} onClose={() => {}}/>
             {loadingDisplay}
             {errorDisplay}
             {queueDisplay}

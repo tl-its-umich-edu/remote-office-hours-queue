@@ -1,5 +1,4 @@
 import { ManageQueue, AttendingQueue, User, MyUser } from "../models";
-import { redirectToLogin } from "../utils";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -20,7 +19,14 @@ const getDeleteHeaders = () => {
     };
 }
 
-const handleErrors = async (resp: Response, on403: () => void = () => {}) => {
+class ForbiddenError extends Error {
+    public name = "ForbiddenError";
+    constructor() {
+        super("You aren't authorized to perform that action. Your session may have expired.");
+    }
+}
+
+const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
     switch (resp.status) {
         case 400:
@@ -31,33 +37,32 @@ const handleErrors = async (resp: Response, on403: () => void = () => {}) => {
         case 403:
             const text = await resp.text();
             console.error(text);
-            on403();
-            throw new Error(text);
+            throw new ForbiddenError();
         default:
             console.error(await resp.text());
             throw new Error(resp.statusText);
     }
 }
 
-export const getUsers = async (on403: () => void = () => {}) => {
+export const getUsers = async () => {
     const resp = await fetch("/api/users/", { method: "GET" });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json() as User[];
 }
 
-export const getQueues = async (on403: () => void = () => {}) => {
+export const getQueues = async () => {
     const resp = await fetch("/api/queues/", { method: "GET" });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json() as ManageQueue[];
 }
 
-export const getQueue = async (id: number, on403: () => void = () => {}) => {
+export const getQueue = async (id: number) => {
     const resp = await fetch(`/api/queues/${id}/`, { method: "GET" });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json() as ManageQueue | AttendingQueue;
 }
 
-export const createQueue = async (name: string, on403: () => void = () => {}) => {
+export const createQueue = async (name: string) => {
     const resp = await fetch("/api/queues/", { 
         method: "POST",
         body: JSON.stringify({
@@ -66,20 +71,20 @@ export const createQueue = async (name: string, on403: () => void = () => {}) =>
         }),
         headers: getPostHeaders(),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json() as ManageQueue;
 }
 
-export const deleteQueue = async (id: number, on403: () => void = () => {}) => {
+export const deleteQueue = async (id: number) => {
     const resp = await fetch(`/api/queues/${id}/`, { 
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return resp;
 }
 
-export const addMeeting = async (queue_id: number, user_id: number, on403: () => void = () => {}) => {
+export const addMeeting = async (queue_id: number, user_id: number) => {
     const resp = await fetch("/api/meetings/", {
         method: "POST",
         body: JSON.stringify({
@@ -88,38 +93,38 @@ export const addMeeting = async (queue_id: number, user_id: number, on403: () =>
         }),
         headers: getPostHeaders(),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return resp;
 }
 
-export const removeMeeting = async (meeting_id: number, on403: () => void = () => {}) => {
+export const removeMeeting = async (meeting_id: number) => {
     const resp = await fetch(`/api/meetings/${meeting_id}`, {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return resp;
 }
 
-export const addHost = async (queue_id: number, user_id: number, on403: () => void = () => {}) => {
+export const addHost = async (queue_id: number, user_id: number) => {
     const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, {
         method: "POST",
         headers: getPostHeaders(),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return resp;
 }
 
-export const removeHost = async (queue_id: number, user_id: number, on403: () => void = () => {}) => {
+export const removeHost = async (queue_id: number, user_id: number) => {
     const resp = await fetch(`/api/queues/${queue_id}/hosts/${user_id}/`, {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return resp;
 }
 
-export const changeQueueName = async (queue_id: number, name: string, on403: () => void = () => {}) => {
+export const changeQueueName = async (queue_id: number, name: string) => {
     const resp = await fetch(`/api/queues/${queue_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
@@ -127,11 +132,11 @@ export const changeQueueName = async (queue_id: number, name: string, on403: () 
             name: name,
         }),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json();
 }
 
-export const changeQueueDescription = async (queue_id: number, description: string, on403: () => void = () => {}) => {
+export const changeQueueDescription = async (queue_id: number, description: string) => {
     const resp = await fetch(`/api/queues/${queue_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
@@ -139,18 +144,18 @@ export const changeQueueDescription = async (queue_id: number, description: stri
             description: description,
         }),
     });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json();
 }
 
-export const getMyUser = async (user_id: number, on403: () => void = () => {}) => {
+export const getMyUser = async (user_id: number) => {
     const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json() as MyUser;
 }
 
-export const searchQueue = async (term: string, on403: () => void = () => {}) => {
+export const searchQueue = async (term: string) => {
     const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
-    await handleErrors(resp, on403);
+    await handleErrors(resp);
     return await resp.json() as AttendingQueue[];
 }
