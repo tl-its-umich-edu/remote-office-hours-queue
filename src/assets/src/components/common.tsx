@@ -264,6 +264,6 @@ export const LoginDialog = (props: LoginDialogProps) =>
             <p className="alert alert-warning">Your session has timed out. Please login via the "Login" link below.</p>
         </Modal.Body>
         <Modal.Footer>
-            <a href={'/oidc/authenticate/?next=' + location.pathname} className="btn btn-primary" target="_blank">Login</a>
+            <a href={'/oidc/authenticate/?next=' + location.pathname} className="btn btn-primary">Login</a>
         </Modal.Footer>
     </Modal>
