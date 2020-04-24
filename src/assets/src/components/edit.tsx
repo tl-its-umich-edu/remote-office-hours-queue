@@ -1,15 +1,16 @@
 import * as React from "react";
 import { useState, useEffect, createRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Dialog from "react-bootstrap-dialog";
 
 import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription, deleteQueue as apiRemoveQueue } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
+import { PageProps } from "./page";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -164,10 +165,6 @@ function QueueEditor(props: QueueEditorProps) {
     );
 }
 
-interface QueueEditorPageProps {
-    user?: User;
-}
-
 const recordQueueManagementEvent = (action: string) => {
     ReactGA.event({
         category: "Queue Management",
@@ -175,13 +172,18 @@ const recordQueueManagementEvent = (action: string) => {
     });
 }
 
-export function QueueEditorPage(props: QueueEditorPageProps) {
+interface EditPageParams {
+    queue_id: string;
+}
+
+export function QueueEditorPage(props: PageProps<EditPageParams>) {
     if (!props.user) {
         redirectToLogin();
     }
-    const { queue_id } = useParams();
+    const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
+    const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
     const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
     const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueue(queueIdParsed) as Promise<ManageQueue>, setQueue);
@@ -195,7 +197,6 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
         doRefreshUsers();
     }, []);
     useAutoRefresh(doRefreshUsers, 6000);
-    const dialogRef = createRef<Dialog>();
     const removeHost = async (h: User) => {
         interactions.next(true);
         recordQueueManagementEvent("Removed Host");
@@ -273,7 +274,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     const removeQueue = async () => {
         interactions.next(true);
         recordQueueManagementEvent("Removed Host");
-        await apiRemoveQueue(queue!.id)
+        await apiRemoveQueue(queue!.id);
         location.href = '/manage';
     }
     const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue);
@@ -292,7 +293,9 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     }
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError || changeDescriptionError || removeQueueError;
+    const errorTypes = [refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError];
+    const error = errorTypes.find(e => e);
+    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
@@ -304,6 +307,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
     return (
         <>
         <Dialog ref={dialogRef}/>
+        <LoginDialog visible={loginDialogVisible} onClose={() => {}}/>
         {loadingDisplay}
         {errorDisplay}
         {queueEditor}

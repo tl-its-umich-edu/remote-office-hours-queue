@@ -19,16 +19,29 @@ const getDeleteHeaders = () => {
     };
 }
 
+class ForbiddenError extends Error {
+    public name = "ForbiddenError";
+    constructor() {
+        super("You aren't authorized to perform that action. Your session may have expired.");
+    }
+}
+
 const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
-    if (resp.status === 400) {
-        const json = await resp.json();
-        const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
-        const formatted = messages.join("\n");
-        throw new Error(formatted);
+    switch (resp.status) {
+        case 400:
+            const json = await resp.json();
+            const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
+            const formatted = messages.join("\n");
+            throw new Error(formatted);
+        case 403:
+            const text = await resp.text();
+            console.error(text);
+            throw new ForbiddenError();
+        default:
+            console.error(await resp.text());
+            throw new Error(resp.statusText);
     }
-    console.error(await resp.text());
-    throw new Error(resp.statusText);
 }
 
 export const getUsers = async () => {
