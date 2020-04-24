@@ -66,10 +66,6 @@ class Meeting(SafeDeleteModel):
                                     null=True)
     backend_metadata = JSONField(null=True, default=dict)
 
-    @property
-    def is_active(self):
-        return bool(not(self.removed_at or self.ended_at))
-
     def save(self, *args, **kwargs):
         if not self.backend_type and bluejeans:
             self.backend_type = 'bluejeans'
