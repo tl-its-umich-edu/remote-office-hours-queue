@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
+import Alert from "react-bootstrap/Alert"
 
 import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert } from "./common";
@@ -22,34 +23,39 @@ interface QueueAttendingProps {
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
     const joinedOther = props.joinedQueue && props.joinedQueue.id !== props.queue.id;
-    const controls = joinedOther && props.joinedQueue
-        ? (
-            <>
-            <div className="row">
-                <div className="col-lg">
-                    <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
+    const controls = props.queue.status !== "closed" && (
+        joinedOther && props.joinedQueue
+            ? (
+                <>
+                <div className="row">
+                    <div className="col-lg">
+                        <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
+                    </div>
                 </div>
-            </div>
-            <div className="row">
-                <div className="col-lg">
-                    <button disabled={props.disabled} onClick={props.leaveAndJoinQueue} type="button" className="btn btn-primary">
-                        Join Queue
-                    </button>
+                <div className="row">
+                    <div className="col-lg">
+                        <button disabled={props.disabled} onClick={props.leaveAndJoinQueue} type="button" className="btn btn-primary">
+                            Join Queue
+                        </button>
+                    </div>
                 </div>
-            </div>
-            </>
-        )
-        : (
-            <div className="row">
-                <div className="col-lg">
-                    <button disabled={props.disabled} onClick={props.joinQueue} type="button" className="btn btn-primary">
-                        Join Queue
-                    </button>
+                </>
+            )
+            : (
+                <div className="row">
+                    <div className="col-lg">
+                        <button disabled={props.disabled} onClick={props.joinQueue} type="button" className="btn btn-primary">
+                            Join Queue
+                        </button>
+                    </div>
                 </div>
-            </div>
-        );
+            )
+    );
+    const closedAlert = props.queue.status === "closed"
+        && <Alert variant="dark">This queue is closed. You cannot join until it is opened by a host.</Alert>
     return (
         <>
+        {closedAlert}
         <div className="row">
             <ul>
                 <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
@@ -106,6 +112,8 @@ function HowToBlueJeans(props: HowToBlueJeansProps) {
 }
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
+    const closedAlert = props.queue.status === "closed"
+        && <Alert variant="dark">This queue has been closed by the host. You're still in line, but if you leave the line you will not be able to rejoin until the queue is reopened.</Alert>
     const alert = props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
@@ -116,6 +124,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         : undefined;
     return (
         <>
+        {closedAlert}
         <div className="row">
             <div className="col-lg">
                 {alert}

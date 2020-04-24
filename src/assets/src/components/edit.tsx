@@ -1,10 +1,10 @@
 import * as React from "react";
-import { useState, useEffect, createRef } from "react";
+import { useState, useEffect, createRef, ChangeEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Dialog from "react-bootstrap-dialog";
 
-import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription, deleteQueue as apiRemoveQueue } from "../services/api";
+import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription, deleteQueue as apiRemoveQueue, setStatus as apiSetStatus } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField } from "./common";
 import { usePromise } from "../hooks/usePromise";
@@ -65,6 +65,7 @@ interface QueueEditorProps {
     changeName: (name: string) => void;
     changeDescription: (description: string) => void;
     removeQueue: () => void;
+    setStatus: (open: boolean) => void;
     disabled: boolean;
 }
 
@@ -81,6 +82,10 @@ function QueueEditor(props: QueueEditorProps) {
         </li>
     );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
+    const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
+        console.log("ToggleStatus")
+        props.setStatus(e.target.checked);
+    }
     return (
         <div>
             <div className="float-right">
@@ -112,6 +117,15 @@ function QueueEditor(props: QueueEditorProps) {
                     <label className="col-md-2 col-form-label">Created:</label>
                     <div className="col-md-6">
                         <DateDisplay date={props.queue.created_at}/>
+                    </div>
+                </div>
+                <div className="form-group row">
+                    <label htmlFor="status" className="col-md-2 col-form-label">Status:</label>
+                    <div className="col-md-6">
+                        <div className="custom-control custom-switch">
+                            <input type="checkbox" id="status" className="custom-control-input" checked={props.queue.status === "open"} onChange={toggleStatus}/>
+                            <label htmlFor="status" className="custom-control-label">{props.queue.status === "open" ? "Open" : "Closed"}</label>
+                        </div>
                     </div>
                 </div>
                 <div className="form-group row">
@@ -290,9 +304,15 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             ],
         });
     }
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading;
+    const setStatus = async (open: boolean) => {
+        interactions.next(true);
+        recordQueueManagementEvent("Set Open/Close: " + open);
+        return await apiSetStatus(queue!.id, open);
+    }
+    const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueue);
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError || changeDescriptionError || removeQueueError;
+    const error = refreshError || refreshUsersError || removeHostError || addHostError || removeMeetingError || addMeetingError || changeNameError || changeDescriptionError || removeQueueError || setStatusError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
@@ -300,7 +320,7 @@ export function QueueEditorPage(props: QueueEditorPageProps) {
             addHost={doAddHost} removeHost={confirmRemoveHost} 
             addMeeting={doAddMeeting} removeMeeting={confirmRemoveMeeting} 
             changeName={doChangeName} changeDescription={doChangeDescription}
-            removeQueue={confirmRemoveQueue}/>
+            setStatus={doSetStatus} removeQueue={confirmRemoveQueue}/>
     return (
         <>
         <Dialog ref={dialogRef}/>
