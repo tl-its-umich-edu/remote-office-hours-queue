@@ -8,7 +8,9 @@ from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework_tracking.mixins import LoggingMixin
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+
 from officehours_api.models import Queue, Meeting, Attendee
 from officehours_api.serializers import (
     UserListSerializer, UserSerializer, QueueAttendeeSerializer,
@@ -40,7 +42,7 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (IsCurrentUser,)
+    permission_classes = (IsAuthenticated, IsCurrentUser,)
 
 
 class QueueList(LoggingMixin, generics.ListCreateAPIView):
@@ -48,8 +50,11 @@ class QueueList(LoggingMixin, generics.ListCreateAPIView):
     serializer_class = QueueHostSerializer
 
     def get_queryset(self):
-        user = self.request.user
-        return Queue.objects.filter(hosts__in=[user])
+        user = (
+            self.request.user
+            if self.request.user.is_authenticated else None
+        )
+        return Queue.objects.filter(hosts__in=list(filter(None, [user])))
 
 
 class QueueListSearch(generics.ListAPIView):
@@ -64,7 +69,7 @@ class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Queue.objects.all()
     serializer_class = QueueHostSerializer
-    permission_classes = (IsHostOrReadOnly,)
+    permission_classes = (IsAuthenticated, IsHostOrReadOnly,)
 
     def get(self, request, pk, format=None):
         queue = self.get_object()
@@ -123,7 +128,7 @@ class MeetingDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Meeting.objects.all()
     serializer_class = MeetingSerializer
-    permission_classes = (IsHostOrAttendee,)
+    permission_classes = (IsAuthenticated, IsHostOrAttendee,)
 
 
 class AttendeeList(generics.ListAPIView):

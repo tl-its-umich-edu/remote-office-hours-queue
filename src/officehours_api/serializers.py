@@ -46,12 +46,15 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
         return obj.meeting_set.count()
 
     def get_my_meeting(self, obj):
-        my_meeting = obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
-        if my_meeting:
-            serializer = NestedMyMeetingSerializer(my_meeting, context={'request': self.context['request']})
-            return serializer.data
-        else:
+        user = self.context['request'].user
+        my_meeting = (
+            obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
+            if user.is_authenticated else None
+        )
+        if not my_meeting:
             return None
+        serializer = NestedMyMeetingSerializer(my_meeting, context={'request': self.context['request']})
+        return serializer.data
 
 
 class QueueHostSerializer(QueueAttendeeSerializer):

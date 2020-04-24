@@ -1,12 +1,14 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { Link } from "react-router-dom";
+
 import { getQueues as apiGetQueues, createQueue as apiAddQueue, deleteQueue as apiRemoveQueue } from "../services/api";
-import { User, ManageQueue } from "../models";
-import { ErrorDisplay, LoadingDisplay, SingleInputForm } from "./common";
+import { ManageQueue } from "../models";
+import { ErrorDisplay, LoadingDisplay, SingleInputForm, LoginDialog } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
+import { PageProps } from "./page";
 
 interface ManageQueueListProps {
     queues: ManageQueue[];
@@ -41,11 +43,7 @@ function ManageQueueList(props: ManageQueueListProps) {
     );
 }
 
-interface ManagePageProps {
-    user?: User;
-}
-
-export function ManagePage(props: ManagePageProps) {
+export function ManagePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin()
     }
@@ -64,13 +62,16 @@ export function ManagePage(props: ManagePageProps) {
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
     const isChanging = addQueueLoading;
     const isLoading = refreshLoading || isChanging;
-    const error = refreshError || addQueueError;
+    const errorTypes = [refreshError, addQueueError];
+    const error = errorTypes.find(e => e);
+    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
         && <ManageQueueList queues={queues} disabled={isChanging} addQueue={doAddQueue}/>
     return (
         <div>
+            <LoginDialog visible={loginDialogVisible} onClose={() => {}}/>
             {loadingDisplay}
             {errorDisplay}
             <h1>Virtual Office Hours</h1>

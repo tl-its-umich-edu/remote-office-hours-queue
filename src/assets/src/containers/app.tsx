@@ -1,6 +1,9 @@
 import * as React from "react";
+import { createRef } from "react";
 import { Route, withRouter } from 'react-router-dom'
-import { RouteComponentProps } from 'react-router'
+import { RouteComponentProps, Switch } from 'react-router'
+import Dialog from "react-bootstrap-dialog";
+
 import { Globals } from "..";
 import { HomePage } from "../components/home";
 import { ManagePage } from "../components/manage";
@@ -16,7 +19,7 @@ interface AppProps extends RouteComponentProps {
 function App(props: AppProps) {
     useGoogleAnalytics(props.globals.ga_tracking_id, props.globals.debug);
     return (
-        <>
+        <Switch>
             <Route path='/' exact render={p => 
                 <HomePage {...p} user={props.globals.user} />
             }/>
@@ -32,7 +35,7 @@ function App(props: AppProps) {
             <Route path='/search/:term' exact render={p =>
                 <SearchPage {...p} user={props.globals.user} />
             }/>
-        </>
+        </Switch>
     );
 }
 

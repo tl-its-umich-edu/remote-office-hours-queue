@@ -4,8 +4,10 @@ import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt } from '@fortawes
 import { User, AttendingQueue } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 
-type BootstrapButtonTypes = "info"|"warning"|"success"|"primary"|"alternate"|"danger";
+type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
 export const DisabledMessage = <em></em>
 
@@ -21,7 +23,7 @@ export const UserDisplay = (props: UserDisplayProps) =>
 interface RemoveButtonProps {
     remove: () => void;
     disabled: boolean;
-    size?: "block"|"lg"|"sm";
+    size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
 }
 
@@ -40,7 +42,7 @@ export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
 interface AddButtonProps {
     add: () => void;
     disabled: boolean;
-    size?: "block"|"lg"|"sm";
+    size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
 }
 
@@ -94,7 +96,7 @@ interface StatelessSingleInputFormProps extends SingleInputFormProps {
     value: string;
     setValue: (value: string) => void;
     error?: Error;
-    setError: (error: Error|undefined) => void;
+    setError: (error: Error | undefined) => void;
     autofocus?: boolean;
 }
 
@@ -109,17 +111,17 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
         try {
             props.onSubmit(props.value);
             props.setValue("");
-        } catch(e) {
+        } catch (e) {
             props.setError(e);
         }
     }
-    const errorDisplay = props.error && <ErrorDisplay error={props.error}/>
+    const errorDisplay = props.error && <ErrorDisplay error={props.error} />
     const buttonClass = "btn btn-" + props.buttonType;
     return (
         <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => props.setValue(e.target.value)} value={props.value} 
+            <input onChange={(e) => props.setValue(e.target.value)} value={props.value}
                 ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}
-                disabled={props.disabled} id={props.id}/>
+                disabled={props.disabled} id={props.id} />
             <div className="input-group-append">
                 <button className={buttonClass} type="submit" disabled={props.disabled}>
                     {props.children}
@@ -139,7 +141,7 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
             value={value} setValue={setValue}
             error={error} setError={setError}
             {...props}
-            />
+        />
     );
 }
 
@@ -168,21 +170,21 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
         setTimeout(() => setCopied(false), 3000);
     }
     const buttonInner = copied
-        ? <span><FontAwesomeIcon icon={faClipboardCheck}/> Copied!</span>
-        : <span><FontAwesomeIcon icon={faClipboard}/> Copy</span>
+        ? <span><FontAwesomeIcon icon={faClipboardCheck} /> Copied!</span>
+        : <span><FontAwesomeIcon icon={faClipboard} /> Copy</span>
     const copiedSrAlert = copied
         && <span className="sr-only" role="alert" aria-live="polite">Copied</span>
     return (
         <>
-        <div className="input-group">
-            <input readOnly id={props.id} ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control"/>
-            <div className="input-group-append">
-                <button type="button" onClick={copy} className="btn btn-secondary">
-                    {buttonInner}
-                </button>
+            <div className="input-group">
+                <input readOnly id={props.id} ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control" />
+                <div className="input-group-append">
+                    <button type="button" onClick={copy} className="btn btn-secondary">
+                        {buttonInner}
+                    </button>
+                </div>
             </div>
-        </div>
-        {copiedSrAlert}
+            {copiedSrAlert}
         </>
     );
 }
@@ -210,7 +212,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     }
     const contents = (editing && !props.disabled)
         ? (
-            <StatelessSingleInputForm 
+            <StatelessSingleInputForm
                 id={props.id}
                 autofocus={true}
                 onSubmit={submit}
@@ -218,14 +220,14 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
                 error={editorError} setError={setEditorError}
                 placeholder={props.placeholder} disabled={props.disabled}
                 buttonType="success">
-                    {props.children}
+                {props.children}
             </StatelessSingleInputForm>
         )
         : (
             <div className="input-group">
                 <span>{props.text}</span>
                 <button onClick={enableEditMode} type="button" className="btn btn-sm">
-                    <FontAwesomeIcon icon={faPencilAlt}/>
+                    <FontAwesomeIcon icon={faPencilAlt} />
                     Edit
                 </button>
             </div>
@@ -237,16 +239,31 @@ interface JoinedQueueAlertProps {
     joinedQueue: AttendingQueue;
 }
 
-export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) => {
-    return (
-        <p className="col-lg alert alert-danger" role="alert">
-            <strong>You may only join one queue. </strong>
-            You are currently in {props.joinedQueue.name}. 
-            If you choose to join another queue, you will lose your current place in line.
-            <br/>
-            <Link to={`/queue/${props.joinedQueue.id}`} className="btn btn-danger">
-                Return to Previous Queue
-            </Link>
-        </p>
-    );
+export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>
+    <p className="col-lg alert alert-danger" role="alert">
+        <strong>You may only join one queue. </strong>
+        You are currently in {props.joinedQueue.name}.
+        If you choose to join another queue, you will lose your current place in line.
+        <br />
+        <Link to={`/queue/${props.joinedQueue.id}`} className="btn btn-danger">
+            Return to Previous Queue
+        </Link>
+    </p>
+
+interface LoginDialogProps {
+    visible: boolean;
+    onClose: () => void;
 }
+
+export const LoginDialog = (props: LoginDialogProps) =>
+    <Modal show={props.visible}>
+        <Modal.Header>
+            <Modal.Title>Session Expired</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            <p className="alert alert-warning">Your session has timed out. Some work may be lost. Please login again via the "Login" link below.</p>
+        </Modal.Body>
+        <Modal.Footer>
+            <a href={'/oidc/authenticate/?next=' + location.pathname} className="btn btn-primary">Login</a>
+        </Modal.Footer>
+    </Modal>
