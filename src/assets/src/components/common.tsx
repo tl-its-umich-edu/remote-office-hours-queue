@@ -258,10 +258,10 @@ interface LoginDialogProps {
 export const LoginDialog = (props: LoginDialogProps) =>
     <Modal show={props.visible}>
         <Modal.Header>
-            <Modal.Title>Log In</Modal.Title>
+            <Modal.Title>Session Expired</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-            <p className="alert alert-warning">Your session has timed out. Please login via the "Login" link below.</p>
+            <p className="alert alert-warning">Your session has timed out. Some work may be lost. Please login again via the "Login" link below.</p>
         </Modal.Body>
         <Modal.Footer>
             <a href={'/oidc/authenticate/?next=' + location.pathname} className="btn btn-primary">Login</a>
