@@ -41,4 +41,5 @@ export interface QueueBase {
     description: string;
     hosts: User[];
     created_at: string;
+    status: "open"|"closed";
 }

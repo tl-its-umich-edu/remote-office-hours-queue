@@ -40,7 +40,7 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting']
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status']
 
     def get_line_length(self, obj):
         return obj.meeting_set.count()
@@ -71,7 +71,7 @@ class QueueHostSerializer(QueueAttendeeSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'my_meeting']
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'my_meeting', 'status']
 
     def validate_host_ids(self, host_ids):
         '''
@@ -116,10 +116,19 @@ class MeetingSerializer(serializers.ModelSerializer):
         '''
         Attendees may only be in one meeting at a time.
         '''
+        instance_id = getattr(self.instance, 'id', None)
         for user in attendee_ids:
-            if user.meeting_set.exists():
+            if user.meeting_set.exclude(id=instance_id).exists():
                 raise serializers.ValidationError(f'{user} is already in a meeting.')
         return attendee_ids
+
+    def validate_queue(self, queue):
+        '''
+        Prevent new meeting from being added to a closed queue.
+        '''
+        if queue.status == 'closed' and self.context['request']._request.method == 'POST':
+            raise serializers.ValidationError(f'Queue {queue} is closed.')
+        return queue
 
 
 class AttendeeSerializer(serializers.ModelSerializer):

@@ -36,6 +36,14 @@ class Queue(SafeDeleteModel):
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=32,
+        choices=[
+            ('open', 'Open'),
+            ('closed', 'Closed'),
+        ],
+        default='open',
+    )
 
     def __str__(self):
         return self.name
@@ -48,9 +56,7 @@ class Meeting(SafeDeleteModel):
         null=True
     )
     attendees = models.ManyToManyField(User, through='Attendee')
-    started_at = models.DateTimeField(auto_now_add=True)
-    removed_at = models.DateTimeField(null=True)
-    ended_at = models.DateTimeField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     MEETING_BACKEND_TYPES = [
         ('bluejeans', 'BlueJeans'),
@@ -59,10 +65,6 @@ class Meeting(SafeDeleteModel):
                                     choices=MEETING_BACKEND_TYPES,
                                     null=True)
     backend_metadata = JSONField(null=True, default=dict)
-
-    @property
-    def is_active(self):
-        return bool(not(self.removed_at or self.ended_at))
 
     def save(self, *args, **kwargs):
         if not self.backend_type and bluejeans:

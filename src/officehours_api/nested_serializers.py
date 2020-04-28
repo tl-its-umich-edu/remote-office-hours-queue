@@ -47,7 +47,7 @@ class NestedMeetingSetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meeting
-        fields = ['id', 'queue', 'is_active', 'backend_type', 'backend_metadata']
+        fields = ['id', 'queue', 'backend_type', 'backend_metadata']
 
 
 class NestedAttendeeSerializer(serializers.ModelSerializer):

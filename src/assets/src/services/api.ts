@@ -148,6 +148,18 @@ export const changeQueueDescription = async (queue_id: number, description: stri
     return await resp.json();
 }
 
+export const setStatus = async (queue_id: number, open: boolean) => {
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            status: open ? "open" : "closed",
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
+
 export const getMyUser = async (user_id: number) => {
     const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
     await handleErrors(resp);
@@ -155,7 +167,7 @@ export const getMyUser = async (user_id: number) => {
 }
 
 export const searchQueue = async (term: string) => {
-    const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
+    const resp = await fetch(`/api/queues_search/?search=${term}&status=open`, { method: "GET" });
     await handleErrors(resp);
     return await resp.json() as AttendingQueue[];
 }
