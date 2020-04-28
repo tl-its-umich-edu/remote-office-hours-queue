@@ -265,3 +265,13 @@ export const LoginDialog = (props: LoginDialogProps) =>
             <a href={'/oidc/authenticate/?next=' + location.pathname} className="btn btn-primary">Login</a>
         </Modal.Footer>
     </Modal>
+
+interface BlueJeansOneTouchDialLinkProps {
+    phone: string; // "." delimited
+    meetingNumber: string;
+}
+
+export const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps) => 
+    <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
+        {props.phone}
+    </a>

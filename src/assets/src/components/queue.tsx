@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
 import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog } from "./common";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink } from "./common";
 import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting, getMyUser as apiGetMyUser } from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -77,16 +77,6 @@ const TurnSoonAlert = () =>
     <div className="alert alert-warning" role="alert">
         <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
     </div>
-
-interface BlueJeansOneTouchDialLinkProps {
-    phone: string; // "." delimited
-    meetingNumber: string;
-}
-
-const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps) => 
-    <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
-        {props.phone}
-    </a>
 
 interface HowToBlueJeansProps {
     metadata: BluejeansMetadata;

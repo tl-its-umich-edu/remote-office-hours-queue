@@ -3,10 +3,12 @@ import { useState, useEffect, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Dialog from "react-bootstrap-dialog";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 
 import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription, deleteQueue as apiRemoveQueue, setStatus as apiSetStatus } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
@@ -14,8 +16,9 @@ import { PageProps } from "./page";
 
 interface MeetingEditorProps {
     meeting: Meeting;
-    remove: () => void;
+    remove: (m: Meeting) => void;
     disabled: boolean;
+    onShowMeetingInfo: (m: Meeting) => void;
 }
 
 function MeetingEditor(props: MeetingEditorProps) {
@@ -23,17 +26,24 @@ function MeetingEditor(props: MeetingEditorProps) {
     const joinUrl = props.meeting.backend_type === "bluejeans"
         ? (props.meeting.backend_metadata as BluejeansMetadata).meeting_url
         : undefined;
-    const joinLink = joinUrl && (
-        <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
-            Start Meeting
-        </a>
+    const joinLink = joinUrl 
+        && (
+            <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
+                Start Meeting
+            </a>
+        );
+    const infoButton = (
+        <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="info" size="sm" className="mr-2">
+            Show Info
+        </Button>
     );
     return (
         <dd>
             <UserDisplay user={user}/>
             <span className="float-right">
+                {infoButton}
                 {joinLink}
-                <RemoveButton remove={props.remove} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
+                <RemoveButton remove={() => props.remove(props.meeting)} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
             </span>
         </dd>
     );
@@ -41,13 +51,13 @@ function MeetingEditor(props: MeetingEditorProps) {
 
 interface HostEditorProps {
     host: User;
-    remove?: () => void;
+    remove?: (h: User) => void;
     disabled: boolean;
 }
 
 function HostEditor(props: HostEditorProps) {
     const removeButton = props.remove
-        ? <RemoveButton remove={props.remove} size="sm" disabled={props.disabled} screenReaderLabel="Remove Host"/>
+        ? <RemoveButton remove={() => props.remove!(props.host)} size="sm" disabled={props.disabled} screenReaderLabel="Remove Host"/>
         : undefined;
     return (
         <span>
@@ -59,45 +69,46 @@ function HostEditor(props: HostEditorProps) {
 
 interface QueueEditorProps {
     queue: ManageQueue;
-    addMeeting: (uniqname: string) => void;
-    removeMeeting: (m: Meeting) => void;
-    addHost: (uniqname: string) => void;
-    removeHost: (h: User) => void;
-    changeName: (name: string) => void;
-    changeDescription: (description: string) => void;
-    removeQueue: () => void;
-    setStatus: (open: boolean) => void;
     disabled: boolean;
+    onAddMeeting: (uniqname: string) => void;
+    onRemoveMeeting: (m: Meeting) => void;
+    onAddHost: (uniqname: string) => void;
+    onRemoveHost: (h: User) => void;
+    onChangeName: (name: string) => void;
+    onChangeDescription: (description: string) => void;
+    onRemoveQueue: () => void;
+    onSetStatus: (open: boolean) => void;
+    onShowMeetingInfo: (m: Meeting) => void;
 }
 
 function QueueEditor(props: QueueEditorProps) {
     const lastHost = props.queue.hosts.length === 1;
     const hosts = props.queue.hosts.map(h =>
         <li className="list-group-item" key={h.id}>
-            <HostEditor host={h} remove={() => props.removeHost(h)} disabled={props.disabled || lastHost}/>
+            <HostEditor host={h} remove={props.onRemoveHost} disabled={props.disabled || lastHost}/>
         </li>
     );
     const meetings = props.queue.meeting_set.map(m =>
         <li className="list-group-item" key={m.id}>
-            <MeetingEditor meeting={m} remove={() => props.removeMeeting(m)} disabled={props.disabled}/>
+            <MeetingEditor meeting={m} remove={props.onRemoveMeeting} disabled={props.disabled} onShowMeetingInfo={props.onShowMeetingInfo}/>
         </li>
     );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
         console.log("ToggleStatus")
-        props.setStatus(e.target.checked);
+        props.onSetStatus(e.target.checked);
     }
     return (
         <div>
             <div className="float-right">
-                <button onClick={props.removeQueue} disabled={props.disabled} className="btn btn-danger">
+                <button onClick={props.onRemoveQueue} disabled={props.disabled} className="btn btn-danger">
                     Delete Queue
                 </button>
             </div>
             <h1 className="form-inline">
                 <span className="mr-2">Manage: </span>
                 <EditToggleField text={props.queue.name} disabled={props.disabled} id="name"
-                    onSubmit={props.changeName} buttonType="success" placeholder="New name...">
+                    onSubmit={props.onChangeName} buttonType="success" placeholder="New name...">
                         Change
                 </EditToggleField>
             </h1>
@@ -133,7 +144,7 @@ function QueueEditor(props: QueueEditorProps) {
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
                         <EditToggleField text={props.queue.description} disabled={props.disabled} id="description"
-                            onSubmit={props.changeDescription} buttonType="success" placeholder="New description...">
+                            onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description...">
                                 Change
                         </EditToggleField>
                     </div>
@@ -148,7 +159,7 @@ function QueueEditor(props: QueueEditorProps) {
                             id="add_host"
                             placeholder="Uniqname..."
                             buttonType="success"
-                            onSubmit={props.addHost}
+                            onSubmit={props.onAddHost}
                             disabled={props.disabled}>
                                 + Add Host
                         </SingleInputForm>
@@ -169,13 +180,64 @@ function QueueEditor(props: QueueEditorProps) {
                         id="add_attendee"
                         placeholder="Uniqname..."
                         buttonType="success"
-                        onSubmit={props.addMeeting}
+                        onSubmit={props.onAddMeeting}
                         disabled={props.disabled}>
                             + Add Attendee
                     </SingleInputForm>
                 </div>
             </div>
         </div>
+    );
+}
+
+interface BlueJeansMeetingInfo {
+    metadata: BluejeansMetadata;
+}
+
+const BlueJeansMeetingInfo = (props: BlueJeansMeetingInfo) => {
+    const meetingNumber = props.metadata.numeric_meeting_id;
+    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={meetingNumber} />
+    const phoneLinkCanada = <BlueJeansOneTouchDialLink phone="1.416.900.2956" meetingNumber={meetingNumber} />
+    return (
+        <>
+        <p>
+            This meeting will be via <strong>BlueJeans</strong>.
+        </p>
+        <p>
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#.
+        </p>
+        </>
+    );
+}
+
+interface MeetingInfoProps {
+    meeting?: Meeting;  // Hide if undefined
+    onClose: () => void;
+}
+
+const MeetingInfoDialog = (props: MeetingInfoProps) => {
+    const generalInfo = props.meeting
+        && (
+            <p>
+                Attendees: {props.meeting.attendees.map(a => <UserDisplay user={a}/>)}
+            </p>
+        );
+    const metadataInfo = props.meeting?.backend_type === "bluejeans"
+        ? <BlueJeansMeetingInfo metadata={props.meeting!.backend_metadata!} />
+        : <div></div>
+    return (
+        <Modal show={!!props.meeting} onHide={props.onClose}>
+            <Modal.Header>
+                <Modal.Title>Meeting Info</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {generalInfo}
+                {metadataInfo}
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="primary" onClick={props.onClose}>Close</Button>
+            </Modal.Footer>
+        </Modal>
     );
 }
 
@@ -199,6 +261,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     if (!props.user) throw new Error("user is undefined!");
     const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
+
+    //Setup basic state
     const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
     const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueue(queueIdParsed) as Promise<ManageQueue>, setQueue);
     useEffect(() => {
@@ -211,6 +275,9 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         doRefreshUsers();
     }, []);
     useAutoRefresh(doRefreshUsers, 6000);
+    const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
+
+    //Setup interactions
     const removeHost = async (h: User) => {
         interactions.next(true);
         recordQueueManagementEvent("Removed Host");
@@ -311,6 +378,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         return await apiSetStatus(queue!.id, open);
     }
     const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueue);
+
+    //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
     const errorTypes = [refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError, setStatusError];
@@ -320,14 +389,16 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging}
-            addHost={doAddHost} removeHost={confirmRemoveHost} 
-            addMeeting={doAddMeeting} removeMeeting={confirmRemoveMeeting} 
-            changeName={doChangeName} changeDescription={doChangeDescription}
-            setStatus={doSetStatus} removeQueue={confirmRemoveQueue}/>
+            onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
+            onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
+            onChangeName={doChangeName} onChangeDescription={doChangeDescription}
+            onSetStatus={doSetStatus} onRemoveQueue={confirmRemoveQueue}
+            onShowMeetingInfo={setVisibleMeetingDialog}/>
     return (
         <>
         <Dialog ref={dialogRef}/>
         <LoginDialog visible={loginDialogVisible}/>
+        <MeetingInfoDialog meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)}/>
         {loadingDisplay}
         {errorDisplay}
         {queueEditor}
