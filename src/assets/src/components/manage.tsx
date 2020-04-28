@@ -71,7 +71,7 @@ export function ManagePage(props: PageProps) {
         && <ManageQueueList queues={queues} disabled={isChanging} addQueue={doAddQueue}/>
     return (
         <div>
-            <LoginDialog visible={loginDialogVisible} onClose={() => {}}/>
+            <LoginDialog visible={loginDialogVisible}/>
             {loadingDisplay}
             {errorDisplay}
             <h1>Virtual Office Hours</h1>

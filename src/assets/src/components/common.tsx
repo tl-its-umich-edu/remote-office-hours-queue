@@ -5,7 +5,6 @@ import { User, AttendingQueue } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -252,7 +251,6 @@ export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>
 
 interface LoginDialogProps {
     visible: boolean;
-    onClose: () => void;
 }
 
 export const LoginDialog = (props: LoginDialogProps) =>

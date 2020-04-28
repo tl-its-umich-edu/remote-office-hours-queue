@@ -262,7 +262,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             leaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div className="container-fluid content">
-            <LoginDialog visible={loginDialogVisible} onClose={() => {}}/>
+            <LoginDialog visible={loginDialogVisible}/>
             {loadingDisplay}
             {errorDisplay}
             {queueDisplay}

@@ -327,7 +327,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     return (
         <>
         <Dialog ref={dialogRef}/>
-        <LoginDialog visible={loginDialogVisible} onClose={() => {}}/>
+        <LoginDialog visible={loginDialogVisible}/>
         {loadingDisplay}
         {errorDisplay}
         {queueEditor}
