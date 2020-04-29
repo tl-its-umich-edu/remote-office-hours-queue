@@ -6,7 +6,7 @@ import Alert from "react-bootstrap/Alert"
 
 import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink } from "./common";
-import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting, getMyUser as apiGetMyUser } from "../services/api";
+import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
@@ -190,7 +190,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
-    const refresh = () => apiGetQueueAttending(queueIdParsed);
+    const refresh = () => api.getQueue(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
         if (isNaN(queueIdParsed)) {
@@ -204,7 +204,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
-    const refreshMyUser = () => apiGetMyUser(props.user!.id);
+    const refreshMyUser = () => api.getMyUser(props.user!.id);
     const [doRefreshMyUser, refreshMyUserLoading, refreshMyUserError] = usePromise(refreshMyUser, setMyUser);
     useEffect(() => {
         doRefreshMyUser();
@@ -218,7 +218,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Joined Queue",
         });
-        await apiAddMeeting(queueIdParsed, props.user!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
@@ -228,7 +228,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Left Queue",
         });
-        await apiRemoveMeeting(queue!.my_meeting!.id);
+        await api.removeMeeting(queue!.my_meeting!.id);
         await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
@@ -238,8 +238,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Left Previous Queue and Joined New Queue",
         });
-        await apiRemoveMeeting(myUser!.my_queue!.my_meeting!.id);
-        await apiAddMeeting(queueIdParsed, props.user!.id);
+        await api.removeMeeting(myUser!.my_queue!.my_meeting!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
