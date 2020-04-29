@@ -39,6 +39,7 @@ export function HomePage(props: PageProps) {
         doRefreshUser();
     }, []);
     useAutoRefresh(doRefreshUser, 10000);
+
     const isLoading = refreshUserLoading;
     const error = refreshUserError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>

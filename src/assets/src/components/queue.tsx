@@ -16,10 +16,10 @@ interface QueueAttendingProps {
     queue: AttendingQueue;
     user: User;
     joinedQueue?: AttendingQueue | null;
-    joinQueue: () => void;
-    leaveQueue: () => void;
-    leaveAndJoinQueue: () => void;
     disabled: boolean;
+    onJoinQueue: () => void;
+    onLeaveQueue: () => void;
+    onLeaveAndJoinQueue: () => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -35,7 +35,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
                 </div>
                 <div className="row">
                     <div className="col-lg">
-                        <button disabled={props.disabled} onClick={props.leaveAndJoinQueue} type="button" className="btn btn-primary">
+                        <button disabled={props.disabled} onClick={props.onLeaveAndJoinQueue} type="button" className="btn btn-primary">
                             Join Queue
                         </button>
                     </div>
@@ -45,7 +45,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
             : (
                 <div className="row">
                     <div className="col-lg">
-                        <button disabled={props.disabled} onClick={props.joinQueue} type="button" className="btn btn-primary">
+                        <button disabled={props.disabled} onClick={props.onJoinQueue} type="button" className="btn btn-primary">
                             Join Queue
                         </button>
                     </div>
@@ -133,7 +133,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <button disabled={props.disabled} onClick={() => props.leaveQueue()} type="button" className="btn btn-warning">
+                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-warning">
                     Leave the line
                     {props.disabled && DisabledMessage}
                 </button>
@@ -187,6 +187,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
+
+    //Setup basic state
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
     const refresh = () => apiGetQueueAttending(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
@@ -208,6 +210,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         doRefreshMyUser();
     }, []);
     useAutoRefresh(doRefreshMyUser, 10000);
+
+    //Setup interactions
     const joinQueue = async () => {
         interactions.next(false);
         ReactGA.event({
@@ -239,6 +243,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
+
+    //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
     const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
@@ -248,8 +254,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} joinQueue={doJoinQueue} leaveQueue={doLeaveQueue}
-            leaveAndJoinQueue={doLeaveAndJoinQueue} />
+            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={doLeaveQueue}
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div className="container-fluid content">
             <LoginDialog visible={loginDialogVisible}/>
