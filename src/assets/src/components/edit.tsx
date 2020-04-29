@@ -5,6 +5,7 @@ import * as ReactGA from "react-ga";
 import Dialog from "react-bootstrap-dialog";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
+import Table from "react-bootstrap/Table";
 
 import { removeMeeting as apiRemoveMeeting, addMeeting as apiAddMeeting, removeHost as apiRemoveHost, addHost as apiAddHost, getQueue as apiGetQueue, getUsers as apiGetUsers, changeQueueName as apiChangeQueueName, changeQueueDescription as apiChangeQueueDescription, deleteQueue as apiRemoveQueue, setStatus as apiSetStatus } from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
@@ -33,19 +34,21 @@ function MeetingEditor(props: MeetingEditorProps) {
             </a>
         );
     const infoButton = (
-        <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="info" size="sm" className="mr-2">
+        <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="link" size="sm" className="mr-2">
             Show Info
         </Button>
     );
     return (
-        <dd>
-            <UserDisplay user={user}/>
-            <span className="float-right">
-                {infoButton}
+        <tr>
+            <td>
+                <UserDisplay user={user}/>
+            </td>
+            <td>
                 {joinLink}
+                {infoButton}
                 <RemoveButton remove={() => props.remove(props.meeting)} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
-            </span>
-        </dd>
+            </td>
+        </tr>
     );
 }
 
@@ -89,9 +92,7 @@ function QueueEditor(props: QueueEditorProps) {
         </li>
     );
     const meetings = props.queue.meeting_set.map(m =>
-        <li className="list-group-item" key={m.id}>
-            <MeetingEditor meeting={m} remove={props.onRemoveMeeting} disabled={props.disabled} onShowMeetingInfo={props.onShowMeetingInfo}/>
-        </li>
+        <MeetingEditor key={m.id} meeting={m} remove={props.onRemoveMeeting} disabled={props.disabled} onShowMeetingInfo={props.onShowMeetingInfo}/>
     );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
@@ -168,10 +169,18 @@ function QueueEditor(props: QueueEditorProps) {
             </div>
             <h3>Meetings Up Next</h3>
             <div className="row">
-                <div className="col-md-8">
-                    <ol className="list-group">
-                        {meetings}
-                    </ol>
+                <div className="col-md-12">
+                    <Table bordered>
+                        <thead>
+                            <tr>
+                                <th>Attendee</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {meetings}
+                        </tbody>
+                    </Table>
                 </div>
             </div>
             <div className="row">
@@ -204,7 +213,8 @@ const BlueJeansMeetingInfo = (props: BlueJeansMeetingInfo) => {
             This meeting will be via <strong>BlueJeans</strong>.
         </p>
         <p>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#.
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#, 
+            or <a href="https://www.bluejeans.com/numbers">dial in from another country</a>.
         </p>
         </>
     );
@@ -227,7 +237,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
         : <div></div>
     return (
         <Modal show={!!props.meeting} onHide={props.onClose}>
-            <Modal.Header>
+            <Modal.Header closeButton>
                 <Modal.Title>Meeting Info</Modal.Title>
             </Modal.Header>
             <Modal.Body>
