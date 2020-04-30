@@ -35,7 +35,7 @@ function MeetingEditor(props: MeetingEditorProps) {
         );
     const infoButton = (
         <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="link" size="sm" className="mr-2">
-            Show Info
+            Join Info
         </Button>
     );
     return (
