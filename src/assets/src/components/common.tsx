@@ -20,7 +20,7 @@ export const UserDisplay = (props: UserDisplayProps) =>
     </span>
 
 interface RemoveButtonProps {
-    remove: () => void;
+    onRemove: () => void;
     disabled: boolean;
     size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
@@ -30,7 +30,7 @@ export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
     const className = "btn btn-danger " + (props.size ? ` btn-${props.size}` : "");
     const disabledMessage = props.disabled && DisabledMessage;
     return (
-        <button onClick={() => props.remove()} disabled={props.disabled} className={className} aria-label={props.screenReaderLabel}>
+        <button onClick={() => props.onRemove()} disabled={props.disabled} className={className} aria-label={props.screenReaderLabel}>
             <FontAwesomeIcon icon={faTrashAlt} />
             {props.children}
             {disabledMessage}
@@ -39,7 +39,7 @@ export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
 }
 
 interface AddButtonProps {
-    add: () => void;
+    onAdd: () => void;
     disabled: boolean;
     size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
@@ -49,7 +49,7 @@ export const AddButton: React.FC<AddButtonProps> = (props) => {
     const className = "btn btn-success" + (props.size ? ` btn-${props.size}` : "");
     const disabledMessage = props.disabled && DisabledMessage;
     return (
-        <button onClick={() => props.add()} disabled={props.disabled} className={className} aria-label={props.screenReaderLabel}>
+        <button onClick={() => props.onAdd()} disabled={props.disabled} className={className} aria-label={props.screenReaderLabel}>
             <span aria-hidden="true">+</span>
             {props.children}
             {disabledMessage}
@@ -93,10 +93,10 @@ interface SingleInputFormProps {
 
 interface StatelessSingleInputFormProps extends SingleInputFormProps {
     value: string;
-    setValue: (value: string) => void;
     error?: Error;
-    setError: (error: Error | undefined) => void;
     autofocus?: boolean;
+    onChangeValue: (value: string) => void;
+    onError: (error: Error | undefined) => void;
 }
 
 const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props) => {
@@ -109,16 +109,16 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
         e.preventDefault();
         try {
             props.onSubmit(props.value);
-            props.setValue("");
+            props.onChangeValue("");
         } catch (e) {
-            props.setError(e);
+            props.onError(e);
         }
     }
     const errorDisplay = props.error && <ErrorDisplay error={props.error} />
     const buttonClass = "btn btn-" + props.buttonType;
     return (
         <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => props.setValue(e.target.value)} value={props.value}
+            <input onChange={(e) => props.onChangeValue(e.target.value)} value={props.value}
                 ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}
                 disabled={props.disabled} id={props.id} />
             <div className="input-group-append">
@@ -137,8 +137,8 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     return (
         <StatelessSingleInputForm
             id={props.id}
-            value={value} setValue={setValue}
-            error={error} setError={setError}
+            value={value} onChangeValue={setValue}
+            error={error} onError={setError}
             {...props}
         />
     );
@@ -192,9 +192,9 @@ interface EditToggleFieldProps {
     text: string;
     placeholder: string;
     disabled: boolean;
-    onSubmit: (value: string) => void;
     buttonType: BootstrapButtonTypes;
     id: string;
+    onSubmit: (value: string) => void;
 }
 
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
@@ -215,8 +215,8 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
                 id={props.id}
                 autofocus={true}
                 onSubmit={submit}
-                value={editorValue} setValue={setEditorValue}
-                error={editorError} setError={setEditorError}
+                value={editorValue} onChangeValue={setEditorValue}
+                error={editorError} onError={setEditorError}
                 placeholder={props.placeholder} disabled={props.disabled}
                 buttonType="success">
                 {props.children}

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { User, MyUser } from "../models";
+import { MyUser } from "../models";
 import { Link } from "react-router-dom";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -39,6 +39,7 @@ export function HomePage(props: PageProps) {
         doRefreshUser();
     }, []);
     useAutoRefresh(doRefreshUser, 10000);
+
     const isLoading = refreshUserLoading;
     const error = refreshUserError;
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
