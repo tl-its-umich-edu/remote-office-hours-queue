@@ -5,8 +5,8 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
 import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog } from "./common";
-import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting, getMyUser as apiGetMyUser } from "../services/api";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink } from "./common";
+import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
@@ -16,10 +16,10 @@ interface QueueAttendingProps {
     queue: AttendingQueue;
     user: User;
     joinedQueue?: AttendingQueue | null;
-    joinQueue: () => void;
-    leaveQueue: () => void;
-    leaveAndJoinQueue: () => void;
     disabled: boolean;
+    onJoinQueue: () => void;
+    onLeaveQueue: () => void;
+    onLeaveAndJoinQueue: () => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -35,7 +35,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
                 </div>
                 <div className="row">
                     <div className="col-lg">
-                        <button disabled={props.disabled} onClick={props.leaveAndJoinQueue} type="button" className="btn btn-primary">
+                        <button disabled={props.disabled} onClick={props.onLeaveAndJoinQueue} type="button" className="btn btn-primary">
                             Join Queue
                         </button>
                     </div>
@@ -45,7 +45,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
             : (
                 <div className="row">
                     <div className="col-lg">
-                        <button disabled={props.disabled} onClick={props.joinQueue} type="button" className="btn btn-primary">
+                        <button disabled={props.disabled} onClick={props.onJoinQueue} type="button" className="btn btn-primary">
                             Join Queue
                         </button>
                     </div>
@@ -77,16 +77,6 @@ const TurnSoonAlert = () =>
     <div className="alert alert-warning" role="alert">
         <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
     </div>
-
-interface BlueJeansOneTouchDialLinkProps {
-    phone: string; // "." delimited
-    meetingNumber: string;
-}
-
-const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps) => 
-    <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
-        {props.phone}
-    </a>
 
 interface HowToBlueJeansProps {
     metadata: BluejeansMetadata;
@@ -143,7 +133,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <button disabled={props.disabled} onClick={() => props.leaveQueue()} type="button" className="btn btn-warning">
+                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-warning">
                     Leave the line
                     {props.disabled && DisabledMessage}
                 </button>
@@ -197,8 +187,10 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
+
+    //Setup basic state
     const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
-    const refresh = () => apiGetQueueAttending(queueIdParsed);
+    const refresh = () => api.getQueue(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
         if (isNaN(queueIdParsed)) {
@@ -212,19 +204,21 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
-    const refreshMyUser = () => apiGetMyUser(props.user!.id);
+    const refreshMyUser = () => api.getMyUser(props.user!.id);
     const [doRefreshMyUser, refreshMyUserLoading, refreshMyUserError] = usePromise(refreshMyUser, setMyUser);
     useEffect(() => {
         doRefreshMyUser();
     }, []);
     useAutoRefresh(doRefreshMyUser, 10000);
+
+    //Setup interactions
     const joinQueue = async () => {
         interactions.next(false);
         ReactGA.event({
             category: "Attending",
             action: "Joined Queue",
         });
-        await apiAddMeeting(queueIdParsed, props.user!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
@@ -234,7 +228,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Left Queue",
         });
-        await apiRemoveMeeting(queue!.my_meeting!.id);
+        await api.removeMeeting(queue!.my_meeting!.id);
         await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
@@ -244,11 +238,13 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Left Previous Queue and Joined New Queue",
         });
-        await apiRemoveMeeting(myUser!.my_queue!.my_meeting!.id);
-        await apiAddMeeting(queueIdParsed, props.user!.id);
+        await api.removeMeeting(myUser!.my_queue!.my_meeting!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
+
+    //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
     const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
@@ -258,11 +254,11 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} joinQueue={doJoinQueue} leaveQueue={doLeaveQueue}
-            leaveAndJoinQueue={doLeaveAndJoinQueue} />
+            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={doLeaveQueue}
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div className="container-fluid content">
-            <LoginDialog visible={loginDialogVisible} onClose={() => {}}/>
+            <LoginDialog visible={loginDialogVisible}/>
             {loadingDisplay}
             {errorDisplay}
             {queueDisplay}
