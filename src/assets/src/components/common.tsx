@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt } from '@fortawesome/free-solid-svg-icons'
+import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
 import { User, AttendingQueue } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -31,7 +31,7 @@ export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
     const disabledMessage = props.disabled && DisabledMessage;
     return (
         <button onClick={() => props.remove()} disabled={props.disabled} className={className} aria-label={props.screenReaderLabel}>
-            <span aria-hidden="true">&times;</span>
+            <FontAwesomeIcon icon={faTrashAlt} />
             {props.children}
             {disabledMessage}
         </button>
@@ -265,3 +265,13 @@ export const LoginDialog = (props: LoginDialogProps) =>
             <a href={'/oidc/authenticate/?next=' + location.pathname} className="btn btn-primary">Login</a>
         </Modal.Footer>
     </Modal>
+
+interface BlueJeansOneTouchDialLinkProps {
+    phone: string; // "." delimited
+    meetingNumber: string;
+}
+
+export const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps) => 
+    <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
+        {props.phone}
+    </a>
