@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { getMyUser as apiGetUser } from "../services/api";
-import { LoadingDisplay, ErrorDisplay, JoinedQueueAlert } from "./common";
+import { LoadingDisplay, ErrorDisplay, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
 
 function QueueLookup() {
@@ -69,11 +69,14 @@ export function HomePage(props: PageProps) {
             </>
         );
     return (
+        <>
+        <Breadcrumbs currentPageTitle="Home"/>
         <div className="jumbotron">
             {loadingDisplay}
             {errorDisplay}
             <h1 className="display-4">Remote Office Hours Queue</h1>
             {body}
         </div>
+        </>
     );
 }

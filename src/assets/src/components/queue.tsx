@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
 import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink } from "./common";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -259,6 +259,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     return (
         <div className="container-fluid content">
             <LoginDialog visible={loginDialogVisible}/>
+            <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
             {loadingDisplay}
             {errorDisplay}
             {queueDisplay}

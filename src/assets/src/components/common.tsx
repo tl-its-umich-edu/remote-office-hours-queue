@@ -280,7 +280,7 @@ interface BreadcrumbsProps {
     currentPageTitle: string;
 }
 
-const Breadcrumbs: React.FC<BreadcrumbsProps> = (props) => {
+export const Breadcrumbs: React.FC<BreadcrumbsProps> = (props) => {
     const homeLink = props.currentPageTitle !== "Home"
         && (
             <li>
