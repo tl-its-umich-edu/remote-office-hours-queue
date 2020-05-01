@@ -275,3 +275,25 @@ export const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps)
     <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
         {props.phone}
     </a>
+
+interface BreadcrumbsProps {
+    currentPageTitle: string;
+}
+
+const Breadcrumbs: React.FC<BreadcrumbsProps> = (props) => {
+    const homeLink = props.currentPageTitle !== "Home"
+        && (
+            <li>
+                <Link to="/">Home</Link>
+            </li>
+        );
+    return (
+        <ol className="breadcrumbs">
+            {homeLink}
+            {props.children}
+            <li>
+                {props.currentPageTitle}
+            </li>
+        </ol>
+    );
+}
