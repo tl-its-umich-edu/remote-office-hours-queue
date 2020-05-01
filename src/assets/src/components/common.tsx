@@ -154,6 +154,15 @@ interface DateDisplayProps {
 export const DateDisplay = (props: DateDisplayProps) =>
     <span>{new Date(props.date).toDateString()}</span>
 
+interface DateTimeDisplayProps {
+    dateTime: string;
+}
+
+export const DateTimeDisplay = (props: DateTimeDisplayProps) => {
+    const date = new Date(props.dateTime);
+    return <span>{date.toDateString()} {date.toLocaleTimeString()}</span>
+}
+
 interface CopyFieldProps {
     text: string;
     id: string;
