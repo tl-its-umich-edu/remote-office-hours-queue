@@ -257,7 +257,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={doLeaveQueue}
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
-        <div className="container-fluid content">
+        <div>
             <LoginDialog visible={loginDialogVisible}/>
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
             {loadingDisplay}

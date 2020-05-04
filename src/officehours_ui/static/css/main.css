@@ -577,26 +577,3 @@ div[role=main] {
 	padding-top: 2rem;
 	padding-bottom: 2rem;
 }
-
-.breadcrumbs {
-	padding: 0;
-	display: flex;
-}
-
-.breadcrumbs {
-    display: flex;
-}
-
-.breadcrumbs li {
-	list-style-type: none;
-}
-    
-.breadcrumbs li::before {
-	margin-left: 6px;
-	margin-right: 6px;
-    content: "/";
-}
-    
-.breadcrumbs li:first-child::before {
-    content: "";
-}

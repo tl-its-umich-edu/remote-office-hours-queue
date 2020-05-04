@@ -5,10 +5,12 @@ import { User, AttendingQueue } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
+import Breadcrumb from "react-bootstrap/Breadcrumb";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
 export const DisabledMessage = <em></em>
+
 
 interface UserDisplayProps {
     user: User;
@@ -18,6 +20,7 @@ export const UserDisplay = (props: UserDisplayProps) =>
     <span>
         {props.user.first_name} {props.user.last_name} <em>({props.user.username})</em>
     </span>
+
 
 interface RemoveButtonProps {
     onRemove: () => void;
@@ -38,6 +41,7 @@ export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
     );
 }
 
+
 interface AddButtonProps {
     onAdd: () => void;
     disabled: boolean;
@@ -57,6 +61,7 @@ export const AddButton: React.FC<AddButtonProps> = (props) => {
     );
 }
 
+
 interface LoadingDisplayProps {
     loading: boolean;
 }
@@ -70,9 +75,11 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
     );
 }
 
+
 interface ErrorDisplayProps {
     error?: Error;
 }
+
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
     if (!props.error) return null;
@@ -82,6 +89,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
         </p>
     );
 }
+
 
 interface SingleInputFormProps {
     placeholder: string;
@@ -131,6 +139,7 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
     );
 }
 
+
 export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     const [value, setValue] = useState("");
     const [error, setError] = useState(undefined as Error | undefined);
@@ -144,8 +153,10 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     );
 }
 
+
 export const invalidUniqnameMessage = (uniqname: string) =>
     uniqname + " is not a valid user. Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
+
 
 interface DateDisplayProps {
     date: string;
@@ -153,6 +164,7 @@ interface DateDisplayProps {
 
 export const DateDisplay = (props: DateDisplayProps) =>
     <span>{new Date(props.date).toDateString()}</span>
+
 
 interface CopyFieldProps {
     text: string;
@@ -187,6 +199,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
         </>
     );
 }
+
 
 interface EditToggleFieldProps {
     text: string;
@@ -234,6 +247,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     return contents;
 }
 
+
 interface JoinedQueueAlertProps {
     joinedQueue: AttendingQueue;
 }
@@ -248,6 +262,7 @@ export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>
             Return to Previous Queue
         </Link>
     </p>
+
 
 interface LoginDialogProps {
     visible: boolean;
@@ -266,6 +281,7 @@ export const LoginDialog = (props: LoginDialogProps) =>
         </Modal.Footer>
     </Modal>
 
+
 interface BlueJeansOneTouchDialLinkProps {
     phone: string; // "." delimited
     meetingNumber: string;
@@ -276,24 +292,30 @@ export const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps)
         {props.phone}
     </a>
 
+
 interface BreadcrumbsProps {
+    intermediatePages?: {title: string, href: string}[];
     currentPageTitle: string;
 }
 
-export const Breadcrumbs: React.FC<BreadcrumbsProps> = (props) => {
+export const Breadcrumbs = (props: BreadcrumbsProps) => {
     const homeLink = props.currentPageTitle !== "Home"
         && (
-            <li>
+            <li className="breadcrumb-item">
                 <Link to="/">Home</Link>
             </li>
         );
+    const intermediateCrumbs = props.intermediatePages?.map(ip => (
+        <li className="breadcrumb-item">
+            <Link to={ip.href}>{ip.title}</Link>
+        </li>
+    ));
     return (
-        <ol className="breadcrumbs">
+        <Breadcrumb>
             {homeLink}
-            {props.children}
-            <li>
-                {props.currentPageTitle}
-            </li>
-        </ol>
+            {intermediateCrumbs}
+            <Breadcrumb.Item active>{props.currentPageTitle}</Breadcrumb.Item>
+        </Breadcrumb>
+
     );
 }

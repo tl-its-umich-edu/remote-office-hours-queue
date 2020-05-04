@@ -392,11 +392,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         <Dialog ref={dialogRef}/>
         <LoginDialog visible={loginDialogVisible}/>
         <MeetingInfoDialog meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)}/>
-        <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}>
-            <li>
-                <Link to="/manage">Manage</Link>
-            </li>
-        </Breadcrumbs>
+        <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()} intermediatePages={[{title: "Manage", href: "/manage"}]}/>
         {loadingDisplay}
         {errorDisplay}
         {queueEditor}
