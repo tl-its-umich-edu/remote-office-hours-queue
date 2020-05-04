@@ -54,7 +54,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
             )
     );
     const closedAlert = props.queue.status === "closed"
-        && <Alert variant="dark">This queue is closed. You cannot join until it is opened by a host.</Alert>
+        && <Alert variant="dark"><strong>This queue is currently closed.</strong> Please return at a later time or message the queue host to find out when the queue will be open.</Alert>
     return (
         <>
         {closedAlert}
@@ -105,7 +105,7 @@ function HowToBlueJeans(props: HowToBlueJeansProps) {
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const closedAlert = props.queue.status === "closed"
-        && <Alert variant="dark">This queue has been closed by the host. You're still in line, but if you leave the line you will not be able to rejoin until the queue is reopened.</Alert>
+        && <Alert variant="dark">This queue has been closed by the host, but you are still in line. Please contact the host to ensure the meeting will still happen.</Alert>
     const alert = props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
@@ -238,7 +238,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         interactions.next(false);
         dialogRef.current!.show({
             title: "Leave Queue?",
-            body: "The queue is closed, but you are still in line. The host will meet with you when they are available.",
+            body: "The queue is closed, but you are still in line. If you leave now, you will not be able to rejoin until the queue is reopened.",
             actions: [
                 Dialog.CancelAction(),
                 Dialog.OKAction(() => {
