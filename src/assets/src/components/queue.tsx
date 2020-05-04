@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
@@ -11,6 +11,7 @@ import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
+import Dialog from "react-bootstrap-dialog";
 
 interface QueueAttendingProps {
     queue: AttendingQueue;
@@ -186,6 +187,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
+    const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
@@ -232,6 +234,19 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
+    const confirmLeaveQueue = () => {
+        interactions.next(false);
+        dialogRef.current!.show({
+            title: "Leave Queue?",
+            body: "The queue is closed, but you are still in line. The host will meet with you when they are available.",
+            actions: [
+                Dialog.CancelAction(),
+                Dialog.OKAction(() => {
+                    doLeaveQueue();
+                }),
+            ],
+        });
+    }
     const leaveAndJoinQueue = async () => {
         interactions.next(false);
         ReactGA.event({
@@ -254,10 +269,11 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={doLeaveQueue}
+            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div className="container-fluid content">
+            <Dialog ref={dialogRef}/>
             <LoginDialog visible={loginDialogVisible}/>
             {loadingDisplay}
             {errorDisplay}
