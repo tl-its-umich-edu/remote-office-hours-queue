@@ -340,8 +340,8 @@ export const BlueJeansDialInMessage = (props: BlueJeansDialInMessageProps) => {
     const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={props.meetingNumber} />
     return (
         <span>
-            Having problems with video? As a back-up, you can call ${phoneLinkUsa} from the USA (or 
-            <a target="_blank" href="https://www.bluejeans.com/numbers">find your international number to call in from outside the USA</a>) 
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA 
+            (or <a target="_blank" href="https://www.bluejeans.com/numbers"> find your international number to call in from outside the USA</a>) 
             from any phone and enter {props.meetingNumber}#.
         </span>
     )
