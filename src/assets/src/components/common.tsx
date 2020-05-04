@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
+import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
 import { User, AttendingQueue } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -302,7 +302,7 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
     const homeLink = props.currentPageTitle !== "Home"
         && (
             <li className="breadcrumb-item">
-                <Link to="/">Home</Link>
+                <Link to="/"><FontAwesomeIcon icon={faHome}/> Remote Office Hours Queue</Link>
             </li>
         );
     const intermediateCrumbs = props.intermediatePages?.map(ip => (
@@ -310,11 +310,22 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
             <Link to={ip.href}>{ip.title}</Link>
         </li>
     ));
+    const current = props.currentPageTitle !== "Home"
+        ? (
+            <Breadcrumb.Item active>
+                {props.currentPageTitle}
+            </Breadcrumb.Item>
+        )
+        : (
+            <Breadcrumb.Item active>
+                <FontAwesomeIcon icon={faHome}/> Remote Office Hours Queue
+            </Breadcrumb.Item>
+        );
     return (
         <Breadcrumb>
             {homeLink}
             {intermediateCrumbs}
-            <Breadcrumb.Item active>{props.currentPageTitle}</Breadcrumb.Item>
+            {current}
         </Breadcrumb>
 
     );
