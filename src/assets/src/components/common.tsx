@@ -306,7 +306,7 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
             </li>
         );
     const intermediateCrumbs = props.intermediatePages?.map(ip => (
-        <li className="breadcrumb-item">
+        <li className="breadcrumb-item" key={ip.href}>
             <Link to={ip.href}>{ip.title}</Link>
         </li>
     ));
