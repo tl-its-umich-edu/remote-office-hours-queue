@@ -72,7 +72,7 @@ export function HomePage(props: PageProps) {
     return (
         <div>
             <Breadcrumbs currentPageTitle="Home"/>
-            <div className="jumbotron">
+            <div>
                 {loadingDisplay}
                 {errorDisplay}
                 <h1 className="display-4">Remote Office Hours Queue</h1>
