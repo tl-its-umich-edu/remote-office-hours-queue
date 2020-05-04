@@ -273,6 +273,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div>
+            <Dialog ref={dialogRef}/>
             <LoginDialog visible={loginDialogVisible}/>
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
             {loadingDisplay}
