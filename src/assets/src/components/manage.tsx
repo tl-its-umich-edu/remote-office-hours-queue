@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import * as api from "../services/api";
 import { ManageQueue } from "../models";
-import { ErrorDisplay, LoadingDisplay, SingleInputForm, LoginDialog } from "./common";
+import { ErrorDisplay, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
@@ -73,6 +73,7 @@ export function ManagePage(props: PageProps) {
     return (
         <div>
             <LoginDialog visible={loginDialogVisible}/>
+            <Breadcrumbs currentPageTitle="Manage"/>
             {loadingDisplay}
             {errorDisplay}
             <h1>Virtual Office Hours</h1>

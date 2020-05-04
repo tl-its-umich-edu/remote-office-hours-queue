@@ -5,7 +5,7 @@ import { Link, RouteComponentProps } from "react-router-dom";
 import { AttendingQueue, User } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
-import { LoadingDisplay, ErrorDisplay } from "./common";
+import { LoadingDisplay, ErrorDisplay, Breadcrumbs } from "./common";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
@@ -63,7 +63,8 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
             </p>
         );
     return (
-        <div className="">
+        <div>
+            <Breadcrumbs currentPageTitle="Search"/>
             {loadingDisplay}
             {errorDisplay}
             {redirectAlert}

@@ -9,7 +9,7 @@ import Table from "react-bootstrap/Table";
 
 import * as api from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
@@ -391,7 +391,12 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         <>
         <Dialog ref={dialogRef}/>
         <LoginDialog visible={loginDialogVisible}/>
-        <MeetingInfoDialog meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)}/>
+        <MeetingInfoDialog
+            meeting={visibleMeetingDialog}
+            onClose={() => setVisibleMeetingDialog(undefined)} />
+        <Breadcrumbs
+            currentPageTitle={queue?.name ?? queueIdParsed.toString()}
+            intermediatePages={[{title: "Manage", href: "/manage"}]} />
         {loadingDisplay}
         {errorDisplay}
         {queueEditor}

@@ -577,3 +577,11 @@ div[role=main] {
 	padding-top: 2rem;
 	padding-bottom: 2rem;
 }
+
+.breadcrumb .breadcrumb-item {
+	color: black;
+}
+
+.breadcrumb .breadcrumb-item::before {
+	color: black;
+}
