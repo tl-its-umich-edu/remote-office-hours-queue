@@ -234,7 +234,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
                 Attendees: {props.meeting.attendees.map(a => <UserDisplay user={a}/>)}
             </p>
             <p>
-                Joined the line at: <DateTimeDisplay dateTime={props.meeting.created_at}/>
+                Time Joined: <DateTimeDisplay dateTime={props.meeting.created_at}/>
             </p>
             </>
         );
