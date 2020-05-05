@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { getMyUser as apiGetUser } from "../services/api";
-import { LoadingDisplay, ErrorDisplay, JoinedQueueAlert } from "./common";
+import { LoadingDisplay, ErrorDisplay, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
 
 function QueueLookup() {
@@ -13,10 +13,11 @@ function QueueLookup() {
     return (
         <form className="form-inline row" method="get" action={"/search/" + lookup}>
             <div className="input-group col-sm-12 col-md-8 col-lg-6">
-                <input type="text" 
+                <input type="text"
+                    required
                     aria-label="Queue name or host uniqname"
-                    className="form-control" 
-                    placeholder="Queue name or host uniqname..." 
+                    className="form-control"
+                    placeholder="Queue name or host uniqname..."
                     value={lookup}
                     onChange={(e) => setLookup(e.target.value)}
                     />
@@ -69,11 +70,14 @@ export function HomePage(props: PageProps) {
             </>
         );
     return (
-        <div className="jumbotron">
-            {loadingDisplay}
-            {errorDisplay}
-            <h1 className="display-4">Remote Office Hours Queue</h1>
-            {body}
+        <div>
+            <Breadcrumbs currentPageTitle="Home"/>
+            <div>
+                {loadingDisplay}
+                {errorDisplay}
+                <h1 className="display-4">Remote Office Hours Queue</h1>
+                {body}
+            </div>
         </div>
     );
 }
