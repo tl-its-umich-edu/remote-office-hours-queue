@@ -76,7 +76,6 @@ export function ManagePage(props: PageProps) {
             <Breadcrumbs currentPageTitle="Manage"/>
             {loadingDisplay}
             {errorDisplay}
-            <h1>Virtual Office Hours</h1>
             <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
             {queueList}
             <hr/>
