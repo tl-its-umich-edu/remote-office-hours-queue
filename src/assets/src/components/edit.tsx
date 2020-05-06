@@ -6,6 +6,7 @@ import Dialog from "react-bootstrap-dialog";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
+import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
 import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
@@ -95,6 +96,23 @@ function QueueEditor(props: QueueEditorProps) {
     const meetings = props.queue.meeting_set.map(m =>
         <MeetingEditor key={m.id} meeting={m} onRemove={props.onRemoveMeeting} disabled={props.disabled} onShowMeetingInfo={props.onShowMeetingInfo}/>
     );
+    const meetingsTable = props.queue.meeting_set.length
+        ? (
+            <Table bordered>
+                <thead>
+                    <tr>
+                        <th>Attendee</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {meetings}
+                </tbody>
+            </Table>
+        )
+        : (
+            <Alert variant="dark">No meetings in queue.</Alert>
+        );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
         console.log("ToggleStatus")
@@ -171,17 +189,7 @@ function QueueEditor(props: QueueEditorProps) {
             <h3>Meetings Up Next</h3>
             <div className="row">
                 <div className="col-md-12">
-                    <Table bordered>
-                        <thead>
-                            <tr>
-                                <th>Attendee</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {meetings}
-                        </tbody>
-                    </Table>
+                    {meetingsTable}
                 </div>
             </div>
             <div className="row">
@@ -239,7 +247,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
     return (
         <Modal show={!!props.meeting} onHide={props.onClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Meeting Info</Modal.Title>
+                <Modal.Title>Join Info</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {generalInfo}
