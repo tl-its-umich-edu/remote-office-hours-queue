@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from rest_framework import permissions
+from .models import Queue, Meeting
 
 
 class IsCurrentUser(permissions.BasePermission):
@@ -6,8 +8,22 @@ class IsCurrentUser(permissions.BasePermission):
     Custom permission to only allow users to view themselves.
     '''
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view, obj: User):
         return obj == request.user
+
+
+def is_host(user: User, queue: Queue):
+    return (
+        user.is_superuser
+        or user in queue.hosts.all()
+    )
+
+
+def is_attendee(user: User, meeting: Meeting):
+    return any(
+        a.user == user
+        for a in meeting.attendee_set.all()
+    )
 
 
 class IsHostOrReadOnly(permissions.BasePermission):
@@ -15,13 +31,13 @@ class IsHostOrReadOnly(permissions.BasePermission):
     Custom permission to only allow hosts to edit queues
     '''
 
-    def has_object_permission(self, request, view, obj):
+    def has_object_permission(self, request, view, obj: Queue):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in permissions.SAFE_METHODS:
             return True
         else:
-            return request.user in obj.hosts.all()
+            return is_host(request.user, obj)
 
 
 class IsHostOrAttendee(permissions.BasePermission):
@@ -30,14 +46,8 @@ class IsHostOrAttendee(permissions.BasePermission):
     hosts of the meeting's queue to edit the meeting.
     '''
 
-    def has_object_permission(self, request, view, obj):
-        for attendee in obj.attendee_set.all():
-            if request.user == attendee.user:
-                return True
-
-        if hasattr(obj, 'queue') and hasattr(obj.queue, 'hosts'):
-            is_host = request.user in obj.queue.hosts.all()
-        else:
-            is_host = False
-
-        return is_host
+    def has_object_permission(self, request, view, obj: Meeting):
+        return (
+            is_attendee(request.user, obj)
+            or (hasattr(obj, 'queue') and is_host(request.user, obj.queue))
+        )
