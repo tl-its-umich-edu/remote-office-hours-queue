@@ -21,19 +21,19 @@ function App(props: AppProps) {
     return (
         <Switch>
             <Route path='/' exact render={p => 
-                <HomePage {...p} user={props.globals.user} />
+                <HomePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} />
             }/>
             <Route path='/manage' exact render={p => 
-                <ManagePage {...p} user={props.globals.user} />
+                <ManagePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} />
             }/>
             <Route path='/manage/:queue_id' exact render={p => 
-                <QueueEditorPage {...p} user={props.globals.user} key={(p.match.params as any).queue_id} />
+                <QueueEditorPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} key={(p.match.params as any).queue_id} />
             }/>
             <Route path='/queue/:queue_id' exact render={p => 
-                <QueuePage {...p} user={props.globals.user} key={(p.match.params as any).queue_id} />
+                <QueuePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} key={(p.match.params as any).queue_id} />
             }/>
             <Route path='/search/:term' exact render={p =>
-                <SearchPage {...p} user={props.globals.user} />
+                <SearchPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} />
             }/>
         </Switch>
     );

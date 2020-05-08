@@ -1,8 +1,8 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Link, RouteComponentProps } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import { QueueAttendee, User } from "../models";
+import { QueueAttendee } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay, Breadcrumbs } from "./common";
@@ -34,7 +34,7 @@ interface SearchPageParams {
 
 export function SearchPage(props: PageProps<SearchPageParams>) {
     if (!props.user) {
-        redirectToLogin();
+        redirectToLogin(props.loginUrl);
     }
     const term = props.match.params.term;
     const [searchResults, setSearchResults] = useState(undefined as QueueAttendee[] | undefined);

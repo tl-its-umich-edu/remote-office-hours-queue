@@ -181,7 +181,7 @@ interface QueuePageParams {
 
 export function QueuePage(props: PageProps<QueuePageParams>) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin(props.loginUrl);
     }
     const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
@@ -258,7 +258,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div>
-            <LoginDialog visible={loginDialogVisible}/>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
             {loadingDisplay}
             {errorDisplay}

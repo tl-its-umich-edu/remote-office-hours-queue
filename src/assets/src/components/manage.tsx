@@ -45,7 +45,7 @@ function ManageQueueList(props: ManageQueueListProps) {
 
 export function ManagePage(props: PageProps) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin(props.loginUrl);
     }
     const [queues, setQueues] = useState(undefined as QueueHost[] | undefined);
     const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueues(), setQueues);
@@ -72,7 +72,7 @@ export function ManagePage(props: PageProps) {
         && <ManageQueueList queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
     return (
         <div>
-            <LoginDialog visible={loginDialogVisible}/>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle="Manage"/>
             {loadingDisplay}
             {errorDisplay}

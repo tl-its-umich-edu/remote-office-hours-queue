@@ -54,7 +54,7 @@
                 </div>
               </li>
             {% else %}
-              <a href="{% url 'oidc_authentication_init' %}" class="nav-link">Login</a>
+              <a href="{{ LOGIN_URL }}" class="nav-link">Login</a>
             {% endif %}
           </div>
         </div>

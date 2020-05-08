@@ -285,7 +285,7 @@ interface EditPageParams {
 
 export function QueueEditorPage(props: PageProps<EditPageParams>) {
     if (!props.user) {
-        redirectToLogin();
+        redirectToLogin(props.loginUrl);
     }
     const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
@@ -398,7 +398,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     return (
         <>
         <Dialog ref={dialogRef}/>
-        <LoginDialog visible={loginDialogVisible}/>
+        <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
         <MeetingInfoDialog
             meeting={visibleMeetingDialog}
             onClose={() => setVisibleMeetingDialog(undefined)} />
