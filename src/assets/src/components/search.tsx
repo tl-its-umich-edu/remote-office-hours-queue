@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { Link, RouteComponentProps } from "react-router-dom";
 
-import { AttendingQueue, User } from "../models";
+import { QueueAttendee, User } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay, Breadcrumbs } from "./common";
@@ -10,7 +10,7 @@ import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
 interface AttendingQueueListProps {
-    queues: AttendingQueue[];
+    queues: QueueAttendee[];
 }
 
 function AttendingQueueList(props: AttendingQueueListProps) {
@@ -37,7 +37,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
         redirectToLogin();
     }
     const term = props.match.params.term;
-    const [searchResults, setSearchResults] = useState(undefined as AttendingQueue[] | undefined);
+    const [searchResults, setSearchResults] = useState(undefined as QueueAttendee[] | undefined);
     const [doSearch, searchLoading, searchError] = usePromise(
         (term: string) => apiSearchQueue(term),
         setSearchResults

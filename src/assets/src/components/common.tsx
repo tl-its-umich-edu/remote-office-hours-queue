@@ -1,7 +1,7 @@
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { User, AttendingQueue } from "../models";
+import { User, QueueAttendee } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
@@ -249,7 +249,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
 
 
 interface JoinedQueueAlertProps {
-    joinedQueue: AttendingQueue;
+    joinedQueue: QueueAttendee;
 }
 
 export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>

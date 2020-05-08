@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
-import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
+import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -13,9 +13,9 @@ import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 
 interface QueueAttendingProps {
-    queue: AttendingQueue;
+    queue: QueueAttendee;
     user: User;
-    joinedQueue?: AttendingQueue | null;
+    joinedQueue?: QueueAttendee | null;
     disabled: boolean;
     onJoinQueue: () => void;
     onLeaveQueue: () => void;
@@ -189,7 +189,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
-    const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
+    const [queue, setQueue] = useState(undefined as QueueAttendee | undefined);
     const refresh = () => api.getQueue(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
