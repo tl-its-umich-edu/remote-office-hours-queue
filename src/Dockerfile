@@ -20,14 +20,14 @@ EXPOSE 8000
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-ENV WEB_CONCURRENCY=4
+ENV WEB_CONCURRENCY=5
 
-RUN pip install uvicorn psycopg2-binary
+RUN pip install gunicorn uvicorn psycopg2-binary
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
 ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
-CMD ["sh", "-c", "uvicorn --host=0.0.0.0 --port=8001 officehours.asgi:application"]
+CMD ["sh", "-c", "gunicorn officehours.asgi:application --bind=0.0.0.0:8001 -k uvicorn.workers.UvicornWorker"]
 
 COPY --from=node-webpack /usr/src/app/package-lock.json package-lock.json
 COPY --from=node-webpack /usr/src/app/webpack-stats.json webpack-stats.json
