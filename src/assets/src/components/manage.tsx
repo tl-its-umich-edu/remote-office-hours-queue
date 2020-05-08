@@ -29,7 +29,6 @@ function ManageQueueList(props: ManageQueueListProps) {
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>
     return (
         <div>
-            <h2>My Meeting Queues</h2>
             {queueList}
             <SingleInputForm 
                 id="add_queue"
@@ -76,6 +75,7 @@ export function ManagePage(props: PageProps) {
             <Breadcrumbs currentPageTitle="Manage"/>
             {loadingDisplay}
             {errorDisplay}
+            <h1>My Meeting Queues</h1>
             <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
             {queueList}
             <hr/>
