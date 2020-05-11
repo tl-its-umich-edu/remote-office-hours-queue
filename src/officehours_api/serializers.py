@@ -10,7 +10,7 @@ class UserContext(TypedDict):
     user: User
 
 
-class MeetingSerializerContext(TypedDict):
+class MeetingSerializerContext(UserContext):
     action: Literal['WRITE', 'READ', 'UPDATE', 'DELETE']
 
 
