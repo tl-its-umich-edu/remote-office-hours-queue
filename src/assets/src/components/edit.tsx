@@ -9,7 +9,7 @@ import Table from "react-bootstrap/Table";
 import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
-import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
+import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -73,7 +73,7 @@ function HostEditor(props: HostEditorProps) {
 }
 
 interface QueueEditorProps {
-    queue: ManageQueue;
+    queue: QueueHost;
     disabled: boolean;
     onAddMeeting: (uniqname: string) => void;
     onRemoveMeeting: (m: Meeting) => void;
@@ -285,7 +285,7 @@ interface EditPageParams {
 
 export function QueueEditorPage(props: PageProps<EditPageParams>) {
     if (!props.user) {
-        redirectToLogin();
+        redirectToLogin(props.loginUrl);
     }
     const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
@@ -294,8 +294,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
-    const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueue(queueIdParsed) as Promise<ManageQueue>, setQueue);
+    const [queue, setQueue] = useState(undefined as QueueHost | undefined);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueue(queueIdParsed) as Promise<QueueHost>, setQueue);
     useEffect(() => {
         doRefresh();
     }, []);
@@ -398,7 +398,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     return (
         <>
         <Dialog ref={dialogRef}/>
-        <LoginDialog visible={loginDialogVisible}/>
+        <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
         <MeetingInfoDialog
             meeting={visibleMeetingDialog}
             onClose={() => setVisibleMeetingDialog(undefined)} />

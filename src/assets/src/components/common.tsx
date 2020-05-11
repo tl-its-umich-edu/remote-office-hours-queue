@@ -1,7 +1,7 @@
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { User, AttendingQueue } from "../models";
+import { User, QueueAttendee } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Modal from "react-bootstrap/Modal";
@@ -249,7 +249,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
 
 
 interface JoinedQueueAlertProps {
-    joinedQueue: AttendingQueue;
+    joinedQueue: QueueAttendee;
 }
 
 export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>
@@ -266,6 +266,7 @@ export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>
 
 interface LoginDialogProps {
     visible: boolean;
+    loginUrl: string;
 }
 
 export const LoginDialog = (props: LoginDialogProps) =>
@@ -277,7 +278,7 @@ export const LoginDialog = (props: LoginDialogProps) =>
             <p className="alert alert-warning">Your session has timed out. Some work may be lost. Please login again via the "Login" link below.</p>
         </Modal.Body>
         <Modal.Footer>
-            <a href={'/oidc/authenticate/?next=' + location.pathname} className="btn btn-primary">Login</a>
+            <a href={props.loginUrl + '?next=' + location.pathname} className="btn btn-primary">Login</a>
         </Modal.Footer>
     </Modal>
 

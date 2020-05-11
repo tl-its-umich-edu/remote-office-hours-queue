@@ -108,6 +108,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
@@ -174,6 +175,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'officehours_ui.context_processors.feedback',
                 'officehours_ui.context_processors.debug',
+                'officehours_ui.context_processors.login_url',
                 'officehours_ui.context_processors.spa_globals',
             ],
         },

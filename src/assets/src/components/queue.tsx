@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
-import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
+import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -14,9 +14,9 @@ import { PageProps } from "./page";
 import Dialog from "react-bootstrap-dialog";
 
 interface QueueAttendingProps {
-    queue: AttendingQueue;
+    queue: QueueAttendee;
     user: User;
-    joinedQueue?: AttendingQueue | null;
+    joinedQueue?: QueueAttendee | null;
     disabled: boolean;
     onJoinQueue: () => void;
     onLeaveQueue: () => void;
@@ -182,7 +182,7 @@ interface QueuePageParams {
 
 export function QueuePage(props: PageProps<QueuePageParams>) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin(props.loginUrl);
     }
     const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
@@ -191,7 +191,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
-    const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
+    const [queue, setQueue] = useState(undefined as QueueAttendee | undefined);
     const refresh = () => api.getQueue(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
@@ -274,7 +274,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     return (
         <div>
             <Dialog ref={dialogRef}/>
-            <LoginDialog visible={loginDialogVisible}/>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
             {loadingDisplay}
             {errorDisplay}

@@ -1,4 +1,4 @@
-import { ManageQueue, AttendingQueue, User, MyUser } from "../models";
+import { QueueHost, QueueAttendee, User, MyUser } from "../models";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -53,13 +53,13 @@ export const getUsers = async () => {
 export const getQueues = async () => {
     const resp = await fetch("/api/queues/", { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as ManageQueue[];
+    return await resp.json() as QueueHost[];
 }
 
 export const getQueue = async (id: number) => {
     const resp = await fetch(`/api/queues/${id}/`, { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as ManageQueue | AttendingQueue;
+    return await resp.json() as QueueHost | QueueAttendee;
 }
 
 export const createQueue = async (name: string) => {
@@ -72,7 +72,7 @@ export const createQueue = async (name: string) => {
         headers: getPostHeaders(),
     });
     await handleErrors(resp);
-    return await resp.json() as ManageQueue;
+    return await resp.json() as QueueHost;
 }
 
 export const deleteQueue = async (id: number) => {
@@ -169,5 +169,5 @@ export const getMyUser = async (user_id: number) => {
 export const searchQueue = async (term: string) => {
     const resp = await fetch(`/api/queues_search/?search=${term}&status=open`, { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as AttendingQueue[];
+    return await resp.json() as QueueAttendee[];
 }
