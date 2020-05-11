@@ -18,6 +18,7 @@ services:
     command: "python manage.py runserver 0.0.0.0:8001"
     depends_on:
       - database
+      - redis
       - webpack_watcher
 
   database:
@@ -27,6 +28,9 @@ services:
       - POSTGRES_DB=admin
     volumes:
       - officehours-postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:5
 
   webpack_watcher:
     build:
