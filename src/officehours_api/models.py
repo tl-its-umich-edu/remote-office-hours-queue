@@ -101,7 +101,7 @@ class Attendee(SafeDeleteModel):
 
 
 @receiver(post_save, sender=User)
-def post_save_user_signal_handler(sender, instance, created, **kwargs):
+def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
     try:
         instance.profile
     except User.profile.RelatedObjectDoesNotExist:
@@ -109,7 +109,7 @@ def post_save_user_signal_handler(sender, instance, created, **kwargs):
 
 
 @receiver(pre_softdelete, sender=Meeting)
-def pre_delete_meeting_signal_handler(sender, instance, **kwargs):
+def pre_delete_meeting_signal_handler(sender, instance: Meeting, **kwargs):
     if instance.backend_type:
         backend = globals()[instance.backend_type]
         if backend:

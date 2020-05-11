@@ -1,10 +1,83 @@
+from typing import TypedDict, Literal
+
 from rest_framework import serializers
 from django.contrib.auth.models import User
+
 from officehours_api.models import Queue, Meeting, Attendee
-from officehours_api.nested_serializers import (
-    NestedMeetingSerializer, NestedAttendeeSerializer, NestedUserSerializer,
-    NestedMyMeetingSerializer,
-)
+
+
+class UserContext(TypedDict):
+    user: User
+
+
+class MeetingSerializerContext(TypedDict):
+    action: Literal['WRITE', 'READ', 'UPDATE', 'DELETE']
+
+
+class AttendeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Attendee
+        fields = ['id', 'user', 'meeting']
+
+
+class NestedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name']
+
+
+class NestedMeetingSerializer(serializers.ModelSerializer):
+    attendees = NestedUserSerializer(many=True, read_only=True)
+    backend_metadata = serializers.JSONField(read_only=True)
+
+    class Meta:
+        model = Meeting
+        fields = ['id', 'attendees', 'backend_type', 'backend_metadata']
+
+
+class NestedMyMeetingSerializer(serializers.ModelSerializer):
+    context: UserContext
+
+    line_place = serializers.SerializerMethodField(read_only=True)
+    backend_metadata = serializers.JSONField(read_only=True)
+
+    class Meta:
+        model = Meeting
+        fields = ['id', 'line_place', 'backend_type', 'backend_metadata']
+
+    def get_line_place(self, obj):
+        i = 0
+        in_line = False
+        meetings = obj.queue.meeting_set.order_by('id')
+        for i in range(0, len(meetings)):
+            if self.context['user'] in meetings[i].attendees.all():
+                in_line = True
+                break
+
+        if in_line:
+            return i
+        else:
+            return None
+
+
+class NestedMeetingSetSerializer(serializers.ModelSerializer):
+    queue = serializers.ReadOnlyField(source='queue.name')
+    backend_metadata = serializers.JSONField(read_only=True)
+
+    class Meta:
+        model = Meeting
+        fields = ['id', 'queue', 'backend_type', 'backend_metadata']
+
+
+class NestedAttendeeSerializer(serializers.ModelSerializer):
+    user_id = serializers.ReadOnlyField(source='user.id')
+    username = serializers.ReadOnlyField(source='user.username')
+    first_name = serializers.ReadOnlyField(source='user.first_name')
+    last_name = serializers.ReadOnlyField(source='user.last_name')
+
+    class Meta:
+        model = Attendee
+        fields = ['id', 'user_id', 'username', 'first_name', 'last_name']
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -14,6 +87,8 @@ class UserListSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    context: UserContext
+
     my_queue = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -26,7 +101,7 @@ class UserSerializer(serializers.ModelSerializer):
         except Meeting.DoesNotExist:
             return None
 
-        serializer = QueueAttendeeSerializer(meeting.queue, context={'request': self.context['request']})
+        serializer = QueueAttendeeSerializer(meeting.queue, context=self.context)
         return serializer.data
 
 
@@ -34,6 +109,8 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
     '''
     Serializer used when viewing queue as an attendee.
     '''
+    context: UserContext
+
     hosts = NestedUserSerializer(many=True, read_only=True)
     line_length = serializers.SerializerMethodField(read_only=True)
     my_meeting = serializers.SerializerMethodField(read_only=True)
@@ -46,14 +123,14 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
         return obj.meeting_set.count()
 
     def get_my_meeting(self, obj):
-        user = self.context['request'].user
+        user = self.context['user']
         my_meeting = (
-            obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
+            obj.meeting_set.filter(attendees__in=[self.context['user']]).first()
             if user.is_authenticated else None
         )
         if not my_meeting:
             return None
-        serializer = NestedMyMeetingSerializer(my_meeting, context={'request': self.context['request']})
+        serializer = NestedMyMeetingSerializer(my_meeting, context=self.context)
         return serializer.data
 
 
@@ -61,6 +138,8 @@ class QueueHostSerializer(QueueAttendeeSerializer):
     '''
     Serializer used when viewing queue as a host.
     '''
+    context: UserContext
+
     meeting_set = NestedMeetingSerializer(many=True, read_only=True)
     host_ids = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -78,7 +157,7 @@ class QueueHostSerializer(QueueAttendeeSerializer):
         Require empty hosts_ids (default to current user) or
         require current user in host_ids
         '''
-        if host_ids and self.context['request'].user not in host_ids:
+        if host_ids and self.context['user'] not in host_ids:
             raise serializers.ValidationError('Must include self as host')
         else:
             return host_ids
@@ -93,11 +172,13 @@ class QueueHostSerializer(QueueAttendeeSerializer):
         if hosts:
             instance.hosts.set(hosts)
         else:
-            instance.hosts.set([self.context['request'].user])
+            instance.hosts.set([self.context['user']])
         return instance
 
 
 class MeetingSerializer(serializers.ModelSerializer):
+    context: MeetingSerializerContext
+
     attendees = NestedAttendeeSerializer(many=True, source='attendee_set', read_only=True)
     attendee_ids = serializers.PrimaryKeyRelatedField(
         many=True,
@@ -128,14 +209,8 @@ class MeetingSerializer(serializers.ModelSerializer):
         '''
         if (
             queue.status == 'closed'
-            and self.context['request']._request.method == 'POST'
-            and self.context['request'].user not in queue.hosts.all()
+            and self.context['action'] == 'WRITE'
+            and self.context['user'] not in queue.hosts.all()
         ):
             raise serializers.ValidationError(f'Queue {queue} is closed.')
         return queue
-
-
-class AttendeeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Attendee
-        fields = ['id', 'user', 'meeting']

@@ -80,6 +80,7 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'officehours_api.apps.OfficehoursApiConfig',
     'officehours_ui.apps.OfficehoursUiConfig',
     'whitenoise.runserver_nostatic',
@@ -266,3 +267,15 @@ MANAGERS = ADMINS
 
 # Google Analytics
 GA_TRACKING_ID = os.getenv('GA_TRACKING_ID')
+
+
+# Channels
+ASGI_APPLICATION = 'officehours.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
