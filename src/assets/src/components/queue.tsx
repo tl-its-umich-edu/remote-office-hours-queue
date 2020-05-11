@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, createRef } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
@@ -11,6 +11,7 @@ import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
+import Dialog from "react-bootstrap-dialog";
 
 interface QueueAttendingProps {
     queue: QueueAttendee;
@@ -53,7 +54,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
             )
     );
     const closedAlert = props.queue.status === "closed"
-        && <Alert variant="dark">This queue is closed. You cannot join until it is opened by a host.</Alert>
+        && <Alert variant="dark"><strong>This queue is currently closed.</strong> Please return at a later time or message the queue host to find out when the queue will be open.</Alert>
     return (
         <>
         {closedAlert}
@@ -104,7 +105,7 @@ function HowToBlueJeans(props: HowToBlueJeansProps) {
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const closedAlert = props.queue.status === "closed"
-        && <Alert variant="dark">This queue has been closed by the host. You're still in line, but if you leave the line you will not be able to rejoin until the queue is reopened.</Alert>
+        && <Alert variant="dark">This queue has been closed by the host, but you are still in line. Please contact the host to ensure the meeting will still happen.</Alert>
     const alert = props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
@@ -186,6 +187,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
+    const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
@@ -232,6 +234,19 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
+    const confirmLeaveQueue = () => {
+        interactions.next(false);
+        dialogRef.current!.show({
+            title: "Leave Queue?",
+            body: "The queue is closed, but you are still in line. If you leave now, you will not be able to rejoin until the queue is reopened.",
+            actions: [
+                Dialog.CancelAction(),
+                Dialog.OKAction(() => {
+                    doLeaveQueue();
+                }),
+            ],
+        });
+    }
     const leaveAndJoinQueue = async () => {
         interactions.next(false);
         ReactGA.event({
@@ -254,11 +269,12 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={doLeaveQueue}
+            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
         <div>
-            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
+            <Dialog ref={dialogRef}/>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
             {loadingDisplay}
             {errorDisplay}
