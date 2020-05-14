@@ -1,9 +1,6 @@
 import time
 import requests
-import logging
 from rest_framework.exceptions import ValidationError
-
-logger = logging.getLogger(__name__)
 
 
 class Bluejeans:
