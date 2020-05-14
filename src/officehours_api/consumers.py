@@ -2,13 +2,14 @@ from asgiref.sync import async_to_sync
 
 from django.contrib.auth.models import User
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete, m2m_changed
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
+from safedelete.signals import post_softdelete
 
-from officehours_api.models import Queue
+from officehours_api.models import Queue, Meeting
 from officehours_api.permissions import is_host
 from officehours_api.serializers import QueueHostSerializer  # , QueueAttendeeSerializer
 
@@ -63,7 +64,6 @@ class QueueConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def update(self, event):
-        print('consuming update')
         queue_data = await database_sync_to_async(
             lambda: QueueHostSerializer(
                 Queue.objects.get(pk=self.queue_id),
@@ -75,12 +75,22 @@ class QueueConsumer(AsyncJsonWebsocketConsumer):
             'content': queue_data,
         })
 
+    async def deleted(self, event):
+        print('sending deleted event')
+        await self.send_json({
+            'type': 'deleted',
+        })
 
-def update_queue_sync(queue_id: int, channel_layer=None):
-    async_to_sync(update_queue)(queue_id, channel_layer)
+
+def send_queue_update_sync(queue_id: int, channel_layer=None):
+    async_to_sync(send_queue_update)(queue_id, channel_layer)
 
 
-async def update_queue(queue_id: int, channel_layer=None):
+def send_queue_delete_sync(queue_id: int, channel_layer=None):
+    async_to_sync(send_queue_delete)(queue_id, channel_layer)
+
+
+async def send_queue_update(queue_id: int, channel_layer=None):
     channel_layer = channel_layer or get_channel_layer()
     await channel_layer.group_send(
         QueueConsumer.get_group_name(queue_id),
@@ -90,7 +100,51 @@ async def update_queue(queue_id: int, channel_layer=None):
     )
 
 
+async def send_queue_delete(queue_id: int, channel_layer=None):
+    print('send_queue_delete')
+    print(queue_id)
+    channel_layer = channel_layer or get_channel_layer()
+    await channel_layer.group_send(
+        QueueConsumer.get_group_name(queue_id),
+        {
+            'type': 'deleted',
+        }
+    )
+
+
 @receiver(post_save, sender=Queue)
 def post_save_queue_signal_handler(sender, instance: Queue, created, **kwargs):
-    print('handling queue update')
-    update_queue_sync(instance.id)
+    print('post_save_queue_signal_handler')
+    if instance.deleted:
+        return
+    send_queue_update_sync(instance.id)
+
+
+@receiver(post_softdelete, sender=Queue)
+def post_delete_queue_signal_handler(sender, instance: Queue, **kwargs):
+    print('post_delete_queue_signal_handler')
+    send_queue_delete_sync(instance.id)
+
+
+@receiver(post_save, sender=Meeting)
+def post_save_meeting_signal_handler(sender, instance: Meeting, created, **kwargs):
+    print('post_save_meeting_signal_handler')
+    if instance.queue_id is None:
+        return
+    send_queue_update_sync(instance.queue_id)
+
+
+@receiver(post_delete, sender=Meeting)
+def post_delete_meeting_signal_handler(sender, instance: Meeting, **kwargs):
+    print('post_delete_meeting_signal_handler')
+    if instance.queue_id is None:
+        return
+    send_queue_update_sync(instance.queue_id)
+
+
+@receiver(m2m_changed, sender=Queue.hosts.through)
+def hosts_changed_signal_handler(sender, instance, action, **kwargs):
+    print('hosts_changed_signal_handler')
+    print(action)
+    if action == "post_remove" or action == "post_clear" or action == "post_add":
+        send_queue_update_sync(instance.id)

@@ -368,7 +368,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const removeHost = async (h: User) => {
         recordQueueManagementEvent("Removed Host");
         await api.removeHost(queue!.id, h.id);
-        await doRefresh();
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
     const confirmRemoveHost = (h: User) => {
@@ -381,13 +380,11 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
-        await doRefresh();
     }
     const [doAddHost, addHostLoading, addHostError] = usePromise(addHost);
     const removeMeeting = async (m: Meeting) => {
         recordQueueManagementEvent("Removed Meeting");
         await api.removeMeeting(m.id);
-        await doRefresh();
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
     const confirmRemoveMeeting = (m: Meeting) => {
@@ -400,7 +397,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id);
-        await doRefresh();
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {
@@ -432,7 +428,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         console.log(assignee)
         console.log("meeting")
         console.log(meeting)
-        interactions.next(true);
         recordQueueManagementEvent("Changed Assignee");
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
         await doRefresh();
@@ -443,6 +438,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
     const errorSources = [
+        {source: 'Refresh', error: webSocketError},
         {source: 'Refresh', error: refreshError},
         {source: 'Refresh Users', error: refreshUsersError}, 
         {source: 'Remove Host', error: removeHostError}, 
