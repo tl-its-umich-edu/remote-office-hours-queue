@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
+import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -135,7 +135,6 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <span>Agenda: </span> 
                 <EditToggleField text="agenda goes here" disabled={props.disabled} id="agenda"
                 onSubmit={props.onChangeAgenda}
                 buttonType="success" placeholder="Enter content or location info...">
@@ -223,6 +222,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         doRefreshMyUser();
     }, []);
     useAutoRefresh(doRefreshMyUser, 10000);
+    const [meeting, setMeeting] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
     const joinQueue = async () => {
@@ -273,7 +273,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         interactions.next(true);
         return await api.changeAgenda(queue!.my_meeting!.id, agenda);
     }
-    const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda, setQueue);
+    const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda, setMeeting);
     
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
