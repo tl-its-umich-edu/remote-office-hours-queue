@@ -163,17 +163,32 @@ interface DateDisplayProps {
 }
 
 export const DateDisplay = (props: DateDisplayProps) =>
-    <span>{new Date(props.date).toDateString()}</span>
+    <span>{
+        new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }).format(new Date(props.date))
+    }</span>
 
 
 interface DateTimeDisplayProps {
     dateTime: string;
 }
 
-export const DateTimeDisplay = (props: DateTimeDisplayProps) => {
-    const date = new Date(props.dateTime);
-    return <span>{date.toDateString()} {date.toLocaleTimeString()}</span>
-}
+export const DateTimeDisplay = (props: DateTimeDisplayProps) =>
+    <span>{
+        new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric'
+        }).format(new Date(props.dateTime))
+    }</span>
 
 
 interface CopyFieldProps {
