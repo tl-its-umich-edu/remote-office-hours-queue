@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -21,6 +21,7 @@ interface QueueAttendingProps {
     onJoinQueue: () => void;
     onLeaveQueue: () => void;
     onLeaveAndJoinQueue: () => void;
+    onChangeAgenda: (agenda: string) => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -130,6 +131,16 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 <div className="card">
                     {howTo}
                 </div>
+            </div>
+        </div>
+        <div className="row">
+            <div className="col-lg">
+                <span>Agenda: </span> 
+                <EditToggleField text="agenda goes here" disabled={props.disabled} id="agenda"
+                onSubmit={props.onChangeAgenda}
+                buttonType="success" placeholder="Enter content or location info...">
+                    Update
+                </EditToggleField>
             </div>
         </div>
         <div className="row">
@@ -258,9 +269,14 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
-
+    const changeAgenda = async (agenda: string) => {
+        interactions.next(true);
+        return await api.changeAgenda(queue!.my_meeting!.id, agenda);
+    }
+    const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda, setQueue);
+    
     //Render
-    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading;
+    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
     const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
     const error = errorTypes.find(e => e);
@@ -270,7 +286,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
-            onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}/>
     return (
         <div>
             <Dialog ref={dialogRef}/>

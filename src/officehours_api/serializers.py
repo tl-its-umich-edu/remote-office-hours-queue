@@ -105,11 +105,12 @@ class MeetingSerializer(serializers.ModelSerializer):
         source='attendees',
         write_only=True,
     )
+    #agenda = serializers.CharField()
     backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
-        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'backend_type', 'backend_metadata']
+        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'agenda', 'backend_type', 'backend_metadata']
         read_only_fields = ['attendees', 'backend_metadata']
 
     def validate_attendee_ids(self, attendee_ids):

@@ -15,7 +15,7 @@ class NestedMeetingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meeting
-        fields = ['id', 'attendees', 'backend_type', 'backend_metadata']
+        fields = ['id', 'attendees', 'agenda', 'backend_type', 'backend_metadata']
 
 
 class NestedMyMeetingSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class NestedMyMeetingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meeting
-        fields = ['id', 'line_place', 'backend_type', 'backend_metadata']
+        fields = ['id', 'line_place', 'agenda', 'backend_type', 'backend_metadata']
 
     def get_line_place(self, obj):
         i = 0
@@ -58,4 +58,4 @@ class NestedAttendeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attendee
-        fields = ['id', 'user_id', 'username', 'first_name', 'last_name']
+        fields = ['id', 'user_id', 'username', 'first_name', 'last_name', 'agenda']

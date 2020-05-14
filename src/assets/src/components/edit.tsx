@@ -241,7 +241,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
                 Attendees: {props.meeting.attendees.map(a => <UserDisplay user={a}/>)}
             </p>
         );
-    const agendaInfo = <p>Agenda: TBD</p>
+    const agendaInfo = <p>Agenda: {props.meeting?.agenda}</p>
     const metadataInfo = props.meeting?.backend_type === "bluejeans"
         ? <BlueJeansMeetingInfo metadata={props.meeting!.backend_metadata!} />
         : <div></div>
