@@ -312,7 +312,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const removeHost = async (h: User) => {
         recordQueueManagementEvent("Removed Host");
         await api.removeHost(queue!.id, h.id);
-        await doRefresh();
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
     const confirmRemoveHost = (h: User) => {
@@ -325,13 +324,11 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
-        await doRefresh();
     }
     const [doAddHost, addHostLoading, addHostError] = usePromise(addHost);
     const removeMeeting = async (m: Meeting) => {
         recordQueueManagementEvent("Removed Meeting");
         await api.removeMeeting(m.id);
-        await doRefresh();
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
     const confirmRemoveMeeting = (m: Meeting) => {
@@ -344,7 +341,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id);
-        await doRefresh();
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {
@@ -375,7 +371,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const errorTypes = [refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError, setStatusError];
+    const errorTypes = [webSocketError, refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError, setStatusError];
     const error = errorTypes.find(e => e);
     const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
