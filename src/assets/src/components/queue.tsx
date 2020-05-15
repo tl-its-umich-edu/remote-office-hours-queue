@@ -126,22 +126,19 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     <li>The host will join the meeting when it is your turn</li>
                     <li>We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</li>
                 </ul>
+                <b>Meeting Agenda (Optional)</b>
+                <p>Let the host(s) know the topic you wish to discuss.</p>
+                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
+                onSubmit={props.onChangeAgenda}
+                buttonType="success" placeholder=""
+                initialState={true}>
+                    Update
+                </EditToggleField>
             </div>
             <div className="col-sm">
                 <div className="card">
                     {howTo}
                 </div>
-            </div>
-        </div>
-        <div className="row">
-            <div className="col-lg">
-                Agenda: 
-                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
-                onSubmit={props.onChangeAgenda}
-                buttonType="success" placeholder="Enter content or location info..."
-                initialState={true}>
-                    Update
-                </EditToggleField>
             </div>
         </div>
         <div className="row">
