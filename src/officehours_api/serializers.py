@@ -105,7 +105,6 @@ class MeetingSerializer(serializers.ModelSerializer):
         source='attendees',
         write_only=True,
     )
-    #agenda = serializers.CharField()
     backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
