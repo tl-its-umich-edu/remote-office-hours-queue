@@ -57,7 +57,7 @@ class Meeting(SafeDeleteModel):
     )
     attendees = models.ManyToManyField(User, through='Attendee')
     created_at = models.DateTimeField(auto_now_add=True)
-    agenda = models.CharField(max_length=100, null=True, default="", blank=True)
+    agenda = models.CharField(max_length=100, null=False, default="", blank=True)
 
     MEETING_BACKEND_TYPES = [
         ('bluejeans', 'BlueJeans'),

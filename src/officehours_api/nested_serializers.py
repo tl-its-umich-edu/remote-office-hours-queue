@@ -58,4 +58,4 @@ class NestedAttendeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Attendee
-        fields = ['id', 'user_id', 'username', 'first_name', 'last_name', 'agenda']
+        fields = ['id', 'user_id', 'username', 'first_name', 'last_name']

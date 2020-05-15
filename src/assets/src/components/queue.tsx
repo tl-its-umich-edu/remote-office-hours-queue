@@ -135,7 +135,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <EditToggleField text="agenda goes here" disabled={props.disabled} id="agenda"
+                Agenda: 
+                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
                 onSubmit={props.onChangeAgenda}
                 buttonType="success" placeholder="Enter content or location info...">
                     Update
@@ -278,7 +279,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
-    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
+    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError, changeAgendaError];
     const error = errorTypes.find(e => e);
     const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
