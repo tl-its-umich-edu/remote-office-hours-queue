@@ -242,7 +242,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
                 Attendees: {props.meeting.attendees.map(a => <UserDisplay user={a}/>)}
             </p>
             <p>
-                Agenda: {props.meeting?.agenda}
+                Agenda: {props.meeting.agenda}
             </p>
             </>
         );
