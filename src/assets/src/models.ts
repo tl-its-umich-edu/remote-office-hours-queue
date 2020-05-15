@@ -22,7 +22,7 @@ export interface Meeting {
     id: number;
     line_place: number;
     attendees: User[];
-    agenda: string;
+    agenda: string | null;
     backend_type?: "bluejeans"|"zoom";
     backend_metadata?: BluejeansMetadata;
 }
