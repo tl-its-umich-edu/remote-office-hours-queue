@@ -208,10 +208,11 @@ interface EditToggleFieldProps {
     buttonType: BootstrapButtonTypes;
     id: string;
     onSubmit: (value: string) => void;
+    initialState: boolean
 }
 
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
-    const [editing, setEditing] = useState(false);
+    const [editing, setEditing] = useState(props.initialState);
     const [editorValue, setEditorValue] = useState(props.text);
     const [editorError, setEditorError] = useState(undefined as Error | undefined);
     const submit = (value: string) => {

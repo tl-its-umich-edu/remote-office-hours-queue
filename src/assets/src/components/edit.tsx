@@ -128,7 +128,7 @@ function QueueEditor(props: QueueEditorProps) {
             <h1 className="form-inline">
                 <span className="mr-2">Manage: </span>
                 <EditToggleField text={props.queue.name} disabled={props.disabled} id="name"
-                    onSubmit={props.onChangeName} buttonType="success" placeholder="New name...">
+                    onSubmit={props.onChangeName} buttonType="success" placeholder="New name..." initialState={false}>
                         Change
                 </EditToggleField>
             </h1>
@@ -164,7 +164,8 @@ function QueueEditor(props: QueueEditorProps) {
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
                         <EditToggleField text={props.queue.description} disabled={props.disabled} id="description"
-                            onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description...">
+                            onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
+                            initialState={false}>
                                 Change
                         </EditToggleField>
                     </div>

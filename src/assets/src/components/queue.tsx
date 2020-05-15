@@ -138,7 +138,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 Agenda: 
                 <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
                 onSubmit={props.onChangeAgenda}
-                buttonType="success" placeholder="Enter content or location info...">
+                buttonType="success" placeholder="Enter content or location info..."
+                initialState={true}>
                     Update
                 </EditToggleField>
             </div>
