@@ -20,8 +20,11 @@ import { Subject } from "rxjs";
 interface MeetingEditorProps {
     meeting: Meeting;
     disabled: boolean;
+    potentialAssignees: User[];
+    user: User;
     onRemove: (m: Meeting) => void;
     onShowMeetingInfo: (m: Meeting) => void;
+    onChangeAssignee: (a: User | undefined) => void;
 }
 
 function MeetingEditor(props: MeetingEditorProps) {
@@ -40,17 +43,34 @@ function MeetingEditor(props: MeetingEditorProps) {
             Join Info
         </Button>
     );
+    const assigneeOptions = [<option value="">Assign to Host...</option>]
+        .concat(
+            props.potentialAssignees
+                .sort((a, b) => a.id === props.user.id ? -1 : b.id === props.user.id ? 1 : 0)
+                .map(a => <option value={a.id}>{a.first_name} {a.last_name} ({a.username})</option>)
+        );
+    const onChangeAssignee = (e: React.ChangeEvent<HTMLSelectElement>) =>
+        e.target.value === ""
+            ? props.onChangeAssignee(undefined)
+            : props.onChangeAssignee(props.potentialAssignees.find(a => a.id === +e.target.value));
     return (
-        <tr>
-            <td>
-                <UserDisplay user={user}/>
-            </td>
-            <td>
-                {joinLink}
-                {infoButton}
-                <RemoveButton onRemove={() => props.onRemove(props.meeting)} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
-            </td>
-        </tr>
+        <>
+        <td>
+            <UserDisplay user={user}/>
+        </td>
+        <td className="form-group">
+            <select className="form-control"
+                value={props.meeting.assignee?.id ?? ""} 
+                onChange={onChangeAssignee}>
+                {assigneeOptions}
+            </select>
+        </td>
+        <td>
+            {joinLink}
+            {infoButton}
+            <RemoveButton onRemove={() => props.onRemove(props.meeting)} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
+        </td>
+        </>
     );
 }
 
@@ -74,6 +94,7 @@ function HostEditor(props: HostEditorProps) {
 
 interface QueueEditorProps {
     queue: QueueHost;
+    user: User;
     disabled: boolean;
     onAddMeeting: (uniqname: string) => void;
     onRemoveMeeting: (m: Meeting) => void;
@@ -84,6 +105,7 @@ interface QueueEditorProps {
     onRemoveQueue: () => void;
     onSetStatus: (open: boolean) => void;
     onShowMeetingInfo: (m: Meeting) => void;
+    onChangeAssignee: (a: User | undefined, m: Meeting) => void;
 }
 
 function QueueEditor(props: QueueEditorProps) {
@@ -93,15 +115,23 @@ function QueueEditor(props: QueueEditorProps) {
             <HostEditor host={h} onRemove={props.onRemoveHost} disabled={props.disabled || lastHost}/>
         </li>
     );
-    const meetings = props.queue.meeting_set.map(m =>
-        <MeetingEditor key={m.id} meeting={m} onRemove={props.onRemoveMeeting} disabled={props.disabled} onShowMeetingInfo={props.onShowMeetingInfo}/>
-    );
+    const meetings = props.queue.meeting_set
+        .sort((a, b) => a.id - b.id)
+        .map((m, i) =>
+            <tr>
+                <td>{i+1}</td>
+                <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled}
+                    onRemove={props.onRemoveMeeting} onShowMeetingInfo={props.onShowMeetingInfo} onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m) }/>
+            </tr>
+        );
     const meetingsTable = props.queue.meeting_set.length
         ? (
             <Table bordered>
                 <thead>
                     <tr>
+                        <th>Queue #</th>
                         <th>Attendee</th>
+                        <th>Host</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -115,7 +145,6 @@ function QueueEditor(props: QueueEditorProps) {
         );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
-        console.log("ToggleStatus")
         props.onSetStatus(e.target.checked);
     }
     return (
@@ -379,22 +408,33 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         return await api.setStatus(queue!.id, open);
     }
     const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueue);
+    const changeAssignee = async (assignee: User | undefined, meeting: Meeting) => {
+        console.log("assignee")
+        console.log(assignee)
+        console.log("meeting")
+        console.log(meeting)
+        interactions.next(true);
+        recordQueueManagementEvent("Changed Assignee");
+        await api.changeMeetingAssignee(meeting.id, assignee?.id);
+        await doRefresh();
+    }
+    const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
 
     //Render
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading;
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const errorTypes = [refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError, setStatusError];
+    const errorTypes = [refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError, setStatusError, changeAssigneeError];
     const error = errorTypes.find(e => e);
     const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue} disabled={isChanging}
+        && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
             onChangeName={doChangeName} onChangeDescription={doChangeDescription}
             onSetStatus={doSetStatus} onRemoveQueue={confirmRemoveQueue}
-            onShowMeetingInfo={setVisibleMeetingDialog}/>
+            onShowMeetingInfo={setVisibleMeetingDialog} onChangeAssignee={doChangeAssignee}/>
     return (
         <>
         <Dialog ref={dialogRef}/>
