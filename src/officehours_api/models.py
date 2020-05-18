@@ -106,12 +106,3 @@ def post_save_user_signal_handler(sender, instance, created, **kwargs):
         instance.profile
     except User.profile.RelatedObjectDoesNotExist:
         instance.profile = Profile.objects.create(user=instance)
-
-
-@receiver(pre_softdelete, sender=Meeting)
-def pre_delete_meeting_signal_handler(sender, instance, **kwargs):
-    if instance.backend_type:
-        backend = globals()[instance.backend_type]
-        if backend:
-            backend.remove_user_meeting(instance.backend_metadata)
-            instance.backend_metadata.clear()

@@ -11,6 +11,7 @@ export interface Globals {
     feedback_email: string;
     debug: boolean;
     ga_tracking_id?: string;
+    login_url: string;
 }
 
 const globalsId = 'spa_globals';

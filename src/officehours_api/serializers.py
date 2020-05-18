@@ -125,9 +125,13 @@ class MeetingSerializer(serializers.ModelSerializer):
 
     def validate_queue(self, queue):
         '''
-        Prevent new meeting from being added to a closed queue.
+        Prevent new meeting from being added to a closed queue, unless it's added by a host.
         '''
-        if queue.status == 'closed' and self.context['request']._request.method == 'POST':
+        if (
+            queue.status == 'closed'
+            and self.context['request']._request.method == 'POST'
+            and self.context['request'].user not in queue.hosts.all()
+        ):
             raise serializers.ValidationError(f'Queue {queue} is closed.')
         return queue
 

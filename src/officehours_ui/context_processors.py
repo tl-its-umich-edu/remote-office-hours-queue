@@ -5,6 +5,10 @@ def feedback(request):
     return {'FEEDBACK_EMAIL': getattr(settings, 'FEEDBACK_EMAIL', None)}
 
 
+def login_url(request):
+    return {'LOGIN_URL': getattr(settings, 'LOGIN_URL', None)}
+
+
 def debug(request):
     return {'DEBUG': settings.DEBUG}
 
@@ -22,5 +26,6 @@ def spa_globals(request):
             'feedback_email': getattr(settings, 'FEEDBACK_EMAIL', None),
             'debug': settings.DEBUG,
             'ga_tracking_id': settings.GA_TRACKING_ID,
+            'login_url': settings.LOGIN_URL,
         }
     }

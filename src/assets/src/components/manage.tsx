@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 import * as api from "../services/api";
-import { ManageQueue } from "../models";
+import { QueueHost } from "../models";
 import { ErrorDisplay, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -11,7 +11,7 @@ import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
 interface ManageQueueListProps {
-    queues: ManageQueue[];
+    queues: QueueHost[];
     disabled: boolean;
     onAddQueue: (uniqname: string) => Promise<void>;
 }
@@ -45,9 +45,9 @@ function ManageQueueList(props: ManageQueueListProps) {
 
 export function ManagePage(props: PageProps) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin(props.loginUrl);
     }
-    const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
+    const [queues, setQueues] = useState(undefined as QueueHost[] | undefined);
     const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueues(), setQueues);
     useEffect(() => {
         doRefresh();
@@ -72,7 +72,7 @@ export function ManagePage(props: PageProps) {
         && <ManageQueueList queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
     return (
         <div>
-            <LoginDialog visible={loginDialogVisible}/>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle="Manage"/>
             {loadingDisplay}
             {errorDisplay}

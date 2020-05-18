@@ -7,7 +7,7 @@ export interface User {
 }
 
 export interface MyUser extends User {
-    my_queue: AttendingQueue | null;
+    my_queue: QueueAttendee | null;
 }
 
 export interface BluejeansMetadata {
@@ -27,11 +27,11 @@ export interface Meeting {
     created_at: string;
 }
 
-export interface ManageQueue extends AttendingQueue {
+export interface QueueHost extends QueueAttendee {
     meeting_set: Meeting[];
 }
 
-export interface AttendingQueue extends QueueBase {
+export interface QueueAttendee extends QueueBase {
     my_meeting: Meeting | null;
     line_length: number;
 }

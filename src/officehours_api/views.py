@@ -17,7 +17,7 @@ from officehours_api.serializers import (
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
 )
 from officehours_api.permissions import (
-    IsCurrentUser, IsHostOrReadOnly, IsHostOrAttendee,
+    IsCurrentUser, IsHostOrReadOnly, IsHostOrAttendee, is_host
 )
 
 
@@ -73,7 +73,7 @@ class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, pk, format=None):
         queue = self.get_object()
-        if request.user in queue.hosts.all():
+        if is_host(request.user, queue):
             serializer = QueueHostSerializer(queue, context={'request': request})
         else:
             serializer = QueueAttendeeSerializer(queue, context={'request': request})
@@ -84,7 +84,7 @@ class QueueHostDetail(LoggingMixin, APIView):
     logging_methods = settings.LOGGING_METHODS
 
     def check_queue_permission(self, request, queue):
-        if request.user not in queue.hosts.all():
+        if not is_host(request.user, queue):
             self.permission_denied(request)
 
     def get(self, request, pk, user_id, format=None):

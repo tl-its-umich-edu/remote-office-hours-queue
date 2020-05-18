@@ -6,9 +6,10 @@ import Dialog from "react-bootstrap-dialog";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
+import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
-import { User, ManageQueue, Meeting, BluejeansMetadata } from "../models";
+import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, DateTimeDisplay } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
@@ -72,7 +73,7 @@ function HostEditor(props: HostEditorProps) {
 }
 
 interface QueueEditorProps {
-    queue: ManageQueue;
+    queue: QueueHost;
     disabled: boolean;
     onAddMeeting: (uniqname: string) => void;
     onRemoveMeeting: (m: Meeting) => void;
@@ -95,6 +96,23 @@ function QueueEditor(props: QueueEditorProps) {
     const meetings = props.queue.meeting_set.map(m =>
         <MeetingEditor key={m.id} meeting={m} onRemove={props.onRemoveMeeting} disabled={props.disabled} onShowMeetingInfo={props.onShowMeetingInfo}/>
     );
+    const meetingsTable = props.queue.meeting_set.length
+        ? (
+            <Table bordered>
+                <thead>
+                    <tr>
+                        <th>Attendee</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {meetings}
+                </tbody>
+            </Table>
+        )
+        : (
+            <Alert variant="dark">No meetings in queue.</Alert>
+        );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
     const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
         console.log("ToggleStatus")
@@ -171,17 +189,7 @@ function QueueEditor(props: QueueEditorProps) {
             <h3>Meetings Up Next</h3>
             <div className="row">
                 <div className="col-md-12">
-                    <Table bordered>
-                        <thead>
-                            <tr>
-                                <th>Attendee</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {meetings}
-                        </tbody>
-                    </Table>
+                    {meetingsTable}
                 </div>
             </div>
             <div className="row">
@@ -244,7 +252,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
     return (
         <Modal show={!!props.meeting} onHide={props.onClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Meeting Info</Modal.Title>
+                <Modal.Title>Join Info</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {generalInfo}
@@ -282,7 +290,7 @@ interface EditPageParams {
 
 export function QueueEditorPage(props: PageProps<EditPageParams>) {
     if (!props.user) {
-        redirectToLogin();
+        redirectToLogin(props.loginUrl);
     }
     const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
@@ -291,8 +299,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
-    const [queue, setQueue] = useState(undefined as ManageQueue | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueue(queueIdParsed) as Promise<ManageQueue>, setQueue);
+    const [queue, setQueue] = useState(undefined as QueueHost | undefined);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueue(queueIdParsed) as Promise<QueueHost>, setQueue);
     useEffect(() => {
         doRefresh();
     }, []);
@@ -395,7 +403,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     return (
         <>
         <Dialog ref={dialogRef}/>
-        <LoginDialog visible={loginDialogVisible}/>
+        <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
         <MeetingInfoDialog
             meeting={visibleMeetingDialog}
             onClose={() => setVisibleMeetingDialog(undefined)} />

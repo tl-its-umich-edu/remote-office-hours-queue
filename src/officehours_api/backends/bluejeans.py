@@ -151,10 +151,3 @@ class Bluejeans:
             })
 
         return backend_metadata
-
-    def remove_user_meeting(self, backend_metadata):
-        user_id = backend_metadata.get('user_id')
-        meeting_id = backend_metadata.get('meeting_id')
-
-        if user_id and meeting_id:
-            self.delete_meeting(user_id, meeting_id)

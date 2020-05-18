@@ -1,12 +1,12 @@
 import * as ReactGA from "react-ga";
 
-export const redirectToLogin = () => {
+export const redirectToLogin = (loginUrl: string) => {
     ReactGA.event({
         category: "Auth",
         action: "Redirected to Login",
         nonInteraction: true,
     });
-    location.href = '/oidc/authenticate/?next=' + location.pathname;
+    location.href = loginUrl + '?next=' + location.pathname;
 }
 
 export const redirectToSearch = (term: string) => {
