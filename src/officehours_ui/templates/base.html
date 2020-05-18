@@ -1,4 +1,6 @@
 {% load static %}
+{% load flatpages %}
+{% get_flatpages as flatpages %}
 <!doctype html>
 <html lang="en">
   <head>
@@ -70,6 +72,14 @@
     This is a <strong>beta</strong> software. We're still working on it. Please let us know if you see any problems or if you have any suggestions, contact the <a href="http://its.umich.edu/help/" target="_blank">ITS Service Center.</a>
   </div>
     {% endif %}
+  
+  {% for page in flatpages %}
+    {% if page.title == "User Comm Banner" %}
+      <div class="alert alert-info text-center" role="alert">
+        {{page.content}}
+      </div>
+    {% endif %}
+  {% endfor %}
 
 	<div id="main-content" class="container" role="main">
     {% block content %}{% endblock %}
