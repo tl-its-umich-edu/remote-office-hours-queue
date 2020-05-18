@@ -64,20 +64,22 @@
   </header>
 
   {% if DEBUG %}
-  <div class="alert alert-danger text-center" role="alert">
-    TEST VERSION. Queues in the test version are not retained! Please use Remote Office Hours Queue at <a href="https://officehours.it.umich.edu/">https://officehours.it.umich.edu/</a>.
-  </div>
-  {% else %}
-  <div class="alert alert-warning text-center" role="alert">
-    This is a <strong>beta</strong> software. We're still working on it. Please let us know if you see any problems or if you have any suggestions, contact the <a href="http://its.umich.edu/help/" target="_blank">ITS Service Center.</a>
-  </div>
+  {% for page in flatpages %}
+    {% if page.title == "Debug Banner" %}
+      {{page.content|safe}}
     {% endif %}
+  {% endfor %}
+  {% else %}
+  {% for page in flatpages %}
+    {% if page.title == "Prod Banner" %}
+      {{page.content|safe}}
+    {% endif %}
+  {% endfor %}
+  {% endif %}
   
   {% for page in flatpages %}
     {% if page.title == "User Comm Banner" %}
-      <div class="alert alert-info text-center" role="alert">
-        {{page.content|safe}}
-      </div>
+      {{page.content|safe}}
     {% endif %}
   {% endfor %}
 
