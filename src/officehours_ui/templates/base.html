@@ -76,7 +76,7 @@
   {% for page in flatpages %}
     {% if page.title == "User Comm Banner" %}
       <div class="alert alert-info text-center" role="alert">
-        {{page.content}}
+        {{page.content|safe}}
       </div>
     {% endif %}
   {% endfor %}
