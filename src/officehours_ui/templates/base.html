@@ -62,20 +62,6 @@
         </div>
     </nav>
   </header>
-
-  {% if DEBUG %}
-  {% for page in flatpages %}
-    {% if page.title == "Debug Banner" %}
-      {{page.content|safe}}
-    {% endif %}
-  {% endfor %}
-  {% else %}
-  {% for page in flatpages %}
-    {% if page.title == "Prod Banner" %}
-      {{page.content|safe}}
-    {% endif %}
-  {% endfor %}
-  {% endif %}
   
   {% for page in flatpages %}
     {% if page.title == "User Comm Banner" %}
