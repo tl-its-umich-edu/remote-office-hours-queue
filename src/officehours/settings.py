@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     'webpack_loader',
     'rest_framework_tracking',
     'django_filters',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
 ]
 
 if DEBUG:
@@ -131,6 +133,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'redirect_to_non_www.middleware.RedirectToNonWww',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
 ROOT_URLCONF = 'officehours.urls'
@@ -277,3 +280,6 @@ MANAGERS = ADMINS
 
 # Google Analytics
 GA_TRACKING_ID = os.getenv('GA_TRACKING_ID')
+
+# Django Flatpages
+SITE_ID = 1
