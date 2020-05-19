@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, DateTimeDisplay } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -84,21 +84,13 @@ interface HowToBlueJeansProps {
 }
 
 function HowToBlueJeans(props: HowToBlueJeansProps) {
-    const joinLink = (
-        <a href={props.metadata.meeting_url} target="_blank" className="card-link">
-            Join the Meeting
-        </a>
-    );
     const meetingNumber = props.metadata.numeric_meeting_id;
     const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={meetingNumber} />
     const phoneLinkCanada = <BlueJeansOneTouchDialLink phone="1.416.900.2956" meetingNumber={meetingNumber} />
     return (
         <div className="card-body">
-            <h5 className="card-title">Join the BlueJeans Meeting</h5>
-            <p className="card-text">Join now so you can make sure you are set up and ready. Download the app and test your audio before it is your turn.</p>
-            <p className="card-text">Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#. You are not a moderator, so you do not need a moderator passcode.</p>
-            {joinLink}
-            <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank" className="card-link">How to use BlueJeans at U-M</a>
+            <h5 className="card-title">Having problems with video?</h5>
+            <p className="card-text">As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#. You are not a moderator, so you do not need a moderator passcode.</p>
         </div>
     );
 }
@@ -114,17 +106,30 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const howTo = props.queue.my_meeting!.backend_type === "bluejeans"
         ? <HowToBlueJeans metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}/>
         : undefined;
+    const joinLink = props.queue.my_meeting!.backend_metadata
+        ? (
+        <>
+        <a href={props.queue.my_meeting!.backend_metadata.meeting_url} target="_blank">
+            Join Meeting
+        </a>
+        </>
+        )
+        : undefined;
     return (
         <>
         {closedAlert}
         <div className="row">
             <div className="col-lg">
                 {alert}
-                <ul>
-                    <li>You are in line and there are <strong>{props.queue.my_meeting!.line_place} people</strong> in line ahead of you</li>
-                    <li>The host will join the meeting when it is your turn</li>
-                    <li>We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</li>
-                </ul>
+                <h3>You are currently in line.</h3>
+                <div className="card">
+                    <div className="card-body">
+                        <p className="card-text">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
+                        <p className="card-text">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
+                    </div>
+                </div>
+                <p>The host will join the meeting when it is your turn. We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</p>
+                <p>You can join the meeting now to make sure you are set up and ready. Download the app and test your audio before it is your turn. See <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank" className="card-link">How to use BlueJeans at U-M</a> for additional help getting started.</p>
             </div>
             <div className="col-sm">
                 <div className="card">
@@ -134,7 +139,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-warning">
+                {joinLink}
+                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn">
                     Leave the line
                     {props.disabled && DisabledMessage}
                 </button>
