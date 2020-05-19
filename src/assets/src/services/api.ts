@@ -1,4 +1,4 @@
-import { QueueHost, QueueAttendee, User, MyUser } from "../models";
+import { QueueHost, QueueAttendee, User, MyUser, Meeting } from "../models";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -90,6 +90,7 @@ export const addMeeting = async (queue_id: number, user_id: number) => {
         body: JSON.stringify({
             queue: queue_id,
             attendee_ids: [user_id],
+            assignee_id: null,
         }),
         headers: getPostHeaders(),
     });
@@ -170,4 +171,16 @@ export const searchQueue = async (term: string) => {
     const resp = await fetch(`/api/queues_search/?search=${term}&status=open`, { method: "GET" });
     await handleErrors(resp);
     return await resp.json() as QueueAttendee[];
+}
+
+export const changeMeetingAssignee = async (meeting_id: number, user_id: number | undefined) => {
+    const resp = await fetch(`/api/meetings/${meeting_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            assignee_id: user_id === undefined ? null : user_id,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json() as Meeting;
 }

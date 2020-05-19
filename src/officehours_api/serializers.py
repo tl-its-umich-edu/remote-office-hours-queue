@@ -106,11 +106,18 @@ class MeetingSerializer(serializers.ModelSerializer):
         source='attendees',
         write_only=True,
     )
+    assignee = NestedUserSerializer(read_only=True)
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='assignee',
+        write_only=True,
+        allow_null=True
+    )
     backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
-        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'backend_type', 'backend_metadata', 'created_at']
+        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'assignee', 'assignee_id', 'backend_type', 'backend_metadata', 'created_at']
         read_only_fields = ['attendees', 'backend_metadata']
 
     def validate_attendee_ids(self, attendee_ids):
