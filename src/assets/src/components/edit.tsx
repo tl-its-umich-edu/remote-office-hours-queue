@@ -10,7 +10,7 @@ import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, DateTimeDisplay } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
@@ -237,9 +237,14 @@ interface MeetingInfoProps {
 const MeetingInfoDialog = (props: MeetingInfoProps) => {
     const generalInfo = props.meeting
         && (
+            <>
             <p>
                 Attendees: {props.meeting.attendees.map(a => <UserDisplay user={a}/>)}
             </p>
+            <p>
+                Time Joined: <DateTimeDisplay dateTime={props.meeting.created_at}/>
+            </p>
+            </>
         );
     const metadataInfo = props.meeting?.backend_type === "bluejeans"
         ? <BlueJeansMeetingInfo metadata={props.meeting!.backend_metadata!} />

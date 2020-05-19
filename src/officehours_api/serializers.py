@@ -71,7 +71,8 @@ class QueueHostSerializer(QueueAttendeeSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'my_meeting', 'status']
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids',
+                  'meeting_set', 'line_length', 'my_meeting', 'status']
 
     def validate_host_ids(self, host_ids):
         '''
@@ -109,7 +110,7 @@ class MeetingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Meeting
-        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'backend_type', 'backend_metadata']
+        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'backend_type', 'backend_metadata', 'created_at']
         read_only_fields = ['attendees', 'backend_metadata']
 
     def validate_attendee_ids(self, attendee_ids):
