@@ -109,7 +109,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const joinLink = props.queue.my_meeting!.backend_metadata
         ? (
         <>
-        <a href={props.queue.my_meeting!.backend_metadata.meeting_url} target="_blank">
+        <a href={props.queue.my_meeting!.backend_metadata.meeting_url} target="_blank" className="btn btn-warning">
             Join Meeting
         </a>
         </>
@@ -140,7 +140,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         <div className="row">
             <div className="col-lg">
                 {joinLink}
-                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn">
+                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
                     Leave the line
                     {props.disabled && DisabledMessage}
                 </button>
