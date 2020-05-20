@@ -56,6 +56,10 @@ class Meeting(SafeDeleteModel):
         null=True
     )
     attendees = models.ManyToManyField(User, through='Attendee')
+    assignee = models.ForeignKey(
+        User, on_delete=models.SET_NULL,
+        null=True, related_name='assigned',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     MEETING_BACKEND_TYPES = [
