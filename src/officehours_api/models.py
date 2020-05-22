@@ -4,10 +4,10 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from safedelete.models import (
-    SafeDeleteModel, SOFT_DELETE, SOFT_DELETE_CASCADE, HARD_DELETE,
+    SafeDeleteModel, SOFT_DELETE_CASCADE, HARD_DELETE,
 )
-from safedelete.signals import pre_softdelete
 from jsonfield import JSONField
+from requests.exceptions import RequestException
 
 from .backends.bluejeans import Bluejeans
 
@@ -18,6 +18,12 @@ if settings.BLUEJEANS_CLIENT_ID and settings.BLUEJEANS_CLIENT_SECRET:
     )
 else:
     bluejeans = None
+
+
+class BackendException(Exception):
+    def __init__(self, backend_type):
+        self.backend_type = backend_type
+        self.message = f'An unexpected error occurred in {self.backend_type.capitalize()}.'
 
 
 class Profile(models.Model):
@@ -78,9 +84,12 @@ class Meeting(SafeDeleteModel):
             if backend:
                 user_email = self.queue.hosts.first().email
                 self.backend_metadata['user_email'] = user_email
-                self.backend_metadata = backend.save_user_meeting(
-                    self.backend_metadata,
-                )
+                try:
+                    self.backend_metadata = backend.save_user_meeting(
+                        self.backend_metadata,
+                    )
+                except RequestException as ex:
+                    raise BackendException(self.backend_type) from ex
 
         super().save(*args, **kwargs)
 
