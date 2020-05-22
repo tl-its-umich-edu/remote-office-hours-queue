@@ -94,8 +94,6 @@ class Bluejeans:
             self._base_url + f'/v1/user/{user_id}/scheduled_meeting',
             json=meeting_settings,
         )
-        from requests.exceptions import HTTPError
-        raise HTTPError()
         resp.raise_for_status()
 
         return resp.json()
