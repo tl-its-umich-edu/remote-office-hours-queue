@@ -4,12 +4,17 @@ from typing import Optional, TypedDict
 from rest_framework.exceptions import ValidationError
 
 
-class BluejeansUserSubset(TypedDict):
+class BluejeansUserExtraFields(TypedDict):
     username: str
     firstName: str
     middleName: str
     lastName: str
     email: str
+
+
+class BluejeansUser(BluejeansUserExtraFields):
+    id: int
+    uri: str
 
 
 class Bluejeans:
@@ -52,10 +57,10 @@ class Bluejeans:
         self._access_token_expires = time.time() - data['expires_in'] - 60
         self._enterprise_id = data['scope']['enterprise']
 
-    def _get_user(self, user_email) -> Optional[BluejeansUserSubset]:
+    def _get_user(self, user_email) -> Optional[BluejeansUser]:
         params = {
             'emailId': user_email,
-            'fields': tuple(BluejeansUserSubset.__annotations__.keys()),
+            'fields': tuple(BluejeansUserExtraFields.__annotations__.keys()),
         }
         resp = self._session.get(
             self._base_url + f'/v1/enterprise/{self._enterprise_id}/users',
