@@ -6,7 +6,7 @@ from officehours_api.models import Meeting, Attendee
 class NestedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name']
+        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):

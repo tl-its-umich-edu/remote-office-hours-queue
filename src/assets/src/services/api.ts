@@ -167,6 +167,18 @@ export const getMyUser = async (user_id: number) => {
     return await resp.json() as MyUser;
 }
 
+export const updateMyUser = async (user_id: number, phone_number:string) => {
+    const resp = await fetch(`/api/users/${user_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            phone_number: phone_number,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json() as MyUser;
+}
+
 export const searchQueue = async (term: string) => {
     const resp = await fetch(`/api/queues_search/?search=${term}&status=open`, { method: "GET" });
     await handleErrors(resp);
@@ -184,3 +196,5 @@ export const changeMeetingAssignee = async (meeting_id: number, user_id: number 
     await handleErrors(resp);
     return await resp.json() as Meeting;
 }
+
+

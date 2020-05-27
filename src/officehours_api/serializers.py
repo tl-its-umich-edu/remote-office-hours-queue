@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from officehours_api.models import Queue, Meeting, Attendee
+from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.nested_serializers import (
     NestedMeetingSerializer, NestedAttendeeSerializer, NestedUserSerializer,
     NestedMyMeetingSerializer,
@@ -29,6 +29,12 @@ class UserSerializer(serializers.ModelSerializer):
         serializer = QueueAttendeeSerializer(meeting.queue, context={'request': self.context['request']})
         return serializer.data
 
+class ProfileSerializer(serializers.ModelSerializer):
+    user = NestedUserSerializer(required=True)
+
+    class Meta:
+        model = Profile
+        fields = ['user', 'phone_number']
 
 class QueueAttendeeSerializer(serializers.ModelSerializer):
     '''

@@ -59,6 +59,9 @@ export function HomePage(props: PageProps) {
             <Link to="/manage">
                 Manage Your Own Queues
             </Link>
+            <Link to="/contact">
+                Update Your Alternative Contact Information
+            </Link>
             </>
         )
         : (
