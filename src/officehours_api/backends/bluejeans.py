@@ -130,7 +130,10 @@ class Bluejeans:
 
         user = self._get_user(user_email=user_email)
         if not user:
-            raise ValidationError(f'{user_email} does not exist in BlueJeans. Please log into umich.bluejeans.com then try again.')
+            raise ValidationError(
+                f'There is no BlueJeans account associated with {user_email}. '
+                f'Please log into umich.bluejeans.com, then try again.'
+            )
 
         now = round(time.time()) * 1000
         meeting = self._create_meeting(
