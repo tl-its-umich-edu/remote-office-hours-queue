@@ -20,14 +20,15 @@ EXPOSE 8000
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-ENV WEB_CONCURRENCY=5
+ENV GUNICORN_WORKERS=2
+ENV GUNICORN_THREADS=4
 
-RUN pip install gunicorn uvicorn psycopg2-binary
+RUN pip install gunicorn psycopg2-binary
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
 ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
-CMD ["sh", "-c", "gunicorn officehours.asgi:application --bind=0.0.0.0:8001 -k uvicorn.workers.UvicornWorker"]
+CMD ["sh", "-c", "gunicorn --bind=0.0.0.0:8001 --workers=${GUNICORN_WORKERS} --threads=${GUNICORN_THREADS} --access-logfile=- --log-file=- officehours.wsgi"]
 
 COPY --from=node-webpack /usr/src/app/package-lock.json package-lock.json
 COPY --from=node-webpack /usr/src/app/webpack-stats.json webpack-stats.json
