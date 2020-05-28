@@ -6,7 +6,7 @@ from officehours_api import views
 urlpatterns = [
     path('', views.api_root, name='api-root'),
     path('users/', views.UserList.as_view(), name='user-list'),
-    path('users/<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
+    path('users/<int:pk>/', views.ProfileDetail.as_view(), name='user-detail'),
     path('queues/', views.QueueList.as_view(), name='queue-list'),
     path('queues/<int:pk>/', views.QueueDetail.as_view(), name='queue-detail'),
     path('queues/<int:pk>/hosts/<int:user_id>/', views.QueueHostDetail.as_view(), name='queuehost-detail'),

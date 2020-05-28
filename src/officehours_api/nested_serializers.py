@@ -1,16 +1,23 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from officehours_api.models import Meeting, Attendee
+from officehours_api.models import Meeting, Attendee, Profile
 
 
 class NestedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
+        fields = ['id', 'username', 'first_name', 'last_name']
+
+class NestedProfileSerializer(serializers.ModelSerializer):
+    user = NestedUserSerializer(required=True)
+
+    class Meta:
+        model = Profile
+        fields = ['user', 'phone_number']
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
-    attendees = NestedUserSerializer(many=True, read_only=True)
+    attendees = NestedProfileSerializer(many=True, read_only=True)
     assignee = NestedUserSerializer(read_only=True)
     backend_metadata = serializers.JSONField(read_only=True)
 

@@ -268,7 +268,12 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
         && (
             <>
             <p>
-                Attendees: {props.meeting.attendees.map(a => <UserDisplay user={a}/>)}
+                Attendees: {props.meeting.attendees.map(a => 
+                <>
+                <UserDisplay user={a}/>
+                Phone:{a.first_name}
+                </>
+                )}
             </p>
             <p>
                 Time Joined: <DateTimeDisplay dateTime={props.meeting.created_at}/>
