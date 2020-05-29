@@ -10,7 +10,7 @@ import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, DateTimeDisplay } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
@@ -243,16 +243,13 @@ interface BlueJeansMeetingInfo {
 
 const BlueJeansMeetingInfo = (props: BlueJeansMeetingInfo) => {
     const meetingNumber = props.metadata.numeric_meeting_id;
-    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={meetingNumber} />
-    const phoneLinkCanada = <BlueJeansOneTouchDialLink phone="1.416.900.2956" meetingNumber={meetingNumber} />
     return (
         <>
         <p>
             This meeting will be via <strong>BlueJeans</strong>.
         </p>
         <p>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#, 
-            or <a href="https://www.bluejeans.com/numbers">dial in from another country</a>.
+            <BlueJeansDialInMessage meetingNumber={meetingNumber} />
         </p>
         </>
     );
