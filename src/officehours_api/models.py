@@ -23,7 +23,12 @@ else:
 class BackendException(Exception):
     def __init__(self, backend_type):
         self.backend_type = backend_type
-        self.message = f'An unexpected error occurred in {self.backend_type.capitalize()}.'
+        self.message = (
+            f'An unexpected error occurred in {self.backend_type.capitalize()}. '
+            f'You can check the ITS Status page (https://status.its.umich.edu/) '
+            f'to see if there is a known issue with {self.backend_type.capitalize()}, '
+            f'or contact the ITS Service Center (https://its.umich.edu/help) for help.'
+        )
 
 
 class Profile(models.Model):
