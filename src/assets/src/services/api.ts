@@ -28,16 +28,22 @@ class ForbiddenError extends Error {
 
 const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
+    let text: string;
+    let json: any;
     switch (resp.status) {
         case 400:
-            const json = await resp.json();
+            json = await resp.json();
             const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
             const formatted = messages.join("\n");
             throw new Error(formatted);
         case 403:
-            const text = await resp.text();
+            text = await resp.text();
             console.error(text);
             throw new ForbiddenError();
+        case 502:
+            json = await resp.json();
+            console.error(json);
+            throw new Error(json.detail);
         default:
             console.error(await resp.text());
             throw new Error(resp.statusText);
