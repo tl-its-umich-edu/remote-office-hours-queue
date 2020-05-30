@@ -59,7 +59,7 @@ function MeetingEditor(props: MeetingEditorProps) {
             <UserDisplay user={user}/>
         </td>
         <td className="form-group">
-            <select className="form-control"
+            <select className="form-control assign"
                 value={props.meeting.assignee?.id ?? ""} 
                 onChange={onChangeAssignee}>
                 {assigneeOptions}
@@ -119,7 +119,7 @@ function QueueEditor(props: QueueEditorProps) {
         .sort((a, b) => a.id - b.id)
         .map((m, i) =>
             <tr>
-                <td>{i+1}</td>
+                <th scope="row" className="d-none d-sm-table-cell">{i+1}</th>
                 <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled}
                     onRemove={props.onRemoveMeeting} onShowMeetingInfo={props.onShowMeetingInfo} onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m) }/>
             </tr>
@@ -129,10 +129,10 @@ function QueueEditor(props: QueueEditorProps) {
             <Table bordered>
                 <thead>
                     <tr>
-                        <th>Queue #</th>
-                        <th>Attendee</th>
-                        <th>Host</th>
-                        <th>Actions</th>
+                        <th scope="col" className="d-none d-sm-table-cell">Queue #</th>
+                        <th scope="col">Attendee</th>
+                        <th scope="col">Host</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -218,7 +218,9 @@ function QueueEditor(props: QueueEditorProps) {
             <h3>Meetings Up Next</h3>
             <div className="row">
                 <div className="col-md-12">
-                    {meetingsTable}
+                    <div className="table-responsive">
+                        {meetingsTable}
+                    </div>
                 </div>
             </div>
             <div className="row">
