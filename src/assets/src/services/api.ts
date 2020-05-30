@@ -168,7 +168,7 @@ export const getMyUser = async (user_id: number) => {
 }
 
 export const searchQueue = async (term: string) => {
-    const resp = await fetch(`/api/queues_search/?search=${term}&status=open`, { method: "GET" });
+    const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
     await handleErrors(resp);
     return await resp.json() as QueueAttendee[];
 }
