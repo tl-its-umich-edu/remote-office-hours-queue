@@ -537,6 +537,10 @@ h3.alert-heading {
 	border-top: 0;
 }
 
+.assign {
+	min-width: 160px;
+}
+
 .card-grid {
 	display: grid;
 	grid-template-columns: repeat(3, auto);
