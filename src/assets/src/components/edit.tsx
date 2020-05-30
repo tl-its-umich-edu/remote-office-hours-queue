@@ -144,8 +144,8 @@ function QueueEditor(props: QueueEditorProps) {
             <Alert variant="dark">No meetings in queue.</Alert>
         );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
-    const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
-        props.onSetStatus(e.target.checked);
+    const toggleStatus = (e: ChangeEvent<HTMLSelectElement>) => {
+        props.onSetStatus(e.target.value === "open");
     }
     return (
         <div>
@@ -181,12 +181,12 @@ function QueueEditor(props: QueueEditorProps) {
                     </div>
                 </div>
                 <div className="form-group row">
-                    <label htmlFor="status" className="col-md-2 col-form-label">Status:</label>
+                    <label htmlFor="status" className="col-md-2 col-form-label">Queue Status:</label>
                     <div className="col-md-6">
-                        <div className="custom-control custom-switch">
-                            <input type="checkbox" id="status" className="custom-control-input" checked={props.queue.status === "open"} onChange={toggleStatus}/>
-                            <label htmlFor="status" className="custom-control-label">{props.queue.status === "open" ? "Open" : "Closed"}</label>
-                        </div>
+                        <select className="form-control" id="status" onChange={toggleStatus} value={props.queue.status}>
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
                     </div>
                 </div>
                 <div className="form-group row">
