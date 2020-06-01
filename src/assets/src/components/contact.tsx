@@ -19,11 +19,11 @@ function ContactEditor(props: ContactEditorProps) {
 
     return (
         <div>
-            <h1>Update Alternative Contact Information</h1>
+            <h1>View/Update Preferences</h1>
             <p>
-                Please provide alternate means in which the host may contact you in the event of technical difficulties. Make sure to click "Save" if you make any changes.
+                Please provide alternate means in which the host may contact you in the event of technical difficulties.
             </p>
-            <EditToggleField text={props.user.phone_number} disabled={props.disabled} id="phone_number"
+            Phone Number:<EditToggleField text={props.user.phone_number} disabled={props.disabled} id="phone_number"
             onSubmit={props.onUpdateInfo} buttonType="success" placeholder="">
                 Update
             </EditToggleField>
@@ -69,7 +69,7 @@ export function ContactPage(props: PageProps) {
         <>
         <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
         <Breadcrumbs
-            currentPageTitle="Alternative Contact Information" />
+            currentPageTitle="User Preferences" />
         {loadingDisplay}
         {errorDisplay}
         {contactEditor}

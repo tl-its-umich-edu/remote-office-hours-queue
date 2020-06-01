@@ -61,7 +61,7 @@ export function HomePage(props: PageProps) {
             </Link>
             <p>
             <Link to="/contact">
-                Update Your Alternative Contact Information
+                View/Update Your Preferences
             </Link>
             </p>
             </>
