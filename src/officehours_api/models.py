@@ -56,7 +56,7 @@ class Meeting(SafeDeleteModel):
         Queue, on_delete=models.CASCADE,
         null=True
     )
-    attendees = models.ManyToManyField(User, through='Attendee')
+    attendees = models.ManyToManyField(Profile, through='Attendee')
     assignee = models.ForeignKey(
         User, on_delete=models.SET_NULL,
         null=True, related_name='assigned',
@@ -93,7 +93,7 @@ class Attendee(SafeDeleteModel):
     '''
     _safedelete_policy = HARD_DELETE
     user = models.ForeignKey(
-        User,
+        Profile,
         on_delete=models.CASCADE,
     )
     meeting = models.ForeignKey(
@@ -104,6 +104,10 @@ class Attendee(SafeDeleteModel):
     def __str__(self):
         return f'user={self.user.username}'
 
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
 
 @receiver(post_save, sender=User)
 def post_save_user_signal_handler(sender, instance, created, **kwargs):

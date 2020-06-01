@@ -17,7 +17,7 @@ class NestedProfileSerializer(serializers.ModelSerializer):
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
-    attendees = NestedProfileSerializer(many=True, read_only=True)
+    attendees = NestedUserSerializer(many=True, read_only=True)
     assignee = NestedUserSerializer(read_only=True)
     backend_metadata = serializers.JSONField(read_only=True)
 

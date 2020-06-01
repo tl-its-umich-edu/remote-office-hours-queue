@@ -31,6 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = NestedUserSerializer(required=True)
+    #phone_number = serializers.CharField(source='pk')
 
     class Meta:
         model = Profile
