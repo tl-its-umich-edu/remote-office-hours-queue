@@ -14,8 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.serializers import (
     UserListSerializer, UserSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
-    ProfileSerializer,
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer,
 )
 from officehours_api.permissions import (
     IsCurrentUser, IsHostOrReadOnly, IsHostOrAttendee, is_host, IsCurrentProfile

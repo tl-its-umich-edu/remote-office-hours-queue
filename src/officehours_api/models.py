@@ -56,7 +56,7 @@ class Meeting(SafeDeleteModel):
         Queue, on_delete=models.CASCADE,
         null=True
     )
-    attendees = models.ManyToManyField(Profile, through='Attendee')
+    attendees = models.ManyToManyField(User, through='Attendee')
     assignee = models.ForeignKey(
         User, on_delete=models.SET_NULL,
         null=True, related_name='assigned',
@@ -93,7 +93,7 @@ class Attendee(SafeDeleteModel):
     '''
     _safedelete_policy = HARD_DELETE
     user = models.ForeignKey(
-        Profile,
+        User,
         on_delete=models.CASCADE,
     )
     meeting = models.ForeignKey(

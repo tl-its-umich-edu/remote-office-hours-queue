@@ -15,10 +15,11 @@ class UserListSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     my_queue = serializers.SerializerMethodField(read_only=True)
+    phone_number = serializers.CharField(source='profile.phone_number')
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'phone_number']
 
     def get_my_queue(self, obj):
         try:
@@ -28,6 +29,16 @@ class UserSerializer(serializers.ModelSerializer):
 
         serializer = QueueAttendeeSerializer(meeting.queue, context={'request': self.context['request']})
         return serializer.data
+    
+    def update(self, instance, validated_data):
+        print("***SERIALIZER VALIDATED DATA:", validated_data)
+        profile = validated_data.pop('profile')
+        instance = super().update(instance, validated_data)
+        instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
+        instance.profile.save()            
+        return instance
+    
+    
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = NestedUserSerializer(required=True)

@@ -4,16 +4,17 @@ from officehours_api.models import Meeting, Attendee, Profile
 
 
 class NestedUserSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(source='profile.phone_number')
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name']
+        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
 
-class NestedProfileSerializer(serializers.ModelSerializer):
+""" class NestedProfileSerializer(serializers.ModelSerializer):
     user = NestedUserSerializer(required=True)
 
     class Meta:
         model = Profile
-        fields = ['user', 'phone_number']
+        fields = ['user', 'phone_number'] """
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):

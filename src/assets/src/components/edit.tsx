@@ -271,7 +271,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
                 Attendees: {props.meeting.attendees.map(a => 
                 <>
                 <UserDisplay user={a}/>
-                Phone:{a.phone_number}
+                <strong> Phone:</strong>{a.phone_number}
                 </>
                 )}
             </p>

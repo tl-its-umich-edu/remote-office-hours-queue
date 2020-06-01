@@ -168,13 +168,15 @@ export const getMyUser = async (user_id: number) => {
 }
 
 export const updateMyUser = async (user_id: number, phone_number:string) => {
-    const resp = await fetch(`/api/users/${user_id}/`, {
+    
+    const resp = await fetch(`/api/profiles/${user_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
         body: JSON.stringify({
             phone_number: phone_number,
         }),
     });
+    console.log(resp)
     await handleErrors(resp);
     return await resp.json() as MyUser;
 }
