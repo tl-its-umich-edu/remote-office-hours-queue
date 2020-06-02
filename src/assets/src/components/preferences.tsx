@@ -9,13 +9,13 @@ import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
-interface ContactEditorProps {
+interface PreferencesEditorProps {
     user: User;
     disabled: boolean;
     onUpdateInfo: (phone_number: string) => void;
 }
 
-function ContactEditor(props: ContactEditorProps) {
+function PreferencesEditor(props: PreferencesEditorProps) {
 
     return (
         <div>
@@ -31,7 +31,7 @@ function ContactEditor(props: ContactEditorProps) {
     );
 }
 
-export function ContactPage(props: PageProps) {
+export function PreferencesPage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
@@ -63,8 +63,8 @@ export function ContactPage(props: PageProps) {
     const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
-    const contactEditor = user
-        && <ContactEditor user={user} disabled={isChanging} onUpdateInfo={doUpdateInfo}/>
+    const preferencesEditor = user
+        && <PreferencesEditor user={user} disabled={isChanging} onUpdateInfo={doUpdateInfo}/>
     return (
         <>
         <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
@@ -72,7 +72,7 @@ export function ContactPage(props: PageProps) {
             currentPageTitle="User Preferences" />
         {loadingDisplay}
         {errorDisplay}
-        {contactEditor}
+        {preferencesEditor}
         </>
     );
 }

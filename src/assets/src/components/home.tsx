@@ -60,7 +60,7 @@ export function HomePage(props: PageProps) {
                 Manage Your Own Queues
             </Link>
             <p>
-            <Link to="/contact">
+            <Link to="/preferences">
                 View/Update Your Preferences
             </Link>
             </p>
