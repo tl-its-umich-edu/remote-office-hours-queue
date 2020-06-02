@@ -23,8 +23,10 @@ export interface Meeting {
     line_place: number;
     attendees: User[];
     agenda: string;
+    assignee?: User;
     backend_type?: "bluejeans"|"zoom";
     backend_metadata?: BluejeansMetadata;
+    created_at: string;
 }
 
 export interface QueueHost extends QueueAttendee {

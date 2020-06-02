@@ -163,7 +163,32 @@ interface DateDisplayProps {
 }
 
 export const DateDisplay = (props: DateDisplayProps) =>
-    <span>{new Date(props.date).toDateString()}</span>
+    <span>{
+        new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        }).format(new Date(props.date))
+    }</span>
+
+
+interface DateTimeDisplayProps {
+    dateTime: string;
+}
+
+export const DateTimeDisplay = (props: DateTimeDisplayProps) =>
+    <span>{
+        new Intl.DateTimeFormat('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric'
+        }).format(new Date(props.dateTime))
+    }</span>
 
 
 interface CopyFieldProps {
@@ -331,4 +356,20 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
         </Breadcrumb>
 
     );
+}
+
+
+interface BlueJeansDialInMessageProps {
+    meetingNumber: string;
+}
+
+export const BlueJeansDialInMessage = (props: BlueJeansDialInMessageProps) => {
+    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={props.meetingNumber} />
+    return (
+        <span>
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA 
+            (or <a target="_blank" href="https://www.bluejeans.com/numbers"> find your international number to call in from outside the USA</a>) 
+            from any phone and enter {props.meetingNumber}#.
+        </span>
+    )
 }

@@ -71,7 +71,8 @@ class QueueHostSerializer(QueueAttendeeSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'my_meeting', 'status']
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids',
+                  'meeting_set', 'line_length', 'my_meeting', 'status']
 
     def validate_host_ids(self, host_ids):
         '''
@@ -105,11 +106,18 @@ class MeetingSerializer(serializers.ModelSerializer):
         source='attendees',
         write_only=True,
     )
+    assignee = NestedUserSerializer(read_only=True)
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='assignee',
+        write_only=True,
+        allow_null=True
+    )
     backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
-        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'agenda', 'backend_type', 'backend_metadata']
+        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'agenda', 'assignee', 'assignee_id', 'backend_type', 'backend_metadata', 'created_at']
         read_only_fields = ['attendees', 'backend_metadata']
 
     def validate_attendee_ids(self, attendee_ids):
