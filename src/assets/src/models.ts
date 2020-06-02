@@ -7,7 +7,7 @@ export interface User {
 }
 
 export interface MyUser extends User {
-    my_queue: AttendingQueue | null;
+    my_queue: QueueAttendee | null;
 }
 
 export interface BluejeansMetadata {
@@ -22,15 +22,17 @@ export interface Meeting {
     id: number;
     line_place: number;
     attendees: User[];
+    assignee?: User;
     backend_type?: "bluejeans"|"zoom";
     backend_metadata?: BluejeansMetadata;
+    created_at: string;
 }
 
-export interface ManageQueue extends AttendingQueue {
+export interface QueueHost extends QueueAttendee {
     meeting_set: Meeting[];
 }
 
-export interface AttendingQueue extends QueueBase {
+export interface QueueAttendee extends QueueBase {
     my_meeting: Meeting | null;
     line_length: number;
 }
@@ -41,4 +43,5 @@ export interface QueueBase {
     description: string;
     hosts: User[];
     created_at: string;
+    status: "open"|"closed";
 }

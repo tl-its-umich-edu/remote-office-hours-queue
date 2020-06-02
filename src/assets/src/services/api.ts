@@ -1,4 +1,4 @@
-import { ManageQueue, AttendingQueue, User, MyUser } from "../models";
+import { QueueHost, QueueAttendee, User, MyUser, Meeting } from "../models";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -19,16 +19,35 @@ const getDeleteHeaders = () => {
     };
 }
 
+class ForbiddenError extends Error {
+    public name = "ForbiddenError";
+    constructor() {
+        super("You aren't authorized to perform that action. Your session may have expired.");
+    }
+}
+
 const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
-    if (resp.status === 400) {
-        const json = await resp.json();
-        const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
-        const formatted = messages.join("\n");
-        throw new Error(formatted);
+    let text: string;
+    let json: any;
+    switch (resp.status) {
+        case 400:
+            json = await resp.json();
+            const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
+            const formatted = messages.join("\n");
+            throw new Error(formatted);
+        case 403:
+            text = await resp.text();
+            console.error(text);
+            throw new ForbiddenError();
+        case 502:
+            json = await resp.json();
+            console.error(json);
+            throw new Error(json.detail);
+        default:
+            console.error(await resp.text());
+            throw new Error(resp.statusText);
     }
-    console.error(await resp.text());
-    throw new Error(resp.statusText);
 }
 
 export const getUsers = async () => {
@@ -40,13 +59,13 @@ export const getUsers = async () => {
 export const getQueues = async () => {
     const resp = await fetch("/api/queues/", { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as ManageQueue[];
+    return await resp.json() as QueueHost[];
 }
 
 export const getQueue = async (id: number) => {
     const resp = await fetch(`/api/queues/${id}/`, { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as ManageQueue | AttendingQueue;
+    return await resp.json() as QueueHost | QueueAttendee;
 }
 
 export const createQueue = async (name: string) => {
@@ -59,7 +78,7 @@ export const createQueue = async (name: string) => {
         headers: getPostHeaders(),
     });
     await handleErrors(resp);
-    return await resp.json() as ManageQueue;
+    return await resp.json() as QueueHost;
 }
 
 export const deleteQueue = async (id: number) => {
@@ -77,6 +96,7 @@ export const addMeeting = async (queue_id: number, user_id: number) => {
         body: JSON.stringify({
             queue: queue_id,
             attendee_ids: [user_id],
+            assignee_id: null,
         }),
         headers: getPostHeaders(),
     });
@@ -135,6 +155,18 @@ export const changeQueueDescription = async (queue_id: number, description: stri
     return await resp.json();
 }
 
+export const setStatus = async (queue_id: number, open: boolean) => {
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            status: open ? "open" : "closed",
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
+
 export const getMyUser = async (user_id: number) => {
     const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
     await handleErrors(resp);
@@ -144,5 +176,17 @@ export const getMyUser = async (user_id: number) => {
 export const searchQueue = async (term: string) => {
     const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as AttendingQueue[];
+    return await resp.json() as QueueAttendee[];
+}
+
+export const changeMeetingAssignee = async (meeting_id: number, user_id: number | undefined) => {
+    const resp = await fetch(`/api/meetings/${meeting_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            assignee_id: user_id === undefined ? null : user_id,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json() as Meeting;
 }

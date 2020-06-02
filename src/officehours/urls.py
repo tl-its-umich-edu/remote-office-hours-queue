@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import re_path, path, include
 from django.views.generic import TemplateView
+from django.conf import settings
 
 urlpatterns = [
     path('', include('officehours_ui.urls')),
@@ -26,3 +27,6 @@ urlpatterns = [
     path('403/', TemplateView.as_view(template_name='403.html')),
     path('500/', TemplateView.as_view(template_name='500.html')),
 ]
+
+if 'mozilla_django_oidc' not in settings.INSTALLED_APPS:
+    urlpatterns += [path('accounts/', include('django.contrib.auth.urls'))]

@@ -1,17 +1,19 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getQueues as apiGetQueues, createQueue as apiAddQueue, deleteQueue as apiRemoveQueue } from "../services/api";
-import { User, ManageQueue } from "../models";
-import { ErrorDisplay, LoadingDisplay, SingleInputForm } from "./common";
+
+import * as api from "../services/api";
+import { QueueHost } from "../models";
+import { ErrorDisplay, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
+import { PageProps } from "./page";
 
 interface ManageQueueListProps {
-    queues: ManageQueue[];
-    addQueue: (uniqname: string) => Promise<void>;
+    queues: QueueHost[];
     disabled: boolean;
+    onAddQueue: (uniqname: string) => Promise<void>;
 }
 
 function ManageQueueList(props: ManageQueueListProps) {
@@ -27,13 +29,12 @@ function ManageQueueList(props: ManageQueueListProps) {
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>
     return (
         <div>
-            <h2>My Meeting Queues</h2>
             {queueList}
             <SingleInputForm 
                 id="add_queue"
                 placeholder="Queue name..." 
                 buttonType="success"
-                onSubmit={props.addQueue} 
+                onSubmit={props.onAddQueue} 
                 disabled={props.disabled}>
                     + Add Queue
             </SingleInputForm>
@@ -41,16 +42,12 @@ function ManageQueueList(props: ManageQueueListProps) {
     );
 }
 
-interface ManagePageProps {
-    user?: User;
-}
-
-export function ManagePage(props: ManagePageProps) {
+export function ManagePage(props: PageProps) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin(props.loginUrl);
     }
-    const [queues, setQueues] = useState(undefined as ManageQueue[] | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => apiGetQueues(), setQueues);
+    const [queues, setQueues] = useState(undefined as QueueHost[] | undefined);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueues(), setQueues);
     useEffect(() => {
         doRefresh();
     }, []);
@@ -58,22 +55,27 @@ export function ManagePage(props: ManagePageProps) {
     const addQueue = async (queueName: string) => {
         interactions.next(true);
         if (!queueName) return;
-        await apiAddQueue(queueName);
+        await api.createQueue(queueName);
         doRefresh();
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
+    
     const isChanging = addQueueLoading;
     const isLoading = refreshLoading || isChanging;
-    const error = refreshError || addQueueError;
+    const errorTypes = [refreshError, addQueueError];
+    const error = errorTypes.find(e => e);
+    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay error={error}/>
     const queueList = queues !== undefined
-        && <ManageQueueList queues={queues} disabled={isChanging} addQueue={doAddQueue}/>
+        && <ManageQueueList queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
     return (
         <div>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
+            <Breadcrumbs currentPageTitle="Manage"/>
             {loadingDisplay}
             {errorDisplay}
-            <h1>Virtual Office Hours</h1>
+            <h1>My Meeting Queues</h1>
             <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
             {queueList}
             <hr/>

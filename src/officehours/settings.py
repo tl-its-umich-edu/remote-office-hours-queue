@@ -30,38 +30,6 @@ def str_to_bool(val):
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'mail_admins'],
-            'propagate': True,
-        },
-        'mozilla_django_oidc': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        }
-    }
-}
-
-
 BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
 BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()
 
@@ -79,9 +47,14 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 
 # Application definition
 
-INSTALLED_APPS = [
+# Add additional non-Django apps here for consistent logging behavior
+EXTRA_APPS = [
     'officehours_api.apps.OfficehoursApiConfig',
     'officehours_ui.apps.OfficehoursUiConfig',
+]
+
+INSTALLED_APPS = [
+    *EXTRA_APPS,
     'whitenoise.runserver_nostatic',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -94,6 +67,9 @@ INSTALLED_APPS = [
     'watchman',
     'webpack_loader',
     'rest_framework_tracking',
+    'django_filters',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
 ]
 
 if DEBUG:
@@ -107,6 +83,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
@@ -137,11 +114,12 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'EXCEPTION_HANDLER': 'officehours_api.exceptions.backend_error_handler',
 }
 
 
@@ -156,6 +134,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'redirect_to_non_www.middleware.RedirectToNonWww',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
 ROOT_URLCONF = 'officehours.urls'
@@ -173,6 +152,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'officehours_ui.context_processors.feedback',
                 'officehours_ui.context_processors.debug',
+                'officehours_ui.context_processors.login_url',
                 'officehours_ui.context_processors.spa_globals',
             ],
         },
@@ -233,6 +213,51 @@ USE_L10N = True
 USE_TZ = True
 
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        },
+    },
+    'loggers': {
+        'django': {
+            'level': 'INFO',
+            'handlers': ['console', 'mail_admins'],
+            'propagate': True,
+        },
+        'mozilla_django_oidc': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+        **{
+            app.split('.')[0]: {
+                'level': 'INFO',
+                'handlers': ['console', 'mail_admins'],
+                'propagate': False
+            } for app in EXTRA_APPS
+        }
+    }
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
@@ -263,3 +288,6 @@ MANAGERS = ADMINS
 
 # Google Analytics
 GA_TRACKING_ID = os.getenv('GA_TRACKING_ID')
+
+# Django Flatpages
+SITE_ID = 1

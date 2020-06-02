@@ -1,55 +1,63 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useEffect, createRef } from "react";
+import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
+import Alert from "react-bootstrap/Alert"
 
-import { User, AttendingQueue, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert } from "./common";
-import { getQueue as apiGetQueueAttending, addMeeting as apiAddMeeting, removeMeeting as apiRemoveMeeting, getMyUser as apiGetMyUser } from "../services/api";
+import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, BlueJeansDialInMessage } from "./common";
+import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
+import { PageProps } from "./page";
+import Dialog from "react-bootstrap-dialog";
 
 interface QueueAttendingProps {
-    queue: AttendingQueue;
+    queue: QueueAttendee;
     user: User;
-    joinedQueue?: AttendingQueue | null;
-    joinQueue: () => void;
-    leaveQueue: () => void;
-    leaveAndJoinQueue: () => void;
+    joinedQueue?: QueueAttendee | null;
     disabled: boolean;
+    onJoinQueue: () => void;
+    onLeaveQueue: () => void;
+    onLeaveAndJoinQueue: () => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
     const joinedOther = props.joinedQueue && props.joinedQueue.id !== props.queue.id;
-    const controls = joinedOther && props.joinedQueue
-        ? (
-            <>
-            <div className="row">
-                <div className="col-lg">
-                    <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
+    const controls = props.queue.status !== "closed" && (
+        joinedOther && props.joinedQueue
+            ? (
+                <>
+                <div className="row">
+                    <div className="col-lg">
+                        <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
+                    </div>
                 </div>
-            </div>
-            <div className="row">
-                <div className="col-lg">
-                    <button disabled={props.disabled} onClick={props.leaveAndJoinQueue} type="button" className="btn btn-primary">
-                        Join Queue
-                    </button>
+                <div className="row">
+                    <div className="col-lg">
+                        <button disabled={props.disabled} onClick={props.onLeaveAndJoinQueue} type="button" className="btn btn-primary">
+                            Join Queue
+                        </button>
+                    </div>
                 </div>
-            </div>
-            </>
-        )
-        : (
-            <div className="row">
-                <div className="col-lg">
-                    <button disabled={props.disabled} onClick={props.joinQueue} type="button" className="btn btn-primary">
-                        Join Queue
-                    </button>
+                </>
+            )
+            : (
+                <div className="row">
+                    <div className="col-lg">
+                        <button disabled={props.disabled} onClick={props.onJoinQueue} type="button" className="btn btn-primary">
+                            Join Queue
+                        </button>
+                    </div>
                 </div>
-            </div>
-        );
+            )
+    );
+    const closedAlert = props.queue.status === "closed"
+        && <Alert variant="dark"><strong>This queue is currently closed.</strong> Please return at a later time or message the queue host to find out when the queue will be open.</Alert>
     return (
         <>
+        {closedAlert}
         <div className="row">
             <ul>
                 <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
@@ -71,16 +79,6 @@ const TurnSoonAlert = () =>
         <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
     </div>
 
-interface BlueJeansOneTouchDialLinkProps {
-    phone: string; // "." delimited
-    meetingNumber: string;
-}
-
-const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps) => 
-    <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
-        {props.phone}
-    </a>
-
 interface HowToBlueJeansProps {
     metadata: BluejeansMetadata;
 }
@@ -92,13 +90,11 @@ function HowToBlueJeans(props: HowToBlueJeansProps) {
         </a>
     );
     const meetingNumber = props.metadata.numeric_meeting_id;
-    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={meetingNumber} />
-    const phoneLinkCanada = <BlueJeansOneTouchDialLink phone="1.416.900.2956" meetingNumber={meetingNumber} />
     return (
         <div className="card-body">
             <h5 className="card-title">Join the BlueJeans Meeting</h5>
             <p className="card-text">Join now so you can make sure you are set up and ready. Download the app and test your audio before it is your turn.</p>
-            <p className="card-text">Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#. You are not a moderator, so you do not need a moderator passcode.</p>
+            <p className="card-text"><BlueJeansDialInMessage meetingNumber={meetingNumber} /> You are not a moderator, so you do not need a moderator passcode.</p>
             {joinLink}
             <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank" className="card-link">How to use BlueJeans at U-M</a>
         </div>
@@ -106,6 +102,8 @@ function HowToBlueJeans(props: HowToBlueJeansProps) {
 }
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
+    const closedAlert = props.queue.status === "closed"
+        && <Alert variant="dark">This queue has been closed by the host, but you are still in line. Please contact the host to ensure the meeting will still happen.</Alert>
     const alert = props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
@@ -116,6 +114,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         : undefined;
     return (
         <>
+        {closedAlert}
         <div className="row">
             <div className="col-lg">
                 {alert}
@@ -133,7 +132,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         </div>
         <div className="row">
             <div className="col-lg">
-                <button disabled={props.disabled} onClick={() => props.leaveQueue()} type="button" className="btn btn-warning">
+                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-warning">
                     Leave the line
                     {props.disabled && DisabledMessage}
                 </button>
@@ -175,20 +174,23 @@ function QueueAttending(props: QueueAttendingProps) {
     );
 }
 
-interface QueuePageProps {
-    user?: User;
+interface QueuePageParams {
+    queue_id: string;
 }
 
-export function QueuePage(props: QueuePageProps) {
+export function QueuePage(props: PageProps<QueuePageParams>) {
     if (!props.user) {
-        redirectToLogin()
+        redirectToLogin(props.loginUrl);
     }
-    const { queue_id } = useParams();
+    const queue_id = props.match.params.queue_id;
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
+    const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
-    const [queue, setQueue] = useState(undefined as AttendingQueue | undefined);
-    const refresh = () => apiGetQueueAttending(queueIdParsed);
+
+    //Setup basic state
+    const [queue, setQueue] = useState(undefined as QueueAttendee | undefined);
+    const refresh = () => api.getQueue(queueIdParsed);
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
         if (isNaN(queueIdParsed)) {
@@ -202,19 +204,21 @@ export function QueuePage(props: QueuePageProps) {
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
-    const refreshMyUser = () => apiGetMyUser(props.user!.id);
+    const refreshMyUser = () => api.getMyUser(props.user!.id);
     const [doRefreshMyUser, refreshMyUserLoading, refreshMyUserError] = usePromise(refreshMyUser, setMyUser);
     useEffect(() => {
         doRefreshMyUser();
     }, []);
     useAutoRefresh(doRefreshMyUser, 10000);
+
+    //Setup interactions
     const joinQueue = async () => {
         interactions.next(false);
         ReactGA.event({
             category: "Attending",
             action: "Joined Queue",
         });
-        await apiAddMeeting(queueIdParsed, props.user!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
@@ -224,31 +228,52 @@ export function QueuePage(props: QueuePageProps) {
             category: "Attending",
             action: "Left Queue",
         });
-        await apiRemoveMeeting(queue!.my_meeting!.id);
+        await api.removeMeeting(queue!.my_meeting!.id);
         await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
+    const confirmLeaveQueue = () => {
+        interactions.next(false);
+        dialogRef.current!.show({
+            title: "Leave Queue?",
+            body: "The queue is closed, but you are still in line. If you leave now, you will not be able to rejoin until the queue is reopened.",
+            actions: [
+                Dialog.CancelAction(),
+                Dialog.OKAction(() => {
+                    doLeaveQueue();
+                }),
+            ],
+        });
+    }
     const leaveAndJoinQueue = async () => {
         interactions.next(false);
         ReactGA.event({
             category: "Attending",
             action: "Left Previous Queue and Joined New Queue",
         });
-        await apiRemoveMeeting(myUser!.my_queue!.my_meeting!.id);
-        await apiAddMeeting(queueIdParsed, props.user!.id);
+        await api.removeMeeting(myUser!.my_queue!.my_meeting!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id);
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
+
+    //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
+    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
+    const error = errorTypes.find(e => e);
+    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={refreshError || joinQueueError || leaveQueueError || refreshMyUserError || leaveAndJoinQueueError}/>
+    const errorDisplay = <ErrorDisplay error={error}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} joinQueue={doJoinQueue} leaveQueue={doLeaveQueue}
-            leaveAndJoinQueue={doLeaveAndJoinQueue} />
+            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
     return (
-        <div className="container-fluid content">
+        <div>
+            <Dialog ref={dialogRef}/>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
+            <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
             {loadingDisplay}
             {errorDisplay}
             {queueDisplay}

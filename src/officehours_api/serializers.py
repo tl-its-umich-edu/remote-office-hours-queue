@@ -40,18 +40,21 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting']
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status']
 
     def get_line_length(self, obj):
         return obj.meeting_set.count()
 
     def get_my_meeting(self, obj):
-        my_meeting = obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
-        if my_meeting:
-            serializer = NestedMyMeetingSerializer(my_meeting, context={'request': self.context['request']})
-            return serializer.data
-        else:
+        user = self.context['request'].user
+        my_meeting = (
+            obj.meeting_set.filter(attendees__in=[self.context['request'].user]).first()
+            if user.is_authenticated else None
+        )
+        if not my_meeting:
             return None
+        serializer = NestedMyMeetingSerializer(my_meeting, context={'request': self.context['request']})
+        return serializer.data
 
 
 class QueueHostSerializer(QueueAttendeeSerializer):
@@ -68,7 +71,8 @@ class QueueHostSerializer(QueueAttendeeSerializer):
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids', 'meeting_set', 'line_length', 'my_meeting']
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids',
+                  'meeting_set', 'line_length', 'my_meeting', 'status']
 
     def validate_host_ids(self, host_ids):
         '''
@@ -102,21 +106,41 @@ class MeetingSerializer(serializers.ModelSerializer):
         source='attendees',
         write_only=True,
     )
+    assignee = NestedUserSerializer(read_only=True)
+    assignee_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='assignee',
+        write_only=True,
+        allow_null=True
+    )
     backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
-        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'backend_type', 'backend_metadata']
+        fields = ['id', 'queue', 'attendees', 'attendee_ids', 'assignee', 'assignee_id', 'backend_type', 'backend_metadata', 'created_at']
         read_only_fields = ['attendees', 'backend_metadata']
 
     def validate_attendee_ids(self, attendee_ids):
         '''
         Attendees may only be in one meeting at a time.
         '''
+        instance_id = getattr(self.instance, 'id', None)
         for user in attendee_ids:
-            if user.meeting_set.exists():
+            if user.meeting_set.exclude(id=instance_id).exists():
                 raise serializers.ValidationError(f'{user} is already in a meeting.')
         return attendee_ids
+
+    def validate_queue(self, queue):
+        '''
+        Prevent new meeting from being added to a closed queue, unless it's added by a host.
+        '''
+        if (
+            queue.status == 'closed'
+            and self.context['request']._request.method == 'POST'
+            and self.context['request'].user not in queue.hosts.all()
+        ):
+            raise serializers.ValidationError(f'Queue {queue} is closed.')
+        return queue
 
 
 class AttendeeSerializer(serializers.ModelSerializer):
