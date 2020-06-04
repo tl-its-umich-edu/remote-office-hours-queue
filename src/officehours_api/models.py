@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from django.core.validators import MaxLengthValidator
 from safedelete.models import (
     SafeDeleteModel, SOFT_DELETE_CASCADE, HARD_DELETE,
 )
@@ -46,7 +47,7 @@ class Queue(SafeDeleteModel):
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(blank=True)
+    description = models.TextField(max_length=1000, blank=True, validators=[MaxLengthValidator(1000)])
     status = models.CharField(
         max_length=32,
         choices=[
