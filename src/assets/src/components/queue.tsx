@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, BlueJeansDialInMessage } from "./common";
+import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -21,6 +21,7 @@ interface QueueAttendingProps {
     onJoinQueue: () => void;
     onLeaveQueue: () => void;
     onLeaveAndJoinQueue: () => void;
+    onChangeAgenda: (agenda: string) => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -123,6 +124,14 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     <li>The host will join the meeting when it is your turn</li>
                     <li>We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</li>
                 </ul>
+                <b>Meeting Agenda (Optional)</b>
+                <p>Let the host(s) know the topic you wish to discuss.</p>
+                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
+                onSubmit={props.onChangeAgenda}
+                buttonType="success" placeholder=""
+                initialState={true}>
+                    Update
+                </EditToggleField>
             </div>
             <div className="col-sm">
                 <div className="card">
@@ -210,6 +219,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         doRefreshMyUser();
     }, []);
     useAutoRefresh(doRefreshMyUser, 10000);
+    const [meeting, setMeeting] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
     const joinQueue = async () => {
@@ -256,11 +266,16 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
-
+    const changeAgenda = async (agenda: string) => {
+        interactions.next(true);
+        return await api.changeAgenda(queue!.my_meeting!.id, agenda);
+    }
+    const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda, setMeeting);
+    
     //Render
-    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading;
+    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
-    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
+    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError, changeAgendaError];
     const error = errorTypes.find(e => e);
     const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
@@ -268,7 +283,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
-            onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}/>
     return (
         <div>
             <Dialog ref={dialogRef}/>

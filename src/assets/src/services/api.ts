@@ -179,6 +179,18 @@ export const searchQueue = async (term: string) => {
     return await resp.json() as QueueAttendee[];
 }
 
+export const changeAgenda = async (meeting_id: number, agenda: string) => {
+    const resp = await fetch(`/api/meetings/${meeting_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            agenda: agenda,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
+
 export const changeMeetingAssignee = async (meeting_id: number, user_id: number | undefined) => {
     const resp = await fetch(`/api/meetings/${meeting_id}/`, {
         method: "PATCH",
