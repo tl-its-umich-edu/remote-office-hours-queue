@@ -59,11 +59,6 @@ export function HomePage(props: PageProps) {
             <Link to="/manage">
                 Manage Your Own Queues
             </Link>
-            <p>
-            <Link to="/preferences">
-                View/Update Your Preferences
-            </Link>
-            </p>
             </>
         )
         : (

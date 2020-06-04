@@ -7,6 +7,8 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import Alert from "react-bootstrap/Alert";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
@@ -273,7 +275,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
                 <>
                 <p>
                 <UserDisplay user={a}/>
-                <strong>  Phone:</strong>{a.phone_number}
+                <strong>  Phone:</strong><PhoneInput value={a.phone_number} disabled={true}/>
                 </p>
                 </>
                 )}

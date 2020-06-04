@@ -1,5 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User } from "../models";
@@ -21,12 +23,15 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         <div>
             <h1>View/Update Preferences</h1>
             <p>
-                Please provide alternate means in which the host may contact you in the event of technical difficulties.
+                Please provide alternate means by which the host may contact you in the event of technical difficulties.
             </p>
-            Phone Number:<EditToggleField text={props.user.phone_number} disabled={props.disabled} id="phone_number"
-            onSubmit={props.onUpdateInfo} buttonType="success" placeholder="">
-                Update
-            </EditToggleField>
+            Phone Number:
+            <PhoneInput
+                country={'us'}
+                value={props.user.phone_number}
+                onChange={props.onUpdateInfo}
+                disabled={props.disabled}
+            />
         </div>
     );
 }
