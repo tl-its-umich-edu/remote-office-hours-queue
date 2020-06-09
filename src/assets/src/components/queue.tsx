@@ -122,10 +122,10 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <div className="col-lg">
                 {alert}
                 <h3>You are currently in line.</h3>
-                <div className="card">
+                <div className="card card-middle" >
                     <div className="card-body">
-                        <p className="card-text">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
-                        <p className="card-text">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
+                        <p className="card-text card-text-spacing">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
+                        <p className="card-text card-text-spacing">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
                     </div>
                 </div>
                 <p>The host will join the meeting when it is your turn. We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</p>

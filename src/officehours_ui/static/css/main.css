@@ -404,6 +404,17 @@ h3.alert-heading {
 	padding-top: 0;
 }
 
+.card-middle {
+	margin-bottom: 20px;
+	font-size: 1.25rem;
+	background-color: #ececec;
+	color: #393939;
+}
+
+.card-text-spacing {
+	margin-bottom: 5px;
+}
+
 .card-header {
 	font-size: 1.25rem;
 	font-weight: bold;
