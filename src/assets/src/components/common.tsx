@@ -233,10 +233,11 @@ interface EditToggleFieldProps {
     buttonType: BootstrapButtonTypes;
     id: string;
     onSubmit: (value: string) => void;
+    initialState: boolean;
 }
 
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
-    const [editing, setEditing] = useState(false);
+    const [editing, setEditing] = useState(props.initialState);
     const [editorValue, setEditorValue] = useState(props.text);
     const [editorError, setEditorError] = useState(undefined as Error | undefined);
     const submit = (value: string) => {
@@ -358,6 +359,20 @@ export const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps)
         {props.phone}
     </a>
 
+interface BlueJeansDialInMessageProps {
+    meetingNumber: string;
+}
+
+export const BlueJeansDialInMessage = (props: BlueJeansDialInMessageProps) => {
+    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={props.meetingNumber} />
+    return (
+        <span>
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA 
+            (or <a target="_blank" href="https://www.bluejeans.com/numbers"> find your international number to call in from outside the USA</a>) 
+            from any phone and enter {props.meetingNumber}#.
+        </span>
+    )
+}
 
 interface BreadcrumbsProps {
     intermediatePages?: {title: string, href: string}[];
