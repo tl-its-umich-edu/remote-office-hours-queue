@@ -600,3 +600,7 @@ div[role=main] {
 .breadcrumb .breadcrumb-item::before {
 	color: black;
 }
+
+.bottom-content {
+	margin-top: 20px;
+}

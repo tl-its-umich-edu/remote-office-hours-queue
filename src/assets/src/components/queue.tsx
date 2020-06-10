@@ -145,7 +145,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             </div>
         </div>
         <div className="row">
-            <div className="col-lg">
+            <div className="col-lg bottom-content">
                 {joinLink}
                 <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
                     Leave the line
