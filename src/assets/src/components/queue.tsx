@@ -190,17 +190,23 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueAttendee | undefined);
-    const refresh = () => api.getQueue(queueIdParsed);
+    const refresh = async () => {
+        try {
+            return await api.getQueue(queueIdParsed)
+        } catch(err) {
+            if (err.message === "Not Found") {
+                redirectToSearch(queue_id);
+            } else {
+                throw err;
+            }
+        }
+    };
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
         if (isNaN(queueIdParsed)) {
             return redirectToSearch(queue_id);
         }
-        doRefresh().catch((err: Error) => {
-            if (err.message === "Not Found") {
-                redirectToSearch(queue_id);
-            }
-        });
+        doRefresh();
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
