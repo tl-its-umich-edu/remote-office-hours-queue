@@ -66,7 +66,7 @@ export function HomePage(props: PageProps) {
             <p className="lead">
                 Join or host a queue for office hours over BlueJeans!
             </p>
-            <a href={props.loginUrl} className="btn btn-light btn-lg">Login</a>
+            <a href={props.loginUrl} className="btn btn-primary btn-lg">Login</a>
             </>
         );
     return (

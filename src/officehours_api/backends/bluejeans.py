@@ -1,6 +1,20 @@
 import time
 import requests
+from typing import Optional, TypedDict
 from rest_framework.exceptions import ValidationError
+
+
+class BluejeansUserExtraFields(TypedDict):
+    username: str
+    firstName: str
+    middleName: str
+    lastName: str
+    email: str
+
+
+class BluejeansUser(BluejeansUserExtraFields):
+    id: int
+    uri: str
 
 
 class Bluejeans:
@@ -14,18 +28,18 @@ class Bluejeans:
         self._access_token = None
         self._access_token_expires = 0
 
-        self._session = requests.Session()
+        self._session_field = requests.Session()
 
     @property
-    def session(self):
+    def _session(self):
         if time.time() > self._access_token_expires:
             self._update_access_token()
 
-            self._session.headers.update({
+            self._session_field.headers.update({
                 'Authorization': f'Bearer {self._access_token}'
             })
 
-        return self._session
+        return self._session_field
 
     def _update_access_token(self):
         client_info = {
@@ -43,26 +57,26 @@ class Bluejeans:
         self._access_token_expires = time.time() - data['expires_in'] - 60
         self._enterprise_id = data['scope']['enterprise']
 
-    def get_user(self, user_email):
+    def _get_user(self, user_email) -> Optional[BluejeansUser]:
         params = {
             'emailId': user_email,
-            'fields': 'username, firstName, middleName, lastName, email',
+            'fields': tuple(BluejeansUserExtraFields.__annotations__.keys()),
         }
-
-        resp = self.session.get(
+        resp = self._session.get(
             self._base_url + f'/v1/enterprise/{self._enterprise_id}/users',
             params=params,
         )
+        if resp.status_code == 404:
+            return None
         resp.raise_for_status()
         r = resp.json()
         if r['count'] > 1:
             raise Exception(f'Too many users match "{user_email}"')
         elif r['count'] == 0:
-            raise Exception('BlueJeans user not found.')
-
+            return None
         return r['users'][0]
 
-    def create_meeting(self, user_id, meeting_settings=None):
+    def _create_meeting(self, user_id, meeting_settings=None):
         now = round(time.time()) * 1000
 
         if not meeting_settings:
@@ -76,32 +90,31 @@ class Bluejeans:
                 'endPointVersion': '2.10',
             }
 
-        resp = self.session.post(
+        resp = self._session.post(
             self._base_url + f'/v1/user/{user_id}/scheduled_meeting',
             json=meeting_settings,
         )
-
         resp.raise_for_status()
 
         return resp.json()
 
-    def read_meeting(self, user_id, meeting_id):
-        resp = self.session.get(
+    def _read_meeting(self, user_id, meeting_id):
+        resp = self._session.get(
             self._base_url + f'/v1/user/{user_id}' +
             f'/scheduled_meeting/{meeting_id}'
         )
         resp.raise_for_status()
         return resp.json()
 
-    def delete_meeting(self, user_id, meeting_id):
-        resp = self.session.delete(
+    def _delete_meeting(self, user_id, meeting_id):
+        resp = self._session.delete(
             self._base_url + f'/v1/user/{user_id}' +
             f'/scheduled_meeting/{meeting_id}'
         )
         resp.raise_for_status()
 
-    def update_meeting(self, user_id, meeting_id, meeting):
-        resp = self.session.put(
+    def _update_meeting(self, user_id, meeting_id, meeting):
+        resp = self._session.put(
             self._base_url + f'/v1/user/{user_id}' +
             f'/scheduled_meeting/{meeting_id}',
             json=meeting,
@@ -109,45 +122,43 @@ class Bluejeans:
         resp.raise_for_status()
         return resp.json()
 
-    def save_user_meeting(self, backend_metadata):
-
-        if not backend_metadata:
-            backend_metadata = {}
-
+    def save_user_meeting(self, backend_metadata={}):
         user_email = backend_metadata['user_email']
 
-        if not backend_metadata.get('meeting_id'):
-            user = self.get_user(user_email=user_email)
+        if backend_metadata.get('meeting_id'):
+            return backend_metadata
 
-            if not user:
-                raise ValidationError(f'{user_email} does not exist in bluejeans.')
-
-            now = round(time.time()) * 1000
-            meeting = self.create_meeting(
-                user['id'],
-                meeting_settings={
-                    'title': (
-                        'Remote Office Hours'),
-                    'description': (
-                        'This meeting was created by the Remote Office '
-                        'Hours Queue application. See '
-                        'https://documentation.its.umich.edu/node/1830'),
-                    'advancedMeetingOptions': {
-                        'moderatorLess': True,
-                    },
-                    'start': now,
-                    'end': now + (60 * 30 * 1000),
-                    'timezone': 'America/Detroit',
-                    'endPointType': 'WEB_APP',
-                    'endPointVersion': '2.10',
-                }
+        user = self._get_user(user_email=user_email)
+        if not user:
+            raise ValidationError(
+                f'There is no BlueJeans account associated with {user_email}. '
+                f'Please log into umich.bluejeans.com, then try again.'
             )
 
-            backend_metadata.update({
-                'user_id': user['id'],
-                'meeting_id': meeting['id'],
-                'numeric_meeting_id': meeting['numericMeetingId'],
-                'meeting_url': f'https://bluejeans.com/{meeting["numericMeetingId"]}',
-            })
-
+        now = round(time.time()) * 1000
+        meeting = self._create_meeting(
+            user['id'],
+            meeting_settings={
+                'title': (
+                    'Remote Office Hours'),
+                'description': (
+                    'This meeting was created by the Remote Office '
+                    'Hours Queue application. See '
+                    'https://documentation.its.umich.edu/node/1830'),
+                'advancedMeetingOptions': {
+                    'moderatorLess': True,
+                },
+                'start': now,
+                'end': now + (60 * 30 * 1000),
+                'timezone': 'America/Detroit',
+                'endPointType': 'WEB_APP',
+                'endPointVersion': '2.10',
+            }
+        )
+        backend_metadata.update({
+            'user_id': user['id'],
+            'meeting_id': meeting['id'],
+            'numeric_meeting_id': meeting['numericMeetingId'],
+            'meeting_url': f'https://bluejeans.com/{meeting["numericMeetingId"]}',
+        })
         return backend_metadata

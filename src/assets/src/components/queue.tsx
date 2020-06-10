@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, DateTimeDisplay } from "./common";
+import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
+import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -21,6 +21,7 @@ interface QueueAttendingProps {
     onJoinQueue: () => void;
     onLeaveQueue: () => void;
     onLeaveAndJoinQueue: () => void;
+    onChangeAgenda: (agenda: string) => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -85,12 +86,10 @@ interface HowToBlueJeansProps {
 
 function HowToBlueJeans(props: HowToBlueJeansProps) {
     const meetingNumber = props.metadata.numeric_meeting_id;
-    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={meetingNumber} />
-    const phoneLinkCanada = <BlueJeansOneTouchDialLink phone="1.416.900.2956" meetingNumber={meetingNumber} />
     return (
         <div className="card-body">
             <h5 className="card-title">Having problems with video?</h5>
-            <p className="card-text">As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#. You are not a moderator, so you do not need a moderator passcode.</p>
+            <p className="card-text"><BlueJeansDialInMessage meetingNumber={meetingNumber} /> You are not a moderator, so you do not need a moderator passcode.</p>
         </div>
     );
 }
@@ -130,6 +129,14 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 </div>
                 <p>The host will join the meeting when it is your turn. We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</p>
                 <p>You can join the meeting now to make sure you are set up and ready. Download the app and test your audio before it is your turn. See <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" target="_blank" className="card-link">How to use BlueJeans at U-M</a> for additional help getting started.</p>
+                <b>Meeting Agenda (Optional)</b>
+                <p>Let the host(s) know the topic you wish to discuss.</p>
+                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
+                onSubmit={props.onChangeAgenda}
+                buttonType="success" placeholder=""
+                initialState={true}>
+                    Update
+                </EditToggleField>
             </div>
             <div className="col-sm">
                 <div className="card">
@@ -218,6 +225,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         doRefreshMyUser();
     }, []);
     useAutoRefresh(doRefreshMyUser, 10000);
+    const [meeting, setMeeting] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
     const joinQueue = async () => {
@@ -264,11 +272,16 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
-
+    const changeAgenda = async (agenda: string) => {
+        interactions.next(true);
+        return await api.changeAgenda(queue!.my_meeting!.id, agenda);
+    }
+    const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda, setMeeting);
+    
     //Render
-    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading;
+    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
-    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError];
+    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError, changeAgendaError];
     const error = errorTypes.find(e => e);
     const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
@@ -276,7 +289,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
-            onLeaveAndJoinQueue={doLeaveAndJoinQueue} />
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}/>
     return (
         <div>
             <Dialog ref={dialogRef}/>
