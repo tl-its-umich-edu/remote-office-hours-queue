@@ -266,19 +266,18 @@ interface MeetingInfoProps {
 }
 
 const MeetingInfoDialog = (props: MeetingInfoProps) => {
+    const attendeeDetails = props.meeting?.attendees.map(a => 
+        <p>
+            <UserDisplay user={a}/>
+            <strong>  Phone:</strong><PhoneInput value={a.phone_number} disabled={true}/>
+        </p>
+    );
     const generalInfo = props.meeting
         && (
             <>
             Attendees:
             <p>
-                {props.meeting.attendees.map(a => 
-                <>
-                <p>
-                <UserDisplay user={a}/>
-                <strong>  Phone:</strong><PhoneInput value={a.phone_number} disabled={true}/>
-                </p>
-                </>
-                )}
+                {attendeeDetails}
             </p>
             <p>
                 Time Joined: <DateTimeDisplay dateTime={props.meeting.created_at}/>

@@ -5,20 +5,30 @@ import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User } from "../models";
-import { ErrorDisplay, LoadingDisplay, EditToggleField, LoginDialog, Breadcrumbs } from "./common";
+import { ErrorDisplay, LoadingDisplay, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
 interface PreferencesEditorProps {
     user: User;
     disabled: boolean;
-    onUpdateInfo: (phone_number: string) => void;
+    onUpdateInfo: (phoneNumber: string) => void;
 }
 
 function PreferencesEditor(props: PreferencesEditorProps) {
-
+    var currentPhoneField = ""
+    const setPhoneField = (newNumber: string) => {
+        currentPhoneField = newNumber
+    };
+    
+    const phoneInput = <PhoneInput
+        country={'us'}
+        value={props.user.phone_number}
+        onChange={setPhoneField}
+        disabled={props.disabled}
+    />
+    
     return (
         <div>
             <h1>View/Update Preferences</h1>
@@ -26,12 +36,10 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 Please provide alternate means by which the host may contact you in the event of technical difficulties.
             </p>
             Phone Number:
-            <PhoneInput
-                country={'us'}
-                value={props.user.phone_number}
-                onChange={props.onUpdateInfo}
-                disabled={props.disabled}
-            />
+            {phoneInput}
+            <button className="btn btn-primary" onClick={() => props.onUpdateInfo(currentPhoneField)}>
+                Save
+            </button>
         </div>
     );
 }
@@ -42,21 +50,20 @@ export function PreferencesPage(props: PageProps) {
     }
     
     if (!props.user) throw new Error("user is undefined!");
-    const user_id = props.user?.id
+    const userId = props.user.id
 
     //Setup basic state
     const [user, setUser] = useState(undefined as User | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getMyUser(user_id) as Promise<User>, setUser);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getMyUser(userId) as Promise<User>, setUser);
     useEffect(() => {
         doRefresh();
     }, []);
-    const [interactions] = useAutoRefresh(doRefresh);
 
     //Setup interactions
-    const updateInfo = async (phone_number: string) => {
-        interactions.next(true);
-        await api.updateMyUser(user_id, phone_number)
-        await doRefresh();
+    const updateInfo = async (phoneNumber: string) => {
+         
+        await api.updateMyUser(userId, phoneNumber)
+        return await doRefresh();
     }
     const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise(updateInfo);
 
