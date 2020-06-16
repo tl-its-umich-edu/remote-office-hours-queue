@@ -62,10 +62,10 @@ export function PreferencesPage(props: PageProps) {
     //Setup interactions
     const updateInfo = async (phoneNumber: string) => {
          
-        await api.updateMyUser(userId, phoneNumber)
-        return await doRefresh();
+        return await api.updateMyUser(userId, phoneNumber)
+        
     }
-    const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise(updateInfo);
+    const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise((phoneNumber: string) => api.updateMyUser(userId, phoneNumber) as Promise<User>, setUser);
 
     //Render
     const isChanging = updateInfoLoading;
