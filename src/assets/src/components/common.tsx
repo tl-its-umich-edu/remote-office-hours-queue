@@ -368,7 +368,7 @@ export const BlueJeansDialInMessage = (props: BlueJeansDialInMessageProps) => {
     return (
         <span>
             Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA 
-            (or <a target="_blank" href="https://www.bluejeans.com/numbers"> find your international number to call in from outside the USA</a>) 
+            (or <a target="_blank" href="https://www.bluejeans.com/premium-numbers"> find your international number to call in from outside the USA</a>) 
             from any phone and enter {props.meetingNumber}#.
         </span>
     )
