@@ -18,24 +18,4 @@ class Migration(migrations.Migration):
             name='phone_number',
             field=models.CharField(blank=True, default='', max_length=20),
         ),
-        migrations.AlterField(
-            model_name='attendee',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='officehours_api.Profile'),
-        ),
-        migrations.AlterField(
-            model_name='meeting',
-            name='attendees',
-            field=models.ManyToManyField(through='officehours_api.Attendee', to='officehours_api.Profile'),
-        ),
-        migrations.AlterField(
-            model_name='attendee',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AlterField(
-            model_name='meeting',
-            name='attendees',
-            field=models.ManyToManyField(through='officehours_api.Attendee', to=settings.AUTH_USER_MODEL),
-        ),
     ]

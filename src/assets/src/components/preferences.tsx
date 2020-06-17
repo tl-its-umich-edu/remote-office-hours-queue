@@ -17,11 +17,7 @@ interface PreferencesEditorProps {
 }
 
 function PreferencesEditor(props: PreferencesEditorProps) {
-    var currentPhoneField = ""
-    const setPhoneField = (newNumber: string) => {
-        currentPhoneField = newNumber
-    };
-    
+    const [phoneField, setPhoneField] = useState("");
     const phoneInput = <PhoneInput
         country={'us'}
         value={props.user.phone_number}
@@ -37,7 +33,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             </p>
             Phone Number:
             {phoneInput}
-            <button className="btn btn-primary" onClick={() => props.onUpdateInfo(currentPhoneField)}>
+            <button className="btn btn-primary" onClick={() => props.onUpdateInfo(phoneField)}>
                 Save
             </button>
         </div>
@@ -61,9 +57,7 @@ export function PreferencesPage(props: PageProps) {
 
     //Setup interactions
     const updateInfo = async (phoneNumber: string) => {
-         
         return await api.updateMyUser(userId, phoneNumber)
-        
     }
     const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise((phoneNumber: string) => api.updateMyUser(userId, phoneNumber) as Promise<User>, setUser);
 

@@ -9,14 +9,6 @@ class NestedUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
 
-""" class NestedProfileSerializer(serializers.ModelSerializer):
-    user = NestedUserSerializer(required=True)
-
-    class Meta:
-        model = Profile
-        fields = ['user', 'phone_number'] """
-
-
 class NestedMeetingSerializer(serializers.ModelSerializer):
     attendees = NestedUserSerializer(many=True, read_only=True)
     assignee = NestedUserSerializer(read_only=True)
