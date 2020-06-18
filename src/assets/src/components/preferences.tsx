@@ -33,7 +33,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             </p>
             Phone Number:
             {phoneInput}
-            <button className="btn btn-primary" onClick={() => props.onUpdateInfo(phoneField)}>
+            <button className="btn btn-primary" onClick={() => props.onUpdateInfo(phoneField)}
+            disabled={props.disabled}>
                 Save
             </button>
         </div>
