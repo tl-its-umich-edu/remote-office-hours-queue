@@ -56,7 +56,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
                 </p>
             )
             : <AttendingQueueList queues={searchResults} />
-    const redirectAlert = props.location.search.includes("redirected=true")
+    const redirectAlert = props.location.search.includes("redirected=true") && !/^\d+$/.exec(term)
         && (
             <p className="alert alert-warning">
                 We didn't find a queue there! It's ok, we made a change that moved some queues around--it's us, not you. To help you find the queue you were looking for, we searched for any queues hosted by {term}. <a href="https://documentation.its.umich.edu/office-hours-links" target="_blank">Learn more about this search.</a>
