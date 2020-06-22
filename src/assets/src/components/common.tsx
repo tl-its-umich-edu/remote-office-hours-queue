@@ -273,12 +273,55 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     return contents;
 }
 
+interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProps {
+    max_length: number
+}
+
+export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
+    const inputRef = createRef<HTMLInputElement>();
+    useEffect(() => {
+        if (!props.autofocus) return;
+        inputRef.current!.focus();
+    }, []);
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            props.onSubmit(props.value);
+            props.onChangeValue("");
+        } catch (e) {
+            props.onError(e);
+        }
+    }
+    const errorDisplay = props.error && <ErrorDisplay error={props.error} />
+    const buttonClass = "btn btn-" + props.buttonType;
+    const [remaining, setRemaining] = useState(props.max_length - props.value.length);
+    const handleChange = (newValue:string) => {
+        props.onChangeValue(newValue);
+        setRemaining(props.max_length - newValue.length)
+    }
+    return (
+        <form onSubmit={submit} className="input-group">
+            <input onChange={(e) => handleChange(e.target.value)} value={props.value}
+                ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}
+                disabled={props.disabled} id={props.id} />
+            <div className="input-group-append">
+                <p className="btn btn-secondary">{remaining}</p>
+                <button className={buttonClass} type="submit" disabled={props.disabled}>
+                    {props.children}
+                </button>
+            </div>
+            {errorDisplay}
+        </form>
+    );
+}
+
+
 interface ShowRemainingFieldProps extends EditToggleFieldProps {
     max_length: number;
 }
 
 export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => {
-    const [editing, setEditing] = useState(false);
+    const [editing, setEditing] = useState(props.initialState);
     const [editorValue, setEditorValue] = useState(props.text);
     const [editorError, setEditorError] = useState(undefined as Error | undefined);
     const submit = (value: string) => {
@@ -289,18 +332,19 @@ export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => 
         setEditing(true);
         setEditorValue(props.text);
     }
+
     const contents = (editing && !props.disabled)
         ? (
-            <StatelessSingleInputForm
+            <SingleInputFormShowRemaining
                 id={props.id}
                 autofocus={true}
                 onSubmit={submit}
                 value={editorValue} onChangeValue={setEditorValue}
                 error={editorError} onError={setEditorError}
                 placeholder={props.placeholder} disabled={props.disabled}
-                buttonType="success">
+                buttonType="success" max_length={props.max_length}>
                 {props.children}
-            </StatelessSingleInputForm>
+            </SingleInputFormShowRemaining>
         )
         : (
             <div className="input-group">

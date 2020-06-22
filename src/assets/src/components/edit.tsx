@@ -10,7 +10,7 @@ import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
@@ -192,11 +192,11 @@ function QueueEditor(props: QueueEditorProps) {
                 <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
-                        <EditToggleField text={props.queue.description} disabled={props.disabled} id="description"
+                        <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
                             onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
-                            initialState={false}>
+                            initialState={false} max_length={1000}>
                                 Change
-                        </EditToggleField>
+                        </ShowRemainingField>
                     </div>
                 </div>
                 <div className="row">
