@@ -17,26 +17,28 @@ interface PreferencesEditorProps {
 }
 
 function PreferencesEditor(props: PreferencesEditorProps) {
-    const [phoneField, setPhoneField] = useState("");
+    const [phoneField, setPhoneField] = useState(props.user.phone_number);
     const phoneInput = <PhoneInput
         country={'us'}
         value={props.user.phone_number}
         onChange={setPhoneField}
         disabled={props.disabled}
     />
-    
+    const validateAndSubmit = () => {
+        if (phoneField.length == 11) {
+            props.onUpdateInfo(phoneField)
+        }
+    }
     return (
         <div>
             <h1>View/Update Preferences</h1>
-            <p>
-                Please provide alternate means by which the host may contact you in the event of technical difficulties.
-            </p>
-            Phone Number:
-            {phoneInput}
-            <button className="btn btn-primary" onClick={() => props.onUpdateInfo(phoneField)}
-            disabled={props.disabled}>
-                Save
-            </button>
+            <form onSubmit={validateAndSubmit}>
+                <p>
+                    Please provide alternate means by which the host may contact you in the event of technical difficulties.
+                </p>
+                <label>Phone Number: {phoneInput}</label>
+                <input type="submit" className="btn btn-primary" value="Save" disabled={props.disabled} />
+            </form>
         </div>
     );
 }
@@ -57,9 +59,6 @@ export function PreferencesPage(props: PageProps) {
     }, []);
 
     //Setup interactions
-    const updateInfo = async (phoneNumber: string) => {
-        return await api.updateMyUser(userId, phoneNumber)
-    }
     const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise((phoneNumber: string) => api.updateMyUser(userId, phoneNumber) as Promise<User>, setUser);
 
     //Render
