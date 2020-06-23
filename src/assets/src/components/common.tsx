@@ -278,7 +278,7 @@ interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProp
 }
 
 export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
-    const inputRef = createRef<HTMLInputElement>();
+    const inputRef = createRef<HTMLTextAreaElement>();
     useEffect(() => {
         if (!props.autofocus) return;
         inputRef.current!.focus();
@@ -301,10 +301,10 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
     }
     return (
         <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => handleChange(e.target.value)} value={props.value}
-                ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}
-                disabled={props.disabled} id={props.id} />
-            <div className="input-group-append">
+            <textarea onChange={(e) => handleChange(e.target.value)} value={props.value}
+                ref={inputRef} className="form-control" placeholder={props.placeholder}
+                disabled={props.disabled} id={props.id} rows={5}/>
+            <div>
                 <p className="btn btn-secondary">{remaining}</p>
                 <button className={buttonClass} type="submit" disabled={props.disabled}>
                     {props.children}
