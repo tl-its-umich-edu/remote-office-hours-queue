@@ -274,7 +274,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
 }
 
 interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProps {
-    max_length: number
+    maxLength: number
 }
 
 export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
@@ -294,21 +294,24 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
     }
     const errorDisplay = props.error && <ErrorDisplay error={props.error} />
     const buttonClass = "btn btn-" + props.buttonType;
-    const [remaining, setRemaining] = useState(props.max_length - props.value.length);
+    const [remaining, setRemaining] = useState(props.maxLength - props.value.length);
     const handleChange = (newValue:string) => {
         props.onChangeValue(newValue);
-        setRemaining(props.max_length - newValue.length)
+        setRemaining(props.maxLength - newValue.length)
     }
     return (
-        <form onSubmit={submit} className="input-group">
+        <form onSubmit={submit}>
             <textarea onChange={(e) => handleChange(e.target.value)} value={props.value}
                 ref={inputRef} className="form-control" placeholder={props.placeholder}
                 disabled={props.disabled} id={props.id} rows={5}/>
             <div>
-                <p className="btn btn-secondary">{remaining}</p>
-                <button className={buttonClass} type="submit" disabled={props.disabled}>
-                    {props.children}
-                </button>
+                <p className="form-p">
+                    <span>{remaining}/{props.maxLength}</span>
+                    <button className={buttonClass} type="submit" disabled={props.disabled}>
+                        {props.children}
+                    </button>
+                </p>
+                
             </div>
             {errorDisplay}
         </form>
@@ -317,7 +320,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
 
 
 interface ShowRemainingFieldProps extends EditToggleFieldProps {
-    max_length: number;
+    maxLength: number;
 }
 
 export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => {
@@ -342,7 +345,7 @@ export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => 
                 value={editorValue} onChangeValue={setEditorValue}
                 error={editorError} onError={setEditorError}
                 placeholder={props.placeholder} disabled={props.disabled}
-                buttonType="success" max_length={props.max_length}>
+                buttonType="success" maxLength={props.maxLength}>
                 {props.children}
             </SingleInputFormShowRemaining>
         )

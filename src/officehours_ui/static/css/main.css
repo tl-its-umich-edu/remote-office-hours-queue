@@ -467,6 +467,12 @@ h3.alert-heading {
 	border: 1px solid #cecbc9;
 }
 
+.form-p {
+	margin: 0;
+	padding: 0;
+	text-align: right;
+}
+
 .input-group {
 	margin: 0.2rem;
 }

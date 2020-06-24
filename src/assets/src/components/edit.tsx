@@ -194,7 +194,7 @@ function QueueEditor(props: QueueEditorProps) {
                     <div className="col-md-6">
                         <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
                             onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
-                            initialState={false} max_length={1000}>
+                            initialState={false} maxLength={1000}>
                                 Change
                         </ShowRemainingField>
                     </div>
