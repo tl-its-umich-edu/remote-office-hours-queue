@@ -293,7 +293,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
         }
     }
     const errorDisplay = props.error && <ErrorDisplay error={props.error} />
-    const buttonClass = "btn btn-" + props.buttonType;
+    const buttonClass = "btn btn-" + props.buttonType + " remaining-controls";
     const [remaining, setRemaining] = useState(props.maxLength - props.value.length);
     const handleChange = (newValue:string) => {
         props.onChangeValue(newValue);
@@ -305,7 +305,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                 ref={inputRef} className="form-control" placeholder={props.placeholder}
                 disabled={props.disabled} id={props.id} rows={5}/>
             <div>
-                <p className="remaining-controls">
+                <p className="remaining-controls-group">
                     <span>{remaining}/{props.maxLength}</span>
                     <button className={buttonClass} type="submit" disabled={props.disabled}>
                         {props.children}
