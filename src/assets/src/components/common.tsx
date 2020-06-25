@@ -305,7 +305,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                 ref={inputRef} className="form-control" placeholder={props.placeholder}
                 disabled={props.disabled} id={props.id} rows={5}/>
             <div>
-                <p className="form-p">
+                <p className="remaining-controls">
                     <span>{remaining}/{props.maxLength}</span>
                     <button className={buttonClass} type="submit" disabled={props.disabled}>
                         {props.children}
