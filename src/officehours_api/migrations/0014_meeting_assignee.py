@@ -18,9 +18,4 @@ class Migration(migrations.Migration):
             name='assignee',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='assigned', to=settings.AUTH_USER_MODEL),
         ),
-        migrations.AddField(
-            model_name='meeting',
-            name='agenda',
-            field=models.CharField(blank=True, default='', max_length=100),
-        ),
     ]
