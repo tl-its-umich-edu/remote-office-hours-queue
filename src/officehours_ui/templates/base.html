@@ -39,6 +39,9 @@
 
 				<div class="collapse navbar-collapse navbars" aria-labelledby="aux-nav" role="navigation">
           <div class="navbar-nav ml-auto">
+            <a class="nav-link" href="{% url 'home' %}">
+              Home
+            </a>
             <a class="nav-link" href="https://documentation.its.umich.edu/office-hours" target="_blank">
               Resources & Support
               <i class="fa fa-external-link"></i>
@@ -51,6 +54,9 @@
                 <div class="dropdown-menu" aria-labelledby="userMenu">
                   <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
                     Preferences
+                  </a>
+                  <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
+                    Manage Queues
                   </a>
                   <form action="{% url 'oidc_logout' %}" method="post">
                     {% csrf_token %}
