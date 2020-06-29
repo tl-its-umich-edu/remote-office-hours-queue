@@ -10,10 +10,10 @@ import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
-import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
+import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import { Subject } from "rxjs";
 
@@ -192,11 +192,11 @@ function QueueEditor(props: QueueEditorProps) {
                 <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
-                        <EditToggleField text={props.queue.description} disabled={props.disabled} id="description"
+                        <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
                             onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
-                            initialState={false}>
+                            initialState={false} maxLength={1000}>
                                 Change
-                        </EditToggleField>
+                        </ShowRemainingField>
                     </div>
                 </div>
                 <div className="row">
@@ -332,7 +332,17 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueue(queueIdParsed) as Promise<QueueHost>, setQueue);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(async () => {
+        try {
+            return await api.getQueue(queueIdParsed) as QueueHost;
+        } catch(err) {
+            if (err.message === "Not Found") {
+                redirectToSearch(queue_id);
+            } else {
+                throw err;
+            }
+        }
+    }, setQueue);
     useEffect(() => {
         doRefresh();
     }, []);

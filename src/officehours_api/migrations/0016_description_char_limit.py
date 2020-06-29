@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('officehours_api', '0014_meeting_assignee'),
+        ('officehours_api', '0015_add_agenda'),
     ]
 
     operations = [
