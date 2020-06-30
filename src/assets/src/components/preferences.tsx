@@ -23,6 +23,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         value={props.user.phone_number}
         onChange={setPhoneField}
         disabled={props.disabled}
+        inputProps={{id: 'phone'}}
     />
     const validateAndSubmit = () => {
         if (phoneField.length == 11) {
@@ -36,7 +37,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 <p>
                     Please provide alternate means by which the host may contact you in the event of technical difficulties.
                 </p>
-                <label>Phone Number: {phoneInput}</label>
+                <label htmlFor="phone">Phone Number: </label>
+                {phoneInput}
                 <input type="submit" className="btn btn-primary" value="Save" disabled={props.disabled} />
             </form>
         </div>
