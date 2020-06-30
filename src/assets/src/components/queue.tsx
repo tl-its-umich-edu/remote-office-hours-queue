@@ -3,8 +3,6 @@ import { useState, useEffect, createRef } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert";
-import Accordion from "react-bootstrap/Accordion";
-import Card from "react-bootstrap/Card";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
 import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay } from "./common";
@@ -109,13 +107,12 @@ function BlueJeansMeetingInfo(props: BlueJeansMeetingInfoProps) {
 
     return (
         <>
-        <Accordion>
-            <Card>
-                <Accordion.Toggle as={Card.Header} eventKey="0">
-                    Joining the Meeting
-                </Accordion.Toggle>
-                <Accordion.Collapse eventKey="0">
-                    <Card.Body>
+        {joinLink}
+        <div className="row bottom-content">
+            <div className="col-sm">
+                <div className="card card-body">
+                    <h5 className="card-title">Joining the Meeting</h5>
+                    <p className="card-text">
                         You can join the meeting now to make sure you are set up and ready. Download the app and test your
                         audio before it is your turn. See 
                         <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" 
@@ -123,21 +120,18 @@ function BlueJeansMeetingInfo(props: BlueJeansMeetingInfoProps) {
                         className="card-link">
                             How to use BlueJeans at U-M
                         </a> for additional help getting started.
-                    </Card.Body>
-                </Accordion.Collapse>
-            </Card>
-            <Card>
-            <Accordion.Toggle as={Card.Header} eventKey="1">
-                    Having Trouble with Video?
-                </Accordion.Toggle>
-                <Accordion.Collapse eventKey="1">
-                    <Card.Body>
-                        <BlueJeansDialInMessage meetingNumber={meetingNumber} /> You are not a moderator, so you do not need a moderator passcode.
-                    </Card.Body>
-                </Accordion.Collapse>
-            </Card>
-        </Accordion>
-        {joinLink}
+                    </p>
+                </div>
+            </div>
+            <div className="col-sm">
+                <div className="card card-body">
+                    <h5 className="card-title">Having Trouble with Video?</h5>
+                    <p className="card-text">
+                    <BlueJeansDialInMessage meetingNumber={meetingNumber} /> You are not a moderator, so you do not need a moderator passcode.
+                    </p>
+                </div>
+            </div>
+        </div>
         </>
     );
 }
@@ -150,18 +144,6 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
             ? <TurnSoonAlert/>
             : undefined;
-    /* const howTo = props.queue.my_meeting!.backend_type === "bluejeans"
-        ? <HowToBlueJeans metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}/>
-        : undefined; */
-    /* const joinLink = props.queue.my_meeting!.backend_metadata
-        ? (
-        <>
-        <a href={props.queue.my_meeting!.backend_metadata.meeting_url} target="_blank" className="btn btn-warning">
-            Join Meeting
-        </a>
-        </>
-        )
-        : undefined; */
     const meetingInfo = props.queue.my_meeting!.backend_type === "bluejeans"
             ? <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}/>
             : undefined;
@@ -170,21 +152,21 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         {closedAlert}
         {alert}
         <h3>You are currently in line.</h3>
-        <div className="card card-middle" >
+        <div className="card card-middle card-width center-align" >
             <div className="card-body">
                 <p className="card-text card-text-spacing">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
                 <p className="card-text card-text-spacing">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
+                <b>Meeting Agenda (Optional)</b>
+                <p>Let the host(s) know the topic you wish to discuss.</p>
+                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
+                    onSubmit={props.onChangeAgenda}
+                    buttonType="success" placeholder=""
+                    initialState={true}>
+                        Update
+                </EditToggleField>
             </div>
         </div>
         <p>The host will join the meeting when it is your turn. We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</p>
-        <b>Meeting Agenda (Optional)</b>
-        <p>Let the host(s) know the topic you wish to discuss.</p>
-        <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
-        onSubmit={props.onChangeAgenda}
-        buttonType="success" placeholder=""
-        initialState={true}>
-            Update
-        </EditToggleField>
         {meetingInfo}
         <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
             Leave the line

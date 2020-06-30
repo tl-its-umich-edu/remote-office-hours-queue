@@ -604,3 +604,8 @@ div[role=main] {
 .bottom-content {
 	margin-top: 20px;
 }
+
+.center-align {
+	display:flex;
+	justify-content: center;
+}
