@@ -18,17 +18,35 @@ interface PreferencesEditorProps {
 
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
+    const [countryDialCode, setCountryDialCode] = useState("");
     const phoneInput = <PhoneInput
         country={'us'}
         value={props.user.phone_number}
-        onChange={setPhoneField}
+        onChange={ (value, data) => {
+            setPhoneField(value);
+            if ('dialCode' in data) setCountryDialCode(data.dialCode);
+        }}
         disabled={props.disabled}
         inputProps={{id: 'phone'}}
     />
     const validateAndSubmit = () => {
-        if (phoneField.length == 11) {
-            props.onUpdateInfo(phoneField)
+        // Determine if there was a change that warrants a submit
+        const num = props.user.phone_number;
+        if ((num.length === 0 && phoneField.length > countryDialCode.length) || (num.length > 0 && phoneField !== num)) {
+            // If USA number, ensure it's 11 digits to submit 
+            if (countryDialCode === '1') {
+                if (phoneField.length == 11) {
+                    props.onUpdateInfo(phoneField)
+                }
+            }
+            else {
+                props.onUpdateInfo(phoneField)
+            }
         }
+        // Can add a check to updat phone number to be empty if they delete everything in the phone field
+        /* if (phoneField.length === 0) {
+            props.onUpdateInfo(phoneField)
+        } */
     }
     return (
         <div>
