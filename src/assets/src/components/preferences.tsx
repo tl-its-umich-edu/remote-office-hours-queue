@@ -43,10 +43,10 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 props.onUpdateInfo(phoneField)
             }
         }
-        // Can add a check to updat phone number to be empty if they delete everything in the phone field
-        /* if (phoneField.length === 0) {
+        // update phone number to be empty if they delete everything in the phone field
+        if (phoneField.length === 0) {
             props.onUpdateInfo(phoneField)
-        } */
+        }
     }
     return (
         <div>
