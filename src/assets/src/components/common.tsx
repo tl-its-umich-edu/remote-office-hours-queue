@@ -75,18 +75,27 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
     );
 }
 
+export const checkError = (pair: (string | Error | undefined)[]) => {
+    return typeof pair[1] !== 'undefined';
+}
+
+export const checkForbiddenError = (pair: (string | Error | undefined)[]) => {
+    return (pair[1] && (pair[1] instanceof Error) && pair[1].name === "ForbiddenError");
+}
 
 interface ErrorDisplayProps {
-    error?: Error;
+    errors?: (string | Error | undefined)[][];
 }
 
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
-    if (!props.error) return null;
+    if (!props.errors) return null;
+const messages = props.errors.map(a => a && a[1] && (a[1] instanceof Error) && a[1].message && <p><b>{a[0]}:</b> {a[1].message} </p>);
+    if (messages.length === 0) return null;
     return (
-        <p className="alert alert-danger" role="alert">
-            {props.error.message}
-        </p>
+        <div className="alert alert-danger" role="alert">
+            {messages}
+        </div>
     );
 }
 
@@ -122,7 +131,7 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
             props.onError(e);
         }
     }
-    const errorDisplay = props.error && <ErrorDisplay error={props.error} />
+    //const errorDisplay = props.error && <ErrorDisplay error={props.error} />
     const buttonClass = "btn btn-" + props.buttonType;
     return (
         <form onSubmit={submit} className="input-group">
@@ -134,7 +143,7 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
                     {props.children}
                 </button>
             </div>
-            {errorDisplay}
+            {/*errorDisplay*/}
         </form>
     );
 }

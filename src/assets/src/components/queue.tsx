@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage } from "./common";
+import { ErrorDisplay, checkError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -275,11 +275,18 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
-    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError, changeAgendaError];
-    const error = errorTypes.find(e => e);
-    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
+    const errorTypes = [
+        ['Refresh', refreshError], 
+        ['Join Queue', joinQueueError], 
+        ['Leave Queue', leaveQueueError], 
+        ['Refresh My User', refreshMyUserError], 
+        ['Leave and Join Queue', leaveAndJoinQueueError], 
+        ['Change Agenda', changeAgendaError]
+    ];
+    const error = errorTypes.filter(checkError);
+    const loginDialogVisible = errorTypes.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={error}/>
+    const errorDisplay = <ErrorDisplay errors={error}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}

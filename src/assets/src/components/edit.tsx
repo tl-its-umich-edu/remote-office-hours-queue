@@ -10,7 +10,7 @@ import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, checkError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
@@ -431,11 +431,23 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const errorTypes = [refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError, setStatusError, changeAssigneeError];
-    const error = errorTypes.find(e => e);
-    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
+    const errorTypes = [
+        ['Refresh', refreshError], 
+        ['Refresh Users', refreshUsersError], 
+        ['Remove Host', removeHostError], 
+        ['Add Host', addHostError], 
+        ['Remove Meeting', removeMeetingError], 
+        ['Add Meeting', addMeetingError], 
+        ['Queue Name', changeNameError], 
+        ['Queue Description', changeDescriptionError], 
+        ['Delete Queue', removeQueueError], 
+        ['Queue Status', setStatusError], 
+        ['Assignee', changeAssigneeError]
+    ];
+    const error = errorTypes.filter(checkError);
+    const loginDialogVisible = errorTypes.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={error}/>
+    const errorDisplay = <ErrorDisplay errors={error}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 

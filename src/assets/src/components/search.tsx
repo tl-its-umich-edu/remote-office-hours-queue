@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { QueueAttendee } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
-import { LoadingDisplay, ErrorDisplay, Breadcrumbs } from "./common";
+import { LoadingDisplay, ErrorDisplay, checkError, Breadcrumbs } from "./common";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
@@ -46,7 +46,9 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
         if (term) doSearch(term);
     }, []);
     const loadingDisplay = <LoadingDisplay loading={searchLoading}/>
-    const errorDisplay = <ErrorDisplay error={searchError}/>
+    const errorTypes = [['Search', searchError]];
+    const error = errorTypes.filter(checkError);
+    const errorDisplay = <ErrorDisplay errors={error}/>
     const resultsDisplay = searchResults === undefined
         ? undefined
         : searchResults.length === 0
