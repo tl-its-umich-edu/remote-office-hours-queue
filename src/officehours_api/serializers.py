@@ -31,7 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
         return serializer.data
     
     def update(self, instance, validated_data):
-        profile = validated_data.pop('profile')
+        profile = validated_data['profile']
         instance = super().update(instance, validated_data)
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
         instance.profile.save()            
