@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import * as api from "../services/api";
 import { QueueHost } from "../models";
-import { ErrorDisplay, checkError, checkForbiddenError, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
@@ -62,14 +62,13 @@ export function ManagePage(props: PageProps) {
     
     const isChanging = addQueueLoading;
     const isLoading = refreshLoading || isChanging;
-    const errorTypes = [
+    const errorSources = [
         {source: 'Refresh', error: refreshError}, 
         {source: 'Add Queue', error: addQueueError}
-    ];
-    const error = errorTypes.filter(checkError);
-    const loginDialogVisible = errorTypes.some(checkForbiddenError);
+    ].filter(e => e.error) as FormError[];
+    const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay errors={error}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueList = queues !== undefined
         && <ManageQueueList queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
     return (

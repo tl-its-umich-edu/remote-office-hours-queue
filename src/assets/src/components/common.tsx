@@ -77,24 +77,20 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
 
 export interface FormError {
     source: string;
-    error: Error | undefined;
-}
-
-export const checkError = (pair: FormError) => {
-    return typeof pair.error !== 'undefined';
+    error: Error;
 }
 
 export const checkForbiddenError = (pair: FormError) => {
-    return (pair.error && pair.error.name === "ForbiddenError");
+    return (pair.error.name === "ForbiddenError");
 }
 
 interface ErrorDisplayProps {
-    errors: FormError[];
+    formErrors: FormError[];
 }
 
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
-    const messages = props.errors.map(a => a.error && <p><b>{a.source}:</b> {a.error.message} </p>);
+    const messages = props.formErrors.map(a => <p><b>{a.source}:</b> {a.error.message} </p>);
     if (messages.length === 0) return null;
     return (
         <div className="alert alert-danger" role="alert">
@@ -305,7 +301,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
             props.onError(e);
         }
     }
-    const errorDisplay = props.error && <ErrorDisplay error={props.error} />
+    //const errorDisplay = props.error && <ErrorDisplay error={props.error} />
     const buttonClass = "btn btn-" + props.buttonType + " remaining-controls";
     const [remaining, setRemaining] = useState(props.maxLength - props.value.length);
     const handleChange = (newValue:string) => {
@@ -326,7 +322,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                 </p>
                 
             </div>
-            {errorDisplay}
+            {/*errorDisplay*/}
         </form>
     );
 }
