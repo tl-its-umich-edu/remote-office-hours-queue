@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('officehours_api', '0014_meeting_assignee'),
+        ('officehours_api', '0016_description_char_limit'),
     ]
 
     operations = [
