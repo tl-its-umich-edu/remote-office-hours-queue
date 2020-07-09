@@ -62,7 +62,10 @@ export function ManagePage(props: PageProps) {
     
     const isChanging = addQueueLoading;
     const isLoading = refreshLoading || isChanging;
-    const errorTypes = [['Refresh', refreshError], ['Add Queue', addQueueError]];
+    const errorTypes = [
+        {source: 'Refresh', error: refreshError}, 
+        {source: 'Add Queue', error: addQueueError}
+    ];
     const error = errorTypes.filter(checkError);
     const loginDialogVisible = errorTypes.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>

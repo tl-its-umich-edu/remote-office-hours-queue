@@ -42,7 +42,7 @@ export function HomePage(props: PageProps) {
     useAutoRefresh(doRefreshUser, 10000);
 
     const isLoading = refreshUserLoading;
-    const errorTypes = [['Refresh User', refreshUserError]];
+    const errorTypes = [{source: 'Refresh User', error: refreshUserError}];
     const error = errorTypes.filter(checkError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay errors={error}/>

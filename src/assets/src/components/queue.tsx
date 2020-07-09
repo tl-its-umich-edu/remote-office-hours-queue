@@ -276,12 +276,12 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
     const errorTypes = [
-        ['Refresh', refreshError], 
-        ['Join Queue', joinQueueError], 
-        ['Leave Queue', leaveQueueError], 
-        ['Refresh My User', refreshMyUserError], 
-        ['Leave and Join Queue', leaveAndJoinQueueError], 
-        ['Change Agenda', changeAgendaError]
+        {source: 'Refresh', error: refreshError}, 
+        {source: 'Join Queue', error: joinQueueError}, 
+        {source: 'Leave Queue', error: leaveQueueError}, 
+        {source: 'Refresh My User', error: refreshMyUserError}, 
+        {source: 'Leave and Join Queue', error: leaveAndJoinQueueError}, 
+        {source: 'Change Agenda', error: changeAgendaError}
     ];
     const error = errorTypes.filter(checkError);
     const loginDialogVisible = errorTypes.some(checkForbiddenError);

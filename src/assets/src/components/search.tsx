@@ -46,7 +46,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
         if (term) doSearch(term);
     }, []);
     const loadingDisplay = <LoadingDisplay loading={searchLoading}/>
-    const errorTypes = [['Search', searchError]];
+    const errorTypes = [{source: 'Search', error: searchError}];
     const error = errorTypes.filter(checkError);
     const errorDisplay = <ErrorDisplay errors={error}/>
     const resultsDisplay = searchResults === undefined

@@ -75,22 +75,26 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
     );
 }
 
-export const checkError = (pair: (string | Error | undefined)[]) => {
-    return typeof pair[1] !== 'undefined';
+export interface FormError {
+    source: string;
+    error: Error | undefined;
 }
 
-export const checkForbiddenError = (pair: (string | Error | undefined)[]) => {
-    return (pair[1] && (pair[1] instanceof Error) && pair[1].name === "ForbiddenError");
+export const checkError = (pair: FormError) => {
+    return typeof pair.error !== 'undefined';
+}
+
+export const checkForbiddenError = (pair: FormError) => {
+    return (pair.error && pair.error.name === "ForbiddenError");
 }
 
 interface ErrorDisplayProps {
-    errors?: (string | Error | undefined)[][];
+    errors: FormError[];
 }
 
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
-    if (!props.errors) return null;
-const messages = props.errors.map(a => a && a[1] && (a[1] instanceof Error) && a[1].message && <p><b>{a[0]}:</b> {a[1].message} </p>);
+    const messages = props.errors.map(a => a.error && <p><b>{a.source}:</b> {a.error.message} </p>);
     if (messages.length === 0) return null;
     return (
         <div className="alert alert-danger" role="alert">

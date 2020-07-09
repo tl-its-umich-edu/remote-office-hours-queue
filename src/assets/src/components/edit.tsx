@@ -10,7 +10,7 @@ import Alert from "react-bootstrap/Alert";
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, checkError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
@@ -432,17 +432,17 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
     const errorTypes = [
-        ['Refresh', refreshError], 
-        ['Refresh Users', refreshUsersError], 
-        ['Remove Host', removeHostError], 
-        ['Add Host', addHostError], 
-        ['Remove Meeting', removeMeetingError], 
-        ['Add Meeting', addMeetingError], 
-        ['Queue Name', changeNameError], 
-        ['Queue Description', changeDescriptionError], 
-        ['Delete Queue', removeQueueError], 
-        ['Queue Status', setStatusError], 
-        ['Assignee', changeAssigneeError]
+        {source: 'Refresh', error: refreshError},
+        {source: 'Refresh Users', error: refreshUsersError}, 
+        {source: 'Remove Host', error: removeHostError}, 
+        {source: 'Add Host', error: addHostError}, 
+        {source: 'Remove Meeting', error: removeMeetingError}, 
+        {source: 'Add Meeting', error: addMeetingError}, 
+        {source: 'Queue Name', error: changeNameError}, 
+        {source: 'Queue Description', error: changeDescriptionError}, 
+        {source: 'Delete Queue', error: removeQueueError}, 
+        {source: 'Queue Status', error: setStatusError}, 
+        {source: 'Assignee', error: changeAssigneeError}
     ];
     const error = errorTypes.filter(checkError);
     const loginDialogVisible = errorTypes.some(checkForbiddenError);
