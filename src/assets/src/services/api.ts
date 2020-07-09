@@ -176,7 +176,6 @@ export const updateMyUser = async (user_id: number, phone_number:string) => {
             phone_number: phone_number,
         }),
     });
-    console.log(resp)
     await handleErrors(resp);
     return await resp.json() as MyUser;
 }

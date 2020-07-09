@@ -105,11 +105,6 @@ class Attendee(SafeDeleteModel):
         return f'user={self.user.username}'
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-@receiver(post_save, sender=User)
 def post_save_user_signal_handler(sender, instance, created, **kwargs):
     try:
         instance.profile
