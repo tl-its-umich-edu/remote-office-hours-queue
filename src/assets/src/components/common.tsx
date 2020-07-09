@@ -246,7 +246,7 @@ interface EditToggleFieldProps {
     buttonType: BootstrapButtonTypes;
     id: string;
     onSubmit: (value: string) => void;
-    initialState: boolean
+    initialState: boolean;
 }
 
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
@@ -286,6 +286,93 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     return contents;
 }
 
+interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProps {
+    maxLength: number
+}
+
+export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
+    const inputRef = createRef<HTMLTextAreaElement>();
+    useEffect(() => {
+        if (!props.autofocus) return;
+        inputRef.current!.focus();
+    }, []);
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            props.onSubmit(props.value);
+            props.onChangeValue("");
+        } catch (e) {
+            props.onError(e);
+        }
+    }
+    const errorDisplay = props.error && <ErrorDisplay error={props.error} />
+    const buttonClass = "btn btn-" + props.buttonType + " remaining-controls";
+    const [remaining, setRemaining] = useState(props.maxLength - props.value.length);
+    const handleChange = (newValue:string) => {
+        props.onChangeValue(newValue);
+        setRemaining(props.maxLength - newValue.length)
+    }
+    return (
+        <form onSubmit={submit}>
+            <textarea onChange={(e) => handleChange(e.target.value)} value={props.value}
+                ref={inputRef} className="form-control" placeholder={props.placeholder}
+                disabled={props.disabled} id={props.id} rows={5}/>
+            <div>
+                <p className="remaining-controls-group">
+                    <span>{remaining}/{props.maxLength}</span>
+                    <button className={buttonClass} type="submit" disabled={props.disabled}>
+                        {props.children}
+                    </button>
+                </p>
+                
+            </div>
+            {errorDisplay}
+        </form>
+    );
+}
+
+
+interface ShowRemainingFieldProps extends EditToggleFieldProps {
+    maxLength: number;
+}
+
+export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => {
+    const [editing, setEditing] = useState(props.initialState);
+    const [editorValue, setEditorValue] = useState(props.text);
+    const [editorError, setEditorError] = useState(undefined as Error | undefined);
+    const submit = (value: string) => {
+        props.onSubmit(value);
+        setEditing(false);
+    }
+    const enableEditMode = () => {
+        setEditing(true);
+        setEditorValue(props.text);
+    }
+
+    const contents = (editing && !props.disabled)
+        ? (
+            <SingleInputFormShowRemaining
+                id={props.id}
+                autofocus={true}
+                onSubmit={submit}
+                value={editorValue} onChangeValue={setEditorValue}
+                error={editorError} onError={setEditorError}
+                placeholder={props.placeholder} disabled={props.disabled}
+                buttonType="success" maxLength={props.maxLength}>
+                {props.children}
+            </SingleInputFormShowRemaining>
+        )
+        : (
+            <div className="input-group">
+                <span>{props.text}</span>
+                <button onClick={enableEditMode} type="button" className="btn btn-sm">
+                    <FontAwesomeIcon icon={faPencilAlt} />
+                    Edit
+                </button>
+            </div>
+        );
+    return contents;
+}
 
 interface JoinedQueueAlertProps {
     joinedQueue: QueueAttendee;
@@ -332,6 +419,20 @@ export const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps)
         {props.phone}
     </a>
 
+interface BlueJeansDialInMessageProps {
+    meetingNumber: string;
+}
+
+export const BlueJeansDialInMessage = (props: BlueJeansDialInMessageProps) => {
+    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={props.meetingNumber} />
+    return (
+        <span>
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA 
+            (or <a target="_blank" href="https://www.bluejeans.com/premium-numbers"> find your international number to call in from outside the USA</a>) 
+            from any phone and enter {props.meetingNumber}#.
+        </span>
+    )
+}
 
 interface BreadcrumbsProps {
     intermediatePages?: {title: string, href: string}[];
@@ -369,20 +470,4 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
         </Breadcrumb>
 
     );
-}
-
-
-interface BlueJeansDialInMessageProps {
-    meetingNumber: string;
-}
-
-export const BlueJeansDialInMessage = (props: BlueJeansDialInMessageProps) => {
-    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={props.meetingNumber} />
-    return (
-        <span>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA 
-            (or <a target="_blank" href="https://www.bluejeans.com/numbers"> find your international number to call in from outside the USA</a>) 
-            from any phone and enter {props.meetingNumber}#.
-        </span>
-    )
 }

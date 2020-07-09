@@ -1,20 +1,25 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: DeploymentConfig
 metadata:
   name: web
   labels:
     app: web
 spec:
-  selector:
-    matchLabels:
-      app: web
   replicas: 1
+  selector:
+    app: web
+    org: umich
+    project: officehours
+    variant: dev
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
         app: web
+        org: umich
+        project: officehours
+        variant: dev
     spec:
       containers:
       - name: web
@@ -26,3 +31,13 @@ spec:
         envFrom:
         - secretRef:
             name: secrets
+  triggers:
+  - type: "ImageChange"
+    imageChangeParams:
+      automatic: true
+      from:
+        kind: "ImageStreamTag"
+        name: "officehours:latest"
+        namespace: "officehours-dev"
+      containerNames:
+      - "web"
