@@ -6,6 +6,7 @@ resources:
 - web-deployment.yaml
 - web-service.yaml
 - web-ingress.yaml
+- build.yaml
 commonLabels:
   project: officehours
 namePrefix: officehours-
@@ -35,3 +36,10 @@ secretGenerator:
   files:
   - secret/tls.key
   - secret/tls.crt
+- name: github
+  type: Opaque
+  files:
+  - secret/WebHookSecretKey
+crds:  # Use CRDs to support OpenShift resource kinds
+- openshift-buildconfig.json
+- openshift-deploymentconfig.json

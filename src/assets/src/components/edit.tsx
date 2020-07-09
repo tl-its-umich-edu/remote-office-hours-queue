@@ -12,10 +12,10 @@ import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, DateTimeDisplay } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
-import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
+import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import { Subject } from "rxjs";
 
@@ -61,7 +61,7 @@ function MeetingEditor(props: MeetingEditorProps) {
             <UserDisplay user={user}/>
         </td>
         <td className="form-group">
-            <select className="form-control"
+            <select className="form-control assign"
                 value={props.meeting.assignee?.id ?? ""} 
                 onChange={onChangeAssignee}>
                 {assigneeOptions}
@@ -121,7 +121,7 @@ function QueueEditor(props: QueueEditorProps) {
         .sort((a, b) => a.id - b.id)
         .map((m, i) =>
             <tr>
-                <td>{i+1}</td>
+                <th scope="row" className="d-none d-sm-table-cell">{i+1}</th>
                 <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled}
                     onRemove={props.onRemoveMeeting} onShowMeetingInfo={props.onShowMeetingInfo} onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m) }/>
             </tr>
@@ -131,10 +131,10 @@ function QueueEditor(props: QueueEditorProps) {
             <Table bordered>
                 <thead>
                     <tr>
-                        <th>Queue #</th>
-                        <th>Attendee</th>
-                        <th>Host</th>
-                        <th>Actions</th>
+                        <th scope="col" className="d-none d-sm-table-cell">Queue #</th>
+                        <th scope="col">Attendee</th>
+                        <th scope="col">Host</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -146,8 +146,8 @@ function QueueEditor(props: QueueEditorProps) {
             <Alert variant="dark">No meetings in queue.</Alert>
         );
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
-    const toggleStatus = (e: ChangeEvent<HTMLInputElement>) => {
-        props.onSetStatus(e.target.checked);
+    const toggleStatus = (e: ChangeEvent<HTMLSelectElement>) => {
+        props.onSetStatus(e.target.value === "open");
     }
     return (
         <div>
@@ -159,7 +159,7 @@ function QueueEditor(props: QueueEditorProps) {
             <h1 className="form-inline">
                 <span className="mr-2">Manage: </span>
                 <EditToggleField text={props.queue.name} disabled={props.disabled} id="name"
-                    onSubmit={props.onChangeName} buttonType="success" placeholder="New name...">
+                    onSubmit={props.onChangeName} buttonType="success" placeholder="New name..." initialState={false}>
                         Change
                 </EditToggleField>
             </h1>
@@ -183,21 +183,22 @@ function QueueEditor(props: QueueEditorProps) {
                     </div>
                 </div>
                 <div className="form-group row">
-                    <label htmlFor="status" className="col-md-2 col-form-label">Status:</label>
+                    <label htmlFor="status" className="col-md-2 col-form-label">Queue Status:</label>
                     <div className="col-md-6">
-                        <div className="custom-control custom-switch">
-                            <input type="checkbox" id="status" className="custom-control-input" checked={props.queue.status === "open"} onChange={toggleStatus}/>
-                            <label htmlFor="status" className="custom-control-label">{props.queue.status === "open" ? "Open" : "Closed"}</label>
-                        </div>
+                        <select className="form-control" id="status" onChange={toggleStatus} value={props.queue.status}>
+                            <option value="open">Open</option>
+                            <option value="closed">Closed</option>
+                        </select>
                     </div>
                 </div>
                 <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
-                        <EditToggleField text={props.queue.description} disabled={props.disabled} id="description"
-                            onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description...">
+                        <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
+                            onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
+                            initialState={false} maxLength={1000}>
                                 Change
-                        </EditToggleField>
+                        </ShowRemainingField>
                     </div>
                 </div>
                 <div className="row">
@@ -220,7 +221,9 @@ function QueueEditor(props: QueueEditorProps) {
             <h3>Meetings Up Next</h3>
             <div className="row">
                 <div className="col-md-12">
-                    {meetingsTable}
+                    <div className="table-responsive">
+                        {meetingsTable}
+                    </div>
                 </div>
             </div>
             <div className="row">
@@ -245,16 +248,13 @@ interface BlueJeansMeetingInfo {
 
 const BlueJeansMeetingInfo = (props: BlueJeansMeetingInfo) => {
     const meetingNumber = props.metadata.numeric_meeting_id;
-    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={meetingNumber} />
-    const phoneLinkCanada = <BlueJeansOneTouchDialLink phone="1.416.900.2956" meetingNumber={meetingNumber} />
     return (
         <>
         <p>
             This meeting will be via <strong>BlueJeans</strong>.
         </p>
         <p>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA (or {phoneLinkCanada} from Canada) from any phone and enter {meetingNumber}#, 
-            or <a href="https://www.bluejeans.com/numbers">dial in from another country</a>.
+            <BlueJeansDialInMessage meetingNumber={meetingNumber} />
         </p>
         </>
     );
@@ -281,6 +281,9 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
             </p>
             <p>
                 Time Joined: <DateTimeDisplay dateTime={props.meeting.created_at}/>
+            </p>
+            <p>
+                Agenda: {props.meeting.agenda}
             </p>
             </>
         );
@@ -338,7 +341,17 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueue(queueIdParsed) as Promise<QueueHost>, setQueue);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(async () => {
+        try {
+            return await api.getQueue(queueIdParsed) as QueueHost;
+        } catch(err) {
+            if (err.message === "Not Found") {
+                redirectToSearch(queue_id);
+            } else {
+                throw err;
+            }
+        }
+    }, setQueue);
     useEffect(() => {
         doRefresh();
     }, []);

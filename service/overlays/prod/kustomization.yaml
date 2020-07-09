@@ -18,9 +18,15 @@ patchesJson6902:
 - target:
     group: apps
     version: v1
-    kind: Deployment
+    kind: DeploymentConfig
     name: web
   path: deployment.yaml
+- target:
+    group: apps
+    version: v1
+    kind: BuildConfig
+    name: web
+  path: build.yaml
 secretGenerator:
 - name: secrets
   behavior: merge
@@ -35,6 +41,7 @@ secretGenerator:
   - secret/OIDC_OP_TOKEN_ENDPOINT
   - secret/OIDC_OP_USER_ENDPOINT
   - secret/OIDC_OP_JWKS_ENDPOINT
+  - secret/GA_TRACKING_ID
 - name: web-tls
   behavior: replace
   type: "kubernetes.io/tls"

@@ -28,16 +28,22 @@ class ForbiddenError extends Error {
 
 const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
+    let text: string;
+    let json: any;
     switch (resp.status) {
         case 400:
-            const json = await resp.json();
+            json = await resp.json();
             const messages = ([] as string[][]).concat(...Object.values<string[]>(json));
             const formatted = messages.join("\n");
             throw new Error(formatted);
         case 403:
-            const text = await resp.text();
+            text = await resp.text();
             console.error(text);
             throw new ForbiddenError();
+        case 502:
+            json = await resp.json();
+            console.error(json);
+            throw new Error(json.detail);
         default:
             console.error(await resp.text());
             throw new Error(resp.statusText);
@@ -181,9 +187,21 @@ export const updateMyUser = async (user_id: number, phone_number:string) => {
 }
 
 export const searchQueue = async (term: string) => {
-    const resp = await fetch(`/api/queues_search/?search=${term}&status=open`, { method: "GET" });
+    const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
     await handleErrors(resp);
     return await resp.json() as QueueAttendee[];
+}
+
+export const changeAgenda = async (meeting_id: number, agenda: string) => {
+    const resp = await fetch(`/api/meetings/${meeting_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            agenda: agenda,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
 }
 
 export const changeMeetingAssignee = async (meeting_id: number, user_id: number | undefined) => {
