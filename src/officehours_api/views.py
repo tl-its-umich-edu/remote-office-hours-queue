@@ -11,13 +11,13 @@ from rest_framework_tracking.mixins import LoggingMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
-from officehours_api.models import Queue, Meeting, Attendee
+from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.serializers import (
     UserListSerializer, UserSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer,
 )
 from officehours_api.permissions import (
-    IsCurrentUser, IsHostOrReadOnly, IsHostOrAttendee, is_host
+    IsCurrentUser, IsHostOrReadOnly, IsHostOrAttendee, is_host, IsCurrentProfile
 )
 
 
@@ -142,3 +142,8 @@ class AttendeeList(generics.ListAPIView):
 class AttendeeDetail(generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
+
+class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = (IsAuthenticated, IsCurrentProfile,)

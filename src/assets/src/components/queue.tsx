@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
-import { ErrorDisplay, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay } from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay } from "./common";
 import * as api from "../services/api";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
@@ -214,17 +214,23 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueAttendee | undefined);
-    const refresh = () => api.getQueue(queueIdParsed);
+    const refresh = async () => {
+        try {
+            return await api.getQueue(queueIdParsed)
+        } catch(err) {
+            if (err.message === "Not Found") {
+                redirectToSearch(queue_id);
+            } else {
+                throw err;
+            }
+        }
+    };
     const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
     useEffect(() => {
         if (isNaN(queueIdParsed)) {
             return redirectToSearch(queue_id);
         }
-        doRefresh().catch((err: Error) => {
-            if (err.message === "Not Found") {
-                redirectToSearch(queue_id);
-            }
-        });
+        doRefresh();
     }, []);
     const [interactions] = useAutoRefresh(doRefresh);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
@@ -290,11 +296,17 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
-    const errorTypes = [refreshError, joinQueueError, leaveQueueError, refreshMyUserError, leaveAndJoinQueueError, changeAgendaError];
-    const error = errorTypes.find(e => e);
-    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
+    const errorSources = [
+        {source: 'Refresh', error: refreshError}, 
+        {source: 'Join Queue', error: joinQueueError}, 
+        {source: 'Leave Queue', error: leaveQueueError}, 
+        {source: 'Refresh My User', error: refreshMyUserError}, 
+        {source: 'Leave and Join Queue', error: leaveAndJoinQueueError}, 
+        {source: 'Change Agenda', error: changeAgendaError}
+    ].filter(e => e.error) as FormError[];
+    const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={error}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}

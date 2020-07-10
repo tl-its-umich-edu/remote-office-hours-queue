@@ -7,13 +7,15 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Table from "react-bootstrap/Table";
 import Alert from "react-bootstrap/Alert";
+import PhoneInput from "react-phone-input-2";
+import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
-import { redirectToLogin, sanitizeUniqname, validateUniqname } from "../utils";
+import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import { Subject } from "rxjs";
 
@@ -192,11 +194,11 @@ function QueueEditor(props: QueueEditorProps) {
                 <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
-                        <EditToggleField text={props.queue.description} disabled={props.disabled} id="description"
+                        <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
                             onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
-                            initialState={false}>
+                            initialState={false} maxLength={1000}>
                                 Change
-                        </EditToggleField>
+                        </ShowRemainingField>
                     </div>
                 </div>
                 <div className="row">
@@ -264,11 +266,18 @@ interface MeetingInfoProps {
 }
 
 const MeetingInfoDialog = (props: MeetingInfoProps) => {
+    const attendeeDetails = props.meeting?.attendees.map(a => 
+        <p>
+            <UserDisplay user={a}/>
+            <strong>  Phone:</strong><PhoneInput value={a.phone_number} disabled={true}/>
+        </p>
+    );
     const generalInfo = props.meeting
         && (
             <>
+            Attendees:
             <p>
-                Attendees: {props.meeting.attendees.map(a => <UserDisplay user={a}/>)}
+                {attendeeDetails}
             </p>
             <p>
                 Time Joined: <DateTimeDisplay dateTime={props.meeting.created_at}/>
@@ -332,7 +341,17 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueue(queueIdParsed) as Promise<QueueHost>, setQueue);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(async () => {
+        try {
+            return await api.getQueue(queueIdParsed) as QueueHost;
+        } catch(err) {
+            if (err.message === "Not Found") {
+                redirectToSearch(queue_id);
+            } else {
+                throw err;
+            }
+        }
+    }, setQueue);
     useEffect(() => {
         doRefresh();
     }, []);
@@ -431,11 +450,22 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
     const isLoading = refreshLoading || refreshUsersLoading || isChanging;
-    const errorTypes = [refreshError, refreshUsersError, removeHostError, addHostError, removeMeetingError, addMeetingError, changeNameError, changeDescriptionError, removeQueueError, setStatusError, changeAssigneeError];
-    const error = errorTypes.find(e => e);
-    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
+    const errorSources = [
+        {source: 'Refresh', error: refreshError},
+        {source: 'Refresh Users', error: refreshUsersError}, 
+        {source: 'Remove Host', error: removeHostError}, 
+        {source: 'Add Host', error: addHostError}, 
+        {source: 'Remove Meeting', error: removeMeetingError}, 
+        {source: 'Add Meeting', error: addMeetingError}, 
+        {source: 'Queue Name', error: changeNameError}, 
+        {source: 'Queue Description', error: changeDescriptionError}, 
+        {source: 'Delete Queue', error: removeQueueError}, 
+        {source: 'Queue Status', error: setStatusError}, 
+        {source: 'Assignee', error: changeAssigneeError}
+    ].filter(e => e.error) as FormError[];
+    const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={error}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 

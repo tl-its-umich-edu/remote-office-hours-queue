@@ -478,6 +478,16 @@ h3.alert-heading {
 	border: 1px solid #cecbc9;
 }
 
+.remaining-controls-group {
+	margin: 0;
+	padding: 0;
+	text-align: right;
+}
+
+.remaining-controls {
+	margin-left: 20px;
+}
+
 .input-group {
 	margin: 0.2rem;
 }

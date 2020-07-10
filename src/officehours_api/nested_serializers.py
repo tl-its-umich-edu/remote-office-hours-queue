@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from officehours_api.models import Meeting, Attendee
+from officehours_api.models import Meeting, Attendee, Profile
 
 
 class NestedUserSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(source='profile.phone_number')
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name']
-
+        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
     attendees = NestedUserSerializer(many=True, read_only=True)
