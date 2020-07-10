@@ -20,10 +20,10 @@ module.exports = {
                     configFile: path.join(__dirname, 'tsconfig.json')
                 }
             },
-            // {
-            //     test: /\.css$/,
-            //     use: ['style-loader', 'css-loader']
-            // },
+            {
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
+            },
             // {
             //     test: /\.(bmp|gif|jpeg|png|woff|woff2|eot|ttf|svg)$/,
             //     loader: 'url-loader',

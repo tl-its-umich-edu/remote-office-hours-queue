@@ -37,6 +37,7 @@ class Profile(models.Model):
         User,
         on_delete=models.CASCADE,
     )
+    phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
 
     def __str__(self):
         return f'user={self.user.username}'
@@ -118,7 +119,6 @@ class Attendee(SafeDeleteModel):
 
     def __str__(self):
         return f'user={self.user.username}'
-
 
 @receiver(post_save, sender=User)
 def post_save_user_signal_handler(sender, instance, created, **kwargs):

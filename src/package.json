@@ -12,6 +12,7 @@
     "react-dev-utils": "~8.0.0",
     "react-dom": "^16.10.2",
     "react-ga": "~2.7.0",
+    "react-phone-input-2": "^2.13.5",
     "react-router-dom": "^5.0.0",
     "rxjs": "^6.5.4"
   },
