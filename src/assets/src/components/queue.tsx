@@ -80,25 +80,11 @@ const TurnSoonAlert = () =>
         <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
     </div>
 
-interface HowToBlueJeansProps {
-    metadata: BluejeansMetadata;
-}
-
-function HowToBlueJeans(props: HowToBlueJeansProps) {
-    const meetingNumber = props.metadata.numeric_meeting_id;
-    return (
-        <div className="card-body">
-            <h5 className="card-title">Having problems with video?</h5>
-            <p className="card-text"><BlueJeansDialInMessage meetingNumber={meetingNumber} /> You are not a moderator, so you do not need a moderator passcode.</p>
-        </div>
-    );
-}
-
 interface BlueJeansMeetingInfoProps {
     metadata: BluejeansMetadata;
 }
 
-function BlueJeansMeetingInfo(props: BlueJeansMeetingInfoProps) {
+const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
     const meetingNumber = props.metadata.numeric_meeting_id;
     const joinLink = 
         <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
@@ -108,6 +94,7 @@ function BlueJeansMeetingInfo(props: BlueJeansMeetingInfoProps) {
     return (
         <>
         {joinLink}
+        {props.children}     
         <div className="row bottom-content">
             <div className="col-sm">
                 <div className="card card-body">
@@ -145,7 +132,12 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             ? <TurnSoonAlert/>
             : undefined;
     const meetingInfo = props.queue.my_meeting!.backend_type === "bluejeans"
-            ? <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}/>
+            ? <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}>
+                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
+                    Leave the line
+                    {props.disabled && DisabledMessage}
+                </button>
+            </BlueJeansMeetingInfo>
             : undefined;
     return (
         <>
@@ -156,22 +148,20 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <div className="card-body">
                 <p className="card-text card-text-spacing">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
                 <p className="card-text card-text-spacing">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
-                <b>Meeting Agenda (Optional)</b>
-                <p>Let the host(s) know the topic you wish to discuss.</p>
-                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
-                    onSubmit={props.onChangeAgenda}
-                    buttonType="success" placeholder=""
-                    initialState={true}>
-                        Update
-                </EditToggleField>
+                <p>
+                    Meeting Agenda (Optional):
+                    <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
+                        onSubmit={props.onChangeAgenda}
+                        buttonType="success" placeholder=""
+                        initialState={true}>
+                            Update
+                    </EditToggleField>
+                    <small>Let the host(s) know the topic you wish to discuss.</small>
+                </p> 
             </div>
         </div>
         <p>The host will join the meeting when it is your turn. We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</p>
         {meetingInfo}
-        <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
-            Leave the line
-            {props.disabled && DisabledMessage}
-        </button>
         </>
     );
 }
