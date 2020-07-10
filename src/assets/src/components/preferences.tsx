@@ -5,7 +5,7 @@ import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User } from "../models";
-import { ErrorDisplay, LoadingDisplay, LoginDialog, Breadcrumbs } from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
@@ -84,11 +84,12 @@ export function PreferencesPage(props: PageProps) {
     //Render
     const isChanging = updateInfoLoading;
     const isLoading = isChanging;
-    const errorTypes = [updateInfoError];
-    const error = errorTypes.find(e => e);
-    const loginDialogVisible = errorTypes.some(e => e?.name === "ForbiddenError");
+    const errorSources = [
+        {source: 'Update Preferences', error: updateInfoError}
+    ].filter(e => e.error) as FormError[];
+    const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={error}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const preferencesEditor = user
         && <PreferencesEditor user={user} disabled={isChanging} onUpdateInfo={doUpdateInfo}/>
     return (

@@ -75,18 +75,27 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
     );
 }
 
+export interface FormError {
+    source: string;
+    error: Error;
+}
+
+export const checkForbiddenError = (pair: FormError) => {
+    return (pair.error.name === "ForbiddenError");
+}
 
 interface ErrorDisplayProps {
-    error?: Error;
+    formErrors: FormError[];
 }
 
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
-    if (!props.error) return null;
+    const messages = props.formErrors.map(a => <p><b>{a.source}:</b> {a.error.message} </p>);
+    if (messages.length === 0) return null;
     return (
-        <p className="alert alert-danger" role="alert">
-            {props.error.message}
-        </p>
+        <div className="alert alert-danger" role="alert">
+            {messages}
+        </div>
     );
 }
 
@@ -101,10 +110,8 @@ interface SingleInputFormProps {
 
 interface StatelessSingleInputFormProps extends SingleInputFormProps {
     value: string;
-    error?: Error;
     autofocus?: boolean;
     onChangeValue: (value: string) => void;
-    onError: (error: Error | undefined) => void;
 }
 
 const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props) => {
@@ -115,14 +122,9 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
     }, []);
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        try {
             props.onSubmit(props.value);
             props.onChangeValue("");
-        } catch (e) {
-            props.onError(e);
-        }
     }
-    const errorDisplay = props.error && <ErrorDisplay error={props.error} />
     const buttonClass = "btn btn-" + props.buttonType;
     return (
         <form onSubmit={submit} className="input-group">
@@ -134,7 +136,6 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
                     {props.children}
                 </button>
             </div>
-            {errorDisplay}
         </form>
     );
 }
@@ -142,12 +143,10 @@ const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props
 
 export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     const [value, setValue] = useState("");
-    const [error, setError] = useState(undefined as Error | undefined);
     return (
         <StatelessSingleInputForm
             id={props.id}
             value={value} onChangeValue={setValue}
-            error={error} onError={setError}
             {...props}
         />
     );
@@ -239,7 +238,6 @@ interface EditToggleFieldProps {
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     const [editing, setEditing] = useState(props.initialState);
     const [editorValue, setEditorValue] = useState(props.text);
-    const [editorError, setEditorError] = useState(undefined as Error | undefined);
     const submit = (value: string) => {
         props.onSubmit(value);
         setEditing(false);
@@ -255,7 +253,6 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
                 autofocus={true}
                 onSubmit={submit}
                 value={editorValue} onChangeValue={setEditorValue}
-                error={editorError} onError={setEditorError}
                 placeholder={props.placeholder} disabled={props.disabled}
                 buttonType="success">
                 {props.children}
@@ -285,14 +282,9 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
     }, []);
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        try {
-            props.onSubmit(props.value);
-            props.onChangeValue("");
-        } catch (e) {
-            props.onError(e);
-        }
+        props.onSubmit(props.value);
+        props.onChangeValue("");
     }
-    const errorDisplay = props.error && <ErrorDisplay error={props.error} />
     const buttonClass = "btn btn-" + props.buttonType + " remaining-controls";
     const [remaining, setRemaining] = useState(props.maxLength - props.value.length);
     const handleChange = (newValue:string) => {
@@ -313,7 +305,6 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                 </p>
                 
             </div>
-            {errorDisplay}
         </form>
     );
 }
@@ -326,7 +317,6 @@ interface ShowRemainingFieldProps extends EditToggleFieldProps {
 export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => {
     const [editing, setEditing] = useState(props.initialState);
     const [editorValue, setEditorValue] = useState(props.text);
-    const [editorError, setEditorError] = useState(undefined as Error | undefined);
     const submit = (value: string) => {
         props.onSubmit(value);
         setEditing(false);
@@ -343,7 +333,6 @@ export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => 
                 autofocus={true}
                 onSubmit={submit}
                 value={editorValue} onChangeValue={setEditorValue}
-                error={editorError} onError={setEditorError}
                 placeholder={props.placeholder} disabled={props.disabled}
                 buttonType="success" maxLength={props.maxLength}>
                 {props.children}

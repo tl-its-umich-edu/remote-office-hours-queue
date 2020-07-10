@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { getMyUser as apiGetUser } from "../services/api";
-import { LoadingDisplay, ErrorDisplay, JoinedQueueAlert, Breadcrumbs } from "./common";
+import { LoadingDisplay, ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
 
 function QueueLookup() {
@@ -42,9 +42,11 @@ export function HomePage(props: PageProps) {
     useAutoRefresh(doRefreshUser, 10000);
 
     const isLoading = refreshUserLoading;
-    const error = refreshUserError;
+    const errorSources = [
+        {source: 'Refresh User', error: refreshUserError}
+    ].filter(e => e.error) as FormError[];
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
-    const errorDisplay = <ErrorDisplay error={error}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueAlert = user?.my_queue
         && <JoinedQueueAlert joinedQueue={user.my_queue}/>
     const body = props.user
