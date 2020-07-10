@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import permissions
-from .models import Queue, Meeting
+from .models import Queue, Meeting, Profile
 
 
 class IsCurrentUser(permissions.BasePermission):
@@ -11,6 +11,9 @@ class IsCurrentUser(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: User):
         return obj == request.user
 
+class IsCurrentProfile(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj: Profile):
+        return obj.user == request.user
 
 def is_host(user: User, queue: Queue):
     return (
