@@ -3,4 +3,4 @@
   value: docker-registry.default.svc:5000/officehours/officehours:latest
 - op: replace
   path: /spec/source/git/ref
-  value: "prod"
+  value: master

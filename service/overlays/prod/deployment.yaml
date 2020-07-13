@@ -5,3 +5,13 @@
   path: /spec/template/spec/containers/0/command
 - op: remove
   path: /spec/template/spec/containers/0/args
+- op: replace
+  path: /spec/selector/variant
+  value: prod
+- op: replace
+  path: /spec/template/metadata/labels/variant
+  value: prod
+- op: replace
+  path: /spec/triggers/0/imageChangeParams/from/namespace
+  value: officehours
+

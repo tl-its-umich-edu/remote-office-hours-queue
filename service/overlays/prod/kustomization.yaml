@@ -16,13 +16,11 @@ patchesJson6902:
     name: web
   path: hostname.yaml
 - target:
-    group: apps
     version: v1
     kind: DeploymentConfig
     name: web
   path: deployment.yaml
 - target:
-    group: apps
     version: v1
     kind: BuildConfig
     name: web
