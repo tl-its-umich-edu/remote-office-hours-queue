@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+commonLabels:
+  variant: qa
+  org: umich
+nameSuffix: -qa
+bases:
+- ../../base
+patchesStrategicMerge:
+- tls.yaml
+patchesJson6902:
+- target:
+    group: extensions
+    version: v1beta1
+    kind: Ingress
+    name: web
+  path: hostname.yaml
+- target:
+    version: v1
+    kind: DeploymentConfig
+    name: web
+  path: deployment.yaml
+- target:
+    version: v1
+    kind: BuildConfig
+    name: web
+  path: build.yaml
+secretGenerator:
+- name: secrets
+  behavior: merge
+  type: Opaque
+  files:
+  - secret/DEBUG
+  - secret/SECRET_KEY
+  - secret/DATABASE_URL
+  - secret/OIDC_RP_CLIENT_ID
+  - secret/OIDC_RP_CLIENT_SECRET
+  - secret/OIDC_OP_AUTHORIZATION_ENDPOINT
+  - secret/OIDC_OP_TOKEN_ENDPOINT
+  - secret/OIDC_OP_USER_ENDPOINT
+  - secret/OIDC_OP_JWKS_ENDPOINT
+  - secret/GA_TRACKING_ID
+- name: web-tls
+  behavior: replace
+  type: "kubernetes.io/tls"
+  files:
+  - secret/tls.key
+  - secret/tls.crt
