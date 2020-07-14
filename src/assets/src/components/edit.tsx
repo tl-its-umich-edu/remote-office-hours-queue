@@ -411,7 +411,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
-    const isLoading = isChanging;
     const errorSources = [
         {source: 'Refresh', error: queueWebSocketError},
         {source: 'Refresh Users', error: usersWebSocketError}, 
@@ -426,7 +425,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         {source: 'Assignee', error: changeAssigneeError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
