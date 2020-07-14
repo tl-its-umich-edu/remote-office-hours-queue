@@ -21,9 +21,11 @@ class AttendeeSerializer(serializers.ModelSerializer):
 
 class NestedUserSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(source='profile.phone_number')
+
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
+
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
     attendees = NestedUserSerializer(many=True, read_only=True)
@@ -102,14 +104,14 @@ class UserSerializer(serializers.ModelSerializer):
 
         serializer = QueueAttendeeSerializer(meeting.queue, context=self.context)
         return serializer.data
-    
+
     def update(self, instance, validated_data):
         profile = validated_data['profile']
         instance = super().update(instance, validated_data)
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
-        instance.profile.save()            
+        instance.profile.save()
         return instance
- 
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = NestedUserSerializer(required=True)
@@ -117,6 +119,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['user', 'phone_number']
+
 
 class QueueAttendeeSerializer(serializers.ModelSerializer):
     '''

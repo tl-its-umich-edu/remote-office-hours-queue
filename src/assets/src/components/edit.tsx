@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, createRef, ChangeEvent } from "react";
+import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Dialog from "react-bootstrap-dialog";
@@ -14,10 +14,9 @@ import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
 import { usePromise } from "../hooks/usePromise";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
-import { useQueueWebSocket } from "../hooks/useWebSocket";
+import { useQueueWebSocket, useUsersWebSocket } from "../hooks/useWebSocket";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -340,27 +339,9 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(async () => {
-        try {
-            return await api.getQueue(queueIdParsed) as QueueHost;
-        } catch(err) {
-            if (err.message === "Not Found") {
-                redirectToSearch(queue_id);
-            } else {
-                throw err;
-            }
-        }
-    }, setQueue);
-    useEffect(() => {
-        doRefresh();
-    }, []);
-    const webSocketError = useQueueWebSocket(queueIdParsed, setQueue);
+    const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueue);
     const [users, setUsers] = useState(undefined as User[] | undefined);
-    const [doRefreshUsers, refreshUsersLoading, refreshUsersError] = usePromise(() => api.getUsers(), setUsers);
-    useEffect(() => {
-        doRefreshUsers();
-    }, []);
-    useAutoRefresh(doRefreshUsers, 6000);
+    const usersWebSocketError = useUsersWebSocket(setUsers)
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
@@ -423,23 +404,17 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     }
     const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueue);
     const changeAssignee = async (assignee: User | undefined, meeting: Meeting) => {
-        console.log("assignee")
-        console.log(assignee)
-        console.log("meeting")
-        console.log(meeting)
         recordQueueManagementEvent("Changed Assignee");
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
-        await doRefresh();
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
 
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
-    const isLoading = refreshLoading || refreshUsersLoading || isChanging;
+    const isLoading = isChanging;
     const errorSources = [
-        {source: 'Refresh', error: webSocketError},
-        {source: 'Refresh', error: refreshError},
-        {source: 'Refresh Users', error: refreshUsersError}, 
+        {source: 'Refresh', error: queueWebSocketError},
+        {source: 'Refresh Users', error: usersWebSocketError}, 
         {source: 'Remove Host', error: removeHostError}, 
         {source: 'Add Host', error: addHostError}, 
         {source: 'Remove Meeting', error: removeMeetingError}, 

@@ -9,9 +9,9 @@ from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from safedelete.signals import post_softdelete
 
-from officehours_api.models import Queue, Meeting
+from officehours_api.models import Queue, Meeting, Profile
 from officehours_api.permissions import is_host
-from officehours_api.serializers import QueueHostSerializer  # , QueueAttendeeSerializer
+from officehours_api.serializers import QueueHostSerializer, UserSerializer  # , QueueAttendeeSerializer
 
 
 class QueueConsumer(AsyncJsonWebsocketConsumer):
@@ -148,3 +148,90 @@ def hosts_changed_signal_handler(sender, instance, action, **kwargs):
     print(action)
     if action == "post_remove" or action == "post_clear" or action == "post_add":
         send_queue_update_sync(instance.id)
+
+
+class UsersConsumer(AsyncJsonWebsocketConsumer):
+    _user: User
+    group_name = "users"
+
+    @property
+    def user(self):
+        return self._user
+
+    async def connect(self):
+        self._user = self.scope["user"]
+        users = await database_sync_to_async(
+            lambda: User.objects.all()
+        )()
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
+        await self.accept()
+        users_data = await database_sync_to_async(
+            lambda: list(
+                UserSerializer(u, context={'user': self.user}).data
+                for u in users
+            )
+        )()
+        await self.send_json({
+            'type': 'init',
+            'content': users_data,
+        })
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            self.group_name,
+            self.channel_name
+        )
+
+    async def update(self, event):
+        # Doesn't scale well - should send only the updated parts instead
+        users_data = await database_sync_to_async(
+            lambda: list(
+                UserSerializer(u, context={'user': self.user}).data
+                for u in User.objects.all()
+            )
+        )()
+        await self.send_json({
+            'type': 'update',
+            'content': users_data,
+        })
+
+
+def send_user_update_sync(channel_layer=None):
+    async_to_sync(send_user_update)(channel_layer)
+
+
+async def send_user_update(channel_layer=None):
+    channel_layer = channel_layer or get_channel_layer()
+    await channel_layer.group_send(
+        UsersConsumer.group_name,
+        {
+            'type': 'update',
+        }
+    )
+
+
+@receiver(post_save, sender=User)
+def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
+    print('post_save_user_signal_handler')
+    send_user_update_sync()
+
+
+@receiver(post_delete, sender=User)
+def post_delete_user_signal_handler(sender, instance: User, **kwargs):
+    print('post_delete_user_signal_handler')
+    send_user_update_sync()
+
+
+@receiver(post_save, sender=Profile)
+def post_save_profile_signal_handler(sender, instance: Profile, created, **kwargs):
+    print('post_save_profile_signal_handler')
+    send_user_update_sync()
+
+
+@receiver(post_delete, sender=Profile)
+def post_delete_profile_signal_handler(sender, instance: Profile, **kwargs):
+    print('post_delete_profile_signal_handler')
+    send_user_update_sync()
