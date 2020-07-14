@@ -22,6 +22,9 @@ interface QueueAttendingProps {
     onLeaveQueue: () => void;
     onLeaveAndJoinQueue: () => void;
     onChangeAgenda: (agenda: string) => void;
+    meetingTypeChoice: string | undefined;
+    onChangeMeetingTypeChoice: (backendType: string) => void;
+    onChangeBackendType: (backendType: string) => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -215,6 +218,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
 
+    const [meetingTypeChoice, setMeetingTypeChoice] = useState(undefined as string | undefined);
+
     //Setup interactions
     const joinQueue = async () => {
         ReactGA.event({
@@ -257,16 +262,21 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         return await api.changeAgenda(queue!.my_meeting!.id, agenda);
     }
     const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda);
+    const changeBackendType = async (backendType: string) => {
+        return await api.changeMeetingType(queue!.my_meeting!.id, backendType);
+    }
+    const [doChangeBackendType, changeBackendTypeLoading, changeBackendTypeError] = usePromise(changeBackendType);
     
     //Render
-    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
+    const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading || changeBackendTypeLoading;
     const errorSources = [
-        {source: 'Queue Connection', error: queueWebSocketError},
-        {source: 'Join Queue', error: joinQueueError},
-        {source: 'Leave Queue', error: leaveQueueError},
-        {source: 'User Connection', error: userWebSocketError},
-        {source: 'Leave and Join Queue', error: leaveAndJoinQueueError},
-        {source: 'Change Agenda', error: changeAgendaError}
+        {source: 'Queue Connection', error: queueWebSocketError}, 
+        {source: 'Join Queue', error: joinQueueError}, 
+        {source: 'Leave Queue', error: leaveQueueError}, 
+        {source: 'User Connection', error: userWebSocketError}, 
+        {source: 'Leave and Join Queue', error: leaveAndJoinQueueError}, 
+        {source: 'Change Agenda', error: changeAgendaError},
+        {source: 'Change Meeting Type', error: changeBackendTypeError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
@@ -274,7 +284,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
-            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}/>
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda} meetingTypeChoice={meetingTypeChoice}
+            onChangeMeetingTypeChoice={setMeetingTypeChoice} onChangeBackendType={doChangeBackendType}/>
     return (
         <div>
             <Dialog ref={dialogRef}/>

@@ -216,4 +216,14 @@ export const changeMeetingAssignee = async (meeting_id: number, user_id: number 
     return await resp.json() as Meeting;
 }
 
-
+export const changeMeetingType = async (meeting_id: number, backend_type: string) => {
+    const resp = await fetch(`/api/meetings/${meeting_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            backend_type: backend_type,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}

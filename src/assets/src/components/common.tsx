@@ -266,6 +266,35 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     return contents;
 }
 
+interface DropdownValue {
+    value: string;
+    displayValue: string;
+}
+
+export const MeetingDropdownTypes = [
+    {value: "bluejeans", displayValue: "BlueJeans"},
+    {value: "inperson", displayValue: "In Person"}
+];
+
+interface MeetingTypeDropdownProps {
+    value: string;
+    onChangeValue: (value: string) => void;
+}
+
+export const MeetingTypeDropdown: React.FC<MeetingTypeDropdownProps> = (props) => {
+    const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
+        props.onChangeValue(event.currentTarget.value);
+    }
+    
+    return (
+        <select value={props.value} onChange={handleChange}>
+            <option value='default'>Meeting via...</option>
+            <option value='bluejeans'>BlueJeans</option>
+            <option value='inperson'>In Person</option>
+        </select>
+    );
+}
+
 interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProps {
     maxLength: number
 }

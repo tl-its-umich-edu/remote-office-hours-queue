@@ -25,7 +25,7 @@ export interface Meeting {
     attendees: User[];
     agenda: string;
     assignee?: User;
-    backend_type?: "bluejeans"|"zoom";
+    backend_type?: "bluejeans"|"zoom"|"inperson";
     backend_metadata?: BluejeansMetadata;
     created_at: string;
 }
@@ -50,4 +50,6 @@ export interface QueueBase {
     hosts: User[];
     created_at: string;
     status: "open"|"closed";
+    bluejeansAllowed: boolean;
+    inpersonAllowed: boolean;
 }

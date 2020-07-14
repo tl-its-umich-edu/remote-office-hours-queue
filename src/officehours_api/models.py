@@ -57,6 +57,8 @@ class Queue(SafeDeleteModel):
         ],
         default='open',
     )
+    bluejeans_allowed = models.BooleanField(default=False)
+    inperson_allowed = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -78,10 +80,11 @@ class Meeting(SafeDeleteModel):
 
     MEETING_BACKEND_TYPES = [
         ('bluejeans', 'BlueJeans'),
+        ('inperson', 'InPerson')
     ]
     backend_type = models.CharField(max_length=20,
                                     choices=MEETING_BACKEND_TYPES,
-                                    null=True)
+                                    null=False, default='')
     backend_metadata = JSONField(null=True, default=dict)
 
     def save(self, *args, **kwargs):
