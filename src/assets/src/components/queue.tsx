@@ -98,7 +98,7 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
         <div className="row bottom-content">
             <div className="col-sm">
                 <div className="card card-body">
-                    <h5 className="card-title">Joining the Meeting</h5>
+                    <h5 className="card-title mt-0">Joining the Meeting</h5>
                     <p className="card-text">
                         You can join the meeting now to make sure you are set up and ready. Download the app and test your
                         audio before it is your turn. See 
@@ -112,7 +112,7 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
             </div>
             <div className="col-sm">
                 <div className="card card-body">
-                    <h5 className="card-title">Having Trouble with Video?</h5>
+                    <h5 className="card-title mt-0">Having Trouble with Video?</h5>
                     <p className="card-text">
                     <BlueJeansDialInMessage meetingNumber={meetingNumber} /> You are not a moderator, so you do not need a moderator passcode.
                     </p>
