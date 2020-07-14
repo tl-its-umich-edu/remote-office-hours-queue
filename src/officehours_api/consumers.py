@@ -11,7 +11,7 @@ from safedelete.signals import post_softdelete
 
 from officehours_api.models import Queue, Meeting, Profile
 from officehours_api.permissions import is_host
-from officehours_api.serializers import QueueHostSerializer, UserSerializer  # , QueueAttendeeSerializer
+from officehours_api.serializers import QueueHostSerializer, QueueAttendeeSerializer, UserSerializer
 
 
 class QueueConsumer(AsyncJsonWebsocketConsumer):
@@ -40,9 +40,11 @@ class QueueConsumer(AsyncJsonWebsocketConsumer):
         queue = await database_sync_to_async(
             lambda: Queue.objects.get(pk=self.queue_id)
         )()
-
-        if not is_host(self.user, queue):
-            return
+        QueueSerializer = (
+            QueueHostSerializer
+            if await database_sync_to_async(lambda: is_host(self.user, queue))()
+            else QueueAttendeeSerializer
+        )
 
         await self.channel_layer.group_add(
             self.group_name,
@@ -50,7 +52,7 @@ class QueueConsumer(AsyncJsonWebsocketConsumer):
         )
         await self.accept()
         queue_data = await database_sync_to_async(
-            lambda: QueueHostSerializer(queue, context={'user': self.user}).data
+            lambda: QueueSerializer(queue, context={'user': self.user}).data
         )()
         await self.send_json({
             'type': 'init',
@@ -64,9 +66,17 @@ class QueueConsumer(AsyncJsonWebsocketConsumer):
         )
 
     async def update(self, event):
+        queue = await database_sync_to_async(
+            lambda: Queue.objects.get(pk=self.queue_id)
+        )()
+        QueueSerializer = (
+            QueueHostSerializer
+            if await database_sync_to_async(lambda: is_host(self.user, queue))()
+            else QueueAttendeeSerializer
+        )
         queue_data = await database_sync_to_async(
-            lambda: QueueHostSerializer(
-                Queue.objects.get(pk=self.queue_id),
+            lambda: QueueSerializer(
+                queue,
                 context={'user': self.user},
             ).data
         )()

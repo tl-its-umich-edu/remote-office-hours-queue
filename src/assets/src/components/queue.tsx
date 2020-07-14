@@ -12,6 +12,7 @@ import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import Dialog from "react-bootstrap-dialog";
+import { useQueueWebSocket } from "../hooks/useWebSocket";
 
 interface QueueAttendingProps {
     queue: QueueAttendee;
@@ -199,25 +200,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueAttendee | undefined);
-    const refresh = async () => {
-        try {
-            return await api.getQueue(queueIdParsed)
-        } catch(err) {
-            if (err.message === "Not Found") {
-                redirectToSearch(queue_id);
-            } else {
-                throw err;
-            }
-        }
-    };
-    const [doRefresh, refreshLoading, refreshError] = usePromise(refresh, setQueue);
-    useEffect(() => {
-        if (isNaN(queueIdParsed)) {
-            return redirectToSearch(queue_id);
-        }
-        doRefresh();
-    }, []);
-    const [interactions] = useAutoRefresh(doRefresh);
+    const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueue);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
     const refreshMyUser = () => api.getMyUser(props.user!.id);
     const [doRefreshMyUser, refreshMyUserLoading, refreshMyUserError] = usePromise(refreshMyUser, setMyUser);
@@ -225,31 +208,25 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         doRefreshMyUser();
     }, []);
     useAutoRefresh(doRefreshMyUser, 10000);
-    const [meeting, setMeeting] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
     const joinQueue = async () => {
-        interactions.next(false);
         ReactGA.event({
             category: "Attending",
             action: "Joined Queue",
         });
         await api.addMeeting(queueIdParsed, props.user!.id);
-        await doRefresh();
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
     const leaveQueue = async () => {
-        interactions.next(false);
         ReactGA.event({
             category: "Attending",
             action: "Left Queue",
         });
         await api.removeMeeting(queue!.my_meeting!.id);
-        await doRefresh();
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
     const confirmLeaveQueue = () => {
-        interactions.next(false);
         dialogRef.current!.show({
             title: "Leave Queue?",
             body: "The queue is closed, but you are still in line. If you leave now, you will not be able to rejoin until the queue is reopened.",
@@ -262,27 +239,24 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         });
     }
     const leaveAndJoinQueue = async () => {
-        interactions.next(false);
         ReactGA.event({
             category: "Attending",
             action: "Left Previous Queue and Joined New Queue",
         });
         await api.removeMeeting(myUser!.my_queue!.my_meeting!.id);
         await api.addMeeting(queueIdParsed, props.user!.id);
-        await doRefresh();
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
     const changeAgenda = async (agenda: string) => {
-        interactions.next(true);
         return await api.changeAgenda(queue!.my_meeting!.id, agenda);
     }
-    const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda, setMeeting);
+    const [doChangeAgenda, changeAgendaLoading, changeAgendaError] = usePromise(changeAgenda);
     
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
-    const isLoading = refreshLoading || isChanging || refreshMyUserLoading;
+    const isLoading = isChanging || refreshMyUserLoading;
     const errorSources = [
-        {source: 'Refresh', error: refreshError}, 
+        {source: 'Refresh', error: queueWebSocketError}, 
         {source: 'Join Queue', error: joinQueueError}, 
         {source: 'Leave Queue', error: leaveQueueError}, 
         {source: 'Refresh My User', error: refreshMyUserError}, 
