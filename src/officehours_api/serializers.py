@@ -48,7 +48,7 @@ class NestedMyMeetingSerializer(serializers.ModelSerializer):
         in_line = False
         meetings = obj.queue.meeting_set.order_by('id')
         for i in range(0, len(meetings)):
-            if self.context['request'].user in meetings[i].attendees.all():
+            if self.context['user'] in meetings[i].attendees.all():
                 in_line = True
                 break
 
