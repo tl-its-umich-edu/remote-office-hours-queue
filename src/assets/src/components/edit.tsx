@@ -17,7 +17,6 @@ import { usePromise } from "../hooks/usePromise";
 import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
-import { Subject } from "rxjs";
 import { useQueueWebSocket } from "../hooks/useWebSocket";
 
 interface MeetingEditorProps {
