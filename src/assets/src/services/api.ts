@@ -228,3 +228,4 @@ export const changeMeetingType = async (meeting_id: number, backend_type: string
     await handleErrors(resp);
     return await resp.json();
 }
+
