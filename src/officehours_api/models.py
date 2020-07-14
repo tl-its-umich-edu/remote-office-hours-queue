@@ -57,7 +57,7 @@ class Queue(SafeDeleteModel):
         ],
         default='open',
     )
-    bluejeans_allowed = models.BooleanField(default=False)
+    bluejeans_allowed = models.BooleanField(default=True)
     inperson_allowed = models.BooleanField(default=False)
 
     def __str__(self):

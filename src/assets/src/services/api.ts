@@ -90,13 +90,14 @@ export const deleteQueue = async (id: number) => {
     return resp;
 }
 
-export const addMeeting = async (queue_id: number, user_id: number) => {
+export const addMeeting = async (queue_id: number, user_id: number, backend_type: string) => {
     const resp = await fetch("/api/meetings/", {
         method: "POST",
         body: JSON.stringify({
             queue: queue_id,
             attendee_ids: [user_id],
             assignee_id: null,
+            backend_type: backend_type
         }),
         headers: getPostHeaders(),
     });
@@ -227,3 +228,4 @@ export const changeMeetingType = async (meeting_id: number, backend_type: string
     await handleErrors(resp);
     return await resp.json();
 }
+

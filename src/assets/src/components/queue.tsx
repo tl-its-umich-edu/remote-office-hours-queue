@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
-import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay } from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, MeetingTypeDropdown, DropdownValue, validateMeetingTypeSubmission } from "./common";
 import * as api from "../services/api";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
@@ -13,22 +13,47 @@ import { PageProps } from "./page";
 import Dialog from "react-bootstrap-dialog";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 
+interface JoinQueueProps {
+    queue: QueueAttendee;
+    onJoinQueue: (backendType: string) => void;
+    disabled: boolean;
+}
+
+const JoinQueue: React.FC<JoinQueueProps> = (props) => {
+    const [dropdownState, setDropdownState] = useState("default");
+    const bluejeansOption = props.queue.bluejeansAllowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
+    const inpersonOption = props.queue.inpersonAllowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
+    const options = [bluejeansOption, inpersonOption].filter(a => a) as DropdownValue[];
+    return (
+        <>
+        <p>Select Meeting Type *</p>
+        <MeetingTypeDropdown options={options} value={dropdownState} onChangeValue={setDropdownState}/>
+        <div className="row">
+            <div className="col-lg">
+                <button disabled={props.disabled} onClick={props.onJoinQueue(dropdownState)} type="button" className="btn btn-primary">
+                    Join Queue
+                </button>
+            </div>
+        </div>
+        </>
+    );
+}
+
 interface QueueAttendingProps {
     queue: QueueAttendee;
     user: User;
     joinedQueue?: QueueAttendee | null;
     disabled: boolean;
-    onJoinQueue: () => void;
+    onJoinQueue: (backendType: string) => void;
     onLeaveQueue: () => void;
-    onLeaveAndJoinQueue: () => void;
+    onLeaveAndJoinQueue: (backendType: string) => void;
     onChangeAgenda: (agenda: string) => void;
-    meetingTypeChoice: string | undefined;
-    onChangeMeetingTypeChoice: (backendType: string) => void;
     onChangeBackendType: (backendType: string) => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
     const joinedOther = props.joinedQueue && props.joinedQueue.id !== props.queue.id;
+    
     const controls = props.queue.status !== "closed" && (
         joinedOther && props.joinedQueue
             ? (
@@ -38,23 +63,11 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
                         <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-lg">
-                        <button disabled={props.disabled} onClick={props.onLeaveAndJoinQueue} type="button" className="btn btn-primary">
-                            Join Queue
-                        </button>
-                    </div>
-                </div>
+                <JoinQueue queue={props.queue} onJoinQueue={props.onLeaveAndJoinQueue} disabled={props.disabled}/>
                 </>
             )
             : (
-                <div className="row">
-                    <div className="col-lg">
-                        <button disabled={props.disabled} onClick={props.onJoinQueue} type="button" className="btn btn-primary">
-                            Join Queue
-                        </button>
-                    </div>
-                </div>
+                <JoinQueue queue={props.queue} onJoinQueue={props.onJoinQueue} disabled={props.disabled}/>
             )
     );
     const closedAlert = props.queue.status === "closed"
@@ -217,16 +230,16 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueue);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
-
-    const [meetingTypeChoice, setMeetingTypeChoice] = useState(undefined as string | undefined);
-
     //Setup interactions
-    const joinQueue = async () => {
+    const joinQueue = async (backendType: string) => {
+        if (backendType === 'default') {
+            throw new Error("Meeting Type is a required field.");
+        }
         ReactGA.event({
             category: "Attending",
             action: "Joined Queue",
         });
-        await api.addMeeting(queueIdParsed, props.user!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id, backendType);
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
     const leaveQueue = async () => {
@@ -249,13 +262,16 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             ],
         });
     }
-    const leaveAndJoinQueue = async () => {
+    const leaveAndJoinQueue = async (backendType: string) => {
+        if (backendType === 'default') {
+            throw new Error("Meeting Type is a required field.");
+        }
         ReactGA.event({
             category: "Attending",
             action: "Left Previous Queue and Joined New Queue",
         });
         await api.removeMeeting(myUser!.my_queue!.my_meeting!.id);
-        await api.addMeeting(queueIdParsed, props.user!.id);
+        await api.addMeeting(queueIdParsed, props.user!.id, backendType);
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
     const changeAgenda = async (agenda: string) => {
@@ -284,8 +300,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
-            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda} meetingTypeChoice={meetingTypeChoice}
-            onChangeMeetingTypeChoice={setMeetingTypeChoice} onChangeBackendType={doChangeBackendType}/>
+            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda} onChangeBackendType={doChangeBackendType}/>
     return (
         <div>
             <Dialog ref={dialogRef}/>

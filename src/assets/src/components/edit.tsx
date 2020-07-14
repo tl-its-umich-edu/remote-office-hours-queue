@@ -362,6 +362,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const [users, setUsers] = useState(undefined as User[] | undefined);
     const usersWebSocketError = useUsersWebSocket(setUsers)
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
+    const [backendTypeDropdownState, setBackendTypeDropdownState] = useState(undefined as string | undefined);
 
     //Setup interactions
     const removeHost = async (h: User) => {
@@ -390,12 +391,15 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string) => {
+        if (!backendTypeDropdownState) {
+            throw new Error("Meeting Type is a required field.")
+        }
         uniqname = sanitizeUniqname(uniqname);
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
-        await api.addMeeting(queue!.id, user.id);
+        await api.addMeeting(queue!.id, user.id, backendTypeDropdownState);
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {

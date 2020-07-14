@@ -266,9 +266,15 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     return contents;
 }
 
-interface DropdownValue {
+export interface DropdownValue {
     value: string;
     displayValue: string;
+}
+
+export const validateMeetingTypeSubmission = (backendType: string) => {
+    if (backendType === 'default') {
+        throw new Error("Meeting Type is a required field.")
+    }
 }
 
 export const MeetingDropdownTypes = [
@@ -277,11 +283,15 @@ export const MeetingDropdownTypes = [
 ];
 
 interface MeetingTypeDropdownProps {
+    options: DropdownValue[];
     value: string;
     onChangeValue: (value: string) => void;
 }
 
-export const MeetingTypeDropdown: React.FC<MeetingTypeDropdownProps> = (props) => {
+export const MeetingTypeDropdown: React.FC<MeetingTypeDropdownProps> = (props) => {  
+    const dropdownOptions = props.options.map(a => 
+        <option value={a.value}>{a.displayValue}</option>
+    );
     const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
         props.onChangeValue(event.currentTarget.value);
     }
@@ -289,8 +299,7 @@ export const MeetingTypeDropdown: React.FC<MeetingTypeDropdownProps> = (props) =
     return (
         <select value={props.value} onChange={handleChange}>
             <option value='default'>Meeting via...</option>
-            <option value='bluejeans'>BlueJeans</option>
-            <option value='inperson'>In Person</option>
+            {dropdownOptions}
         </select>
     );
 }
