@@ -12,7 +12,7 @@ import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import Dialog from "react-bootstrap-dialog";
-import { useQueueWebSocket } from "../hooks/useWebSocket";
+import { useQueueWebSocket, useUserWebSocket } from "../hooks/useWebSocket";
 
 interface QueueAttendingProps {
     queue: QueueAttendee;
@@ -202,12 +202,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const [queue, setQueue] = useState(undefined as QueueAttendee | undefined);
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueue);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
-    const refreshMyUser = () => api.getMyUser(props.user!.id);
-    const [doRefreshMyUser, refreshMyUserLoading, refreshMyUserError] = usePromise(refreshMyUser, setMyUser);
-    useEffect(() => {
-        doRefreshMyUser();
-    }, []);
-    useAutoRefresh(doRefreshMyUser, 10000);
+    const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
 
     //Setup interactions
     const joinQueue = async () => {
@@ -254,17 +249,16 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
-    const isLoading = isChanging || refreshMyUserLoading;
     const errorSources = [
         {source: 'Refresh', error: queueWebSocketError}, 
         {source: 'Join Queue', error: joinQueueError}, 
         {source: 'Leave Queue', error: leaveQueueError}, 
-        {source: 'Refresh My User', error: refreshMyUserError}, 
+        {source: 'Refresh My User', error: userWebSocketError}, 
         {source: 'Leave and Join Queue', error: leaveAndJoinQueueError}, 
         {source: 'Change Agenda', error: changeAgendaError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueDisplay = queue
         && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
