@@ -265,10 +265,17 @@ interface MeetingInfoProps {
 }
 
 const MeetingInfoDialog = (props: MeetingInfoProps) => {
+    const phoneDetails = (phoneNumber: string) => {
+        if (phoneNumber === "") {
+            return undefined;
+        } else {
+            return (<><strong>  Phone:</strong><PhoneInput value={phoneNumber} disabled={true}/></>);
+        }
+    }
     const attendeeDetails = props.meeting?.attendees.map(a => 
         <p>
             <UserDisplay user={a}/>
-            <strong>  Phone:</strong><PhoneInput value={a.phone_number} disabled={true}/>
+            {phoneDetails(a.phone_number)}
         </p>
     );
     const generalInfo = props.meeting
