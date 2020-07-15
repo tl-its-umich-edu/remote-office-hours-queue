@@ -3,9 +3,11 @@ import { useState, useEffect, createRef } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert";
+import Modal from "react-bootstrap/Modal";
+import Button from "react-bootstrap/Button";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
-import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, MeetingTypeDropdown, DropdownValue, validateMeetingTypeSubmission } from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, MeetingDropdownTypes, MeetingTypeDropdown, DropdownValue, validateMeetingTypeSubmission, convertMeetingTypeToDisplay } from "./common";
 import * as api from "../services/api";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
@@ -21,8 +23,8 @@ interface JoinQueueProps {
 
 const JoinQueue: React.FC<JoinQueueProps> = (props) => {
     const [dropdownState, setDropdownState] = useState("default");
-    const bluejeansOption = props.queue.bluejeansAllowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
-    const inpersonOption = props.queue.inpersonAllowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
+    const bluejeansOption = props.queue.bluejeans_allowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
+    const inpersonOption = props.queue.inperson_allowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
     const options = [bluejeansOption, inpersonOption].filter(a => a) as DropdownValue[];
     return (
         <>
@@ -30,7 +32,7 @@ const JoinQueue: React.FC<JoinQueueProps> = (props) => {
         <MeetingTypeDropdown options={options} value={dropdownState} onChangeValue={setDropdownState}/>
         <div className="row">
             <div className="col-lg">
-                <button disabled={props.disabled} onClick={props.onJoinQueue(dropdownState)} type="button" className="btn btn-primary">
+                <button disabled={props.disabled} onClick={() => props.onJoinQueue(dropdownState)} type="button" className="btn btn-primary">
                     Join Queue
                 </button>
             </div>
@@ -136,6 +138,39 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
     );
 }
 
+interface ChangeMeetingTypeDialogProps {
+    queue: QueueAttendee;
+    show: boolean;
+    onClose: () => void;
+    onSubmit: (backendType: string) => void;
+}
+
+const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
+    const [dropdownState, setDropdownState] = useState(props.queue.my_meeting?.backend_type as string);
+    const bluejeansOption = props.queue.bluejeans_allowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
+    const inpersonOption = props.queue.inperson_allowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
+    const options = [bluejeansOption, inpersonOption].filter(a => a) as DropdownValue[];
+    const handleSubmit = () => {
+        props.onClose();
+        props.onSubmit(dropdownState);
+    }
+    return (
+        <Modal show={props.show} onHide={props.onClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Change Meeting Type</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <p>Select Meeting Type *</p>
+                <MeetingTypeDropdown options={options} value={dropdownState} onChangeValue={setDropdownState}/>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={props.onClose}>Cancel</Button>
+                <Button variant="primary" onClick={handleSubmit}>OK</Button>
+            </Modal.Footer>
+        </Modal>
+    );
+}
+
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const closedAlert = props.queue.status === "closed"
         && <Alert variant="dark">This queue has been closed by the host, but you are still in line. Please contact the host to ensure the meeting will still happen.</Alert>
@@ -144,6 +179,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
             ? <TurnSoonAlert/>
             : undefined;
+    const [showMeetingTypeDialog, setShowMeetingTypeDialog] = useState(false);
+    const meetingTypeDialog = <ChangeMeetingTypeDialog queue={props.queue} show={showMeetingTypeDialog} onClose={() => setShowMeetingTypeDialog(false)} onSubmit={props.onChangeBackendType}/>
     const meetingInfo = props.queue.my_meeting!.backend_type === "bluejeans"
             ? <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}>
                 <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
@@ -151,26 +188,36 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     {props.disabled && DisabledMessage}
                 </button>
             </BlueJeansMeetingInfo>
-            : undefined;
+            : <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
+                Leave the line
+                {props.disabled && DisabledMessage}
+            </button>;
+    const changeMeetingType = props.queue.my_meeting?.assignee 
+        ? <small>A Host has been assigned to this meeting. MeetingType can no longer be changed.</small>
+        : <button disabled={props.disabled} onClick={() => setShowMeetingTypeDialog(true)} type="button" className="btn btn-link">Change</button>;
     return (
         <>
         {closedAlert}
         {alert}
+        {meetingTypeDialog}
         <h3>You are currently in line.</h3>
         <div className="card card-middle card-width center-align" >
             <div className="card-body">
                 <p className="card-text card-text-spacing">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
                 <p className="card-text card-text-spacing">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
-                <p>
-                    Meeting Agenda (Optional):
-                    <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
-                        onSubmit={props.onChangeAgenda}
-                        buttonType="success" placeholder=""
-                        initialState={true}>
-                            Update
-                    </EditToggleField>
-                    <small>Let the host(s) know the topic you wish to discuss.</small>
-                </p> 
+                <div className="row">
+                    <p className="card-text card-text-spacing">Meeting via: <strong>{convertMeetingTypeToDisplay(props.queue.my_meeting!.backend_type as string)}</strong></p>
+                    {changeMeetingType}
+                </div>
+                <p>Meeting Agenda (Optional):</p>
+                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
+                    onSubmit={props.onChangeAgenda}
+                    buttonType="success" placeholder=""
+                    initialState={true}>
+                        Update
+                </EditToggleField>
+                <small>Let the host(s) know the topic you wish to discuss.</small>
+                 
             </div>
         </div>
         <p>The host will join the meeting when it is your turn. We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</p>
