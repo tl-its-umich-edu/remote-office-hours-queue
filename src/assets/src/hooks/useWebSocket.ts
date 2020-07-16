@@ -5,6 +5,11 @@ interface OfficeHoursMessage<T> {
     content: T;
 }
 
+const closeCodes = {
+    1006: "An unexpected error occurred. Please refresh the page.",
+    4404: "The resource you're looking for could not be found. Maybe it was deleted?",
+} as {[closeCode: number]: string}
+
 export const useWebSocket = <T>(url: string, update: (content: T) => void, handleDeleted=true) => {
     const [error, setError] = useState(undefined as Error | undefined);
     useEffect(() => {
@@ -27,7 +32,8 @@ export const useWebSocket = <T>(url: string, update: (content: T) => void, handl
         }
         ws.onclose = (e: CloseEvent) => {
             console.error(e);
-            setError(new Error(e.code.toString()));
+
+            setError(new Error(closeCodes[e.code] ?? e.code.toString()));
         }
         ws.onerror = (e: Event) => {
             console.error(e);
