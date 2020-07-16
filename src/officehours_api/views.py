@@ -35,6 +35,7 @@ def api_root(request, format=None):
 
 
 class DecoupledContextMixin:
+    """Decouple the context from the view layer."""
     def get_serializer_context(self):
         action = {
             'POST': 'WRITE',
