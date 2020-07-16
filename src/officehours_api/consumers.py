@@ -189,6 +189,7 @@ def send_users_update(channel_layer=None):
         }
     )
 
+
 @receiver(post_save, sender=User)
 @receiver(post_delete, sender=User)
 @receiver(post_save, sender=Profile)
