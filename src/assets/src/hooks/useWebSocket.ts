@@ -52,7 +52,6 @@ export const useUsersWebSocket = (update: (users: User[]) => void) => {
         const url = `ws://${location.host}/ws/users/`;
         const ws = new WebSocket(url);
         ws.onmessage = (e: MessageEvent) => {
-            console.log(e);
             const m = JSON.parse(e.data) as UsersMessage;
             console.log(m);
             switch(m.type) {
@@ -63,6 +62,10 @@ export const useUsersWebSocket = (update: (users: User[]) => void) => {
                     update(m.content as User[]);
                     break;
             }
+        }
+        ws.onclose = (e: CloseEvent) => {
+            console.error(e);
+            setError(new Error(e.code.toString()));
         }
         ws.onerror = (e) => {
             console.error(e);
@@ -83,7 +86,6 @@ export const useUserWebSocket = (user_id: number, update: (user: User|MyUser) =>
         const url = `ws://${location.host}/ws/users/${user_id}/`;
         const ws = new WebSocket(url);
         ws.onmessage = (e: MessageEvent) => {
-            console.log(e);
             const m = JSON.parse(e.data) as UserMessage;
             console.log(m);
             switch(m.type) {
@@ -94,6 +96,10 @@ export const useUserWebSocket = (user_id: number, update: (user: User|MyUser) =>
                     update(m.content as User|MyUser);
                     break;
             }
+        }
+        ws.onclose = (e: CloseEvent) => {
+            console.error(e);
+            setError(new Error(e.code.toString()));
         }
         ws.onerror = (e) => {
             console.error(e);
