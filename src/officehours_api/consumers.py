@@ -79,9 +79,9 @@ class QueueConsumer(JsonWebsocketConsumer):
             else QueueAttendeeSerializer
         )
         queue_data = QueueSerializer(
-                queue,
-                context={'user': self.user},
-            ).data
+            queue,
+            context={'user': self.user},
+        ).data
         self.send_json({
             'type': 'update',
             'content': queue_data,
@@ -246,8 +246,8 @@ class UserConsumer(JsonWebsocketConsumer):
 
     def user_update(self, event):
         user_data = UserSerializer(
-                User.objects.get(pk=self.user_id), context={'user': self.user}
-            ).data
+            User.objects.get(pk=self.user_id), context={'user': self.user}
+        ).data
         self.send_json({
             'type': 'update',
             'content': user_data,
