@@ -4,10 +4,9 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Alert from "react-bootstrap/Alert"
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
+import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
 import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, BlueJeansOneTouchDialLink, Breadcrumbs, EditToggleField, BlueJeansDialInMessage } from "./common";
 import * as api from "../services/api";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";

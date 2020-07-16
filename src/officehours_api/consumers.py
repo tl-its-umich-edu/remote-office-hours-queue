@@ -6,8 +6,7 @@ from django.dispatch import receiver
 from django.db import transaction
 from django.db.models.signals import post_save, post_delete, m2m_changed
 
-from channels.generic.websocket import AsyncJsonWebsocketConsumer, JsonWebsocketConsumer
-from channels.db import database_sync_to_async
+from channels.generic.websocket import JsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from safedelete.signals import post_softdelete
 
