@@ -12,7 +12,7 @@ import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, MeetingTypeDropdown, DropdownValue } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
@@ -93,6 +93,82 @@ function HostEditor(props: HostEditorProps) {
     );
 }
 
+interface AddAttendeeFormProps {
+    queue: QueueHost;
+    dropdownState: string;
+    onChangeDropdownState: (backendType: string) => void;
+    disabled: boolean;
+    onSubmit: (value: string) => void;
+}
+
+function AddAttendeeForm(props: AddAttendeeFormProps) {
+    const [value, setValue] = useState("");
+    const inputRef = createRef<HTMLInputElement>();
+    useEffect(() => {
+        inputRef.current!.focus();
+    }, []);
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        props.onSubmit(value);
+        setValue("");
+    }
+    const bluejeansOption = props.queue.bluejeans_allowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
+    const inpersonOption = props.queue.inperson_allowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
+    const options = [bluejeansOption, inpersonOption].filter(a => a) as DropdownValue[];
+    return (
+        <form onSubmit={submit} className="input-group">
+            <input onChange={(e) => setValue(e.target.value)} value={value}
+                ref={inputRef} type="text" className="form-control" placeholder="Uniqname..."
+                disabled={props.disabled} id="add_attendee" />
+            <div className="input-group-append">
+                <MeetingTypeDropdown options={options} defaultValue="default" onChangeValue={props.onChangeDropdownState}/>
+            </div>
+            <div className="input-group-append">
+                <button className="btn btn-success" type="submit" disabled={props.disabled}>
+                    + Add Attendee
+                </button>
+            </div>
+        </form>
+    );
+}
+
+interface AllowedMeetingTypesFormProps {
+    queue: QueueHost;
+    onSubmit: (bluejeansAllowed: boolean, inpersonAllowed: boolean) => void;
+    disabled: boolean;
+}
+
+function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
+    const [bluejeansCheckbox, setBluejeansCheckbox] = useState(props.queue.bluejeans_allowed);
+    const [inpersonCheckbox, setInpersonCheckbox] = useState(props.queue.inperson_allowed);
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.currentTarget.name === "bluejeans") {
+            setBluejeansCheckbox(event.target.checked);
+        } else if (event.currentTarget.name === "inperson"){
+            setInpersonCheckbox(event.target.checked);
+        }
+    }
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        props.onSubmit(bluejeansCheckbox, inpersonCheckbox);
+    }
+    return (
+        <form onSubmit={submit} className="input-group">
+            <label htmlFor="bluejeans">BlueJeans:</label>
+            <input name="BlueJeans" type="checkbox" checked={bluejeansCheckbox} onChange={handleChange}/>
+            <div className="input-group-append">
+                <label htmlFor="inperson">InPerson:</label>
+                <input name="inperson" type="checkbox" checked={inpersonCheckbox} onChange={handleChange}/>
+            </div>
+            <div className="input-group-append">
+                <button className="btn btn-success" type="submit" disabled={props.disabled}>
+                    Save
+                </button>
+            </div>
+        </form>
+    );
+}
+
 interface QueueEditorProps {
     queue: QueueHost;
     user: User;
@@ -107,6 +183,9 @@ interface QueueEditorProps {
     onSetStatus: (open: boolean) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
+    dropdownState: string;
+    onChangeDropdownState: (backendType: string) => void;
+    onUpdateAllowedMeetingTypes: (bluejeansAllowed: boolean, inpersonAllowed: boolean) => void;
 }
 
 function QueueEditor(props: QueueEditorProps) {
@@ -191,6 +270,12 @@ function QueueEditor(props: QueueEditorProps) {
                     </div>
                 </div>
                 <div className="form-group row">
+                    <label htmlFor="allowed meeting types" className="col-md-2 col-form-label">Allowed Meeting Types:</label>
+                    <div className="col-md-6">
+                        <AllowedMeetingTypesForm queue={props.queue} onSubmit={props.onUpdateAllowedMeetingTypes} disabled={props.disabled}/>
+                    </div>
+                </div>
+                <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
                         <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
@@ -227,14 +312,9 @@ function QueueEditor(props: QueueEditorProps) {
             </div>
             <div className="row">
                 <div className="col-md-4">
-                    <SingleInputForm
-                        id="add_attendee"
-                        placeholder="Uniqname..."
-                        buttonType="success"
-                        onSubmit={props.onAddMeeting}
-                        disabled={props.disabled}>
-                            + Add Attendee
-                    </SingleInputForm>
+                    <AddAttendeeForm queue={props.queue} dropdownState={props.dropdownState}
+                    onChangeDropdownState={props.onChangeDropdownState} disabled={props.disabled}
+                    onSubmit={props.onAddMeeting}/>
                 </div>
             </div>
         </div>
@@ -362,7 +442,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const [users, setUsers] = useState(undefined as User[] | undefined);
     const usersWebSocketError = useUsersWebSocket(setUsers)
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
-    const [backendTypeDropdownState, setBackendTypeDropdownState] = useState(undefined as string | undefined);
+    const [backendTypeDropdownState, setBackendTypeDropdownState] = useState("default");
 
     //Setup interactions
     const removeHost = async (h: User) => {
@@ -391,15 +471,17 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string) => {
-        if (!backendTypeDropdownState) {
+        if (backendTypeDropdownState === "default") {
             throw new Error("Meeting Type is a required field.")
         }
+        const backendType = backendTypeDropdownState;
+        setBackendTypeDropdownState("default");
         uniqname = sanitizeUniqname(uniqname);
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
-        await api.addMeeting(queue!.id, user.id, backendTypeDropdownState);
+        await api.addMeeting(queue!.id, user.id, backendType);
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {
@@ -431,9 +513,16 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
+    const updateAllowedMeetingTypes = async (bluejeansAllowed: boolean, inpersonAllowed: boolean) => {
+        if (!bluejeansAllowed && !inpersonAllowed) {
+            throw new Error("Must have at least one allowed meeting type.")
+        }
+        await api.updateAllowedMeetingTypes(queue!.id, bluejeansAllowed, inpersonAllowed);
+    }
+    const [doUpdateAllowedMeetingTypes, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedMeetingTypes);
 
     //Render
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading || updateAllowedMeetingTypesLoading;
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
@@ -446,7 +535,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         {source: 'Queue Description', error: changeDescriptionError}, 
         {source: 'Delete Queue', error: removeQueueError}, 
         {source: 'Queue Status', error: setStatusError}, 
-        {source: 'Assignee', error: changeAssigneeError}
+        {source: 'Assignee', error: changeAssigneeError},
+        {source: 'Allowed Meeting Types', error: updateAllowedMeetingTypesError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
@@ -457,7 +547,10 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
             onChangeName={doChangeName} onChangeDescription={doChangeDescription}
             onSetStatus={doSetStatus} onRemoveQueue={confirmRemoveQueue}
-            onShowMeetingInfo={setVisibleMeetingDialog} onChangeAssignee={doChangeAssignee}/>
+            onShowMeetingInfo={setVisibleMeetingDialog} onChangeAssignee={doChangeAssignee}
+            dropdownState={backendTypeDropdownState}
+            onChangeDropdownState={setBackendTypeDropdownState}
+            onUpdateAllowedMeetingTypes={doUpdateAllowedMeetingTypes}/>
     return (
         <>
         <Dialog ref={dialogRef}/>

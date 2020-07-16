@@ -25,7 +25,7 @@ export interface Meeting {
     attendees: User[];
     agenda: string;
     assignee?: User;
-    backend_type?: "bluejeans"|"zoom"|"inperson";
+    backend_type: "bluejeans"|"zoom"|"inperson";
     backend_metadata?: BluejeansMetadata;
     created_at: string;
 }

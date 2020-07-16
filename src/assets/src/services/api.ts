@@ -229,3 +229,16 @@ export const changeMeetingType = async (meeting_id: number, backend_type: string
     return await resp.json();
 }
 
+export const updateAllowedMeetingTypes = async (queue_id: number, bluejeans_allowed: boolean, inperson_allowed: boolean) => {
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            bluejeans_allowed: bluejeans_allowed,
+            inperson_allowed: inperson_allowed,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
+

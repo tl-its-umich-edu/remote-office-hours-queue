@@ -293,7 +293,7 @@ export const convertMeetingTypeToDisplay = (backendType: string) => {
 
 interface MeetingTypeDropdownProps {
     options: DropdownValue[];
-    value: string;
+    defaultValue: string;
     onChangeValue: (value: string) => void;
 }
 
@@ -306,7 +306,7 @@ export const MeetingTypeDropdown: React.FC<MeetingTypeDropdownProps> = (props) =
     }
     
     return (
-        <select value={props.value} onChange={handleChange}>
+        <select defaultValue={props.defaultValue} onChange={handleChange}>
             <option value='default'>Meeting via...</option>
             {dropdownOptions}
         </select>

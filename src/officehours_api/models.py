@@ -84,7 +84,7 @@ class Meeting(SafeDeleteModel):
     ]
     backend_type = models.CharField(max_length=20,
                                     choices=MEETING_BACKEND_TYPES,
-                                    null=False, default='')
+                                    null=False, default='bluejeans')
     backend_metadata = JSONField(null=True, default=dict)
 
     def save(self, *args, **kwargs):
