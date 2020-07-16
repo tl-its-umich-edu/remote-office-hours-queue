@@ -32,7 +32,6 @@ export const useWebSocket = <T>(url: string, update: (content: T) => void, handl
         }
         ws.onclose = (e: CloseEvent) => {
             console.error(e);
-
             setError(new Error(closeCodes[e.code] ?? e.code.toString()));
         }
         ws.onerror = (e: Event) => {
