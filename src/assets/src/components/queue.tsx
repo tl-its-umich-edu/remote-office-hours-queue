@@ -12,7 +12,7 @@ import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import Dialog from "react-bootstrap-dialog";
-import { useQueueWebSocket, useUserWebSocket } from "../hooks/useWebSocket";
+import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 
 interface QueueAttendingProps {
     queue: QueueAttendee;

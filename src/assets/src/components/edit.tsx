@@ -16,7 +16,7 @@ import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
-import { useQueueWebSocket, useUsersWebSocket } from "../hooks/useWebSocket";
+import { useQueueWebSocket, useUsersWebSocket } from "../services/sockets";
 
 interface MeetingEditorProps {
     meeting: Meeting;

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { getMyUser as apiGetUser } from "../services/api";
 import { ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
-import { useUserWebSocket } from "../hooks/useWebSocket";
+import { useUserWebSocket } from "../services/sockets";
 
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
