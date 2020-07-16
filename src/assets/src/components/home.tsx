@@ -32,7 +32,7 @@ export function HomePage(props: PageProps) {
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setUser(u as MyUser));
 
     const errorSources = [
-        {source: 'Refresh User', error: userWebSocketError}
+        {source: 'User Connection', error: userWebSocketError}
     ].filter(e => e.error) as FormError[];
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueAlert = user?.my_queue
