@@ -63,7 +63,7 @@ export function ManagePage(props: PageProps) {
     const isChanging = addQueueLoading;
     const isLoading = refreshLoading || isChanging;
     const errorSources = [
-        {source: 'Refresh', error: refreshError}, 
+        {source: 'Queue Connection', error: refreshError}, 
         {source: 'Add Queue', error: addQueueError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);

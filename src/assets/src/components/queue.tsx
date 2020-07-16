@@ -249,7 +249,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const errorSources = [
-        {source: 'Refresh', error: queueWebSocketError}, 
+        {source: 'Queue Connection', error: queueWebSocketError}, 
         {source: 'Join Queue', error: joinQueueError}, 
         {source: 'Leave Queue', error: leaveQueueError}, 
         {source: 'Refresh My User', error: userWebSocketError}, 

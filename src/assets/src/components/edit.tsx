@@ -417,8 +417,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
     const errorSources = [
-        {source: 'Refresh', error: queueWebSocketError},
-        {source: 'Refresh Users', error: usersWebSocketError}, 
+        {source: 'Queue Connection', error: queueWebSocketError},
+        {source: 'Users Connection', error: usersWebSocketError}, 
         {source: 'Remove Host', error: removeHostError}, 
         {source: 'Add Host', error: addHostError}, 
         {source: 'Remove Meeting', error: removeMeetingError}, 
