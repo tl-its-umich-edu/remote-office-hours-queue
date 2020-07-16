@@ -3,9 +3,10 @@ from typing import Union
 
 from django.contrib.auth.models import User
 from django.dispatch import receiver
+from django.db import transaction
 from django.db.models.signals import post_save, post_delete, m2m_changed
 
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer, JsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
 from safedelete.signals import post_softdelete
@@ -17,7 +18,7 @@ from officehours_api.serializers import (
 )
 
 
-class QueueConsumer(AsyncJsonWebsocketConsumer):
+class QueueConsumer(JsonWebsocketConsumer):
     _queue_id: int
     _user: User
 
@@ -37,95 +38,77 @@ class QueueConsumer(AsyncJsonWebsocketConsumer):
     def user(self):
         return self._user
 
-    async def connect(self):
+    def connect(self):
         self._queue_id = int(self.scope['url_route']['kwargs']['queue_id'])
         self._user = self.scope["user"]
         try:
-            queue = await database_sync_to_async(
-                lambda: Queue.objects.get(pk=self.queue_id)
-            )()
+            queue = Queue.objects.get(pk=self.queue_id)
         except Queue.DoesNotExist:
-            await self.accept()
-            await self.close(code=4404)
+            self.accept()
+            self.close(code=4404)
             return
 
         QueueSerializer = (
             QueueHostSerializer
-            if await database_sync_to_async(lambda: is_host(self.user, queue))()
+            if is_host(self.user, queue)
             else QueueAttendeeSerializer
         )
 
-        await self.channel_layer.group_add(
+        async_to_sync(self.channel_layer.group_add)(
             self.group_name,
             self.channel_name
         )
-        await self.accept()
-        queue_data = await database_sync_to_async(
-            lambda: QueueSerializer(queue, context={'user': self.user}).data
-        )()
-        await self.send_json({
+        self.accept()
+        queue_data = QueueSerializer(queue, context={'user': self.user}).data
+        self.send_json({
             'type': 'init',
             'content': queue_data,
         })
 
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
             self.group_name,
             self.channel_name
         )
 
-    async def update(self, event):
-        queue = await database_sync_to_async(
-            lambda: Queue.objects.get(pk=self.queue_id)
-        )()
+    def queue_update(self, event):
+        queue = Queue.objects.get(pk=self.queue_id)
         QueueSerializer = (
             QueueHostSerializer
-            if await database_sync_to_async(lambda: is_host(self.user, queue))()
+            if is_host(self.user, queue)
             else QueueAttendeeSerializer
         )
-        queue_data = await database_sync_to_async(
-            lambda: QueueSerializer(
+        queue_data = QueueSerializer(
                 queue,
                 context={'user': self.user},
             ).data
-        )()
-        await self.send_json({
+        self.send_json({
             'type': 'update',
             'content': queue_data,
         })
 
-    async def deleted(self, event):
-        await self.send_json({
+    def queue_deleted(self, event):
+        self.send_json({
             'type': 'deleted',
         })
 
 
-def send_queue_update_sync(queue_id: int, channel_layer=None):
-    async_to_sync(send_queue_update)(queue_id, channel_layer)
-
-
-def send_queue_delete_sync(queue_id: int, channel_layer=None):
-    async_to_sync(send_queue_delete)(queue_id, channel_layer)
-
-
-async def send_queue_update(queue_id: int, channel_layer=None):
+def send_queue_update(queue_id: int, channel_layer=None):
     channel_layer = channel_layer or get_channel_layer()
-    await channel_layer.group_send(
+    async_to_sync(channel_layer.group_send)(
         QueueConsumer.get_group_name(queue_id),
         {
-            'type': 'update',
+            'type': 'queue.update',
         }
     )
 
 
-async def send_queue_delete(queue_id: int, channel_layer=None):
-    print('send_queue_delete')
-    print(queue_id)
+def send_queue_delete(queue_id: int, channel_layer=None):
     channel_layer = channel_layer or get_channel_layer()
-    await channel_layer.group_send(
+    async_to_sync(channel_layer.group_send)(
         QueueConsumer.get_group_name(queue_id),
         {
-            'type': 'deleted',
+            'type': 'queue.deleted',
         }
     )
 
@@ -134,12 +117,12 @@ async def send_queue_delete(queue_id: int, channel_layer=None):
 def trigger_queue_update(sender, instance: Queue, created, **kwargs):
     if instance.deleted:
         return
-    send_queue_update_sync(instance.id)
+    transaction.on_commit(lambda: send_queue_update(instance.id))
 
 
 @receiver(post_softdelete, sender=Queue)
 def trigger_queue_delete(sender, instance: Queue, **kwargs):
-    send_queue_delete_sync(instance.id)
+    transaction.on_commit(lambda: send_queue_delete(instance.id))
 
 
 @receiver(post_save, sender=Meeting)
@@ -147,16 +130,16 @@ def trigger_queue_delete(sender, instance: Queue, **kwargs):
 def trigger_queue_update_for_meeting(sender, instance: Meeting, **kwargs):
     if instance.queue_id is None:
         return
-    send_queue_update_sync(instance.queue_id)
+    transaction.on_commit(lambda: send_queue_update(instance.queue_id))
 
 
 @receiver(m2m_changed, sender=Queue.hosts.through)
 def trigger_queue_update_for_hosts(sender, instance, action, **kwargs):
     if action == "post_remove" or action == "post_clear" or action == "post_add":
-        send_queue_update_sync(instance.id)
+        transaction.on_commit(lambda: send_queue_update(instance.id))
 
 
-class UsersConsumer(AsyncJsonWebsocketConsumer):
+class UsersConsumer(JsonWebsocketConsumer):
     _user: User
     group_name = "users"
 
@@ -164,48 +147,58 @@ class UsersConsumer(AsyncJsonWebsocketConsumer):
     def user(self):
         return self._user
 
-    async def connect(self):
+    def _get_users(self):
+        return list(
+            UserSerializer(u, context={'user': self.user}).data
+            for u in User.objects.all()
+        )
+
+    def connect(self):
         self._user = self.scope["user"]
-        users = await database_sync_to_async(
-            lambda: User.objects.all()
-        )()
-        await self.channel_layer.group_add(
+        async_to_sync(self.channel_layer.group_add)(
             self.group_name,
             self.channel_name
         )
-        await self.accept()
-        users_data = await database_sync_to_async(
-            lambda: list(
-                UserSerializer(u, context={'user': self.user}).data
-                for u in users
-            )
-        )()
-        await self.send_json({
+        self.accept()
+        users_data = self._get_users()
+        self.send_json({
             'type': 'init',
             'content': users_data,
         })
 
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
             self.group_name,
             self.channel_name
         )
 
-    async def update(self, event):
+    def users_update(self, event):
         # Doesn't scale well - should send only the updated parts instead
-        users_data = await database_sync_to_async(
-            lambda: list(
-                UserSerializer(u, context={'user': self.user}).data
-                for u in User.objects.all()
-            )
-        )()
-        await self.send_json({
+        users_data = self._get_users()
+        self.send_json({
             'type': 'update',
             'content': users_data,
         })
 
 
-class UserConsumer(AsyncJsonWebsocketConsumer):
+def send_users_update(channel_layer=None):
+    channel_layer = channel_layer or get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        UsersConsumer.group_name,
+        {
+            'type': 'users.update',
+        }
+    )
+
+@receiver(post_save, sender=User)
+@receiver(post_delete, sender=User)
+@receiver(post_save, sender=Profile)
+@receiver(post_delete, sender=Profile)
+def trigger_users_update(sender, instance: User, created, **kwargs):
+    transaction.on_commit(send_users_update)
+
+
+class UserConsumer(JsonWebsocketConsumer):
     _user_id: int
     _user: User
 
@@ -225,115 +218,81 @@ class UserConsumer(AsyncJsonWebsocketConsumer):
     def user(self):
         return self._user
 
-    async def connect(self):
+    def connect(self):
         self._user_id = int(self.scope['url_route']['kwargs']['user_id'])
         self._user = self.scope["user"]
-        await self.channel_layer.group_add(
+        async_to_sync(self.channel_layer.group_add)(
             self.group_name,
             self.channel_name
         )
-        await self.accept()
+        self.accept()
         try:
-            user_data = await database_sync_to_async(
-                lambda: UserSerializer(
-                    User.objects.get(pk=self.user_id), context={'user': self.user}
-                ).data
-            )()
+            user_data = UserSerializer(
+                User.objects.get(pk=self.user_id), context={'user': self.user}
+            ).data
         except User.DoesNotExist:
-            await self.close(code=4404)
+            self.close(code=4404)
             return
-        await self.send_json({
+        self.send_json({
             'type': 'init',
             'content': user_data,
         })
 
-    async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
             self.group_name,
             self.channel_name
         )
 
-    async def update(self, event):
-        user_data = await database_sync_to_async(
-            lambda: UserSerializer(
+    def user_update(self, event):
+        user_data = UserSerializer(
                 User.objects.get(pk=self.user_id), context={'user': self.user}
             ).data
-        )()
-        await self.send_json({
+        self.send_json({
             'type': 'update',
             'content': user_data,
         })
 
-    async def deleted(self, event):
-        await self.send_json({
+    def user_deleted(self, event):
+        self.send_json({
             'type': 'deleted',
         })
 
 
-def send_user_update_sync(user_id: int, channel_layer=None):
-    async_to_sync(send_user_update)(user_id, channel_layer)
-
-
-def send_user_deleted_sync(user_id: int, channel_layer=None):
-    async_to_sync(send_user_deleted)(user_id, channel_layer)
-
-
-def send_users_update_sync(channel_layer=None):
-    async_to_sync(send_users_update)(channel_layer)
-
-
-async def send_user_update(user_id: int, channel_layer=None):
+def send_user_update(user_id: int, channel_layer=None):
     channel_layer = channel_layer or get_channel_layer()
-    await channel_layer.group_send(
+    async_to_sync(channel_layer.group_send)(
         UserConsumer.get_group_name(user_id),
         {
-            'type': 'update',
+            'type': 'user.update',
         }
     )
 
 
-async def send_user_deleted(user_id: int, channel_layer=None):
+def send_user_deleted(user_id: int, channel_layer=None):
     channel_layer = channel_layer or get_channel_layer()
-    await channel_layer.group_send(
+    async_to_sync(channel_layer.group_send)(
         UserConsumer.get_group_name(user_id),
         {
-            'type': 'deleted',
+            'type': 'user.deleted',
         }
     )
-
-
-async def send_users_update(channel_layer=None):
-    channel_layer = channel_layer or get_channel_layer()
-    await channel_layer.group_send(
-        UsersConsumer.group_name,
-        {
-            'type': 'update',
-        }
-    )
-
-
-@receiver(post_save, sender=User)
-@receiver(post_delete, sender=User)
-@receiver(post_save, sender=Profile)
-@receiver(post_delete, sender=Profile)
-def trigger_users_update(sender, instance: User, created, **kwargs):
-    send_users_update_sync()
 
 
 @receiver(post_save, sender=User)
 def trigger_user_update(sender, instance: User, **kwargs):
-    send_user_update_sync(instance.id)
+    transaction.on_commit(lambda: send_user_update(instance.id))
 
 
 @receiver(post_delete, sender=User)
 def trigger_user_deleted(sender, instance: User, **kwargs):
-    send_user_deleted_sync(instance.id)
+    transaction.on_commit(lambda: send_user_deleted(instance.id))
 
 
 @receiver(post_save, sender=Profile)
 @receiver(post_delete, sender=Profile)
 def trigger_user_update_for_profile(sender, instance: Profile, **kwargs):
-    send_user_update_sync(instance.user.id)
+    transaction.on_commit(lambda: send_user_update(instance.user.id))
 
 
 @receiver(m2m_changed, sender=User.meeting_set.through)
@@ -348,7 +307,7 @@ def trigger_user_update_for_meetings(
     ):
         return
     if isinstance(instance, User):
-        send_user_update_sync(instance.id)
+        transaction.on_commit(lambda: send_user_update(instance.id))
     else:  # is Meeting
         for user_id in pk_set:
-            send_user_update_sync(user_id)
+            transaction.on_commit(lambda: send_user_update(user_id))
