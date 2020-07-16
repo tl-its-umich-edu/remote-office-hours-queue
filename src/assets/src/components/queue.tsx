@@ -241,6 +241,9 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 }
 
 function QueueAttending(props: QueueAttendingProps) {
+    useEffect(() => {
+        props.onChangeDropdownState(props.queue?.my_meeting ? props.queue.my_meeting.backend_type : "default");
+    }, []);
     const description = props.queue.description.trim()
         && <p className="lead">{props.queue.description.trim()}</p>
     const content = !props.queue.my_meeting
