@@ -11,7 +11,7 @@ import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
-import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
+import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
@@ -339,7 +339,12 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
-    const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueue);
+    const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
+        if (!q) setQueue(q);
+        else if (isQueueHost(q)) setQueue(q);
+        else setQueue(undefined);
+    }
+    const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
     const [users, setUsers] = useState(undefined as User[] | undefined);
     const usersWebSocketError = useUsersWebSocket(setUsers)
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
@@ -383,12 +388,12 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         recordQueueManagementEvent("Changed Name");
         return await api.changeQueueName(queue!.id, name);
     }
-    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue);
+    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueueChecked);
     const changeDescription = async (description: string) => {
         recordQueueManagementEvent("Changed Description");
         return await api.changeQueueDescription(queue!.id, description);
     }
-    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueue);
+    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueueChecked);
     const removeQueue = async () => {
         recordQueueManagementEvent("Removed Host");
         await api.deleteQueue(queue!.id);
@@ -402,7 +407,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         recordQueueManagementEvent("Set Open/Close: " + open);
         return await api.setStatus(queue!.id, open);
     }
-    const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueue);
+    const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueueChecked);
     const changeAssignee = async (assignee: User | undefined, meeting: Meeting) => {
         recordQueueManagementEvent("Changed Assignee");
         await api.changeMeetingAssignee(meeting.id, assignee?.id);

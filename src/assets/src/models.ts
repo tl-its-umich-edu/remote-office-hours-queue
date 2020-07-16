@@ -39,6 +39,10 @@ export interface QueueAttendee extends QueueBase {
     line_length: number;
 }
 
+export const isQueueHost = (q: QueueAttendee | QueueHost): q is QueueHost => {
+    return (q as QueueHost).meeting_set !== undefined;
+}
+
 export interface QueueBase {
     id: number;
     name: string;
