@@ -88,19 +88,20 @@ class Meeting(SafeDeleteModel):
     backend_metadata = JSONField(null=True, default=dict)
 
     def save(self, *args, **kwargs):
-        if not self.backend_type and bluejeans:
-            self.backend_type = 'bluejeans'
-        if self.backend_type:
+        if self.backend_type == 'inperson':
+            backend = None
+        else:
             backend = globals()[self.backend_type]
-            if backend:
-                user_email = self.queue.hosts.first().email
-                self.backend_metadata['user_email'] = user_email
-                try:
-                    self.backend_metadata = backend.save_user_meeting(
-                        self.backend_metadata,
-                    )
-                except RequestException as ex:
-                    raise BackendException(self.backend_type) from ex
+        if backend:
+            user_email = self.queue.hosts.first().email
+            self.backend_metadata['user_email'] = user_email
+            try:
+                self.backend_metadata = backend.save_user_meeting(
+                    self.backend_metadata,
+                )
+            except RequestException as ex:
+                raise BackendException(self.backend_type) from ex
+
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
