@@ -29,7 +29,7 @@ function QueueLookup() {
 
 export function HomePage(props: PageProps) {
     const [user, setUser] = useState(undefined as MyUser | undefined);
-    const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setUser(u as MyUser));
+    const userWebSocketError = useUserWebSocket(props.user?.id, (u) => setUser(u as MyUser));
 
     const errorSources = [
         {source: 'User Connection', error: userWebSocketError}

@@ -16,9 +16,11 @@ export const useUsersWebSocket = (update: (users: User[]) => void) => {
     );
 }
 
-export const useUserWebSocket = (user_id: number, update: (user: User | MyUser) => void) => {
-    return useWebSocket(
-        `ws://${location.host}/ws/users/${user_id}/`,
-        update,
-    );
+export const useUserWebSocket = (user_id: number | undefined, update: (user: User | MyUser) => void) => {
+    return typeof user_id === "number"
+        ? useWebSocket(
+            `ws://${location.host}/ws/users/${user_id}/`,
+            update,
+        )
+        : undefined;
 }
