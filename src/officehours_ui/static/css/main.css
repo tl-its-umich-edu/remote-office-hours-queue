@@ -623,3 +623,12 @@ div[role=main] {
 	display:flex;
 	justify-content: center;
 }
+
+.select-dropdown {
+	background-color: #dcdcdc;
+	color: #393939;
+}
+
+.required {
+	color: #cc0000;
+}
