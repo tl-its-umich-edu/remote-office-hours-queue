@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+  name: redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: redis
+        org: umich
+        project: officehours
+        variant: dev
+    spec:
+      containers:
+      - image: redis:5
+        name: redis
+        resources: {}
+      restartPolicy: Always
+status: {}
