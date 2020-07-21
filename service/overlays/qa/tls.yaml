@@ -1,0 +1,10 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web
+spec:
+  tls:
+  - hosts:
+    - qa.officehours.it.umich.edu
+    - www.qa.officehours.it.umich.edu
+    secretName: web-tls
