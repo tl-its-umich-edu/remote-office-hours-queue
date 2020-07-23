@@ -34,10 +34,13 @@ function MeetingEditor(props: MeetingEditorProps) {
         ? (props.meeting.backend_metadata as BluejeansMetadata).meeting_url
         : undefined;
     const joinLink = joinUrl 
-        && (
+        ? (
             <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
                 Start Meeting
             </a>
+        )
+        : (
+            <a className="btn btn-light btn-sm mr-2">In Person</a>
         );
     const infoButton = (
         <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="link" size="sm" className="mr-2">
@@ -150,12 +153,18 @@ function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
     }
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        props.onSubmit(bluejeansCheckbox, inpersonCheckbox);
+        const currentBluejeansCheckbox = bluejeansCheckbox;
+        const currentInpersonCheckbox = inpersonCheckbox;
+        if (!bluejeansCheckbox && !inpersonCheckbox) {
+            setBluejeansCheckbox(props.queue.bluejeans_allowed);
+            setInpersonCheckbox(props.queue.inperson_allowed);
+        }
+        props.onSubmit(currentBluejeansCheckbox, currentInpersonCheckbox);
     }
     return (
         <form onSubmit={submit} className="input-group">
             <label htmlFor="bluejeans">BlueJeans:</label>
-            <input name="BlueJeans" type="checkbox" checked={bluejeansCheckbox} onChange={handleChange}/>
+            <input name="bluejeans" type="checkbox" checked={bluejeansCheckbox} onChange={handleChange}/>
             <div className="input-group-append">
                 <label htmlFor="inperson">InPerson:</label>
                 <input name="inperson" type="checkbox" checked={inpersonCheckbox} onChange={handleChange}/>
@@ -375,7 +384,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
         );
     const metadataInfo = props.meeting?.backend_type === "bluejeans"
         ? <BlueJeansMeetingInfo metadata={props.meeting!.backend_metadata!} />
-        : <div></div>
+        : <div><p>This meeting will be <strong>in person</strong>.</p></div>
     return (
         <Modal show={!!props.meeting} onHide={props.onClose}>
             <Modal.Header closeButton>
@@ -514,8 +523,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
     const updateAllowedMeetingTypes = async (bluejeansAllowed: boolean, inpersonAllowed: boolean) => {
-        if (!bluejeansAllowed && !inpersonAllowed) {
-            throw new Error("Must have at least one allowed meeting type.")
+        if (!bluejeansAllowed && !inpersonAllowed) {    
+            throw new Error("Must have at least one allowed meeting type.");
         }
         await api.updateAllowedMeetingTypes(queue!.id, bluejeansAllowed, inpersonAllowed);
     }
