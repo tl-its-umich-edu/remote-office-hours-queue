@@ -3,6 +3,8 @@ kind: Kustomization
 commonLabels:
   org: umich
 resources:
+- redis-deployment.yaml
+- redis-service.yaml
 - web-deployment.yaml
 - web-service.yaml
 - web-ingress.yaml
@@ -30,6 +32,7 @@ secretGenerator:
   - secret/ADMIN_EMAIL
   - secret/EMAIL_HOST
   - secret/GA_TRACKING_ID
+  - secret/REDIS_HOST
   type: Opaque
 - name: web-tls
   type: "kubernetes.io/tls"

@@ -98,8 +98,16 @@ class Meeting(SafeDeleteModel):
                     )
                 except RequestException as ex:
                     raise BackendException(self.backend_type) from ex
-
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Trigger m2m "remove" signals for attendees
+        self.attendees.remove(*self.attendees.all())
+        self.save()
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.id}: {self.backend_type} {self.backend_metadata}'
 
 
 class Attendee(SafeDeleteModel):
@@ -118,10 +126,11 @@ class Attendee(SafeDeleteModel):
     )
 
     def __str__(self):
-        return f'user={self.user.username}'
+        return f'attendee_user={self.user.username}'
+
 
 @receiver(post_save, sender=User)
-def post_save_user_signal_handler(sender, instance, created, **kwargs):
+def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
     try:
         instance.profile
     except User.profile.RelatedObjectDoesNotExist:

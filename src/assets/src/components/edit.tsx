@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, createRef, ChangeEvent } from "react";
+import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import Dialog from "react-bootstrap-dialog";
@@ -11,13 +11,12 @@ import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
-import { User, QueueHost, Meeting, BluejeansMetadata } from "../models";
+import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
 import { usePromise } from "../hooks/usePromise";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
-import { Subject } from "rxjs";
+import { useQueueWebSocket, useUsersWebSocket } from "../services/sockets";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -313,8 +312,7 @@ const recordQueueManagementEvent = (action: string) => {
     });
 }
 
-const showConfirmation = (dialog: React.RefObject<Dialog>, interactions: Subject<boolean>, action: () => void, title: string, actionDescription: string) => {
-    interactions.next(true);
+const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, actionDescription: string) => {
     dialog.current!.show({
         title: title,
         body: `Are you sure you want to ${actionDescription}?`,
@@ -341,118 +339,86 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(async () => {
-        try {
-            return await api.getQueue(queueIdParsed) as QueueHost;
-        } catch(err) {
-            if (err.message === "Not Found") {
-                redirectToSearch(queue_id);
-            } else {
-                throw err;
-            }
-        }
-    }, setQueue);
-    useEffect(() => {
-        doRefresh();
-    }, []);
-    const [interactions] = useAutoRefresh(doRefresh);
+    const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
+        if (!q) setQueue(q);
+        else if (isQueueHost(q)) setQueue(q);
+        else setQueue(undefined);
+    }
+    const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
     const [users, setUsers] = useState(undefined as User[] | undefined);
-    const [doRefreshUsers, refreshUsersLoading, refreshUsersError] = usePromise(() => api.getUsers(), setUsers);
-    useEffect(() => {
-        doRefreshUsers();
-    }, []);
-    useAutoRefresh(doRefreshUsers, 6000);
+    const usersWebSocketError = useUsersWebSocket(setUsers)
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
     const removeHost = async (h: User) => {
-        interactions.next(true);
         recordQueueManagementEvent("Removed Host");
         await api.removeHost(queue!.id, h.id);
-        await doRefresh();
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
     const confirmRemoveHost = (h: User) => {
-        showConfirmation(dialogRef, interactions, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
+        showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
     }
     const addHost = async (uniqname: string) => {
-        interactions.next(true);
         uniqname = sanitizeUniqname(uniqname);
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
-        await doRefresh();
     }
     const [doAddHost, addHostLoading, addHostError] = usePromise(addHost);
     const removeMeeting = async (m: Meeting) => {
-        interactions.next(true);
         recordQueueManagementEvent("Removed Meeting");
         await api.removeMeeting(m.id);
-        await doRefresh();
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
     const confirmRemoveMeeting = (m: Meeting) => {
-        showConfirmation(dialogRef, interactions, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
+        showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string) => {
-        interactions.next(true);
         uniqname = sanitizeUniqname(uniqname);
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id);
-        await doRefresh();
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {
-        interactions.next(true);
         recordQueueManagementEvent("Changed Name");
         return await api.changeQueueName(queue!.id, name);
     }
-    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueue);
+    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueueChecked);
     const changeDescription = async (description: string) => {
-        interactions.next(true);
         recordQueueManagementEvent("Changed Description");
         return await api.changeQueueDescription(queue!.id, description);
     }
-    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueue);
+    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueueChecked);
     const removeQueue = async () => {
-        interactions.next(true);
         recordQueueManagementEvent("Removed Host");
         await api.deleteQueue(queue!.id);
         location.href = '/manage';
     }
     const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue);
     const confirmRemoveQueue = () => {
-        showConfirmation(dialogRef, interactions, () => doRemoveQueue(), "Delete Queue?", "permanently delete this queue");
+        showConfirmation(dialogRef, () => doRemoveQueue(), "Delete Queue?", "permanently delete this queue");
     }
     const setStatus = async (open: boolean) => {
-        interactions.next(true);
         recordQueueManagementEvent("Set Open/Close: " + open);
         return await api.setStatus(queue!.id, open);
     }
-    const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueue);
+    const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueueChecked);
     const changeAssignee = async (assignee: User | undefined, meeting: Meeting) => {
-        console.log("assignee")
-        console.log(assignee)
-        console.log("meeting")
-        console.log(meeting)
-        interactions.next(true);
         recordQueueManagementEvent("Changed Assignee");
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
-        await doRefresh();
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
 
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
-    const isLoading = refreshLoading || refreshUsersLoading || isChanging;
     const errorSources = [
-        {source: 'Refresh', error: refreshError},
-        {source: 'Refresh Users', error: refreshUsersError}, 
+        {source: 'Queue Connection', error: queueWebSocketError},
+        {source: 'Users Connection', error: usersWebSocketError}, 
         {source: 'Remove Host', error: removeHostError}, 
         {source: 'Add Host', error: addHostError}, 
         {source: 'Remove Meeting', error: removeMeetingError}, 
@@ -464,7 +430,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         {source: 'Assignee', error: changeAssigneeError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
         && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}

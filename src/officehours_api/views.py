@@ -34,18 +34,32 @@ def api_root(request, format=None):
     })
 
 
-class UserList(generics.ListAPIView):
+class DecoupledContextMixin:
+    """Decouple the context from the view layer."""
+    def get_serializer_context(self):
+        action = {
+            'POST': 'WRITE',
+            'GET': 'READ',
+            'PUT': 'UPDATE',
+        }.get(self.request._request.method, self.request._request.method)
+        return {
+            'user': self.request.user,
+            'action': action,
+        }
+
+
+class UserList(DecoupledContextMixin, generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserListSerializer
 
 
-class UserDetail(generics.RetrieveAPIView):
+class UserDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated, IsCurrentUser,)
 
 
-class QueueList(LoggingMixin, generics.ListCreateAPIView):
+class QueueList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
     serializer_class = QueueHostSerializer
 
@@ -57,7 +71,7 @@ class QueueList(LoggingMixin, generics.ListCreateAPIView):
         return Queue.objects.filter(hosts__in=list(filter(None, [user])))
 
 
-class QueueListSearch(generics.ListAPIView):
+class QueueListSearch(DecoupledContextMixin, generics.ListAPIView):
     queryset = Queue.objects.all()
     serializer_class = QueueAttendeeSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
@@ -65,7 +79,7 @@ class QueueListSearch(generics.ListAPIView):
     filterset_fields = ['status']
 
 
-class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
+class QueueDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Queue.objects.all()
     serializer_class = QueueHostSerializer
@@ -74,13 +88,13 @@ class QueueDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     def get(self, request, pk, format=None):
         queue = self.get_object()
         if is_host(request.user, queue):
-            serializer = QueueHostSerializer(queue, context={'request': request})
+            serializer = QueueHostSerializer(queue, context={'user': request.user})
         else:
-            serializer = QueueAttendeeSerializer(queue, context={'request': request})
+            serializer = QueueAttendeeSerializer(queue, context={'user': request.user})
         return Response(serializer.data)
 
 
-class QueueHostDetail(LoggingMixin, APIView):
+class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
     logging_methods = settings.LOGGING_METHODS
 
     def check_queue_permission(self, request, queue):
@@ -96,7 +110,7 @@ class QueueHostDetail(LoggingMixin, APIView):
         except ObjectDoesNotExist:
             return Response({'detail': 'Host not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = UserListSerializer(host, context={'request': request})
+        serializer = UserListSerializer(host, context={'user': request.user})
         return Response(serializer.data)
 
     def post(self, request, pk, user_id, format=None):
@@ -104,7 +118,7 @@ class QueueHostDetail(LoggingMixin, APIView):
         self.check_queue_permission(request, queue)
         host = get_object_or_404(User, pk=user_id)
         queue.hosts.add(host)
-        serializer = UserListSerializer(host, context={'request': request})
+        serializer = UserListSerializer(host, context={'user': request.user})
         return Response(serializer.data)
 
     def delete(self, request, pk, user_id, format=None):
@@ -115,7 +129,7 @@ class QueueHostDetail(LoggingMixin, APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class MeetingList(LoggingMixin, generics.ListCreateAPIView):
+class MeetingList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
     serializer_class = MeetingSerializer
 
@@ -124,14 +138,14 @@ class MeetingList(LoggingMixin, generics.ListCreateAPIView):
         return Meeting.objects.filter(attendees__in=[user])
 
 
-class MeetingDetail(LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
+class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Meeting.objects.all()
     serializer_class = MeetingSerializer
     permission_classes = (IsAuthenticated, IsHostOrAttendee,)
 
 
-class AttendeeList(generics.ListAPIView):
+class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
     serializer_class = AttendeeSerializer
 
     def get_queryset(self):
@@ -139,7 +153,7 @@ class AttendeeList(generics.ListAPIView):
         return Attendee.objects.filter(user=user)
 
 
-class AttendeeDetail(generics.RetrieveAPIView):
+class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
 

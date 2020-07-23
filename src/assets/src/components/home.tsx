@@ -1,12 +1,10 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MyUser } from "../models";
 import { Link } from "react-router-dom";
-import { usePromise } from "../hooks/usePromise";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
-import { getMyUser as apiGetUser } from "../services/api";
-import { LoadingDisplay, ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
+import { ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
+import { useUserWebSocket } from "../services/sockets";
 
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
@@ -30,22 +28,12 @@ function QueueLookup() {
 }
 
 export function HomePage(props: PageProps) {
-    const getUser = async () => {
-        if (!props.user) return;
-        return await apiGetUser(props.user.id)
-    }
     const [user, setUser] = useState(undefined as MyUser | undefined);
-    const [doRefreshUser, refreshUserLoading, refreshUserError] = usePromise(getUser, setUser);
-    useEffect(() => {
-        doRefreshUser();
-    }, []);
-    useAutoRefresh(doRefreshUser, 10000);
+    const userWebSocketError = useUserWebSocket(props.user?.id, (u) => setUser(u as MyUser));
 
-    const isLoading = refreshUserLoading;
     const errorSources = [
-        {source: 'Refresh User', error: refreshUserError}
+        {source: 'User Connection', error: userWebSocketError}
     ].filter(e => e.error) as FormError[];
-    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueAlert = user?.my_queue
         && <JoinedQueueAlert joinedQueue={user.my_queue}/>
@@ -75,7 +63,6 @@ export function HomePage(props: PageProps) {
         <div>
             <Breadcrumbs currentPageTitle="Home"/>
             <div>
-                {loadingDisplay}
                 {errorDisplay}
                 <h1 className="display-4">Remote Office Hours Queue</h1>
                 {body}

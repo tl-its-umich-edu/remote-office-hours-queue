@@ -40,6 +40,7 @@ secretGenerator:
   - secret/OIDC_OP_USER_ENDPOINT
   - secret/OIDC_OP_JWKS_ENDPOINT
   - secret/GA_TRACKING_ID
+  - secret/REDIS_HOST
 - name: web-tls
   behavior: replace
   type: "kubernetes.io/tls"
