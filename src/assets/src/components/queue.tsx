@@ -168,7 +168,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 {props.disabled && DisabledMessage}
             </button>;
     const changeMeetingType = props.queue.my_meeting?.assignee 
-        ? <small>A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
+        ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
     return (
         <>
@@ -179,7 +179,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <div className="card-body">
                 <p className="card-text card-text-spacing">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
                 <p className="card-text card-text-spacing">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
-                <div className="row col-lg">
+                <div className="row col-lg meeting-type-text-container">
                     <p className="card-text card-text-spacing">Meeting via: <strong>{convertMeetingTypeToDisplay(props.queue.my_meeting!.backend_type as string)}</strong></p>
                     {changeMeetingType}
                 </div>
