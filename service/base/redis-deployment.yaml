@@ -20,6 +20,7 @@ spec:
       containers:
       - image: redis:5
         name: redis
+        command: ["redis-server", "--stop-writes-on-bgsave-error", "no"]
         resources: {}
       restartPolicy: Always
 status: {}
