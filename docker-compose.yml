@@ -14,7 +14,7 @@ services:
     ports:
       - 8003:8001
     volumes:
-      - ./src:/usr/src/app
+      - ./src:/usr/src/app:z
     command: "python manage.py runserver 0.0.0.0:8001"
     depends_on:
       - database
@@ -38,7 +38,7 @@ services:
       target: node-webpack
     command: npm run watch
     volumes:
-      - ./src:/usr/src/app:delegated
+      - ./src:/usr/src/app:z
       - /usr/src/app/node_modules/
 
 volumes:
