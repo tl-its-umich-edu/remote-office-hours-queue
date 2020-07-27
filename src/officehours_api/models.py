@@ -72,9 +72,12 @@ class Meeting(SafeDeleteModel):
         (key, value.friendly_name)
         for key, value in settings.BACKENDS.items()
     ]
-    backend_type = models.CharField(max_length=20,
-                                    choices=MEETING_BACKEND_TYPES,
-                                    null=False, default='bluejeans')  # Pull default from settings?
+    backend_type = models.CharField(
+        max_length=20,
+        choices=MEETING_BACKEND_TYPES,
+        null=False,
+        default=settings.DEFAULT_BACKEND,
+    )
     backend_metadata = JSONField(null=True, default=dict)
 
     def save(self, *args, **kwargs):
