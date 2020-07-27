@@ -14,7 +14,7 @@ import os
 
 import dj_database_url
 
-from officehours_api.backends.bluejeans import Bluejeans
+from officehours_api.backends.bluejeans import BluejeansBackend
 from officehours_api.backends.inperson import InPersonBackend
 
 
@@ -40,7 +40,7 @@ BACKENDS = {
 }
 DEFAULT_BACKEND = "inperson"
 if BLUEJEANS_CLIENT_ID and BLUEJEANS_CLIENT_SECRET:
-    BACKENDS['bluejeans'] = Bluejeans(
+    BACKENDS['bluejeans'] = BluejeansBackend(
         client_id=BLUEJEANS_CLIENT_ID,
         client_secret=BLUEJEANS_CLIENT_SECRET,
     )

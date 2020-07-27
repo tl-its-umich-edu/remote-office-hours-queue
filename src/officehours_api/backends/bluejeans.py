@@ -17,8 +17,7 @@ class BluejeansUser(BluejeansUserExtraFields):
     uri: str
 
 
-class Bluejeans:
-    friendly_name = 'BlueJeans'
+class BluejeansClient:
     _base_url = 'https://api.bluejeans.com'
 
     def __init__(self, client_id, client_secret):
@@ -58,7 +57,7 @@ class Bluejeans:
         self._access_token_expires = time.time() - data['expires_in'] - 60
         self._enterprise_id = data['scope']['enterprise']
 
-    def _get_user(self, user_email) -> Optional[BluejeansUser]:
+    def get_user(self, user_email) -> Optional[BluejeansUser]:
         params = {
             'emailId': user_email,
             'fields': tuple(BluejeansUserExtraFields.__annotations__.keys()),
@@ -77,7 +76,7 @@ class Bluejeans:
             return None
         return r['users'][0]
 
-    def _create_meeting(self, user_id, meeting_settings=None):
+    def create_meeting(self, user_id, meeting_settings=None):
         now = round(time.time()) * 1000
 
         if not meeting_settings:
@@ -99,7 +98,7 @@ class Bluejeans:
 
         return resp.json()
 
-    def _read_meeting(self, user_id, meeting_id):
+    def read_meeting(self, user_id, meeting_id):
         resp = self._session.get(
             self._base_url + f'/v1/user/{user_id}' +
             f'/scheduled_meeting/{meeting_id}'
@@ -107,14 +106,14 @@ class Bluejeans:
         resp.raise_for_status()
         return resp.json()
 
-    def _delete_meeting(self, user_id, meeting_id):
+    def delete_meeting(self, user_id, meeting_id):
         resp = self._session.delete(
             self._base_url + f'/v1/user/{user_id}' +
             f'/scheduled_meeting/{meeting_id}'
         )
         resp.raise_for_status()
 
-    def _update_meeting(self, user_id, meeting_id, meeting):
+    def update_meeting(self, user_id, meeting_id, meeting):
         resp = self._session.put(
             self._base_url + f'/v1/user/{user_id}' +
             f'/scheduled_meeting/{meeting_id}',
@@ -123,13 +122,21 @@ class Bluejeans:
         resp.raise_for_status()
         return resp.json()
 
+
+class BluejeansBackend:
+    friendly_name = 'BlueJeans'
+    _client: BluejeansClient
+
+    def __init__(self, client_id, client_secret):
+        self._client = BluejeansClient(client_id, client_secret)
+
     def save_user_meeting(self, backend_metadata={}):
         user_email = backend_metadata['user_email']
 
         if backend_metadata.get('meeting_id'):
             return backend_metadata
 
-        user = self._get_user(user_email=user_email)
+        user = self._client.get_user(user_email=user_email)
         if not user:
             raise ValidationError(
                 f'There is no BlueJeans account associated with {user_email}. '
@@ -137,7 +144,7 @@ class Bluejeans:
             )
 
         now = round(time.time()) * 1000
-        meeting = self._create_meeting(
+        meeting = self._client.create_meeting(
             user['id'],
             meeting_settings={
                 'title': (

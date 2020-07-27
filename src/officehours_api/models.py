@@ -86,15 +86,14 @@ class Meeting(SafeDeleteModel):
 
     def save(self, *args, **kwargs):
         backend = settings.BACKENDS[self.backend_type]
-        if backend:
-            user_email = self.queue.hosts.first().email
-            self.backend_metadata['user_email'] = user_email
-            try:
-                self.backend_metadata = backend.save_user_meeting(
-                    self.backend_metadata,
-                )
-            except RequestException as ex:
-                raise BackendException(self.backend_type) from ex
+        user_email = self.queue.hosts.first().email
+        self.backend_metadata['user_email'] = user_email
+        try:
+            self.backend_metadata = backend.save_user_meeting(
+                self.backend_metadata,
+            )
+        except RequestException as ex:
+            raise BackendException(self.backend_type) from ex
 
         super().save(*args, **kwargs)
 
