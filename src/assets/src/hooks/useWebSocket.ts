@@ -10,7 +10,7 @@ const closeCodes = {
     4404: "The resource you're looking for could not be found. Maybe it was deleted?",
 } as {[closeCode: number]: string}
 
-export const useWebSocket = <T>(url: string, update: (content: T) => void, handleDeleted=true) => {
+export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onDelete?: (setError: (React.Dispatch<React.SetStateAction<Error | undefined>>)) => void) => {
     const [error, setError] = useState(undefined as Error | undefined);
     useEffect(() => {
         const ws = new WebSocket(url);
@@ -19,18 +19,22 @@ export const useWebSocket = <T>(url: string, update: (content: T) => void, handl
             console.log(m);
             switch(m.type) {
                 case "init":
-                    update(m.content as T);
+                    onUpdate(m.content as T);
                     break;
                 case "update":
-                    update(m.content as T);
+                    onUpdate(m.content as T);
                     break;
                 case "deleted":
-                    if (handleDeleted) update(undefined!);
-                    else throw new Error("Unexpected message type 'deleted': " + e);
+                    if (onDelete) {
+                        onDelete(setError);
+                    } else {
+                        throw new Error("Unexpected message type 'deleted': " + e);
+                    }
                     break;
             }
         }
         ws.onclose = (e: CloseEvent) => {
+            if (e.code === 1000) return;
             console.error(e);
             setError(new Error(closeCodes[e.code] ?? e.code.toString()));
         }
