@@ -10,6 +10,7 @@ import { ManagePage } from "../components/manage";
 import { QueuePage } from "../components/queue";
 import { QueueEditorPage } from "../components/edit";
 import { SearchPage } from "../components/search";
+import { AddQueuePage } from "../components/add_queue";
 import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
 
 interface AppProps extends RouteComponentProps {
@@ -34,6 +35,9 @@ function App(props: AppProps) {
             }/>
             <Route path='/search/:term' exact render={p =>
                 <SearchPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} defaultBackend={props.globals.default_backend} />
+            }/>
+            <Route path='/add_queue' exact render={p =>
+                <AddQueuePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} defaultBackend={props.globals.default_backend} />
             }/>
         </Switch>
     );
