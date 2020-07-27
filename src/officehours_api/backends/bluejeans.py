@@ -18,6 +18,7 @@ class BluejeansUser(BluejeansUserExtraFields):
 
 
 class Bluejeans:
+    friendly_name = 'BlueJeans'
     _base_url = 'https://api.bluejeans.com'
 
     def __init__(self, client_id, client_secret):

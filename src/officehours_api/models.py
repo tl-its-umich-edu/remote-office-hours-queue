@@ -11,14 +11,16 @@ from jsonfield import JSONField
 from requests.exceptions import RequestException
 
 from .backends.bluejeans import Bluejeans
+from .backends.inperson import InPersonBackend
 
+backends = {
+    'inperson': InPersonBackend(),
+}
 if settings.BLUEJEANS_CLIENT_ID and settings.BLUEJEANS_CLIENT_SECRET:
-    bluejeans = Bluejeans(
+    backends['bluejeans'] = Bluejeans(
         client_id=settings.BLUEJEANS_CLIENT_ID,
         client_secret=settings.BLUEJEANS_CLIENT_SECRET,
     )
-else:
-    bluejeans = None
 
 
 class BackendException(Exception):
@@ -79,19 +81,16 @@ class Meeting(SafeDeleteModel):
     agenda = models.CharField(max_length=100, null=False, default="", blank=True)
 
     MEETING_BACKEND_TYPES = [
-        ('bluejeans', 'BlueJeans'),
-        ('inperson', 'InPerson')
+        (key, value.friendly_name)
+        for key, value in backends.items()
     ]
     backend_type = models.CharField(max_length=20,
                                     choices=MEETING_BACKEND_TYPES,
-                                    null=False, default='bluejeans')
+                                    null=False, default='bluejeans')  # Pull default from settings?
     backend_metadata = JSONField(null=True, default=dict)
 
     def save(self, *args, **kwargs):
-        if self.backend_type == 'inperson':
-            backend = None
-        else:
-            backend = globals()[self.backend_type]
+        backend = backends[self.backend_type]
         if backend:
             user_email = self.queue.hosts.first().email
             self.backend_metadata['user_email'] = user_email
