@@ -27,5 +27,9 @@ def spa_globals(request):
             'debug': settings.DEBUG,
             'ga_tracking_id': settings.GA_TRACKING_ID,
             'login_url': settings.LOGIN_URL,
+            'backends': {
+                k: v.friendly_name
+                for k, v in settings.BACKENDS.items()
+            },
         }
     }

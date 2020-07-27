@@ -12,6 +12,7 @@ export interface Globals {
     debug: boolean;
     ga_tracking_id?: string;
     login_url: string;
+    backends: {[backend_type: string]: string};
 }
 
 const globalsId = 'spa_globals';

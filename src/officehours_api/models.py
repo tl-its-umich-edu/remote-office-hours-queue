@@ -10,18 +10,6 @@ from safedelete.models import (
 from jsonfield import JSONField
 from requests.exceptions import RequestException
 
-from .backends.bluejeans import Bluejeans
-from .backends.inperson import InPersonBackend
-
-backends = {
-    'inperson': InPersonBackend(),
-}
-if settings.BLUEJEANS_CLIENT_ID and settings.BLUEJEANS_CLIENT_SECRET:
-    backends['bluejeans'] = Bluejeans(
-        client_id=settings.BLUEJEANS_CLIENT_ID,
-        client_secret=settings.BLUEJEANS_CLIENT_SECRET,
-    )
-
 
 class BackendException(Exception):
     def __init__(self, backend_type):
@@ -82,7 +70,7 @@ class Meeting(SafeDeleteModel):
 
     MEETING_BACKEND_TYPES = [
         (key, value.friendly_name)
-        for key, value in backends.items()
+        for key, value in settings.BACKENDS.items()
     ]
     backend_type = models.CharField(max_length=20,
                                     choices=MEETING_BACKEND_TYPES,
@@ -90,7 +78,7 @@ class Meeting(SafeDeleteModel):
     backend_metadata = JSONField(null=True, default=dict)
 
     def save(self, *args, **kwargs):
-        backend = backends[self.backend_type]
+        backend = settings.BACKENDS[self.backend_type]
         if backend:
             user_email = self.queue.hosts.first().email
             self.backend_metadata['user_email'] = user_email
