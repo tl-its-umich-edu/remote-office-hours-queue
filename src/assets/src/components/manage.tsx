@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 import * as api from "../services/api";
 import { useUserWebSocket } from "../services/sockets";
@@ -15,7 +16,6 @@ import { PageProps } from "./page";
 interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
-    onAddQueue: (uniqname: string) => Promise<void>;
 }
 
 function ManageQueueTable(props: ManageQueueTableProps) {
@@ -26,18 +26,9 @@ function ManageQueueTable(props: ManageQueueTableProps) {
         <div>
             {queueResults}
             <div className="page-content-flow">
-                <SingleInputField
-                    id="add_queue"
-                    fieldComponent={StatelessInputGroupForm}
-                    placeholder="Queue name..."
-                    buttonType="success"
-                    onSubmit={props.onAddQueue}
-                    disabled={props.disabled}
-                    fieldSchema={queueTitleSchema}
-                    showRemaining={true}
-                >
+                <Link to="/add_queue" className="btn btn-success">
                     + Add Queue
-                </SingleInputField>
+                </Link>
             </div>
         </div>
     );
@@ -65,7 +56,7 @@ export function ManagePage(props: PageProps) {
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueTable = queues !== undefined
-        && <ManageQueueTable queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
+        && <ManageQueueTable queues={queues} disabled={isChanging}/>
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
@@ -73,7 +64,7 @@ export function ManagePage(props: PageProps) {
             {loadingDisplay}
             {errorDisplay}
             <h1>My Meeting Queues</h1>
-            <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
+            <p>These are all the queues you are a host of. Select a queue to manage it or add a queue below.</p>
             {queueTable}
             <hr/>
             <a target="_blank" href="https://documentation.its.umich.edu/node/1830">
