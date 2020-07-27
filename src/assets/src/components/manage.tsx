@@ -13,7 +13,6 @@ import { PageProps } from "./page";
 interface ManageQueueListProps {
     queues: QueueHost[];
     disabled: boolean;
-    onAddQueue: (uniqname: string) => Promise<void>;
 }
 
 function ManageQueueList(props: ManageQueueListProps) {
@@ -30,14 +29,9 @@ function ManageQueueList(props: ManageQueueListProps) {
     return (
         <div>
             {queueList}
-            <SingleInputForm 
-                id="add_queue"
-                placeholder="Queue name..." 
-                buttonType="success"
-                onSubmit={props.onAddQueue} 
-                disabled={props.disabled}>
-                    + Add Queue
-            </SingleInputForm>
+            <Link to="/add_queue" className="btn btn-success">
+                + Add Queue
+            </Link>
         </div>
     );
 }
@@ -70,7 +64,7 @@ export function ManagePage(props: PageProps) {
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueList = queues !== undefined
-        && <ManageQueueList queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
+        && <ManageQueueList queues={queues} disabled={isChanging}/>
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
@@ -78,7 +72,7 @@ export function ManagePage(props: PageProps) {
             {loadingDisplay}
             {errorDisplay}
             <h1>My Meeting Queues</h1>
-            <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
+            <p>These are all the queues you are a host of. Select a queue to manage it or add a queue below.</p>
             {queueList}
             <hr/>
             <a target="_blank" href="https://documentation.its.umich.edu/node/1830">
