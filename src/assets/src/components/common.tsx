@@ -92,7 +92,7 @@ interface ErrorDisplayProps {
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
     const messages = props.formErrors.map(
-        (a: FormError, index: any) => (<p key={index}><b>{a.source}:</b> {a.error.message} </p>)
+        (a: FormError, index: number) => (<p key={index}><b>{a.source}:</b> {a.error.message} </p>)
     );
     if (messages.length === 0) return null;
     return (<Alert variant='danger'>{messages}</Alert>);
