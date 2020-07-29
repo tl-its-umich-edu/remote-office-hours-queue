@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
+import { Button, Form } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 
@@ -19,16 +20,18 @@ interface PreferencesEditorProps {
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
     const [countryDialCode, setCountryDialCode] = useState("");
-    const phoneInput = <PhoneInput
-        country={'us'}
-        value={props.user.phone_number}
-        onChange={ (value, data) => {
-            setPhoneField(value);
-            if ('dialCode' in data) setCountryDialCode(data.dialCode);
-        }}
-        disabled={props.disabled}
-        inputProps={{id: 'phone'}}
-    />
+    const phoneInput = (
+        <PhoneInput
+            country={'us'}
+            value={props.user.phone_number}
+            onChange={(value: any, data: any) => {
+                setPhoneField(value);
+                if ('dialCode' in data) setCountryDialCode(data.dialCode);
+            }}
+            disabled={props.disabled}
+            inputProps={{id: 'phone'}}
+        />
+    )
     const validateAndSubmit = () => {
         // Determine if there was a change that warrants a submit
         const num = props.user.phone_number;
@@ -51,14 +54,16 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     return (
         <div>
             <h1>View/Update Preferences</h1>
-            <form onSubmit={validateAndSubmit}>
+            <Form onSubmit={validateAndSubmit}>
                 <p>
                     Please provide alternate means by which the host may contact you in the event of technical difficulties.
                 </p>
-                <label htmlFor="phone">Phone Number: </label>
-                {phoneInput}
-                <input type="submit" className="btn btn-primary" value="Save" disabled={props.disabled} />
-            </form>
+                <Form.Group controlId='phone'>
+                    <Form.Label>Phone Number</Form.Label>
+                    {phoneInput}
+                </Form.Group>
+                <Button variant="primary" type="submit" disabled={props.disabled}>Save</Button>
+            </Form>
         </div>
     );
 }
