@@ -4,8 +4,9 @@ import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHo
 import { User, QueueAttendee } from "../models";
 import { useState, createRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Modal from "react-bootstrap/Modal";
+import Alert from "react-bootstrap/Alert";
 import Breadcrumb from "react-bootstrap/Breadcrumb";
+import Modal from "react-bootstrap/Modal";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -94,11 +95,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
         (a: FormError, index: any) => (<p key={index}><b>{a.source}:</b> {a.error.message} </p>)
     );
     if (messages.length === 0) return null;
-    return (
-        <div className="alert alert-danger" role="alert">
-            {messages}
-        </div>
-    );
+    return (<Alert variant='danger'>{messages}</Alert>);
 }
 
 
