@@ -42,7 +42,10 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         const num = props.user.phone_number;
         let validCheck = null as boolean | null
         let validationError = undefined as undefined | string
-        if ((num.length === 0 && phoneField.length > countryDialCode.length) || (num.length > 0 && phoneField !== num)) {
+        if (
+            (num.length === 0 && phoneField.length > countryDialCode.length) ||
+            (num.length > 0 && phoneField !== num && phoneField.length > 1)
+        ) {
             // If USA number, ensure it's 11 digits to submit 
             if (countryDialCode === '1') {
                 if (phoneField.length == 11) {
@@ -56,11 +59,12 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 validCheck = true
                 props.onUpdateInfo(phoneField)
             }
-        }
-        // update phone number to be empty if they delete everything in the phone field
-        if (phoneField.length === 0) {
+        } else if (phoneField.length <= 1 && num !== '') {
+            // Update phone number to be empty if they try to delete everything in the phone field
+            // Seems to be a known issue where the last character can't be removed as part of onChange:
+            // https://github.com/bl00mber/react-phone-input-2/issues/231
             validCheck = true
-            props.onUpdateInfo(phoneField)
+            props.onUpdateInfo('')
         }
 
         setPhoneIsValid(validCheck)
