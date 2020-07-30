@@ -75,14 +75,14 @@ function PreferencesEditor(props: PreferencesEditorProps) {
 
     let alertBlock
     if (phoneIsValid === false) {
-        alertBlock = (<Alert variant='danger'>{phoneValidationError ? phoneValidationError : 'One or more of your entries is invalid.' }</Alert>)
+        alertBlock = <Alert variant='danger'>{phoneValidationError ? phoneValidationError : 'One or more of your entries is invalid.'}</Alert>
     } else if (phoneIsValid === null) {
-        alertBlock = (<Alert variant='primary'>Your preferences were not changed.</Alert>)
+        alertBlock = <Alert variant='primary'>Your preferences were not changed.</Alert>
     } else if (phoneIsValid === true && props.errorOccurred) {
-        alertBlock = (<Alert variant='danger'>An error occurred while trying to update your preferences; please try again later.</Alert>)
+        alertBlock = <Alert variant='danger'>An error occurred while trying to update your preferences; please try again later.</Alert>
     } else if (phoneIsValid === true) {
         // props.errorOccurred === false is implied
-        alertBlock = (<Alert variant='success'>Your preferences were successfully updated.</Alert>)
+        alertBlock = <Alert variant='success'>Your preferences were successfully updated.</Alert>
     }
     // if alertBlock is still undefined, don't display an Alert
 
@@ -129,8 +129,8 @@ export function PreferencesPage(props: PageProps) {
         {source: 'Update Preferences', error: updateInfoError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = (<LoadingDisplay loading={isLoading}/>)
-    const errorDisplay = (<ErrorDisplay formErrors={errorSources}/>)
+    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const preferencesEditor = user
         && (
             <PreferencesEditor
