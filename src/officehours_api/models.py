@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.core.validators import MaxLengthValidator
@@ -47,8 +48,11 @@ class Queue(SafeDeleteModel):
         ],
         default='open',
     )
-    bluejeans_allowed = models.BooleanField(default=True)
-    inperson_allowed = models.BooleanField(default=False)
+    MEETING_BACKEND_TYPES = [
+        (key, value.friendly_name)
+        for key, value in settings.BACKENDS.items()
+    ]
+    allowed_backends = ArrayField(models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False), size=2, default=settings.DEFAULT_BACKEND)
 
     def __str__(self):
         return self.name

@@ -22,22 +22,22 @@ function App(props: AppProps) {
     return (
         <Switch>
             <Route path='/' exact render={p => 
-                <HomePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} />
+                <HomePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} />
             }/>
             <Route path='/manage' exact render={p => 
-                <ManagePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} />
+                <ManagePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} />
             }/>
             <Route path='/manage/:queue_id' exact render={p => 
-                <QueueEditorPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} key={(p.match.params as any).queue_id} />
+                <QueueEditorPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} key={(p.match.params as any).queue_id} />
             }/>
             <Route path='/queue/:queue_id' exact render={p => 
-                <QueuePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} key={(p.match.params as any).queue_id} />
+                <QueuePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} key={(p.match.params as any).queue_id} />
             }/>
             <Route path='/search/:term' exact render={p =>
-                <SearchPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} />
+                <SearchPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} />
             }/>
             <Route path='/preferences' exact render={p =>
-                <PreferencesPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} />
+                <PreferencesPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} />
             }/>
         </Switch>
     );

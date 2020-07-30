@@ -4,4 +4,5 @@ import { User } from "../models";
 export interface PageProps<TParams = {}> extends RouteComponentProps<TParams> {
     user?: User;
     loginUrl: string;
+    backends: {[backend_type: string]: string};
 }

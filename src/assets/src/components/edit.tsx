@@ -98,6 +98,7 @@ function HostEditor(props: HostEditorProps) {
 
 interface AddAttendeeFormProps {
     queue: QueueHost;
+    backends: {[backend_type: string]: string};
     dropdownState: string;
     onChangeDropdownState: (backendType: string) => void;
     disabled: boolean;
@@ -115,9 +116,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
         props.onSubmit(value);
         setValue("");
     }
-    const bluejeansOption = props.queue.bluejeans_allowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
-    const inpersonOption = props.queue.inperson_allowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
-    const options = [bluejeansOption, inpersonOption].filter(a => a) as DropdownValue[];
+    const options = props.queue.allowed_backends.map(function (b) { return {value: b, displayValue: props.backends[b]} as DropdownValue;}) as DropdownValue[];
     return (
         <form onSubmit={submit} className="input-group">
             <input onChange={(e) => setValue(e.target.value)} value={value}
@@ -137,11 +136,13 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
 
 interface AllowedMeetingTypesFormProps {
     queue: QueueHost;
+    backends: {[backend_type: string]: string};
     onSubmit: (bluejeansAllowed: boolean, inpersonAllowed: boolean) => void;
     disabled: boolean;
 }
 
 function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
+    const checkboxes = [];
     const [bluejeansCheckbox, setBluejeansCheckbox] = useState(props.queue.bluejeans_allowed);
     const [inpersonCheckbox, setInpersonCheckbox] = useState(props.queue.inperson_allowed);
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -180,6 +181,7 @@ function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
 
 interface QueueEditorProps {
     queue: QueueHost;
+    backends: {[backend_type: string]: string};
     user: User;
     disabled: boolean;
     onAddMeeting: (uniqname: string) => void;
@@ -321,7 +323,7 @@ function QueueEditor(props: QueueEditorProps) {
             </div>
             <div className="row">
                 <div className="col-md-4">
-                    <AddAttendeeForm queue={props.queue} dropdownState={props.dropdownState}
+                    <AddAttendeeForm queue={props.queue} backends={props.backends} dropdownState={props.dropdownState}
                     onChangeDropdownState={props.onChangeDropdownState} disabled={props.disabled}
                     onSubmit={props.onAddMeeting}/>
                 </div>
@@ -551,7 +553,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
+        && <QueueEditor queue={queue} backends={props.backends} disabled={isChanging} user={props.user!}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
             onChangeName={doChangeName} onChangeDescription={doChangeDescription}

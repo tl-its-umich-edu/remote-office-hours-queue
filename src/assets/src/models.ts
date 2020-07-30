@@ -50,6 +50,5 @@ export interface QueueBase {
     hosts: User[];
     created_at: string;
     status: "open"|"closed";
-    bluejeans_allowed: boolean;
-    inperson_allowed: boolean;
+    allowed_backends: string[];
 }
