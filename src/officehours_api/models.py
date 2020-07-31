@@ -10,6 +10,12 @@ from safedelete.models import (
 )
 from jsonfield import JSONField
 from requests.exceptions import RequestException
+from officehours_api import backends
+
+backend_instances = {
+    backend_name: getattr(getattr(backends, backend_name), 'Backend')()
+    for backend_name in settings.ENABLED_BACKENDS
+}
 
 
 class BackendException(Exception):
@@ -31,6 +37,7 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
     notify_me_attendee = models.BooleanField(default=False)
     notify_me_host = models.BooleanField(default=False)
+    backend_metadata = JSONField(null=True, default=dict)
 
     def __str__(self):
         return f'user={self.user.username}'
@@ -101,6 +108,10 @@ class Meeting(SafeDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True)
     agenda = models.CharField(max_length=100, null=False, default="", blank=True)
 
+    MEETING_BACKEND_TYPES = [
+        (key, value.friendly_name)
+        for key, value in backend_instances.items()
+    ]
     backend_type = models.CharField(
         max_length=20,
         choices=get_backend_types(),
@@ -114,7 +125,7 @@ class Meeting(SafeDeleteModel):
         return get_users_with_emails(self.attendees)
 
     def save(self, *args, **kwargs):
-        backend = settings.BACKENDS[self.backend_type]
+        backend = backend_instances[self.backend_type]
         user_email = self.queue.hosts.first().email
         self.backend_metadata['user_email'] = user_email
         try:

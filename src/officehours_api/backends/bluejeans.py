@@ -1,7 +1,9 @@
 import time
-import requests
 from typing import Optional, TypedDict
+
+import requests
 from rest_framework.exceptions import ValidationError
+from django.conf import settings
 
 
 class BluejeansUserExtraFields(TypedDict):
@@ -123,18 +125,21 @@ class BluejeansClient:
         return resp.json()
 
 
-class BluejeansBackend:
+class Backend:
     friendly_name = 'BlueJeans'
     _client: BluejeansClient
 
-    def __init__(self, client_id, client_secret):
-        self._client = BluejeansClient(client_id, client_secret)
+    def __init__(self, client_id=None, client_secret=None):
+        self._client = BluejeansClient(
+            client_id or settings.BLUEJEANS_CLIENT_ID,
+            client_secret or settings.BLUEJEANS_CLIENT_SECRET
+        )
 
     def save_user_meeting(self, backend_metadata={}):
-        user_email = backend_metadata['user_email']
-
         if backend_metadata.get('meeting_id'):
             return backend_metadata
+
+        user_email = backend_metadata['user_email']
 
         user = self._client.get_user(user_email=user_email)
         if not user:

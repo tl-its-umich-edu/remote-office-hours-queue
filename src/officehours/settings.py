@@ -14,9 +14,6 @@ import os
 
 import dj_database_url
 
-from officehours_api.backends.bluejeans import BluejeansBackend
-from officehours_api.backends.inperson import InPersonBackend
-
 
 def csv_to_list(csv, delim=','):
     try:
@@ -31,26 +28,6 @@ def str_to_bool(val):
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Backends
-BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
-BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()
-BACKENDS = {
-    'inperson': InPersonBackend(),
-}
-DEFAULT_BACKEND = "inperson"
-if BLUEJEANS_CLIENT_ID and BLUEJEANS_CLIENT_SECRET:
-    BACKENDS['bluejeans'] = BluejeansBackend(
-        client_id=BLUEJEANS_CLIENT_ID,
-        client_secret=BLUEJEANS_CLIENT_SECRET,
-    )
-    DEFAULT_BACKEND = "bluejeans"
-
-DEFAULT_ALLOWED_BACKENDS = (
-    csv_to_list(os.getenv('DEFAULT_ALLOWED_BACKENDS'))
-    if os.getenv('DEFAULT_ALLOWED_BACKENDS', None)
-    else [DEFAULT_BACKEND]
-)
 
 
 # Quick-start development settings - unsuitable for production
@@ -332,3 +309,27 @@ CHANNEL_LAYERS = {
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
+
+# Backends
+ENABLED_BACKENDS = {'inperson'}
+DEFAULT_BACKEND = "inperson"
+
+BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
+BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()
+if BLUEJEANS_CLIENT_ID and BLUEJEANS_CLIENT_SECRET:
+    ENABLED_BACKENDS.add("bluejeans")
+    DEFAULT_BACKEND = "bluejeans"
+
+ZOOM_API_KEY = os.getenv('ZOOM_API_KEY', '').strip()
+ZOOM_API_SECRET = os.getenv('ZOOM_API_SECRET', '').strip()
+ZOOM_CLIENT_ID = os.getenv('ZOOM_CLIENT_ID', '').strip()
+ZOOM_CLIENT_SECRET = os.getenv('ZOOM_CLIENT_SECRET', '').strip()
+if ZOOM_CLIENT_ID and ZOOM_CLIENT_SECRET:
+    ENABLED_BACKENDS.add("zoom")
+    DEFAULT_BACKEND = "zoom"
+
+DEFAULT_ALLOWED_BACKENDS = (
+    csv_to_list(os.getenv('DEFAULT_ALLOWED_BACKENDS'))
+    if os.getenv('DEFAULT_ALLOWED_BACKENDS', None)
+    else [DEFAULT_BACKEND]
+)

@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from officehours_api import backends
+
 
 def feedback(request):
     return {'FEEDBACK_EMAIL': getattr(settings, 'FEEDBACK_EMAIL', None)}
@@ -20,6 +22,10 @@ def spa_globals(request):
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,
     } if request.user.is_authenticated else None
+    backend_classes = {
+        backend_name: getattr(getattr(backends, backend_name), 'Backend')
+        for backend_name in settings.ENABLED_BACKENDS
+    }
     return {
         'spa_globals': {
             'user': user_data,
@@ -29,7 +35,7 @@ def spa_globals(request):
             'login_url': settings.LOGIN_URL,
             'backends': {
                 k: v.friendly_name
-                for k, v in settings.BACKENDS.items()
+                for k, v in backend_classes.items()
             },
             'default_backend': settings.DEFAULT_BACKEND,
         }
