@@ -1,12 +1,10 @@
-import * as React from "react";
+import * as React from "react"
+import { createRef, useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { User, QueueAttendee } from "../models";
-import { useState, createRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import Alert from "react-bootstrap/Alert";
-import Breadcrumb from "react-bootstrap/Breadcrumb";
-import Modal from "react-bootstrap/Modal";
+import { Alert, Breadcrumb, Button, Form, Modal } from "react-bootstrap"
+import { QueueAttendee, User } from "../models"
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -261,8 +259,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
             <div className="input-group">
                 <span>{props.text}</span>
                 <button onClick={enableEditMode} type="button" className="btn btn-sm">
-                    <FontAwesomeIcon icon={faPencilAlt} />
-                    Edit
+                    <FontAwesomeIcon icon={faPencilAlt} /> Edit
                 </button>
             </div>
         );
@@ -274,38 +271,47 @@ interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProp
 }
 
 export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
-    const inputRef = createRef<HTMLTextAreaElement>();
-    useEffect(() => {
-        if (!props.autofocus) return;
-        inputRef.current!.focus();
-    }, []);
-    const submit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        props.onSubmit(props.value);
-        props.onChangeValue("");
+    const [remaining, setRemaining] = useState(props.maxLength - props.value.length as number)
+    const [isInvalid, setIsInvalid] = useState(false as boolean)
+    const buttonClass = `btn btn-${props.buttonType} remaining-controls` as string
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        if (!isInvalid) {
+            props.onSubmit(props.value)
+            props.onChangeValue('')
+        }
     }
-    const buttonClass = "btn btn-" + props.buttonType + " remaining-controls";
-    const [remaining, setRemaining] = useState(props.maxLength - props.value.length);
-    const handleChange = (newValue:string) => {
+    const handleChange = (newValue: string) => {
         props.onChangeValue(newValue);
+        if (newValue.length <= props.maxLength) { setIsInvalid(false) } else { setIsInvalid(true) }
         setRemaining(props.maxLength - newValue.length)
     }
+
+    const charsRemaining = (remaining > 0) ? remaining : 0 as number
+    const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '' as string
+    const feedbackText = `Remaining characters: ${charsRemaining}/${props.maxLength}` + charsOver as string
+
     return (
-        <form onSubmit={submit}>
-            <textarea onChange={(e) => handleChange(e.target.value)} value={props.value}
-                ref={inputRef} className="form-control" placeholder={props.placeholder}
-                disabled={props.disabled} id={props.id} rows={5}/>
-            <div>
-                <p className="remaining-controls-group">
-                    <span>{remaining}/{props.maxLength}</span>
-                    <button className={buttonClass} type="submit" disabled={props.disabled}>
-                        {props.children}
-                    </button>
-                </p>
-                
+        <Form onSubmit={handleSubmit}>
+            <Form.Group>
+                <Form.Control
+                    id={props.id}
+                    as='textarea'
+                    rows={5}
+                    value={props.value}
+                    placeholder={props.placeholder}
+                    onChange={(e) => handleChange(e.currentTarget.value)}
+                    disabled={props.disabled}
+                    isInvalid={!!isInvalid}
+                />
+            </Form.Group>
+            <div className="remaining-controls-group">
+                <span className={isInvalid ? 'text-danger' : undefined}>{feedbackText}</span>
+                <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>{props.children}</Button>
             </div>
-        </form>
-    );
+        </Form>
+    )
 }
 
 
@@ -331,9 +337,12 @@ export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => 
                 id={props.id}
                 autofocus={true}
                 onSubmit={submit}
-                value={editorValue} onChangeValue={setEditorValue}
-                placeholder={props.placeholder} disabled={props.disabled}
-                buttonType="success" maxLength={props.maxLength}>
+                value={editorValue}
+                onChangeValue={setEditorValue}
+                placeholder={props.placeholder}
+                disabled={props.disabled}
+                buttonType="success"
+                maxLength={props.maxLength}>
                 {props.children}
             </SingleInputFormShowRemaining>
         )
@@ -341,8 +350,7 @@ export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => 
             <div className="input-group">
                 <span>{props.text}</span>
                 <button onClick={enableEditMode} type="button" className="btn btn-sm">
-                    <FontAwesomeIcon icon={faPencilAlt} />
-                    Edit
+                    <FontAwesomeIcon icon={faPencilAlt} /> Edit
                 </button>
             </div>
         );
