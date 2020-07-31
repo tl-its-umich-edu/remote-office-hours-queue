@@ -277,10 +277,8 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if (!isInvalid) {
-            props.onSubmit(props.value)
-            props.onChangeValue('')
-        }
+        props.onSubmit(props.value)
+        props.onChangeValue('')
     }
     const handleChange = (newValue: string) => {
         props.onChangeValue(newValue);
@@ -308,7 +306,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
             </Form.Group>
             <div className="remaining-controls-group">
                 <span className={isInvalid ? 'text-danger' : undefined}>{feedbackText}</span>
-                <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>{props.children}</Button>
+                <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled || isInvalid}>{props.children}</Button>
             </div>
         </Form>
     )
