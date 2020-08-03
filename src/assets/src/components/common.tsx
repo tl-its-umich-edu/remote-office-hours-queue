@@ -271,24 +271,20 @@ interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProp
 }
 
 export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
-    const [remaining, setRemaining] = useState(props.maxLength - props.value.length as number)
-    const [isInvalid, setIsInvalid] = useState(false as boolean)
-    const buttonClass = `btn btn-${props.buttonType} remaining-controls` as string
+    const buttonClass = `btn btn-${props.buttonType} remaining-controls`
+    const remaining = props.maxLength - props.value.length
+    const isInvalid = props.value.length > props.maxLength
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         props.onSubmit(props.value)
         props.onChangeValue('')
     }
-    const handleChange = (newValue: string) => {
-        props.onChangeValue(newValue);
-        if (newValue.length <= props.maxLength) { setIsInvalid(false) } else { setIsInvalid(true) }
-        setRemaining(props.maxLength - newValue.length)
-    }
+    const handleChange = (newValue: string) => props.onChangeValue(newValue)
 
-    const charsRemaining = (remaining > 0) ? remaining : 0 as number
-    const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '' as string
-    const feedbackText = `Remaining characters: ${charsRemaining}/${props.maxLength}` + charsOver as string
+    const charsRemaining = (remaining > 0) ? remaining : 0
+    const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : ''
+    const feedbackText = `Remaining characters: ${charsRemaining}/${props.maxLength}${charsOver}`
 
     return (
         <Form onSubmit={handleSubmit}>
@@ -301,7 +297,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                     placeholder={props.placeholder}
                     onChange={(e) => handleChange(e.currentTarget.value)}
                     disabled={props.disabled}
-                    isInvalid={!!isInvalid}
+                    isInvalid={isInvalid}
                 />
             </Form.Group>
             <div className="remaining-controls-group">
