@@ -52,7 +52,8 @@ class Queue(SafeDeleteModel):
         (key, value.friendly_name)
         for key, value in settings.BACKENDS.items()
     ]
-    allowed_backends = ArrayField(models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False), size=2, default=settings.DEFAULT_BACKEND)
+    DEFAULT_ALLOWED_TYPES = [settings.DEFAULT_BACKEND]
+    allowed_backends = ArrayField(models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False), size=2, default=list(DEFAULT_ALLOWED_TYPES))
 
     def __str__(self):
         return self.name

@@ -17,6 +17,7 @@ import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 
 interface JoinQueueProps {
     queue: QueueAttendee;
+    backends: {[backend_type: string]: string};
     onJoinQueue: (backendType: string) => void;
     disabled: boolean;
     dropdownState: string;
@@ -24,9 +25,7 @@ interface JoinQueueProps {
 }
 
 const JoinQueue: React.FC<JoinQueueProps> = (props) => {
-    const bluejeansOption = props.queue.bluejeans_allowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
-    const inpersonOption = props.queue.inperson_allowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
-    const options = [bluejeansOption, inpersonOption].filter(a => a) as DropdownValue[];
+    const options = props.queue.allowed_backends.map(function (b) { return {value: b, displayValue: props.backends[b]} as DropdownValue;}) as DropdownValue[];
     return (
         <>
         <div className="row col-lg">
@@ -48,6 +47,7 @@ const JoinQueue: React.FC<JoinQueueProps> = (props) => {
 
 interface QueueAttendingProps {
     queue: QueueAttendee;
+    backends: {[backend_type: string]: string};
     user: User;
     joinedQueue?: QueueAttendee | null;
     disabled: boolean;
@@ -73,12 +73,12 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
                         <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
                     </div>
                 </div>
-                <JoinQueue queue={props.queue} onJoinQueue={props.onLeaveAndJoinQueue} disabled={props.disabled}
+                <JoinQueue queue={props.queue} backends={props.backends} onJoinQueue={props.onLeaveAndJoinQueue} disabled={props.disabled}
                     dropdownState={props.dropdownState} onChangeDropdownState={props.onChangeDropdownState}/>
                 </>
             )
             : (
-                <JoinQueue queue={props.queue} onJoinQueue={props.onJoinQueue} disabled={props.disabled}
+                <JoinQueue queue={props.queue} backends={props.backends} onJoinQueue={props.onJoinQueue} disabled={props.disabled}
                     dropdownState={props.dropdownState} onChangeDropdownState={props.onChangeDropdownState}/>
             )
     );
@@ -237,6 +237,7 @@ function QueueAttending(props: QueueAttendingProps) {
 
 interface ChangeMeetingTypeDialogProps {
     queue: QueueAttendee;
+    backends: {[backend_type: string]: string};
     show: boolean;
     onClose: () => void;
     onSubmit: (oldBackendType: string) => void;
@@ -245,9 +246,7 @@ interface ChangeMeetingTypeDialogProps {
 }
 
 const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
-    const bluejeansOption = props.queue.bluejeans_allowed ? {value: 'bluejeans', displayValue: 'BlueJeans'} as DropdownValue : undefined;
-    const inpersonOption = props.queue.inperson_allowed ? {value: 'inperson', displayValue: 'In Person'} as DropdownValue : undefined;
-    const options = [bluejeansOption, inpersonOption].filter(a => a) as DropdownValue[];
+    const options = props.queue.allowed_backends.map(function (b) { return {value: b, displayValue: props.backends[b]} as DropdownValue;}) as DropdownValue[];
     const handleSubmit = () => {
         props.onClose();
         props.onSubmit(props.queue.my_meeting?.backend_type as string);
@@ -366,14 +365,14 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueDisplay = queue
-        && <QueueAttending queue={queue} user={props.user} joinedQueue={myUser?.my_queue} 
+        && <QueueAttending queue={queue} backends={props.backends} user={props.user} joinedQueue={myUser?.my_queue} 
             disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}
             onShowDialog={() => setShowMeetingTypeDialog(true)}
             onChangeBackendType={doChangeBackendType}
             dropdownState={dropdownState} onChangeDropdownState={setDropdownState}/>
     const meetingTypeDialog = queue 
-        && <ChangeMeetingTypeDialog queue={queue} show={showMeetingTypeDialog} 
+        && <ChangeMeetingTypeDialog queue={queue} backends={props.backends} show={showMeetingTypeDialog} 
             onClose={() => setShowMeetingTypeDialog(false)} 
             onSubmit={doChangeBackendType} dropdownState={dropdownState} 
             onChangeDropdownState={setDropdownState}/>

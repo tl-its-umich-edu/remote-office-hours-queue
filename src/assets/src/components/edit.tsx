@@ -137,39 +137,65 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
 interface AllowedMeetingTypesFormProps {
     queue: QueueHost;
     backends: {[backend_type: string]: string};
-    onSubmit: (bluejeansAllowed: boolean, inpersonAllowed: boolean) => void;
+    onSubmit: (allowedTypes: string[]) => void;
     disabled: boolean;
 }
 
-function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
+function GetCheckboxes(labels: string[], checkedLabels: string[]) {
     const checkboxes = [];
-    const [bluejeansCheckbox, setBluejeansCheckbox] = useState(props.queue.bluejeans_allowed);
-    const [inpersonCheckbox, setInpersonCheckbox] = useState(props.queue.inperson_allowed);
+    for (var i = 0; i < labels.length; i++) {
+        checkboxes.push({checked: checkedLabels.includes(labels[i])});
+    }
+    return checkboxes;
+}
+
+function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
+    const [checkedCheckboxes, setCheckedCheckboxes] = useState(GetCheckboxes(Object.keys(props.backends), props.queue.allowed_backends));
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.currentTarget.name === "bluejeans") {
-            setBluejeansCheckbox(event.target.checked);
-        } else if (event.currentTarget.name === "inperson"){
-            setInpersonCheckbox(event.target.checked);
-        }
+        let checked = checkedCheckboxes;
+        console.log(checked[Object.keys(props.backends).indexOf(event.target.name)].checked);
+        checked[Object.keys(props.backends).indexOf(event.target.name)].checked = !checked[Object.keys(props.backends).indexOf(event.target.name)].checked;
+        console.log(checked[Object.keys(props.backends).indexOf(event.target.name)].checked);
+        setCheckedCheckboxes(checked);
     }
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const currentBluejeansCheckbox = bluejeansCheckbox;
-        const currentInpersonCheckbox = inpersonCheckbox;
-        if (!bluejeansCheckbox && !inpersonCheckbox) {
-            setBluejeansCheckbox(props.queue.bluejeans_allowed);
-            setInpersonCheckbox(props.queue.inperson_allowed);
+        const currentCheckboxes = checkedCheckboxes;
+        if (checkedCheckboxes.length === 0) {
+            setCheckedCheckboxes(GetCheckboxes(Object.keys(props.backends), props.queue.allowed_backends));
         }
-        props.onSubmit(currentBluejeansCheckbox, currentInpersonCheckbox);
+        let choice = [];
+        for (var i = 0; i < currentCheckboxes.length; i++) {
+            if (currentCheckboxes[i].checked) {
+                choice.push(Object.keys(props.backends)[i]);
+            }
+        }
+        props.onSubmit(choice);
+    }
+    const checkbox = (label: string) => {
+        return (
+        <>
+        <label htmlFor={label}>{props.backends[label]}:</label>
+        <input name={label} type="checkbox" checked={checkedCheckboxes[Object.keys(props.backends).indexOf(label)].checked} onChange={handleChange}/>
+        </>);
+    }
+    const checkboxes = [];
+    for (var i = 0; i < Object.keys(props.backends).length; i++) {
+        var thisType = Object.keys(props.backends)[i];
+        if (i === 0) {
+            checkboxes.push(checkbox(thisType));
+        } else {
+            let thisBox = <>
+                <div className="input-group-append">
+                    {checkbox(thisType)}
+                </div> 
+            </>
+            checkboxes.push(thisBox);
+        }
     }
     return (
         <form onSubmit={submit} className="input-group">
-            <label htmlFor="bluejeans">BlueJeans:</label>
-            <input name="bluejeans" type="checkbox" checked={bluejeansCheckbox} onChange={handleChange}/>
-            <div className="input-group-append">
-                <label htmlFor="inperson">InPerson:</label>
-                <input name="inperson" type="checkbox" checked={inpersonCheckbox} onChange={handleChange}/>
-            </div>
+            {checkboxes}
             <div className="input-group-append">
                 <button className="btn btn-success" type="submit" disabled={props.disabled}>
                     Save
@@ -196,7 +222,7 @@ interface QueueEditorProps {
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     dropdownState: string;
     onChangeDropdownState: (backendType: string) => void;
-    onUpdateAllowedMeetingTypes: (bluejeansAllowed: boolean, inpersonAllowed: boolean) => void;
+    onUpdateAllowedMeetingTypes: (allowedTypes: string[]) => void;
 }
 
 function QueueEditor(props: QueueEditorProps) {
@@ -283,7 +309,7 @@ function QueueEditor(props: QueueEditorProps) {
                 <div className="form-group row">
                     <label htmlFor="allowed meeting types" className="col-md-2 col-form-label">Allowed Meeting Types:</label>
                     <div className="col-md-6">
-                        <AllowedMeetingTypesForm queue={props.queue} onSubmit={props.onUpdateAllowedMeetingTypes} disabled={props.disabled}/>
+                        <AllowedMeetingTypesForm queue={props.queue} onSubmit={props.onUpdateAllowedMeetingTypes} disabled={props.disabled} backends={props.backends}/>
                     </div>
                 </div>
                 <div className="form-group row">
@@ -524,11 +550,11 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
-    const updateAllowedMeetingTypes = async (bluejeansAllowed: boolean, inpersonAllowed: boolean) => {
-        if (!bluejeansAllowed && !inpersonAllowed) {    
+    const updateAllowedMeetingTypes = async (allowedTypes: string[]) => {
+        if (allowedTypes.length === 0) {    
             throw new Error("Must have at least one allowed meeting type.");
         }
-        await api.updateAllowedMeetingTypes(queue!.id, bluejeansAllowed, inpersonAllowed);
+        await api.updateAllowedMeetingTypes(queue!.id, allowedTypes);
     }
     const [doUpdateAllowedMeetingTypes, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedMeetingTypes);
 
