@@ -478,6 +478,10 @@ h3.alert-heading {
 	border: 1px solid #cecbc9;
 }
 
+.form-control-remaining.is-invalid {
+	background-image: none;
+}
+
 .remaining-controls-group {
 	margin: 0;
 	padding: 0;
