@@ -293,6 +293,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                     id={props.id}
                     as='textarea'
                     rows={5}
+                    bsPrefix='form-control form-control-remaining'
                     value={props.value}
                     placeholder={props.placeholder}
                     onChange={(e) => handleChange(e.currentTarget.value)}
