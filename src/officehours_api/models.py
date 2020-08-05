@@ -108,10 +108,6 @@ class Meeting(SafeDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True)
     agenda = models.CharField(max_length=100, null=False, default="", blank=True)
 
-    MEETING_BACKEND_TYPES = [
-        (key, value.friendly_name)
-        for key, value in backend_instances.items()
-    ]
     backend_type = models.CharField(
         max_length=20,
         choices=get_backend_types(),
