@@ -1,6 +1,7 @@
 from typing import TypedDict, List, Literal
 from base64 import b64encode
 from time import time
+from datetime import datetime
 import json
 
 import requests
@@ -122,7 +123,9 @@ class Backend:
     def _get_session(cls, user: User) -> requests.Session:
         session = requests.Session()
         session.headers.update({
-            'Authorization': f'Bearer {cls._get_access_token(user)}'
+            'Authorization': f'Bearer {cls._get_access_token(user)}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
         })
         return session
 
@@ -132,10 +135,15 @@ class Backend:
         user_id = user.profile.backend_metadata['zoom']['id']
         resp = session.post(
             f'{cls.base_url}/v2/users/{user_id}/meetings',
-            data={
-
-            }
+            json={
+                'topic': 'Remote Office Hours Queue Meeting',
+                'start_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'timezone': 'America/Detroit',
+                'agenda': 'Meeting agenda goes here',
+            },
         )
+        print(resp.json())
+        resp.raise_for_status()
         return resp.json()
 
     @classmethod
@@ -150,8 +158,8 @@ class Backend:
             return backend_metadata
 
         user_email = backend_metadata['user_email']
-        access_token = cls._get_access_token(user_email)
-        meeting = cls._create_meeting(access_token, user_email)
+        user = User.objects.get(email=user_email)
+        meeting = cls._create_meeting(user)
         print(meeting)
         backend_metadata.update({
             'user_id': meeting['host_id'],
@@ -207,10 +215,7 @@ def ensure_auth(get_response):
         auth_callback_path = reverse('auth_callback', kwargs={'backend_name': 'zoom'})
         print("Checking", request.path, auth_callback_path)
         print("Checking", request.path, auth_prompt_path)
-        if (
-            request.path == auth_prompt_path
-            or request.path == auth_callback_path
-        ):
+        if request.path in (auth_prompt_path, auth_callback_path):
             print("User requested auth URI; skip middleware")
             return get_response(request)
         print("Redirect to zoom auth prompt")
