@@ -1,13 +1,13 @@
-from typing import Optional, TypedDict, List, Literal
+from typing import TypedDict, List, Literal
 from base64 import b64encode
 from time import time
 import json
 
 import requests
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.urls import reverse
 
 
 class ZoomMeeting(TypedDict):
@@ -83,10 +83,12 @@ class Backend:
             params={
                 'grant_type': 'authorization_code',
                 'code': code,
-                'redirect_uri': 'http://localhost:8003/authorize/zoom',
+                'redirect_uri': 'http://localhost:8003/callback/zoom/',
             },
             headers=cls._get_client_auth_headers(),
         )
+        print(resp.request.url)
+        print(resp.json())
         resp.raise_for_status()
         # print(repr(resp.request.url))
         # print(repr(resp.request.headers))
@@ -171,6 +173,7 @@ class Backend:
             'access_token': token['access_token'],
             'access_token_expires': time() - token['expires_in'] - 60,
         })
+        request.user.profile.backend_metadata['zoom'] = zoom_meta
         me = Backend._get_me(request.user)
         print(me)
         zoom_meta.update({
@@ -180,3 +183,36 @@ class Backend:
         request.user.profile.save()
         print(json.dumps(request.user.profile.backend_metadata))
         return redirect('/')
+
+    @classmethod
+    def get_auth_url(cls, redirect_uri: str):
+        return (
+            f"{Backend.base_url}/oauth/authorize"
+            f"?response_type=code"
+            f"&client_id={cls.client_id}"
+            f"&scope=meeting:read%20meeting:write"
+            f"&redirect_uri={redirect_uri}"
+        )
+
+
+def ensure_auth(get_response):
+    def middleware(request):
+        if not request.user.is_authenticated:
+            print("User not authenticated; skip middleware")
+            return get_response(request)
+        if request.user.profile.backend_metadata.get('zoom', None):
+            print("Already have zoom meta; skip middleware")
+            return get_response(request)
+        auth_prompt_path = reverse('auth_prompt', kwargs={'backend_name': 'zoom'})
+        auth_callback_path = reverse('auth_callback', kwargs={'backend_name': 'zoom'})
+        print("Checking", request.path, auth_callback_path)
+        print("Checking", request.path, auth_prompt_path)
+        if (
+            request.path == auth_prompt_path
+            or request.path == auth_callback_path
+        ):
+            print("User requested auth URI; skip middleware")
+            return get_response(request)
+        print("Redirect to zoom auth prompt")
+        return redirect(auth_prompt_path)
+    return middleware
