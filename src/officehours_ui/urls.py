@@ -1,8 +1,6 @@
 from django.urls import path
-from django.conf import settings
 
-from .views import SpaView
-from officehours_api import backends
+from .views import SpaView, AuthPromptView, auth_callback_view
 
 
 urlpatterns = [
