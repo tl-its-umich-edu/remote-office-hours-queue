@@ -41,12 +41,14 @@ function AddQueueEditor(props: AddQueueEditorProps) {
     : <ManageHosts {...props}/>
     return (
         <>
-        <div className="col-sm">
-            {generalTab}
-            {manageTab}
-        </div>
-        <div className="col-lg">
-            {content}
+        <div className="row">
+            <div className="col-sm">
+                {generalTab}
+                {manageTab}
+            </div>
+            <div className="col-lg">
+                {content}
+            </div>
         </div>
         </>
     );
@@ -85,6 +87,7 @@ export function AddQueuePage(props: PageProps) {
             <Breadcrumbs currentPageTitle="Add Queue"/>
             {errorDisplay}
             <h1>Add Queue</h1>
+            {addQueueEditor}
             <hr/>
             
         </div>
