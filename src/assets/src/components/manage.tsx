@@ -55,7 +55,7 @@ export function ManagePage(props: PageProps) {
     const addQueue = async (queueName: string) => {
         interactions.next(true);
         if (!queueName) return;
-        await api.createQueue(queueName);
+        await api.createQueue(queueName, new Set(Object.keys(props.backends)));
         doRefresh();
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
