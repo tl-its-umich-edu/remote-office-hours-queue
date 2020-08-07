@@ -99,6 +99,7 @@ function HostEditor(props: HostEditorProps) {
 interface AddAttendeeFormProps {
     queue: QueueHost;
     backends: {[backend_type: string]: string};
+    defaultBackend: string;
     dropdownState: string;
     onChangeDropdownState: (backendType: string) => void;
     disabled: boolean;
@@ -123,7 +124,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
                 ref={inputRef} type="text" className="form-control" placeholder="Uniqname..."
                 disabled={props.disabled} id="add_attendee" />
             <div className="input-group-append">
-                <MeetingTypeDropdown options={options} defaultValue="default" onChangeValue={props.onChangeDropdownState}/>
+                <MeetingTypeDropdown options={options} defaultValue={props.defaultBackend} onChangeValue={props.onChangeDropdownState}/>
             </div>
             <div className="input-group-append">
                 <button className="btn btn-success" type="submit" disabled={props.disabled}>
@@ -208,6 +209,7 @@ function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
 interface QueueEditorProps {
     queue: QueueHost;
     backends: {[backend_type: string]: string};
+    defaultBackend: string;
     user: User;
     disabled: boolean;
     onAddMeeting: (uniqname: string) => void;
@@ -349,7 +351,7 @@ function QueueEditor(props: QueueEditorProps) {
             </div>
             <div className="row">
                 <div className="col-md-4">
-                    <AddAttendeeForm queue={props.queue} backends={props.backends} dropdownState={props.dropdownState}
+                    <AddAttendeeForm queue={props.queue} backends={props.backends} defaultBackend={props.defaultBackend} dropdownState={props.dropdownState}
                     onChangeDropdownState={props.onChangeDropdownState} disabled={props.disabled}
                     onSubmit={props.onAddMeeting}/>
                 </div>
@@ -508,11 +510,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string) => {
-        if (backendTypeDropdownState === "default") {
-            throw new Error("Meeting Type is a required field.")
-        }
         const backendType = backendTypeDropdownState;
-        setBackendTypeDropdownState("default");
+        setBackendTypeDropdownState(props.defaultBackend);
         uniqname = sanitizeUniqname(uniqname);
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
@@ -557,7 +556,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         await api.updateAllowedMeetingTypes(queue!.id, allowedTypes);
     }
     const [doUpdateAllowedMeetingTypes, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedMeetingTypes);
-
+    
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading || updateAllowedMeetingTypesLoading;
     const errorSources = [
@@ -579,7 +578,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue} backends={props.backends} disabled={isChanging} user={props.user!}
+        && <QueueEditor queue={queue} backends={props.backends} defaultBackend={props.defaultBackend} disabled={isChanging} user={props.user!}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
             onChangeName={doChangeName} onChangeDescription={doChangeDescription}

@@ -31,5 +31,6 @@ def spa_globals(request):
                 k: v.friendly_name
                 for k, v in settings.BACKENDS.items()
             },
+            'default_backend' : settings.DEFAULT_BACKEND,
         }
     }

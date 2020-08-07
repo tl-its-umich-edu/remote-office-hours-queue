@@ -271,26 +271,6 @@ export interface DropdownValue {
     displayValue: string;
 }
 
-export const validateMeetingTypeSubmission = (backendType: string) => {
-    if (backendType === 'default') {
-        throw new Error("Meeting Type is a required field.")
-    }
-}
-
-export const MeetingDropdownTypes = [
-    {value: "bluejeans", displayValue: "BlueJeans"},
-    {value: "inperson", displayValue: "In Person"}
-];
-
-export const convertMeetingTypeToDisplay = (backendType: string) => {
-    if (backendType === "bluejeans") {
-        return ("BlueJeans");
-    }
-    else if (backendType === "inperson") {
-        return ("In Person");
-    }
-}
-
 interface MeetingTypeDropdownProps {
     options: DropdownValue[];
     defaultValue: string;
@@ -307,7 +287,6 @@ export const MeetingTypeDropdown: React.FC<MeetingTypeDropdownProps> = (props) =
     
     return (
         <select className="btn btn-sm select-dropdown" defaultValue={props.defaultValue} onChange={handleChange}>
-            <option value='default'>Meeting via...</option>
             {dropdownOptions}
         </select>
     );
