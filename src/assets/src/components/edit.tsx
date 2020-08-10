@@ -9,6 +9,7 @@ import Table from "react-bootstrap/Table";
 import Alert from "react-bootstrap/Alert";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
+import _ from "lodash";
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
@@ -142,61 +143,45 @@ interface AllowedMeetingTypesFormProps {
     disabled: boolean;
 }
 
-function GetCheckboxes(labels: string[], checkedLabels: string[]) {
-    const checkboxes = [];
-    for (var i = 0; i < labels.length; i++) {
-        checkboxes.push({checked: checkedLabels.includes(labels[i])});
-    }
-    return checkboxes;
-}
+const getCheckboxes = (labels: string[], checkedLabels: string[]) =>
+    _(labels)
+        .map(l => [l, checkedLabels.includes(l)])
+        .fromPairs()
+        .value();
 
 function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
-    const [checkedCheckboxes, setCheckedCheckboxes] = useState(GetCheckboxes(Object.keys(props.backends), props.queue.allowed_backends));
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        let checked = checkedCheckboxes;
-        console.log(checked[Object.keys(props.backends).indexOf(event.target.name)].checked);
-        checked[Object.keys(props.backends).indexOf(event.target.name)].checked = !checked[Object.keys(props.backends).indexOf(event.target.name)].checked;
-        console.log(checked[Object.keys(props.backends).indexOf(event.target.name)].checked);
-        setCheckedCheckboxes(checked);
+    const [typeStates, setTypeStates] = useState(getCheckboxes(Object.keys(props.backends), props.queue.allowed_backends));
+    const toggleAllowed = (backend_type: string) => {
+        const newState = {...typeStates}
+        newState[backend_type] = !typeStates[backend_type]
+        setTypeStates(newState);
     }
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const currentCheckboxes = checkedCheckboxes;
-        if (checkedCheckboxes.length === 0) {
-            setCheckedCheckboxes(GetCheckboxes(Object.keys(props.backends), props.queue.allowed_backends));
-        }
-        let choice = [];
-        for (var i = 0; i < currentCheckboxes.length; i++) {
-            if (currentCheckboxes[i].checked) {
-                choice.push(Object.keys(props.backends)[i]);
-            }
-        }
-        props.onSubmit(choice);
+        const allowed = _(typeStates)
+            .toPairs()
+            .filter(ts => ts[1])
+            .map(ts => ts[0])
+            .value();
+        props.onSubmit(allowed);
     }
-    const checkbox = (label: string) => {
+    const allowedMeetingTypeEditor = (backend_type: string) => {
         return (
-        <>
-        <label htmlFor={label}>{props.backends[label]}:</label>
-        <input name={label} type="checkbox" checked={checkedCheckboxes[Object.keys(props.backends).indexOf(label)].checked} onChange={handleChange}/>
-        </>);
-    }
-    const checkboxes = [];
-    for (var i = 0; i < Object.keys(props.backends).length; i++) {
-        var thisType = Object.keys(props.backends)[i];
-        if (i === 0) {
-            checkboxes.push(checkbox(thisType));
-        } else {
-            let thisBox = <>
-                <div className="input-group-append">
-                    {checkbox(thisType)}
-                </div> 
+            <>
+            <label htmlFor={backend_type}>{props.backends[backend_type]}:</label>
+            <input name={backend_type} type="checkbox" checked={typeStates[backend_type]} onChange={() => toggleAllowed(backend_type)}/>
             </>
-            checkboxes.push(thisBox);
-        }
+        );
     }
+    const allowedMeetingTypeEditors = Object.keys(props.backends)
+        .map((b, i) => 
+            i === 0 
+                ? allowedMeetingTypeEditor(b) 
+                : <div className="input-group-append">{allowedMeetingTypeEditor(b)}</div>
+        );
     return (
         <form onSubmit={submit} className="input-group">
-            {checkboxes}
+            {allowedMeetingTypeEditors}
             <div className="input-group-append">
                 <button className="btn btn-success" type="submit" disabled={props.disabled}>
                     Save
