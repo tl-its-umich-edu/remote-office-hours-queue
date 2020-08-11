@@ -136,57 +136,37 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     );
 }
 
-interface AllowedMeetingTypesFormProps {
+interface AllowedMeetingBackendsFormProps {
     queue: QueueHost;
     backends: {[backend_type: string]: string};
-    onSubmit: (allowedTypes: string[]) => void;
+    allowed: Set<string>;
+    onChange: (allowedBackends: Set<string>) => void;
     disabled: boolean;
 }
 
-const getCheckboxes = (labels: string[], checkedLabels: string[]) =>
-    _(labels)
-        .map(l => [l, checkedLabels.includes(l)])
-        .fromPairs()
-        .value();
-
-function AllowedMeetingTypesForm(props: AllowedMeetingTypesFormProps) {
-    const [typeStates, setTypeStates] = useState(getCheckboxes(Object.keys(props.backends), props.queue.allowed_backends));
+function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
     const toggleAllowed = (backend_type: string) => {
-        const newState = {...typeStates}
-        newState[backend_type] = !typeStates[backend_type]
-        setTypeStates(newState);
-    }
-    const submit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const allowed = _(typeStates)
-            .toPairs()
-            .filter(ts => ts[1])
-            .map(ts => ts[0])
-            .value();
-        props.onSubmit(allowed);
+        const newAllowed = new Set(props.allowed);
+        if (newAllowed.has(backend_type)) {
+            newAllowed.delete(backend_type);
+        } else {
+            newAllowed.add(backend_type);
+        }
+        props.onChange(newAllowed);
     }
     const allowedMeetingTypeEditor = (backend_type: string) => {
         return (
             <>
             <label htmlFor={backend_type}>{props.backends[backend_type]}:</label>
-            <input name={backend_type} type="checkbox" checked={typeStates[backend_type]} onChange={() => toggleAllowed(backend_type)}/>
+            <input name={backend_type} type="checkbox" checked={props.allowed.has(backend_type)} onChange={() => toggleAllowed(backend_type)}/>
             </>
         );
     }
     const allowedMeetingTypeEditors = Object.keys(props.backends)
-        .map((b, i) => 
-            i === 0 
-                ? allowedMeetingTypeEditor(b) 
-                : <div className="input-group-append">{allowedMeetingTypeEditor(b)}</div>
-        );
+        .map((b) => <div>{allowedMeetingTypeEditor(b)}</div>);
     return (
-        <form onSubmit={submit} className="input-group">
+        <form className="input-group">
             {allowedMeetingTypeEditors}
-            <div className="input-group-append">
-                <button className="btn btn-success" type="submit" disabled={props.disabled}>
-                    Save
-                </button>
-            </div>
         </form>
     );
 }
@@ -209,7 +189,7 @@ interface QueueEditorProps {
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     selectedBackend: string;
     onChangeSelectedBackend: (backendType: string) => void;
-    onUpdateAllowedMeetingTypes: (allowedTypes: string[]) => void;
+    onUpdateAllowedBackends: (allowedBackends: Set<string>) => void;
 }
 
 function QueueEditor(props: QueueEditorProps) {
@@ -296,7 +276,12 @@ function QueueEditor(props: QueueEditorProps) {
                 <div className="form-group row">
                     <label htmlFor="allowed meeting types" className="col-md-2 col-form-label">Allowed Meeting Types:</label>
                     <div className="col-md-6">
-                        <AllowedMeetingTypesForm queue={props.queue} onSubmit={props.onUpdateAllowedMeetingTypes} disabled={props.disabled} backends={props.backends}/>
+                        <AllowedBackendsForm 
+                            queue={props.queue}
+                            allowed={new Set(props.queue.allowed_backends)}
+                            onChange={props.onUpdateAllowedBackends}
+                            disabled={props.disabled}
+                            backends={props.backends}/>
                     </div>
                 </div>
                 <div className="form-group row">
@@ -336,7 +321,8 @@ function QueueEditor(props: QueueEditorProps) {
             </div>
             <div className="row">
                 <div className="col-md-8">
-                    <AddAttendeeForm queue={props.queue} backends={props.backends} defaultBackend={props.defaultBackend} selectedBackend={props.selectedBackend}
+                    <AddAttendeeForm queue={props.queue} backends={props.backends}
+                        defaultBackend={props.defaultBackend} selectedBackend={props.selectedBackend}
                         onChangeSelectedBackend={props.onChangeSelectedBackend} disabled={props.disabled}
                         onSubmit={props.onAddMeeting}/>
                 </div>
@@ -534,13 +520,13 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
-    const updateAllowedMeetingTypes = async (allowedTypes: string[]) => {
-        if (allowedTypes.length === 0) {    
+    const updateAllowedBackends = async (allowedBackends: Set<string>) => {
+        if (allowedBackends.size === 0) {    
             throw new Error("Must have at least one allowed meeting type.");
         }
-        await api.updateAllowedMeetingTypes(queue!.id, allowedTypes);
+        await api.updateAllowedMeetingTypes(queue!.id, allowedBackends);
     }
-    const [doUpdateAllowedMeetingTypes, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedMeetingTypes);
+    const [doUpdateAllowedMeetingTypes, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedBackends);
     
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading || updateAllowedMeetingTypesLoading;
@@ -571,7 +557,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
             onShowMeetingInfo={setVisibleMeetingDialog} onChangeAssignee={doChangeAssignee}
             selectedBackend={selectedBackend}
             onChangeSelectedBackend={setSelectedBackend}
-            onUpdateAllowedMeetingTypes={doUpdateAllowedMeetingTypes}/>
+            onUpdateAllowedBackends={doUpdateAllowedMeetingTypes}/>
     return (
         <>
         <Dialog ref={dialogRef}/>
