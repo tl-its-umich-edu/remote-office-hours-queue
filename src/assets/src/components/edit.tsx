@@ -335,7 +335,7 @@ function QueueEditor(props: QueueEditorProps) {
                 </div>
             </div>
             <div className="row">
-                <div className="col-md-4">
+                <div className="col-md-8">
                     <AddAttendeeForm queue={props.queue} backends={props.backends} defaultBackend={props.defaultBackend} selectedBackend={props.dropdownState}
                     onChangeSelectedBackend={props.onChangeDropdownState} disabled={props.disabled}
                     onSubmit={props.onAddMeeting}/>
