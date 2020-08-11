@@ -204,7 +204,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 
 function QueueAttending(props: QueueAttendingProps) {
     useEffect(() => {
-        props.onChangeSelectedBackend(props.queue?.my_meeting.backend_type ?? props.defaultBackend);
+        props.onChangeSelectedBackend(props.queue?.my_meeting?.backend_type ?? props.defaultBackend);
     }, []);
     const description = props.queue.description.trim()
         && <p className="lead">{props.queue.description.trim()}</p>
