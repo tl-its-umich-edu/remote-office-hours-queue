@@ -39,7 +39,11 @@ class Queue(SafeDeleteModel):
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(max_length=1000, blank=True, validators=[MaxLengthValidator(1000)])
+    description = models.TextField(
+        max_length=1000,
+        blank=True,
+        validators=[MaxLengthValidator(1000)]
+    )
     status = models.CharField(
         max_length=32,
         choices=[
@@ -53,7 +57,10 @@ class Queue(SafeDeleteModel):
         for key, value in settings.BACKENDS.items()
     ]
     DEFAULT_ALLOWED_TYPES = [settings.DEFAULT_BACKEND]
-    allowed_backends = ArrayField(models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False), size=2, default=list(DEFAULT_ALLOWED_TYPES))
+    allowed_backends = ArrayField(
+        models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False),
+        default=list(DEFAULT_ALLOWED_TYPES)
+    )
 
     def __str__(self):
         return self.name
