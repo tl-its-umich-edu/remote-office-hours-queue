@@ -1,5 +1,5 @@
 class InPersonBackend:
-    friendly_name = "InPerson"
+    friendly_name = "In Person"
 
     def save_user_meeting(self, backend_metadata={}):
         return backend_metadata
