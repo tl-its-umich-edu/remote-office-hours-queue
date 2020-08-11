@@ -101,8 +101,8 @@ interface AddAttendeeFormProps {
     queue: QueueHost;
     backends: {[backend_type: string]: string};
     defaultBackend: string;
-    dropdownState: string;
-    onChangeDropdownState: (backendType: string) => void;
+    selectedBackend: string;
+    onChangeSelectedBackend: (backendType: string) => void;
     disabled: boolean;
     onSubmit: (value: string) => void;
 }
@@ -118,14 +118,14 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
         props.onSubmit(value);
         setValue("");
     }
-    const options = props.queue.allowed_backends.map(function (b) { return {value: b, displayValue: props.backends[b]} as DropdownValue;}) as DropdownValue[];
+    const options = props.queue.allowed_backends.map((b) => ({value: b, displayValue: props.backends[b]} as DropdownValue));
     return (
         <form onSubmit={submit} className="input-group">
             <input onChange={(e) => setValue(e.target.value)} value={value}
                 ref={inputRef} type="text" className="form-control" placeholder="Uniqname..."
                 disabled={props.disabled} id="add_attendee" />
             <div className="input-group-append">
-                <MeetingTypeDropdown options={options} defaultValue={props.defaultBackend} onChangeValue={props.onChangeDropdownState}/>
+                <MeetingTypeDropdown options={options} defaultValue={props.defaultBackend} onChangeValue={props.onChangeSelectedBackend}/>
             </div>
             <div className="input-group-append">
                 <button className="btn btn-success" type="submit" disabled={props.disabled}>
@@ -336,8 +336,8 @@ function QueueEditor(props: QueueEditorProps) {
             </div>
             <div className="row">
                 <div className="col-md-4">
-                    <AddAttendeeForm queue={props.queue} backends={props.backends} defaultBackend={props.defaultBackend} dropdownState={props.dropdownState}
-                    onChangeDropdownState={props.onChangeDropdownState} disabled={props.disabled}
+                    <AddAttendeeForm queue={props.queue} backends={props.backends} defaultBackend={props.defaultBackend} selectedBackend={props.dropdownState}
+                    onChangeSelectedBackend={props.onChangeDropdownState} disabled={props.disabled}
                     onSubmit={props.onAddMeeting}/>
                 </div>
             </div>
