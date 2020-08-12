@@ -98,7 +98,7 @@ export const addMeeting = async (queue_id: number, user_id: number, backend_type
             queue: queue_id,
             attendee_ids: [user_id],
             assignee_id: null,
-            backend_type: backend_type
+            backend_type: backend_type,
         }),
         headers: getPostHeaders(),
     });
@@ -230,15 +230,14 @@ export const changeMeetingType = async (meeting_id: number, backend_type: string
     return await resp.json();
 }
 
-export const updateAllowedMeetingTypes = async (queue_id: number, allowed_backends: string[]) => {
+export const updateAllowedMeetingTypes = async (queue_id: number, allowed_backends: Set<string>) => {
     const resp = await fetch(`/api/queues/${queue_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
         body: JSON.stringify({
-            allowed_backends: allowed_backends
+            allowed_backends: Array.from(allowed_backends),
         }),
     });
     await handleErrors(resp);
     return await resp.json();
 }
-
