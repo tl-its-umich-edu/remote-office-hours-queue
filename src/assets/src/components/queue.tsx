@@ -5,7 +5,7 @@ import * as ReactGA from "react-ga";
 import { Alert, Button, Card, Modal } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
+import { User, QueueAttendee, BluejeansMetadata, MyUser, ZoomMetadata } from "../models";
 import {
     checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DisabledMessage,
     EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
@@ -152,6 +152,41 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
     );
 }
 
+interface ZoomMeetingInfoProps {
+    metadata: ZoomMetadata;
+}
+
+const ZoomMeetingInfo: React.FC<ZoomMeetingInfoProps> = (props) => {
+    const meetingNumber = props.metadata.numeric_meeting_id;
+    const joinLink = 
+        <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
+            Join Meeting
+        </a>
+
+    return (
+        <>
+        {joinLink}
+        {props.children}     
+        <div className="row bottom-content">
+            <div className="col-sm">
+                <div className="card card-body">
+                    <h5 className="card-title mt-0">Joining the Meeting</h5>
+                    <p className="card-text">
+                        You can join the meeting now to make sure you are set up and ready. Download the app and test your
+                        audio before it is your turn. See 
+                        <a href="https://its.umich.edu/communication/videoconferencing/zoom" 
+                        target="_blank" 
+                        className="card-link">
+                            How to use Zoom at U-M
+                        </a> for additional help getting started.
+                    </p>
+                </div>
+            </div>
+        </div>
+        </>
+    );
+}
+
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const closedAlert = props.queue.status === "closed"
         && (
@@ -166,20 +201,25 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
             ? <TurnSoonAlert/>
             : undefined;
-
-    const buttonBlock = (
+    const leave = (
         <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
             Leave the line
             {props.disabled && DisabledMessage}
         </button>
     );
     const meetingInfo = props.queue.my_meeting!.backend_type === "bluejeans"
-        ? (
-            <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}>
-                {buttonBlock}
-            </BlueJeansMeetingInfo>
-        ) : buttonBlock;
-
+            ? (
+                <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}>
+                    {leave}
+                </BlueJeansMeetingInfo>
+            )
+            : props.queue.my_meeting!.backend_type === "zoom"
+                ? (
+                    <ZoomMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as ZoomMetadata}>
+                        {leave}
+                    </ZoomMeetingInfo>
+                )
+                : {leave}
     const changeMeetingType = props.queue.my_meeting?.assignee 
         ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
@@ -241,9 +281,6 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 }
 
 function QueueAttending(props: QueueAttendingProps) {
-    useEffect(() => {
-        props.onChangeDropdownState(props.queue?.my_meeting ? props.queue.my_meeting.backend_type : "default");
-    }, []);
     const description = props.queue.description.trim()
         && <p className="lead">{props.queue.description.trim()}</p>
     const content = !props.queue.my_meeting
