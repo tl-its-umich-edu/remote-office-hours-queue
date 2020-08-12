@@ -90,6 +90,8 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
         <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
             Join Meeting
         </a>
+    const docLink = 'https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started'
+    const docLinkTag = <a href={docLink} target='_blank' className='card-link'>How to use BlueJeans at U-M</a>
 
     return (
         <>
@@ -101,12 +103,7 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
                     <h5 className="card-title mt-0">Joining the Meeting</h5>
                     <p className="card-text">
                         You can join the meeting now to make sure you are set up and ready. Download the app and test your
-                        audio before it is your turn. See 
-                        <a href="https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started" 
-                        target="_blank" 
-                        className="card-link">
-                            How to use BlueJeans at U-M
-                        </a> for additional help getting started.
+                        audio before it is your turn. Refer to {docLinkTag} for additional help getting started.
                     </p>
                 </div>
             </div>
