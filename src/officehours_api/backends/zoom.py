@@ -132,7 +132,7 @@ class Backend:
     @classmethod
     def _create_meeting(cls, user: User) -> ZoomMeeting:
         session = cls._get_session(user)
-        user_id = user.profile.backend_metadata['zoom']['id']
+        user_id = user.profile.backend_metadata['zoom']['user_id']
         resp = session.post(
             f'{cls.base_url}/v2/users/{user_id}/meetings',
             json={
@@ -185,7 +185,7 @@ class Backend:
         me = Backend._get_me(request.user)
         print(me)
         zoom_meta.update({
-            'id': me['id'],
+            'user_id': me['id'],
         })
         request.user.profile.backend_metadata['zoom'] = zoom_meta
         request.user.profile.save()
