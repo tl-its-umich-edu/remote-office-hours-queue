@@ -20,6 +20,7 @@ interface MeetingEditorProps {
     disabled: boolean;
     potentialAssignees: User[];
     user: User;
+    backends: {[backend_type: string]: string};
     onRemove: (m: Meeting) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined) => void;
@@ -27,9 +28,7 @@ interface MeetingEditorProps {
 
 function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0];
-    const joinUrl = props.meeting.backend_type === "bluejeans"
-        ? (props.meeting.backend_metadata as BluejeansMetadata).meeting_url
-        : undefined;
+    const joinUrl = props.meeting.backend_metadata?.meeting_url;
     const joinLink = joinUrl 
         ? (
             <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
@@ -37,7 +36,7 @@ function MeetingEditor(props: MeetingEditorProps) {
             </a>
         )
         : (
-            <a className="btn btn-light btn-sm mr-2">In Person</a>
+            <span className="badge badge-secondary mr-2">{props.backends[props.meeting.backend_type]}</span>
         );
     const infoButton = (
         <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="link" size="sm" className="mr-2">
@@ -203,7 +202,7 @@ function QueueEditor(props: QueueEditorProps) {
         .map((m, i) =>
             <tr>
                 <th scope="row" className="d-none d-sm-table-cell">{i+1}</th>
-                <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled}
+                <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled} backends={props.backends}
                     onRemove={props.onRemoveMeeting} onShowMeetingInfo={props.onShowMeetingInfo} onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m) }/>
             </tr>
         );
