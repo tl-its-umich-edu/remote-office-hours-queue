@@ -72,12 +72,12 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
 
 const TurnNowAlert = () =>
     <div className="alert alert-success" role="alert">
-        <strong>It's your turn!</strong> If you haven't already joined the meeting, follow the directions on the right to join it now!
+        <strong>It's your turn!</strong> If you haven't already joined the meeting, follow the directions to join it now!
     </div>
 
 const TurnSoonAlert = () =>
     <div className="alert alert-warning" role="alert">
-        <strong>Your turn is coming up!</strong> Follow the directions on the right to join the meeting now so you are ready when it's your turn.
+        <strong>Your turn is coming up!</strong> Follow the directions to join the meeting now so you are ready when it's your turn.
     </div>
 
 interface BlueJeansMeetingInfoProps {
