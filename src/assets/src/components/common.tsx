@@ -142,7 +142,6 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     const [value, setValue] = useState("");
     return (
         <StatelessSingleInputForm
-            id={props.id}
             value={value} onChangeValue={setValue}
             {...props}
         />
