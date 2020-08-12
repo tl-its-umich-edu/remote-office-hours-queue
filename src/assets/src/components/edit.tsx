@@ -43,11 +43,11 @@ function MeetingEditor(props: MeetingEditorProps) {
             Join Info
         </Button>
     );
-    const assigneeOptions = [<option value="">Assign to Host...</option>]
+    const assigneeOptions = [<option key={0} value="">Assign to Host...</option>]
         .concat(
             props.potentialAssignees
                 .sort((a, b) => a.id === props.user.id ? -1 : b.id === props.user.id ? 1 : 0)
-                .map(a => <option value={a.id}>{a.first_name} {a.last_name} ({a.username})</option>)
+                .map(a => <option key={a.id} value={a.id}>{a.first_name} {a.last_name} ({a.username})</option>)
         );
     const onChangeAssignee = (e: React.ChangeEvent<HTMLSelectElement>) =>
         e.target.value === ""
@@ -158,7 +158,7 @@ function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
     }
     const allowedMeetingTypeEditors = Object.keys(props.backends)
         .map((b) =>
-            <Form.Group controlId={b}>
+            <Form.Group key={b} controlId={b}>
                 <Form.Check type="checkbox" label={props.backends[b]}
                     checked={props.allowed.has(b)}
                     onChange={() => toggleAllowed(b)}/>
@@ -200,7 +200,7 @@ function QueueEditor(props: QueueEditorProps) {
     const meetings = props.queue.meeting_set
         .sort((a, b) => a.id - b.id)
         .map((m, i) =>
-            <tr>
+            <tr key={m.id}>
                 <th scope="row" className="d-none d-sm-table-cell">{i+1}</th>
                 <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled} backends={props.backends}
                     onRemove={props.onRemoveMeeting} onShowMeetingInfo={props.onShowMeetingInfo} onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m) }/>
@@ -517,6 +517,17 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const updateAllowedBackends = async (allowedBackends: Set<string>) => {
         if (allowedBackends.size === 0) {    
             throw new Error("Must have at least one allowed meeting type.");
+        }
+        const meetingsWithDisallowedBackends = queue!.meeting_set.filter(m => !allowedBackends.has(m.backend_type));
+        if (meetingsWithDisallowedBackends.length) {
+            const meetingsList = meetingsWithDisallowedBackends
+                .map(m => m.attendees[0])
+                .map(u => `${u.first_name} ${u.last_name} (${u.username})`)
+                .reduce(
+                    (p, c) => p + `, ${c}`,
+                    
+                );
+            throw new Error(`You can't disallow this meeting type until the following meetings that use it have been removed from the queue: ${meetingsList}`);
         }
         await api.updateAllowedMeetingTypes(queue!.id, allowedBackends);
     }

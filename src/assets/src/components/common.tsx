@@ -279,13 +279,13 @@ interface BackendSelectorProps {
 
 export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {  
     const dropdownOptions = props.options.map(a => 
-        <option value={a.value}>{a.displayValue}</option>
+        <option key={a.value} value={a.value}>{a.displayValue}</option>
     );
     const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
         props.onChange(event.currentTarget.value);
     }
     return (
-        <select className="btn btn-sm select-dropdown" defaultValue={props.defaultBackend} onChange={handleChange} value={props.selectedBackend}>
+        <select className="btn btn-sm select-dropdown" onChange={handleChange} value={props.selectedBackend}>
             {dropdownOptions}
         </select>
     );
