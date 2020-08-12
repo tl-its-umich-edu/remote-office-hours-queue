@@ -271,22 +271,22 @@ export interface DropdownValue {
     displayValue: string;
 }
 
-interface MeetingTypeDropdownProps {
+interface BackendSelectorProps {
     options: DropdownValue[];
-    defaultValue: string;
-    onChangeValue: (value: string) => void;
+    defaultBackend: string;
+    selectedBackend: string;
+    onChange: (backend: string) => void;
 }
 
-export const MeetingTypeDropdown: React.FC<MeetingTypeDropdownProps> = (props) => {  
+export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {  
     const dropdownOptions = props.options.map(a => 
         <option value={a.value}>{a.displayValue}</option>
     );
     const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
-        props.onChangeValue(event.currentTarget.value);
+        props.onChange(event.currentTarget.value);
     }
-    
     return (
-        <select className="btn btn-sm select-dropdown" defaultValue={props.defaultValue} onChange={handleChange}>
+        <select className="btn btn-sm select-dropdown" defaultValue={props.defaultBackend} onChange={handleChange} value={props.selectedBackend}>
             {dropdownOptions}
         </select>
     );

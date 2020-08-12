@@ -7,7 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
-import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, MeetingTypeDropdown, DropdownValue} from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, BackendSelector, DropdownValue} from "./common";
 import * as api from "../services/api";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
@@ -19,10 +19,10 @@ interface JoinQueueProps {
     queue: QueueAttendee;
     backends: {[backend_type: string]: string};
     defaultBackend: string;
-    onJoinQueue: (backendType: string) => void;
+    onJoinQueue: (backend: string) => void;
     disabled: boolean;
     selectedBackend: string;
-    onChangeSelectedBackend: (backendType: string) => void;
+    onChangeSelectedBackend: (backend: string) => void;
 }
 
 const JoinQueue: React.FC<JoinQueueProps> = (props) => {
@@ -33,8 +33,7 @@ const JoinQueue: React.FC<JoinQueueProps> = (props) => {
             <p className="mb-0">Select Meeting Type</p>
             <p className="mb-0 required">*</p>
         </div>
-        
-        <MeetingTypeDropdown options={options} defaultValue={props.defaultBackend} onChangeValue={props.onChangeSelectedBackend}/>
+        <BackendSelector options={options} defaultBackend={props.defaultBackend} onChange={props.onChangeSelectedBackend} selectedBackend={props.selectedBackend}/>
         <div className="row">
             <div className="col-lg">
                 <button disabled={props.disabled} onClick={() => props.onJoinQueue(props.selectedBackend)} type="button" className="btn btn-primary bottom-content">
@@ -53,14 +52,14 @@ interface QueueAttendingProps {
     user: User;
     joinedQueue?: QueueAttendee | null;
     disabled: boolean;
-    onJoinQueue: (backendType: string) => void;
+    onJoinQueue: (backend: string) => void;
     onLeaveQueue: () => void;
-    onLeaveAndJoinQueue: (backendType: string) => void;
+    onLeaveAndJoinQueue: (backend: string) => void;
     onChangeAgenda: (agenda: string) => void;
     onShowDialog: () => void;
-    onChangeBackendType: (oldBackendType: string, backendType: string) => void;
+    onChangeBackendType: (oldBackendType: string, backend: string) => void;
     selectedBackend: string;
-    onChangeSelectedBackend: (backendType: string) => void;
+    onChangeSelectedBackend: (backend: string) => void;
 }
 
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
@@ -240,11 +239,11 @@ function QueueAttending(props: QueueAttendingProps) {
 interface ChangeMeetingTypeDialogProps {
     queue: QueueAttendee;
     backends: {[backend_type: string]: string};
+    selectedBackend: string;
     show: boolean;
     onClose: () => void;
-    onSubmit: (oldBackendType: string) => void;
-    dropdownState: string;
-    onChangeDropdownState: (backendType: string) => void;
+    onSubmit: (oldBackend: string) => void;
+    onChangeBackend: (backend: string) => void;
 }
 
 const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
@@ -263,7 +262,10 @@ const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
                     <p>Select Meeting Type</p>
                     <p className="required">*</p>
                 </div>
-                <MeetingTypeDropdown options={options} defaultValue={props.queue.my_meeting?.backend_type as string} onChangeValue={props.onChangeDropdownState}/>
+                <BackendSelector options={options} 
+                    defaultBackend={props.queue.my_meeting?.backend_type as string}
+                    onChange={props.onChangeBackend}
+                    selectedBackend={props.selectedBackend}/>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={props.onClose}>Cancel</Button>
@@ -370,8 +372,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const meetingTypeDialog = queue 
         && <ChangeMeetingTypeDialog queue={queue} backends={props.backends} show={showMeetingTypeDialog} 
             onClose={() => setShowMeetingTypeDialog(false)} 
-            onSubmit={doChangeBackendType} dropdownState={selectedBackend} 
-            onChangeDropdownState={setSelectedBackend}/>
+            onSubmit={doChangeBackendType} selectedBackend={selectedBackend} 
+            onChangeBackend={setSelectedBackend}/>
     return (
         <div>
             <Dialog ref={dialogRef}/>
