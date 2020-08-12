@@ -264,11 +264,11 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     //Render
     const isChanging = joinQueueLoading || leaveQueueLoading || leaveAndJoinQueueLoading || changeAgendaLoading;
     const errorSources = [
-        {source: 'Queue Connection', error: queueWebSocketError}, 
-        {source: 'Join Queue', error: joinQueueError}, 
-        {source: 'Leave Queue', error: leaveQueueError}, 
-        {source: 'Refresh My User', error: userWebSocketError}, 
-        {source: 'Leave and Join Queue', error: leaveAndJoinQueueError}, 
+        {source: 'Queue Connection', error: queueWebSocketError},
+        {source: 'Join Queue', error: joinQueueError},
+        {source: 'Leave Queue', error: leaveQueueError},
+        {source: 'User Connection', error: userWebSocketError},
+        {source: 'Leave and Join Queue', error: leaveAndJoinQueueError},
         {source: 'Change Agenda', error: changeAgendaError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
