@@ -521,10 +521,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
             const meetingsList = meetingsWithDisallowedBackends
                 .map(m => m.attendees[0])
                 .map(u => `${u.first_name} ${u.last_name} (${u.username})`)
-                .reduce(
-                    (p, c) => p + `, ${c}`,
-                    
-                );
+                .reduce((p, c) => p + ', ' + c);
             throw new Error(`You can't disallow this meeting type until the following meetings that use it have been removed from the queue: ${meetingsList}`);
         }
         await api.updateAllowedMeetingTypes(queue!.id, allowedBackends);
