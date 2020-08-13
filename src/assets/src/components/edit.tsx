@@ -352,6 +352,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
             setQueue(q);
         } else if (isQueueHost(q)) {
             setQueue(q);
+            setAuthError(undefined);
         } else {
             setQueue(undefined);
             setAuthError(new Error("You are not a host of this queue. If you believe you are seeing this message in error, contact the queue host(s)."));
