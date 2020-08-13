@@ -346,10 +346,16 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
 
     //Setup basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
+    const [authError, setAuthError] = useState(undefined as Error | undefined);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
-        if (!q) setQueue(q);
-        else if (isQueueHost(q)) setQueue(q);
-        else setQueue(undefined);
+        if (!q) {
+            setQueue(q);
+        } else if (isQueueHost(q)) {
+            setQueue(q);
+        } else {
+            setQueue(undefined);
+            setAuthError(new Error("You are not a host of this queue. If you believe you are seeing this message in error, contact the queue host(s)."));
+        }
     }
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
     const [users, setUsers] = useState(undefined as User[] | undefined);
@@ -424,6 +430,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     //Render
     const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
     const errorSources = [
+        {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
         {source: 'Users Connection', error: usersWebSocketError}, 
         {source: 'Remove Host', error: removeHostError}, 
