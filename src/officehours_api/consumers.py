@@ -71,7 +71,13 @@ class QueueConsumer(JsonWebsocketConsumer):
         )
 
     def queue_update(self, event):
-        queue = Queue.objects.get(pk=self.queue_id)
+        try:
+            queue = Queue.objects.get(pk=self.queue_id)
+        except Queue.DoesNotExist:
+            self.send_json({
+                'type': 'deleted',
+            })
+            return
         QueueSerializer = (
             QueueHostSerializer
             if is_host(self.user, queue)
