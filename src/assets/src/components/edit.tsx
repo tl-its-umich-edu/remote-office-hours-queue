@@ -113,8 +113,6 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     }, []);
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("Submitting AddAttendeeForm...")
-        console.log(selectedBackend)
         props.onSubmit(attendee, selectedBackend);
         setAttendee("");
     }
