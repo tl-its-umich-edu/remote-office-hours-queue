@@ -130,10 +130,12 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
     hosts = NestedUserSerializer(many=True, read_only=True)
     line_length = serializers.SerializerMethodField(read_only=True)
     my_meeting = serializers.SerializerMethodField(read_only=True)
+    allowed_backends = serializers.ListField(child=serializers.CharField())
 
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status']
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status',
+                  'allowed_backends']
 
     def get_line_length(self, obj):
         return obj.meeting_set.count()
@@ -163,11 +165,12 @@ class QueueHostSerializer(QueueAttendeeSerializer):
         source='hosts',
         write_only=True,
     )
+    allowed_backends = serializers.ListField(child=serializers.CharField())
 
     class Meta:
         model = Queue
         fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids',
-                  'meeting_set', 'line_length', 'my_meeting', 'status']
+                  'meeting_set', 'line_length', 'my_meeting', 'status', 'allowed_backends']
 
     def validate_host_ids(self, host_ids):
         '''

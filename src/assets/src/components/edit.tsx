@@ -1,18 +1,15 @@
 import * as React from "react";
-import { useState, createRef, ChangeEvent } from "react";
+import { useState, createRef, ChangeEvent, useEffect } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
+import { Modal, Button, Table, Alert, Form } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import Table from "react-bootstrap/Table";
-import Alert from "react-bootstrap/Alert";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector, DropdownValue } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
@@ -23,6 +20,7 @@ interface MeetingEditorProps {
     disabled: boolean;
     potentialAssignees: User[];
     user: User;
+    backends: {[backend_type: string]: string};
     onRemove: (m: Meeting) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined) => void;
@@ -30,25 +28,26 @@ interface MeetingEditorProps {
 
 function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0];
-    const joinUrl = props.meeting.backend_type === "bluejeans"
-        ? (props.meeting.backend_metadata as BluejeansMetadata).meeting_url
-        : undefined;
+    const joinUrl = props.meeting.backend_metadata?.meeting_url;
     const joinLink = joinUrl 
-        && (
+        ? (
             <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
                 Start Meeting
             </a>
+        )
+        : (
+            <span className="badge badge-secondary mr-2">{props.backends[props.meeting.backend_type]}</span>
         );
     const infoButton = (
         <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="link" size="sm" className="mr-2">
             Join Info
         </Button>
     );
-    const assigneeOptions = [<option value="">Assign to Host...</option>]
+    const assigneeOptions = [<option key={0} value="">Assign to Host...</option>]
         .concat(
             props.potentialAssignees
                 .sort((a, b) => a.id === props.user.id ? -1 : b.id === props.user.id ? 1 : 0)
-                .map(a => <option value={a.id}>{a.first_name} {a.last_name} ({a.username})</option>)
+                .map(a => <option key={a.id} value={a.id}>{a.first_name} {a.last_name} ({a.username})</option>)
         );
     const onChangeAssignee = (e: React.ChangeEvent<HTMLSelectElement>) =>
         e.target.value === ""
@@ -93,11 +92,90 @@ function HostEditor(props: HostEditorProps) {
     );
 }
 
+interface AddAttendeeFormProps {
+    allowedBackends: Set<string>;
+    backends: {[backend_type: string]: string};
+    defaultBackend: string;
+    disabled: boolean;
+    onSubmit: (value: string, backend: string) => void;
+}
+
+function AddAttendeeForm(props: AddAttendeeFormProps) {
+    const [attendee, setAttendee] = useState("");
+    const [selectedBackend, setSelectedBackend] = useState(
+        props.allowedBackends.has(props.defaultBackend)
+            ? props.defaultBackend
+            : Array.from(props.allowedBackends)[0]
+    );
+    const inputRef = createRef<HTMLInputElement>();
+    useEffect(() => {
+        inputRef.current!.focus();
+    }, []);
+    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        props.onSubmit(attendee, selectedBackend);
+        setAttendee("");
+    }
+    const options = Array.from(props.allowedBackends)
+        .map((b) => ({value: b, displayValue: props.backends[b]} as DropdownValue));
+    return (
+        <form onSubmit={submit} className="input-group">
+            <input onChange={(e) => setAttendee(e.target.value)} value={attendee}
+                ref={inputRef} type="text" className="form-control" placeholder="Uniqname..."
+                disabled={props.disabled} id="add_attendee" />
+            <div className="input-group-append">
+                <MeetingBackendSelector options={options} defaultBackend={props.defaultBackend}
+                    onChange={setSelectedBackend} selectedBackend={selectedBackend}/>
+            </div>
+            <div className="input-group-append">
+                <button className="btn btn-success" type="submit" disabled={props.disabled}>
+                    + Add Attendee
+                </button>
+            </div>
+        </form>
+    );
+}
+
+interface AllowedMeetingBackendsFormProps {
+    queue: QueueHost;
+    backends: {[backend_type: string]: string};
+    allowed: Set<string>;
+    onChange: (allowedBackends: Set<string>) => void;
+    disabled: boolean;
+}
+
+function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
+    const toggleAllowed = (backend_type: string) => {
+        const newAllowed = new Set(props.allowed);
+        if (newAllowed.has(backend_type)) {
+            newAllowed.delete(backend_type);
+        } else {
+            newAllowed.add(backend_type);
+        }
+        props.onChange(newAllowed);
+    }
+    const allowedMeetingTypeEditors = Object.keys(props.backends)
+        .map((b) =>
+            <Form.Group key={b} controlId={b}>
+                <Form.Check type="checkbox" label={props.backends[b]}
+                    checked={props.allowed.has(b)}
+                    onChange={() => toggleAllowed(b)}/>
+            </Form.Group>
+        );
+    return (
+        <Form>
+            {allowedMeetingTypeEditors}
+        </Form>
+    );
+}
+
 interface QueueEditorProps {
     queue: QueueHost;
     user: User;
     disabled: boolean;
-    onAddMeeting: (uniqname: string) => void;
+    backends: {[backend_type: string]: string};
+    defaultBackend: string;
+    onAddMeeting: (uniqname: string, backend: string) => void;
     onRemoveMeeting: (m: Meeting) => void;
     onAddHost: (uniqname: string) => void;
     onRemoveHost: (h: User) => void;
@@ -107,6 +185,7 @@ interface QueueEditorProps {
     onSetStatus: (open: boolean) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
+    onUpdateAllowedBackends: (allowedBackends: Set<string>) => void;
 }
 
 function QueueEditor(props: QueueEditorProps) {
@@ -119,9 +198,9 @@ function QueueEditor(props: QueueEditorProps) {
     const meetings = props.queue.meeting_set
         .sort((a, b) => a.id - b.id)
         .map((m, i) =>
-            <tr>
+            <tr key={m.id}>
                 <th scope="row" className="d-none d-sm-table-cell">{i+1}</th>
-                <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled}
+                <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled} backends={props.backends}
                     onRemove={props.onRemoveMeeting} onShowMeetingInfo={props.onShowMeetingInfo} onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m) }/>
             </tr>
         );
@@ -191,6 +270,17 @@ function QueueEditor(props: QueueEditorProps) {
                     </div>
                 </div>
                 <div className="form-group row">
+                    <label htmlFor="allowed meeting types" className="col-md-2 col-form-label">Allowed Meeting Types:</label>
+                    <div className="col-md-6">
+                        <AllowedBackendsForm 
+                            queue={props.queue}
+                            allowed={new Set(props.queue.allowed_backends)}
+                            onChange={props.onUpdateAllowedBackends}
+                            disabled={props.disabled}
+                            backends={props.backends}/>
+                    </div>
+                </div>
+                <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
                         <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
@@ -226,15 +316,10 @@ function QueueEditor(props: QueueEditorProps) {
                 </div>
             </div>
             <div className="row">
-                <div className="col-md-4">
-                    <SingleInputForm
-                        id="add_attendee"
-                        placeholder="Uniqname..."
-                        buttonType="success"
-                        onSubmit={props.onAddMeeting}
-                        disabled={props.disabled}>
-                            + Add Attendee
-                    </SingleInputForm>
+                <div className="col-md-8">
+                    <AddAttendeeForm allowedBackends={new Set(props.queue.allowed_backends)} backends={props.backends}
+                        defaultBackend={props.defaultBackend} disabled={props.disabled}
+                        onSubmit={props.onAddMeeting}/>
                 </div>
             </div>
         </div>
@@ -295,7 +380,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
         );
     const metadataInfo = props.meeting?.backend_type === "bluejeans"
         ? <BlueJeansMeetingInfo metadata={props.meeting!.backend_metadata!} />
-        : <div></div>
+        : <div><p>This meeting will be <strong>in person</strong>.</p></div>
     return (
         <Modal show={!!props.meeting} onHide={props.onClose}>
             <Modal.Header closeButton>
@@ -389,13 +474,13 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const confirmRemoveMeeting = (m: Meeting) => {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
-    const addMeeting = async (uniqname: string) => {
+    const addMeeting = async (uniqname: string, backend: string) => {
         uniqname = sanitizeUniqname(uniqname);
         validateUniqname(uniqname);
         const user = users!.find(u => u.username === uniqname);
         if (!user) throw new Error(invalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
-        await api.addMeeting(queue!.id, user.id);
+        await api.addMeeting(queue!.id, user.id, backend);
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
     const changeName = async (name: string) => {
@@ -427,9 +512,24 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
-
+    const updateAllowedBackends = async (allowedBackends: Set<string>) => {
+        if (allowedBackends.size === 0) {    
+            throw new Error("Must have at least one allowed meeting type.");
+        }
+        const meetingsWithDisallowedBackends = queue!.meeting_set.filter(m => !allowedBackends.has(m.backend_type));
+        if (meetingsWithDisallowedBackends.length) {
+            const meetingsList = meetingsWithDisallowedBackends
+                .map(m => m.attendees[0])
+                .map(u => `${u.first_name} ${u.last_name} (${u.username})`)
+                .reduce((p, c) => p + ', ' + c);
+            throw new Error(`You can't disallow this meeting type until the following meetings that use it have been removed from the queue: ${meetingsList}`);
+        }
+        await api.updateAllowedMeetingTypes(queue!.id, allowedBackends);
+    }
+    const [doUpdateAllowedBackends, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedBackends);
+    
     //Render
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading;
+    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading || updateAllowedMeetingTypesLoading;
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
@@ -442,18 +542,21 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         {source: 'Queue Description', error: changeDescriptionError}, 
         {source: 'Delete Queue', error: removeQueueError}, 
         {source: 'Queue Status', error: setStatusError}, 
-        {source: 'Assignee', error: changeAssigneeError}
+        {source: 'Assignee', error: changeAssigneeError},
+        {source: 'Allowed Meeting Types', error: updateAllowedMeetingTypesError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
+        && <QueueEditor queue={queue}  disabled={isChanging} user={props.user!}
+            backends={props.backends} defaultBackend={props.defaultBackend}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
             onChangeName={doChangeName} onChangeDescription={doChangeDescription}
             onSetStatus={doSetStatus} onRemoveQueue={confirmRemoveQueue}
-            onShowMeetingInfo={setVisibleMeetingDialog} onChangeAssignee={doChangeAssignee}/>
+            onShowMeetingInfo={setVisibleMeetingDialog} onChangeAssignee={doChangeAssignee}
+            onUpdateAllowedBackends={doUpdateAllowedBackends}/>
     return (
         <>
         <Dialog ref={dialogRef}/>

@@ -142,7 +142,6 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     const [value, setValue] = useState("");
     return (
         <StatelessSingleInputForm
-            id={props.id}
             value={value} onChangeValue={setValue}
             {...props}
         />
@@ -264,6 +263,32 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
             </div>
         );
     return contents;
+}
+
+export interface DropdownValue {
+    value: string;
+    displayValue: string;
+}
+
+interface BackendSelectorProps {
+    options: DropdownValue[];
+    defaultBackend: string;
+    selectedBackend: string;
+    onChange: (backend: string) => void;
+}
+
+export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {  
+    const dropdownOptions = props.options.map(a => 
+        <option key={a.value} value={a.value}>{a.displayValue}</option>
+    );
+    const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
+        props.onChange(event.currentTarget.value);
+    }
+    return (
+        <select className="btn btn-sm select-dropdown" onChange={handleChange} value={props.selectedBackend}>
+            {dropdownOptions}
+        </select>
+    );
 }
 
 interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProps {

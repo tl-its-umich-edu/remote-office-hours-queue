@@ -68,12 +68,13 @@ export const getQueue = async (id: number) => {
     return await resp.json() as QueueHost | QueueAttendee;
 }
 
-export const createQueue = async (name: string) => {
+export const createQueue = async (name: string, allowed_backends: Set<string>) => {
     const resp = await fetch("/api/queues/", { 
         method: "POST",
         body: JSON.stringify({
             name: name,
             host_ids: [],  //Ideally, this wouldn't be required
+            allowed_backends: Array.from(allowed_backends),
         }),
         headers: getPostHeaders(),
     });
@@ -90,13 +91,14 @@ export const deleteQueue = async (id: number) => {
     return resp;
 }
 
-export const addMeeting = async (queue_id: number, user_id: number) => {
+export const addMeeting = async (queue_id: number, user_id: number, backend_type: string) => {
     const resp = await fetch("/api/meetings/", {
         method: "POST",
         body: JSON.stringify({
             queue: queue_id,
             attendee_ids: [user_id],
             assignee_id: null,
+            backend_type: backend_type,
         }),
         headers: getPostHeaders(),
     });
@@ -216,4 +218,26 @@ export const changeMeetingAssignee = async (meeting_id: number, user_id: number 
     return await resp.json() as Meeting;
 }
 
+export const changeMeetingType = async (meeting_id: number, backend_type: string) => {
+    const resp = await fetch(`/api/meetings/${meeting_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            backend_type: backend_type,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
 
+export const updateAllowedMeetingTypes = async (queue_id: number, allowed_backends: Set<string>) => {
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify({
+            allowed_backends: Array.from(allowed_backends),
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}

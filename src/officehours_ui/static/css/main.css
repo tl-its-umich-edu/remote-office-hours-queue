@@ -623,3 +623,21 @@ div[role=main] {
 	display:flex;
 	justify-content: center;
 }
+
+.select-dropdown {
+	background-color: #dcdcdc;
+	color: #393939;
+}
+
+.required {
+	color: #cc0000;
+}
+
+.meeting-type-text-container {
+	display: flex;
+	align-items: flex-end;
+}
+
+.meeting-type-message {
+	padding-left: 5px
+}

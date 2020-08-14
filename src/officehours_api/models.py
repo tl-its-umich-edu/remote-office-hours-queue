@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.postgres.fields import ArrayField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.core.validators import MaxLengthValidator
@@ -9,16 +10,6 @@ from safedelete.models import (
 )
 from jsonfield import JSONField
 from requests.exceptions import RequestException
-
-from .backends.bluejeans import Bluejeans
-
-if settings.BLUEJEANS_CLIENT_ID and settings.BLUEJEANS_CLIENT_SECRET:
-    bluejeans = Bluejeans(
-        client_id=settings.BLUEJEANS_CLIENT_ID,
-        client_secret=settings.BLUEJEANS_CLIENT_SECRET,
-    )
-else:
-    bluejeans = None
 
 
 class BackendException(Exception):
@@ -48,7 +39,11 @@ class Queue(SafeDeleteModel):
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(max_length=1000, blank=True, validators=[MaxLengthValidator(1000)])
+    description = models.TextField(
+        max_length=1000,
+        blank=True,
+        validators=[MaxLengthValidator(1000)]
+    )
     status = models.CharField(
         max_length=32,
         choices=[
@@ -56,6 +51,15 @@ class Queue(SafeDeleteModel):
             ('closed', 'Closed'),
         ],
         default='open',
+    )
+    MEETING_BACKEND_TYPES = [
+        (key, value.friendly_name)
+        for key, value in settings.BACKENDS.items()
+    ]
+    DEFAULT_ALLOWED_TYPES = [settings.DEFAULT_BACKEND]
+    allowed_backends = ArrayField(
+        models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False),
+        default=lambda: list(DEFAULT_ALLOWED_TYPES)
     )
 
     def __str__(self):
@@ -77,27 +81,28 @@ class Meeting(SafeDeleteModel):
     agenda = models.CharField(max_length=100, null=False, default="", blank=True)
 
     MEETING_BACKEND_TYPES = [
-        ('bluejeans', 'BlueJeans'),
+        (key, value.friendly_name)
+        for key, value in settings.BACKENDS.items()
     ]
-    backend_type = models.CharField(max_length=20,
-                                    choices=MEETING_BACKEND_TYPES,
-                                    null=True)
+    backend_type = models.CharField(
+        max_length=20,
+        choices=MEETING_BACKEND_TYPES,
+        null=False,
+        default=settings.DEFAULT_BACKEND,
+    )
     backend_metadata = JSONField(null=True, default=dict)
 
     def save(self, *args, **kwargs):
-        if not self.backend_type and bluejeans:
-            self.backend_type = 'bluejeans'
-        if self.backend_type:
-            backend = globals()[self.backend_type]
-            if backend:
-                user_email = self.queue.hosts.first().email
-                self.backend_metadata['user_email'] = user_email
-                try:
-                    self.backend_metadata = backend.save_user_meeting(
-                        self.backend_metadata,
-                    )
-                except RequestException as ex:
-                    raise BackendException(self.backend_type) from ex
+        backend = settings.BACKENDS[self.backend_type]
+        user_email = self.queue.hosts.first().email
+        self.backend_metadata['user_email'] = user_email
+        try:
+            self.backend_metadata = backend.save_user_meeting(
+                self.backend_metadata,
+            )
+        except RequestException as ex:
+            raise BackendException(self.backend_type) from ex
+
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
