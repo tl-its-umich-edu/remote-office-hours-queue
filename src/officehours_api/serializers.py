@@ -20,11 +20,9 @@ class AttendeeSerializer(serializers.ModelSerializer):
 
 
 class NestedUserSerializer(serializers.ModelSerializer):
-    phone_number = serializers.CharField(source='profile.phone_number')
-
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
+        fields = ['id', 'username', 'first_name', 'last_name',]
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
@@ -90,11 +88,10 @@ class UserSerializer(serializers.ModelSerializer):
     context: UserContext
 
     my_queue = serializers.SerializerMethodField(read_only=True)
-    phone_number = serializers.CharField(source='profile.phone_number')
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'phone_number']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue',]
 
     def get_my_queue(self, obj):
         try:

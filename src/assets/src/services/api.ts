@@ -175,8 +175,7 @@ export const getMyUser = async (user_id: number) => {
     return await resp.json() as MyUser;
 }
 
-export const updateMyUser = async (user_id: number, phone_number:string) => {
-    
+export const updateMyUser = async (user_id: number, phone_number: string) => {
     const resp = await fetch(`/api/profiles/${user_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
