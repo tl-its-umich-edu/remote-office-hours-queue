@@ -59,7 +59,7 @@ class Queue(SafeDeleteModel):
     DEFAULT_ALLOWED_TYPES = [settings.DEFAULT_BACKEND]
     allowed_backends = ArrayField(
         models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False),
-        default=list(DEFAULT_ALLOWED_TYPES)
+        default=lambda: list(DEFAULT_ALLOWED_TYPES)
     )
 
     def __str__(self):
