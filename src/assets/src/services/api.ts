@@ -202,7 +202,7 @@ export const changeAgenda = async (meeting_id: number, agenda: string) => {
         }),
     });
     await handleErrors(resp);
-    return await resp.json();
+    return await resp.json() as Meeting;
 }
 
 export const changeMeetingAssignee = async (meeting_id: number, user_id: number | undefined) => {
@@ -226,7 +226,7 @@ export const changeMeetingType = async (meeting_id: number, backend_type: string
         }),
     });
     await handleErrors(resp);
-    return await resp.json();
+    return await resp.json() as Meeting;
 }
 
 export const updateAllowedMeetingTypes = async (queue_id: number, allowed_backends: Set<string>) => {
@@ -238,5 +238,5 @@ export const updateAllowedMeetingTypes = async (queue_id: number, allowed_backen
         }),
     });
     await handleErrors(resp);
-    return await resp.json();
+    return await resp.json() as QueueHost | QueueAttendee;
 }
