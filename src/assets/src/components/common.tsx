@@ -295,20 +295,20 @@ interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProp
 }
 
 export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
-    const buttonClass = `btn btn-${props.buttonType} remaining-controls`
-    const remaining = props.maxLength - props.value.length
-    const isInvalid = props.value.length > props.maxLength
+    const buttonClass = `btn btn-${props.buttonType} remaining-controls`;
+    const remaining = props.maxLength - props.value.length;
+    const isInvalid = props.value.length > props.maxLength;
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        props.onSubmit(props.value)
-        props.onChangeValue('')
+        e.preventDefault();
+        props.onSubmit(props.value);
+        props.onChangeValue('');
     }
-    const handleChange = (newValue: string) => props.onChangeValue(newValue)
+    const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
-    const charsRemaining = (remaining > 0) ? remaining : 0
-    const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : ''
-    const feedbackText = `Remaining characters: ${charsRemaining}/${props.maxLength}${charsOver}`
+    const charsRemaining = (remaining > 0) ? remaining : 0;
+    const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
+    const feedbackText = `Remaining characters: ${charsRemaining}/${props.maxLength}${charsOver}`;
 
     return (
         <Form onSubmit={handleSubmit}>
@@ -330,7 +330,7 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                 <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled || isInvalid}>{props.children}</Button>
             </div>
         </Form>
-    )
+    );
 }
 
 
