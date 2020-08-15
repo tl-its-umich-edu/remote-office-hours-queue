@@ -272,7 +272,6 @@ export interface DropdownValue {
 
 interface BackendSelectorProps {
     options: DropdownValue[];
-    defaultBackend: string;
     selectedBackend: string;
     onChange: (backend: string) => void;
 }

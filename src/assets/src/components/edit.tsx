@@ -124,7 +124,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
                 ref={inputRef} type="text" className="form-control" placeholder="Uniqname..."
                 disabled={props.disabled} id="add_attendee" />
             <div className="input-group-append">
-                <MeetingBackendSelector options={options} defaultBackend={props.defaultBackend}
+                <MeetingBackendSelector options={options}
                     onChange={setSelectedBackend} selectedBackend={selectedBackend}/>
             </div>
             <div className="input-group-append">
