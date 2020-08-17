@@ -404,6 +404,17 @@ h3.alert-heading {
 	padding-top: 0;
 }
 
+.card-middle {
+	margin-bottom: 20px;
+	font-size: 1.25rem;
+	background-color: #ececec;
+	color: #393939;
+}
+
+.card-text-spacing {
+	margin-bottom: 5px;
+}
+
 .card-header {
 	font-size: 1.25rem;
 	font-weight: bold;
@@ -465,6 +476,20 @@ h3.alert-heading {
 
 .form-control {
 	border: 1px solid #cecbc9;
+}
+
+.form-control-remaining.is-invalid {
+	background-image: none;
+}
+
+.remaining-controls-group {
+	margin: 0;
+	padding: 0;
+	text-align: right;
+}
+
+.remaining-controls {
+	margin-left: 20px;
 }
 
 .input-group {
@@ -588,4 +613,31 @@ div[role=main] {
 
 .breadcrumb .breadcrumb-item::before {
 	color: black;
+}
+
+.bottom-content {
+	margin-top: 20px;
+}
+
+.center-align {
+	display:flex;
+	justify-content: center;
+}
+
+.select-dropdown {
+	background-color: #dcdcdc;
+	color: #393939;
+}
+
+.required {
+	color: #cc0000;
+}
+
+.meeting-type-text-container {
+	display: flex;
+	align-items: flex-end;
+}
+
+.meeting-type-message {
+	padding-left: 5px
 }

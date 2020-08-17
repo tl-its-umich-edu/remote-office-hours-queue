@@ -14,6 +14,9 @@ import os
 
 import dj_database_url
 
+from officehours_api.backends.bluejeans import BluejeansBackend
+from officehours_api.backends.inperson import InPersonBackend
+
 
 def csv_to_list(csv, delim=','):
     try:
@@ -29,9 +32,20 @@ def str_to_bool(val):
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
+# Backends
 BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
 BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()
+BACKENDS = {
+    'inperson': InPersonBackend(),
+}
+DEFAULT_BACKEND = "inperson"
+if BLUEJEANS_CLIENT_ID and BLUEJEANS_CLIENT_SECRET:
+    BACKENDS['bluejeans'] = BluejeansBackend(
+        client_id=BLUEJEANS_CLIENT_ID,
+        client_secret=BLUEJEANS_CLIENT_SECRET,
+    )
+    DEFAULT_BACKEND = "bluejeans"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -49,6 +63,7 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 
 # Add additional non-Django apps here for consistent logging behavior
 EXTRA_APPS = [
+    'channels',
     'officehours_api.apps.OfficehoursApiConfig',
     'officehours_ui.apps.OfficehoursUiConfig',
 ]
@@ -291,3 +306,17 @@ GA_TRACKING_ID = os.getenv('GA_TRACKING_ID')
 
 # Django Flatpages
 SITE_ID = 1
+
+# Channels
+ASGI_APPLICATION = 'officehours.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [(
+                os.getenv('REDIS_HOST', 'redis'),
+                int(os.getenv('REDIS_PORT', '6379'))
+            )],
+        },
+    },
+}

@@ -12,6 +12,7 @@
     "react-dev-utils": "~8.0.0",
     "react-dom": "^16.10.2",
     "react-ga": "~2.7.0",
+    "react-phone-input-2": "^2.13.5",
     "react-router-dom": "^5.0.0",
     "rxjs": "^6.5.4"
   },
@@ -37,7 +38,7 @@
     "url-loader": "1.1.2",
     "webpack": "~4.29.6",
     "webpack-bundle-tracker": "^0.4.3",
-    "webpack-cli": "~3.2.3",
-    "webpack-dev-server": "~3.2.1"
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }

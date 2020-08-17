@@ -22,6 +22,8 @@ WORKDIR /usr/src/app
 
 ENV WEB_CONCURRENCY=5
 
+RUN apt-get update
+RUN apt-get -y install gcc
 RUN pip install gunicorn uvicorn psycopg2-binary
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt

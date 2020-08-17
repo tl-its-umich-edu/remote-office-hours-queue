@@ -22,8 +22,9 @@ export interface Meeting {
     id: number;
     line_place: number;
     attendees: User[];
+    agenda: string;
     assignee?: User;
-    backend_type?: "bluejeans"|"zoom";
+    backend_type: "bluejeans"|"zoom"|"inperson";
     backend_metadata?: BluejeansMetadata;
     created_at: string;
 }
@@ -37,6 +38,10 @@ export interface QueueAttendee extends QueueBase {
     line_length: number;
 }
 
+export const isQueueHost = (q: QueueAttendee | QueueHost): q is QueueHost => {
+    return (q as QueueHost).meeting_set !== undefined;
+}
+
 export interface QueueBase {
     id: number;
     name: string;
@@ -44,4 +49,5 @@ export interface QueueBase {
     hosts: User[];
     created_at: string;
     status: "open"|"closed";
+    allowed_backends: string[];
 }

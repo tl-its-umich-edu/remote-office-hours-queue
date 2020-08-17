@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: BuildConfig
+metadata:
+  name: web
+spec:
+  output:
+    to:
+      kind: DockerImage
+      name: docker-registry.default.svc:5000/officehours-dev/officehours:latest
+  runPolicy: Serial
+  source:
+    contextDir: src
+    git:
+      uri: https://github.com/tl-its-umich-edu/remote-office-hours-queue.git
+      ref: "dev"
+    type: Git
+  strategy:
+    type: Docker
+    dockerStrategy:
+      noCache: true
+      forcePull: true
+  triggers:
+  - type: "GitHub"
+    github:
+      secretReference:
+        name: github
+  nodeSelector: {}
+status:
+  lastVersion: 0
