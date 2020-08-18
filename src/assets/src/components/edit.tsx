@@ -538,10 +538,10 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         {source: 'Allowed Meeting Types', error: updateAllowedMeetingTypesError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
+    const loadingDisplay = <LoadingDisplay loading={isChanging || !users}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue}  disabled={isChanging} user={props.user!}
+        && <QueueEditor queue={queue}  disabled={isChanging || !users} user={props.user!}
             backends={props.backends} defaultBackend={props.defaultBackend}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
