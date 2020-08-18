@@ -13,7 +13,8 @@ from safedelete.signals import post_softdelete
 from officehours_api.models import Queue, Meeting, Profile
 from officehours_api.permissions import is_host
 from officehours_api.serializers import (
-    QueueHostSerializer, QueueAttendeeSerializer, UserSerializer
+    QueueHostSerializer, QueueAttendeeSerializer, UserSerializer,
+    NestedUserSerializer
 )
 
 
@@ -154,7 +155,7 @@ class UsersConsumer(JsonWebsocketConsumer):
 
     def _get_users(self):
         return list(
-            UserSerializer(u, context={'user': self.user}).data
+            NestedUserSerializer(u).data
             for u in User.objects.all()
         )
 
