@@ -52,6 +52,7 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             console.log("handleVisibilityChange");
             if (!document.hidden && ws.readyState === 3) {
                 console.log("Reconnecting...");
+                setError(undefined);
                 setWs(buildWebSocket);
             }
         }
