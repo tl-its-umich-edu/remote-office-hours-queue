@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, createRef, ChangeEvent, useEffect } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
-import { Col, Container, Modal, Button, Table, Alert, Form, Row } from "react-bootstrap";
+import { Modal, Button, Table, Alert, Form } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
