@@ -12,7 +12,8 @@ const closeCodes = {
 
 export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onDelete?: (setError: (React.Dispatch<React.SetStateAction<Error | undefined>>)) => void) => {
     const [error, setError] = useState(undefined as Error | undefined);
-    useEffect(() => {
+    const buildWebSocket = () => {
+        console.log("Building websocket...");
         const ws = new WebSocket(url);
         ws.onmessage = (e: MessageEvent) => {
             const m = JSON.parse(e.data) as OfficeHoursMessage<T>;
@@ -42,9 +43,24 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             console.error(e);
             setError(new Error(e.toString()));
         }
-        return () => {
-            ws.close();
+        return ws;
+    }
+    const [ws, setWs] = useState(buildWebSocket);
+    useEffect(() => {
+        console.log("Setting up reconnect for new websocket...");
+        const handleVisibilityChange = () => {
+            console.log("handleVisibilityChange");
+            if (!document.hidden && ws.readyState === 3) {
+                console.log("Reconnecting...");
+                setWs(buildWebSocket);
+            }
         }
-    }, []);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => {
+            console.log("Cleaning up websocket...");
+            ws.close();
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        }
+    }, [ws]);
     return error;
 }
