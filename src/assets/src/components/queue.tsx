@@ -2,17 +2,19 @@ import * as React from "react";
 import { useState, useEffect, createRef } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
-import Alert from "react-bootstrap/Alert";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
+import { Alert, Button, Card, Modal } from "react-bootstrap";
+import Dialog from "react-bootstrap-dialog";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
-import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, BackendSelector, DropdownValue} from "./common";
+import {
+    checkForbiddenError, BackendSelector, DropdownValue, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay,
+    DisabledMessage, EditToggleField, EditToggleFieldType, ErrorDisplay, FormError, JoinedQueueAlert,
+    LoadingDisplay, LoginDialog
+} from "./common";
 import * as api from "../services/api";
 import { usePromise } from "../hooks/usePromise";
-import { redirectToLogin, redirectToSearch } from "../utils";
+import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
-import Dialog from "react-bootstrap-dialog";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 
 interface JoinQueueProps {
@@ -171,30 +173,37 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
     return (
         <>
-        {closedAlert}
-        {alert}
-        <h3>You are currently in line.</h3>
-        <div className="card card-middle card-width center-align" >
-            <div className="card-body">
-                <p className="card-text card-text-spacing">Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></p>
-                <p className="card-text card-text-spacing">Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></p>
-                <div className="row col-lg meeting-type-text-container">
-                    <p className="card-text card-text-spacing">Meeting via: <strong>{props.backends[props.queue.my_meeting!.backend_type]}</strong></p>
+            {closedAlert}
+            {alert}
+            <h3>You are currently in line.</h3>
+            <Card bsPrefix='card card-middle card-width center-align'>
+                <Card.Body>
                     {changeMeetingType}
-                </div>
-                <p>Meeting Agenda (Optional):</p>
-                <EditToggleField text={props.queue.my_meeting!.agenda} disabled={props.disabled} id="agenda"
-                    onSubmit={props.onChangeAgenda}
-                    buttonType="success" placeholder=""
-                    initialState={true}>
+                    <Card.Text >Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></Card.Text>
+                    <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
+                    <Card.Text>Meeting via: <strong>{props.backends[props.queue.my_meeting!.backend_type]}</strong></Card.Text>
+                    <Card.Text>Meeting Agenda (Optional)</Card.Text>
+                    <EditToggleField
+                        id='agenda'
+                        text={props.queue.my_meeting!.agenda}
+                        disabled={props.disabled}
+                        onSubmit={props.onChangeAgenda}
+                        buttonType='success'
+                        fieldType={EditToggleFieldType.inputGroup}
+                        placeholder=''
+                        initialState={false}
+                        maxLength={100}
+                    >
                         Update
-                </EditToggleField>
-                <small>Let the host(s) know the topic you wish to discuss.</small>
-                 
-            </div>
-        </div>
-        <p>The host will join the meeting when it is your turn. We'll show a message in this window when your turn is coming up--keep an eye on the window so you don't miss it!</p>
-        {meetingInfo}
+                    </EditToggleField>
+                    <small>Let the host(s) know the topic you wish to discuss.</small>
+                </Card.Body>
+            </Card>
+            <p>
+                The host will join the meeting when it is your turn.
+                We'll show a message in this window when your turn is coming up -- keep an eye on the window so you don't miss it!
+            </p>
+            {meetingInfo}
         </>
     );
 }

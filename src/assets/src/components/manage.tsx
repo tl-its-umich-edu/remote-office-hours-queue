@@ -35,7 +35,8 @@ function ManageQueueList(props: ManageQueueListProps) {
                 placeholder="Queue name..." 
                 buttonType="success"
                 onSubmit={props.onAddQueue} 
-                disabled={props.disabled}>
+                disabled={props.disabled}
+                allowBlank={true}>
                     + Add Queue
             </SingleInputForm>
         </div>

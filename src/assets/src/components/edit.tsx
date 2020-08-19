@@ -2,14 +2,18 @@ import * as React from "react";
 import { useState, createRef, ChangeEvent, useEffect } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
-import { Modal, Button, Table, Alert, Form } from "react-bootstrap";
+import { Col, Container, Modal, Button, Table, Alert, Form, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector, DropdownValue } from "./common";
+import { 
+    UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm,
+    invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, EditToggleFieldType, LoginDialog, Breadcrumbs,
+    DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector, DropdownValue
+} from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
@@ -227,6 +231,7 @@ function QueueEditor(props: QueueEditorProps) {
     const toggleStatus = (e: ChangeEvent<HTMLSelectElement>) => {
         props.onSetStatus(e.target.value === "open");
     }
+
     return (
         <div>
             <div className="float-right">
@@ -234,14 +239,23 @@ function QueueEditor(props: QueueEditorProps) {
                     Delete Queue
                 </button>
             </div>
-            <h1 className="form-inline">
-                <span className="mr-2">Manage: </span>
-                <EditToggleField text={props.queue.name} disabled={props.disabled} id="name"
-                    onSubmit={props.onChangeName} buttonType="success" placeholder="New name..." initialState={false}>
-                        Change
+            <h1 className='form-inline'>
+                <span className='mr-2'>Manage: </span>
+                <EditToggleField
+                    text={props.queue.name}
+                    disabled={props.disabled}
+                    id='name'
+                    onSubmit={props.onChangeName}
+                    buttonType='success'
+                    placeholder='New name...'
+                    fieldType={EditToggleFieldType.inputGroup}
+                    initialState={false}
+                    maxLength={100}
+                    allowBlank={false}
+                >
+                    Change
                 </EditToggleField>
             </h1>
-
             <p>
                 <Link to={"/queue/" + props.queue.id}>
                     View as visitor
@@ -283,11 +297,20 @@ function QueueEditor(props: QueueEditorProps) {
                 <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
-                        <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
-                            onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
-                            initialState={false} maxLength={1000}>
-                                Change
-                        </ShowRemainingField>
+                        <EditToggleField
+                            id='description'
+                            text={props.queue.description}
+                            disabled={props.disabled}
+                            onSubmit={props.onChangeDescription}
+                            buttonType='success'
+                            placeholder='New description...'
+                            fieldType={EditToggleFieldType.textArea}
+                            initialState={false}
+                            maxLength={1000}
+                            allowBlank={true}
+                        >
+                            Change
+                        </EditToggleField>
                     </div>
                 </div>
                 <div className="row">
@@ -301,7 +324,8 @@ function QueueEditor(props: QueueEditorProps) {
                             placeholder="Uniqname..."
                             buttonType="success"
                             onSubmit={props.onAddHost}
-                            disabled={props.disabled}>
+                            disabled={props.disabled}
+                            allowBlank={true}>
                                 + Add Host
                         </SingleInputForm>
                     </div>
