@@ -255,7 +255,6 @@ interface ValidatedInputFormProps extends SingleInputFormProps {
 interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
     value: string;
     onChangeValue: (value: string) => void;
-    autofocus?: boolean;
 }
 
 function generateFeedbackText (maxLength: number, currentLength: number, allowBlank: boolean) {
@@ -392,7 +391,6 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
 
     const statelessProps = {
         id: props.id,
-        autofocus: true,
         onSubmit: submit,
         value: editorValue,
         onChangeValue: setEditorValue,
