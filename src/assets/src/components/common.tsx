@@ -103,9 +103,6 @@ interface SingleInputFormProps {
     onSubmit: (value: string) => void;
     buttonType: BootstrapButtonTypes;
     id: string;
-    maxLength?: number;
-    validateLength?: boolean;
-    allowBlank: boolean;
 }
 
 interface StatelessSingleInputFormProps extends SingleInputFormProps {
@@ -248,24 +245,18 @@ export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
     );
 }
 
-export enum EditToggleFieldType {
-    inputGroup,
-    textArea
-}
 
-interface EditToggleFieldProps {
-    fieldType: EditToggleFieldType;
-    text: string;
-    placeholder: string;
-    disabled: boolean;
-    buttonType: BootstrapButtonTypes;
-    id: string;
-    onSubmit: (value: string) => void;
-    initialState: boolean;
+interface ValidatedInputFormProps extends SingleInputFormProps {
     maxLength?: number;
-    allowBlank?: boolean;
+    validateLength?: boolean;
+    allowBlank: boolean;
 }
 
+interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
+    value: string;
+    onChangeValue: (value: string) => void;
+    autofocus?: boolean;
+}
 
 function generateFeedbackText (maxLength: number, currentLength: number, allowBlank: boolean) {
     const remaining = maxLength - currentLength;
@@ -278,7 +269,7 @@ function generateFeedbackText (maxLength: number, currentLength: number, allowBl
     }
 }
 
-export const StatelessInputGroupForm: React.FC<StatelessSingleInputFormProps> = (props) => {
+export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType}`
 
     let feedbackEl;
@@ -325,7 +316,7 @@ export const StatelessInputGroupForm: React.FC<StatelessSingleInputFormProps> = 
     );
 }
 
-export const StatelessTextAreaForm: React.FC<StatelessSingleInputFormProps> = (props) => {
+export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType} remaining-controls`
 
     let feedbackEl;
@@ -368,6 +359,25 @@ export const StatelessTextAreaForm: React.FC<StatelessSingleInputFormProps> = (p
     );
 }
 
+export enum EditToggleFieldType {
+    inputGroup,
+    textArea
+}
+
+interface EditToggleFieldProps {
+    fieldType: EditToggleFieldType;
+    text: string;
+    placeholder: string;
+    disabled: boolean;
+    buttonType: BootstrapButtonTypes;
+    id: string;
+    onSubmit: (value: string) => void;
+    initialState: boolean;
+    validateLength: boolean;
+    maxLength?: number;
+    allowBlank?: boolean;
+}
+
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     const [editing, setEditing] = useState(props.initialState);
     const [editorValue, setEditorValue] = useState(props.text);
@@ -387,7 +397,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
         value: editorValue,
         onChangeValue: setEditorValue,
         placeholder: props.placeholder,
-        validateLength: true,
+        validateLength: props.validateLength,
         maxLength: props.maxLength,
         allowBlank: props.allowBlank === undefined ? true : props.allowBlank,
         buttonType: props.buttonType,

@@ -242,14 +242,15 @@ function QueueEditor(props: QueueEditorProps) {
             <h1 className='form-inline'>
                 <span className='mr-2'>Manage: </span>
                 <EditToggleField
+                    fieldType={EditToggleFieldType.inputGroup}
                     text={props.queue.name}
                     disabled={props.disabled}
                     id='name'
                     onSubmit={props.onChangeName}
                     buttonType='success'
                     placeholder='New name...'
-                    fieldType={EditToggleFieldType.inputGroup}
                     initialState={false}
+                    validateLength={true}
                     maxLength={100}
                     allowBlank={false}
                 >
@@ -299,13 +300,14 @@ function QueueEditor(props: QueueEditorProps) {
                     <div className="col-md-6">
                         <EditToggleField
                             id='description'
+                            fieldType={EditToggleFieldType.textArea}
                             text={props.queue.description}
                             disabled={props.disabled}
                             onSubmit={props.onChangeDescription}
                             buttonType='success'
                             placeholder='New description...'
-                            fieldType={EditToggleFieldType.textArea}
                             initialState={false}
+                            validateLength={true}
                             maxLength={1000}
                             allowBlank={true}
                         >
@@ -319,14 +321,14 @@ function QueueEditor(props: QueueEditorProps) {
                         <ul className="list-group">
                             {hosts}
                         </ul>
-                        <SingleInputForm 
+                        <SingleInputForm
                             id="add_host"
                             placeholder="Uniqname..."
                             buttonType="success"
                             onSubmit={props.onAddHost}
                             disabled={props.disabled}
-                            allowBlank={true}>
-                                + Add Host
+                        >
+                            + Add Host
                         </SingleInputForm>
                     </div>
                 </div>

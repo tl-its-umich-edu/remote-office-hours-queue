@@ -192,6 +192,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                         fieldType={EditToggleFieldType.inputGroup}
                         placeholder=''
                         initialState={false}
+                        validateLength={true}
                         maxLength={100}
                     >
                         Update
