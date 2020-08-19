@@ -1,10 +1,10 @@
-import * as React from "react"
-import { createRef, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
+import * as React from "react";
+import { createRef, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { Alert, Breadcrumb, Button, Form, InputGroup, Modal } from "react-bootstrap"
-import { QueueAttendee, User } from "../models"
+import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
+import { Alert, Breadcrumb, Button, Form, InputGroup, Modal } from "react-bootstrap";
+import { QueueAttendee, User } from "../models";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -268,13 +268,13 @@ interface EditToggleFieldProps {
 
 
 function generateFeedbackText (maxLength: number, currentLength: number, allowBlank: boolean) {
-    const remaining = maxLength - currentLength
-    const charsRemaining = (remaining > 0) ? remaining : 0
+    const remaining = maxLength - currentLength;
+    const charsRemaining = (remaining > 0) ? remaining : 0;
     if (!allowBlank && currentLength === 0) {
-       return 'This field is not allowed to be blank.'
+       return 'This field is not allowed to be blank.';
     } else {
-        const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : ''
-        return `Remaining characters: ${charsRemaining}/${maxLength}${charsOver}`
+        const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
+        return `Remaining characters: ${charsRemaining}/${maxLength}${charsOver}`;
     }
 }
 
@@ -284,21 +284,21 @@ export const StatelessInputGroupForm: React.FC<StatelessSingleInputFormProps> = 
     let feedbackEl;
     let isInvalid;
     if (props.validateLength && props.maxLength !== undefined) {
-        isInvalid = props.value.length > props.maxLength || (!props.allowBlank && props.value.length === 0)
-        const feedbackText = generateFeedbackText(props.maxLength, props.value.length, props.allowBlank)
-        const textClass = isInvalid ? 'text-danger': ''
+        isInvalid = props.value.length > props.maxLength || (!props.allowBlank && props.value.length === 0);
+        const feedbackText = generateFeedbackText(props.maxLength, props.value.length, props.allowBlank);
+        const textClass = isInvalid ? 'text-danger': '';
         feedbackEl = (
             <Form.Text bsPrefix={`form-text remaining-feedback ${textClass}`}>
                 {feedbackText}
             </Form.Text>
-        )
+        );
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(props.value);
         props.onChangeValue('');
-    }
+    };
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     return (
@@ -322,26 +322,26 @@ export const StatelessInputGroupForm: React.FC<StatelessSingleInputFormProps> = 
             </InputGroup>
             {feedbackEl}
         </Form>
-    )
+    );
 }
 
 export const StatelessTextAreaForm: React.FC<StatelessSingleInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType} remaining-controls`
 
-    let feedbackEl
-    let isInvalid
+    let feedbackEl;
+    let isInvalid;
     if (props.validateLength && props.maxLength !== undefined) {
-        isInvalid = props.value.length > props.maxLength || (!props.allowBlank && props.value.length === 0)
-        const feedbackText = generateFeedbackText(props.maxLength, props.value.length, props.allowBlank)
-        feedbackEl = <span className={(isInvalid ? 'text-danger ' : '') + 'remaining-feedback'}>{feedbackText}</span>
+        isInvalid = props.value.length > props.maxLength || (!props.allowBlank && props.value.length === 0);
+        const feedbackText = generateFeedbackText(props.maxLength, props.value.length, props.allowBlank);
+        feedbackEl = <span className={(isInvalid ? 'text-danger ' : '') + 'remaining-feedback'}>{feedbackText}</span>;
     }
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        props.onSubmit(props.value)
-        props.onChangeValue('')
-    }
-    const handleChange = (newValue: string) => props.onChangeValue(newValue)
+        e.preventDefault();
+        props.onSubmit(props.value);
+        props.onChangeValue('');
+    };
+    const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     return (
         <Form onSubmit={handleSubmit}>
@@ -392,13 +392,13 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
         allowBlank: props.allowBlank === undefined ? true : props.allowBlank,
         buttonType: props.buttonType,
         disabled: props.disabled,
-    }
+    };
 
-    let statelessComponent = null
+    let statelessComponent = null;
     if (props.fieldType === EditToggleFieldType.textArea) {
-        statelessComponent = (<StatelessTextAreaForm {...statelessProps}>{props.children}</StatelessTextAreaForm>)
+        statelessComponent = <StatelessTextAreaForm {...statelessProps}>{props.children}</StatelessTextAreaForm>;
     } else if (props.fieldType === EditToggleFieldType.inputGroup) {
-        statelessComponent = (<StatelessInputGroupForm {...statelessProps}>{props.children}</StatelessInputGroupForm>)
+        statelessComponent = <StatelessInputGroupForm {...statelessProps}>{props.children}</StatelessInputGroupForm>;
     }
 
     const contents = (editing && !props.disabled)
