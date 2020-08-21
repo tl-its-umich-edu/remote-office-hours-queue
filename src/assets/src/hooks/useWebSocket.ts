@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 interface OfficeHoursMessage<T> {
     type: "init"|"update"|"deleted";
@@ -6,14 +7,13 @@ interface OfficeHoursMessage<T> {
 }
 
 const closeCodes = {
-    1006: "An unexpected error occurred. Please refresh the page.",
     4404: "The resource you're looking for could not be found. Maybe it was deleted?",
 } as {[closeCode: number]: string}
 
 export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onDelete?: (setError: (React.Dispatch<React.SetStateAction<Error | undefined>>)) => void) => {
     const [error, setError] = useState(undefined as Error | undefined);
     useEffect(() => {
-        const ws = new WebSocket(url);
+        const ws = new ReconnectingWebSocket(url);
         ws.onmessage = (e: MessageEvent) => {
             const m = JSON.parse(e.data) as OfficeHoursMessage<T>;
             console.log(m);
@@ -33,12 +33,22 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
                     break;
             }
         }
-        ws.onclose = (e: CloseEvent) => {
-            if (e.code === 1000) return;
+        ws.onclose = (e) => {
+            if (e.code === 4404) {
+                ws.close();
+            }
             console.error(e);
-            setError(new Error(closeCodes[e.code] ?? e.code.toString()));
+            setError(
+                new Error(
+                    closeCodes[e.code]
+                    ?? `An unexpected error (${e.code.toString()}) occured. Trying to reconnect...`
+                )
+            );
         }
-        ws.onerror = (e: Event) => {
+        ws.onopen = (e) => {
+            setError(undefined);
+        }
+        ws.onerror = (e) => {
             console.error(e);
             setError(new Error(e.toString()));
         }
