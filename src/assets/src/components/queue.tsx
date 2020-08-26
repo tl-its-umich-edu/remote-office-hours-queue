@@ -11,11 +11,13 @@ import {
     DisabledMessage, EditToggleField, StatelessInputGroupForm, ErrorDisplay, FormError, JoinedQueueAlert,
     LoadingDisplay, LoginDialog
 } from "./common";
-import * as api from "../services/api";
-import { usePromise } from "../hooks/usePromise";
-import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
+import { usePromise } from "../hooks/usePromise";
+import { meetingAgendaSchema } from "../validation";
+import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
+import { redirectToLogin } from "../utils";
+
 
 interface JoinQueueProps {
     queue: QueueAttendee;
@@ -192,8 +194,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                         fieldComponent={StatelessInputGroupForm}
                         placeholder=''
                         initialState={false}
-                        validateLength={true}
-                        maxLength={100}
+                        fieldSchema={meetingAgendaSchema}
+                        showRemaining={true}
                     >
                         Update
                     </EditToggleField>

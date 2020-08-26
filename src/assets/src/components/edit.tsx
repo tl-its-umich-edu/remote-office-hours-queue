@@ -16,6 +16,8 @@ import {
     DropdownValue
 } from "./common";
 import { usePromise } from "../hooks/usePromise";
+import { queueTitleSchema, queueDescriptSchema } from "../validation";
+
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import { useQueueWebSocket, useUsersWebSocket } from "../services/sockets";
@@ -251,9 +253,8 @@ function QueueEditor(props: QueueEditorProps) {
                     buttonType='success'
                     placeholder='New name...'
                     initialState={false}
-                    validateLength={true}
-                    maxLength={100}
-                    allowBlank={false}
+                    fieldSchema={queueTitleSchema}
+                    showRemaining={true}
                 >
                     Change
                 </EditToggleField>
@@ -308,9 +309,8 @@ function QueueEditor(props: QueueEditorProps) {
                             buttonType='success'
                             placeholder='New description...'
                             initialState={false}
-                            validateLength={true}
-                            maxLength={1000}
-                            allowBlank={true}
+                            fieldSchema={queueDescriptSchema}
+                            showRemaining={true}
                         >
                             Change
                         </EditToggleField>

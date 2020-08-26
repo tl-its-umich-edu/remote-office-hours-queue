@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Alert, Breadcrumb, Button, Form, InputGroup, Modal } from "react-bootstrap";
+import { StringSchema } from "yup";
+import { validateString } from "../validation";
 import { QueueAttendee, User } from "../models";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
@@ -247,9 +249,8 @@ export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
 
 
 interface ValidatedInputFormProps extends SingleInputFormProps {
-    maxLength?: number;
-    validateLength?: boolean;
-    allowBlank: boolean;
+    fieldSchema: StringSchema;
+    showRemaining?: boolean;
 }
 
 interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
@@ -257,32 +258,14 @@ interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
     onChangeValue: (value: string) => void;
 }
 
-function generateFeedbackText (maxLength: number, currentLength: number, allowBlank: boolean) {
-    const remaining = maxLength - currentLength;
-    const charsRemaining = (remaining > 0) ? remaining : 0;
-    if (!allowBlank && currentLength === 0) {
-       return 'This field is not allowed to be blank.';
-    } else {
-        const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
-        return `Remaining characters: ${charsRemaining}/${maxLength}${charsOver}`;
-    }
-}
-
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType}`
 
-    let feedbackEl;
-    let isInvalid;
-    if (props.validateLength && props.maxLength !== undefined) {
-        isInvalid = props.value.length > props.maxLength || (!props.allowBlank && props.value.length === 0);
-        const feedbackText = generateFeedbackText(props.maxLength, props.value.length, props.allowBlank);
-        const textClass = isInvalid ? 'text-danger': '';
-        feedbackEl = (
-            <Form.Text bsPrefix={`form-text remaining-feedback ${textClass}`}>
-                {feedbackText}
-            </Form.Text>
-        );
-    }
+    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining)
+    const textClass = isInvalid ? ' text-danger' : '';
+    const feedback = messages.map(
+        (m, key) => <Form.Text key={key} bsPrefix={`form-text remaining-feedback${textClass}`}>{m}</Form.Text>
+    )
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -310,7 +293,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
                     </Button>
                 </InputGroup.Append>
             </InputGroup>
-            {feedbackEl}
+            {feedback}
         </Form>
     );
 }
@@ -318,13 +301,9 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType} remaining-controls`
 
-    let feedbackEl;
-    let isInvalid;
-    if (props.validateLength && props.maxLength !== undefined) {
-        isInvalid = props.value.length > props.maxLength || (!props.allowBlank && props.value.length === 0);
-        const feedbackText = generateFeedbackText(props.maxLength, props.value.length, props.allowBlank);
-        feedbackEl = <span className={(isInvalid ? 'text-danger ' : '') + 'remaining-feedback'}>{feedbackText}</span>;
-    }
+    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining)
+    const textClass = isInvalid ? ' text-danger': '';
+    const feedback = messages.map((m, key) => <span key={key} className={'remaining-feedback' + textClass}>{m}</span>)
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -349,7 +328,7 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
                 />
             </Form.Group>
             <div className="remaining-controls-group">
-                {feedbackEl}
+                {feedback}
                 <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled || isInvalid}>
                     {props.children}
                 </Button>
@@ -367,9 +346,8 @@ interface EditToggleFieldProps {
     id: string;
     onSubmit: (value: string) => void;
     initialState: boolean;
-    validateLength: boolean;
-    maxLength?: number;
-    allowBlank?: boolean;
+    fieldSchema: StringSchema;
+    showRemaining?: boolean;
 }
 
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
@@ -390,11 +368,10 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
         value: editorValue,
         onChangeValue: setEditorValue,
         placeholder: props.placeholder,
-        validateLength: props.validateLength,
-        maxLength: props.maxLength,
-        allowBlank: props.allowBlank === undefined ? true : props.allowBlank,
         buttonType: props.buttonType,
         disabled: props.disabled,
+        fieldSchema: props.fieldSchema,
+        showRemaining: props.showRemaining
     };
     const statelessComponent = <props.fieldComponent {...statelessProps}>{props.children}</props.fieldComponent>
     const contents = (editing && !props.disabled)
