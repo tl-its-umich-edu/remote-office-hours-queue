@@ -8,9 +8,9 @@ import { string, StringSchema, SchemaDescription } from 'yup'
 function getMaxLimit (description: SchemaDescription): number | undefined {
     const matches = description.tests.filter((obj) => obj.params?.max);
     if (matches.length !== 1) {
-        console.error('Invalid use of getMaxLimit: ' + matches)
+        console.error('Invalid use of getMaxLimit: ' + matches);
     }
-    return matches.length === 1 ? matches[0].params.max : undefined
+    return matches.length === 1 ? matches[0].params.max : undefined;
 }
 
 function createRemainingCharsMessage (data: any) {
@@ -52,7 +52,7 @@ function validateString (value: string, schema: StringSchema, showRemaining: boo
         isInvalid = true;
         messages = error.errors;
     }
-    return {'isInvalid': isInvalid, 'messages': messages}
+    return {'isInvalid': isInvalid, 'messages': messages};
 }
 
 export { validateString, queueDescriptSchema, meetingAgendaSchema, queueTitleSchema };
