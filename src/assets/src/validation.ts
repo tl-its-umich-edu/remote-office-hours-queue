@@ -5,7 +5,7 @@ import { string, StringSchema, SchemaDescription } from 'yup'
 
 // Utilities
 
-function getMaxLimit (description: SchemaDescription): number | null {
+function getMaxLimit (description: SchemaDescription): number | undefined {
     const matches = description.tests.filter((obj) => obj.params?.max);
     if (matches.length !== 1) {
         console.error('Invalid use of getMaxLimit: ' + matches)
@@ -16,9 +16,6 @@ function getMaxLimit (description: SchemaDescription): number | null {
 function createRemainingCharsMessage (data: any) {
     // Type of input could be StringLocale['max'], but wasn't sure how to handle undefineds
     // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/yup/index.d.ts
-    // const dataKeys = data.keys();
-    // if (dataKeys.includes('max') && dataKeys.includes('value'))
-    //     throw Error
     const remaining = data.max - data.value.length;
     const charsRemaining = (remaining > 0) ? remaining : 0;
     const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
