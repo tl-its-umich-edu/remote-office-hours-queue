@@ -8,7 +8,7 @@ import Dialog from "react-bootstrap-dialog";
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
 import {
     checkForbiddenError, BackendSelector, DropdownValue, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay,
-    DisabledMessage, EditToggleField, EditToggleFieldType, ErrorDisplay, FormError, JoinedQueueAlert,
+    DisabledMessage, EditToggleField, StatelessInputGroupForm, ErrorDisplay, FormError, JoinedQueueAlert,
     LoadingDisplay, LoginDialog
 } from "./common";
 import * as api from "../services/api";
@@ -189,7 +189,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                         disabled={props.disabled}
                         onSubmit={props.onChangeAgenda}
                         buttonType='success'
-                        fieldType={EditToggleFieldType.inputGroup}
+                        fieldComponent={StatelessInputGroupForm}
                         placeholder=''
                         initialState={false}
                         validateLength={true}

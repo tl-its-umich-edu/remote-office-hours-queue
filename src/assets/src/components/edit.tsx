@@ -11,8 +11,9 @@ import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import { 
     UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm,
-    invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, EditToggleFieldType, LoginDialog, Breadcrumbs,
-    DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector, DropdownValue
+    invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm,
+    LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector,
+    DropdownValue
 } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
@@ -242,7 +243,7 @@ function QueueEditor(props: QueueEditorProps) {
             <h1 className='form-inline'>
                 <span className='mr-2'>Manage: </span>
                 <EditToggleField
-                    fieldType={EditToggleFieldType.inputGroup}
+                    fieldComponent={StatelessInputGroupForm}
                     text={props.queue.name}
                     disabled={props.disabled}
                     id='name'
@@ -300,7 +301,7 @@ function QueueEditor(props: QueueEditorProps) {
                     <div className="col-md-6">
                         <EditToggleField
                             id='description'
-                            fieldType={EditToggleFieldType.textArea}
+                            fieldComponent={StatelessTextAreaForm}
                             text={props.queue.description}
                             disabled={props.disabled}
                             onSubmit={props.onChangeDescription}

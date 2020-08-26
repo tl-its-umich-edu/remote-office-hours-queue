@@ -358,13 +358,8 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
     );
 }
 
-export enum EditToggleFieldType {
-    inputGroup,
-    textArea
-}
-
 interface EditToggleFieldProps {
-    fieldType: EditToggleFieldType;
+    fieldComponent: React.FC<StatelessValidatedInputFormProps>;
     text: string;
     placeholder: string;
     disabled: boolean;
@@ -389,7 +384,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
         setEditorValue(props.text);
     }
 
-    const statelessProps = {
+    const statelessProps: StatelessValidatedInputFormProps = {
         id: props.id,
         onSubmit: submit,
         value: editorValue,
@@ -401,14 +396,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
         buttonType: props.buttonType,
         disabled: props.disabled,
     };
-
-    let statelessComponent = null;
-    if (props.fieldType === EditToggleFieldType.textArea) {
-        statelessComponent = <StatelessTextAreaForm {...statelessProps}>{props.children}</StatelessTextAreaForm>;
-    } else if (props.fieldType === EditToggleFieldType.inputGroup) {
-        statelessComponent = <StatelessInputGroupForm {...statelessProps}>{props.children}</StatelessInputGroupForm>;
-    }
-
+    const statelessComponent = <props.fieldComponent {...statelessProps}>{props.children}</props.fieldComponent>
     const contents = (editing && !props.disabled)
         ? (statelessComponent)
         : (
