@@ -1,7 +1,7 @@
 import * as React from "react";
 import { createRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Alert, Breadcrumb, Button, Form, InputGroup, Modal } from "react-bootstrap";
 import { StringSchema } from "yup";
@@ -302,8 +302,8 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
     const buttonClass = `btn btn-${props.buttonType} remaining-controls`
 
     const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining)
-    const textClass = isInvalid ? ' text-danger': '';
-    const feedback = messages.map((m, key) => <span key={key} className={'remaining-feedback' + textClass}>{m}</span>)
+    const textClass = isInvalid ? ' text-danger' : '';
+    const feedback = messages.map((m, key) => <span key={key} className={'remaining-feedback' + textClass}>{m}</span>);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
