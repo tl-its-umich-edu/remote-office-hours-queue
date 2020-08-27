@@ -46,6 +46,7 @@ export function validateString (value: string, schema: StringSchema, showRemaini
     let isInvalid = false;
     try {
         // We could also do this asynchronously with .validate, but wasn't sure if that was needed?
+        schema.validateSync(value)
         const maxLimit = getMaxLimit(schema.describe());
         if (showRemaining && maxLimit) {
             messages.push(createRemainingCharsMessage({'value': value, 'max': maxLimit}));
