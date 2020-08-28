@@ -181,7 +181,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <Card bsPrefix='card card-middle card-width center-align'>
                 <Card.Body>
                     {changeMeetingType}
-                    <Card.Text >Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></Card.Text>
+                    <Card.Text>Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></Card.Text>
                     <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
                     <Card.Text>Meeting via: <strong>{props.backends[props.queue.my_meeting!.backend_type]}</strong></Card.Text>
                     <Card.Text>Meeting Agenda (Optional)</Card.Text>
