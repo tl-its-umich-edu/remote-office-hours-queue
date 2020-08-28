@@ -254,13 +254,13 @@ interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
-    const buttonClass = `btn btn-${props.buttonType}`
+    const buttonClass = `btn btn-${props.buttonType}`;
 
     const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining)
     const textClass = isInvalid ? ' text-danger' : '';
     const feedback = messages.map(
         (m, key) => <Form.Text key={key} bsPrefix={`form-text remaining-feedback${textClass}`}>{m}</Form.Text>
-    )
+    );
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -294,9 +294,9 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 }
 
 export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
-    const buttonClass = `btn btn-${props.buttonType} remaining-controls`
+    const buttonClass = `btn btn-${props.buttonType} remaining-controls`;
 
-    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining)
+    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining);
     const textClass = isInvalid ? ' text-danger' : '';
     const feedback = messages.map((m, key) => <span key={key} className={'remaining-feedback' + textClass}>{m}</span>);
 
