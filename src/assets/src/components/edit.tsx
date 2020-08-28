@@ -11,14 +11,18 @@ import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import { 
     UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm,
-    invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm,
-    LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector,
+    DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm, LoginDialog,
+    Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector,
     DropdownValue
 } from "./common";
 import { usePromise } from "../hooks/usePromise";
-import { queueTitleSchema, queueDescriptSchema } from "../validation";
+import {
+    queueTitleSchema, queueDescriptSchema, uniqnameSchema, validateString, reportErrors,
+    createInvalidUniqnameMessage
+}
+from "../validation";
 
-import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
+import { redirectToLogin, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import { useQueueWebSocket, useUsersWebSocket } from "../services/sockets";
 
@@ -477,10 +481,12 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
     }
     const addHost = async (uniqname: string) => {
-        uniqname = sanitizeUniqname(uniqname);
-        validateUniqname(uniqname);
+        const validationResult = validateString(uniqname, uniqnameSchema, false);
+        if (validationResult.isInvalid) {
+            reportErrors(validationResult.messages);
+        }
         const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(invalidUniqnameMessage(uniqname));
+        if (!user) throw new Error(createInvalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
     }
@@ -494,10 +500,12 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string, backend: string) => {
-        uniqname = sanitizeUniqname(uniqname);
-        validateUniqname(uniqname);
+        const validationResult = validateString(uniqname, uniqnameSchema, false);
+        if (validationResult.isInvalid) {
+            reportErrors(validationResult.messages);
+        }
         const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(invalidUniqnameMessage(uniqname));
+        if (!user) throw new Error(createInvalidUniqnameMessage(uniqname));
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id, backend);
     }

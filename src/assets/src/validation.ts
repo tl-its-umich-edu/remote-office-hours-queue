@@ -26,6 +26,12 @@ function createRemainingCharsMessage (data: any): string | undefined {
     }
 }
 
+export const createInvalidUniqnameMessage = (uniqname: string) => (
+    uniqname + " is not a valid user. " +
+    "Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
+)
+
+
 // Schemas
 
 const blankText = 'This field may not be left blank.'
@@ -33,6 +39,11 @@ const blankText = 'This field may not be left blank.'
 export const queueTitleSchema = string().required(blankText).max(100, createRemainingCharsMessage);
 export const queueDescriptSchema = string().max(1000, createRemainingCharsMessage);
 export const meetingAgendaSchema = string().max(100, createRemainingCharsMessage);
+export const uniqnameSchema = string().trim().lowercase()
+    .min(3, 'Uniqnames must be at least 3 characters long.')
+    .max(8, 'Uniqnames must be at most 8 characters long.')
+    .matches(/^[a-z]+$/i, 'Uniqnames cannot contain non-alphanumeric characters.')
+
 
 // Type validators
 
@@ -40,6 +51,15 @@ export interface ValidationResult {
     isInvalid: boolean;
     messages: ReadonlyArray<string>;
 }
+
+export function reportErrors(messages: ReadonlyArray<string>) {
+    console.log('Arent these messages: ' + messages);
+    for (let message of messages) {
+        console.log(message)
+        throw new Error(message);
+    }
+}
+
 
 export function validateString (value: string, schema: StringSchema, showRemaining: boolean): ValidationResult {
     let messages = Array();

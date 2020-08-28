@@ -150,11 +150,6 @@ export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
     );
 }
 
-
-export const invalidUniqnameMessage = (uniqname: string) =>
-    uniqname + " is not a valid user. Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
-
-
 interface DateDisplayProps {
     date: string;
 }
