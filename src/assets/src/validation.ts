@@ -31,6 +31,12 @@ export const createInvalidUniqnameMessage = (uniqname: string) => (
     "Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
 )
 
+export function reportErrors(messages: ReadonlyArray<string>) {
+    for (let message of messages) {
+        throw new Error(message);
+    }
+}
+
 
 // Schemas
 
@@ -42,40 +48,31 @@ export const meetingAgendaSchema = string().max(100, createRemainingCharsMessage
 export const uniqnameSchema = string().trim().lowercase()
     .min(3, 'Uniqnames must be at least 3 characters long.')
     .max(8, 'Uniqnames must be at most 8 characters long.')
-    .matches(/^[a-z]+$/i, 'Uniqnames cannot contain non-alphanumeric characters.')
+    .matches(/^[a-z]+$/i, 'Uniqnames cannot contain non-alphanumeric characters.');
 
 
-// Type validators
+// Type validator(s)
 
 export interface ValidationResult {
+    transformedValue: string;
     isInvalid: boolean;
     messages: ReadonlyArray<string>;
 }
 
-export function reportErrors(messages: ReadonlyArray<string>) {
-    console.log('Arent these messages: ' + messages);
-    for (let message of messages) {
-        console.log(message)
-        throw new Error(message);
-    }
-}
-
-
 export function validateString (value: string, schema: StringSchema, showRemaining: boolean): ValidationResult {
-    let messages = Array();
+    let transformedValue;
     let isInvalid = false;
+    let messages = Array();
     try {
-        // We could also do this asynchronously with .validate, but wasn't sure if that was needed?
-        schema.validateSync(value)
+        transformedValue = schema.validateSync(value)
         const maxLimit = getMaxLimit(schema.describe());
         if (showRemaining && maxLimit) {
             messages.push(createRemainingCharsMessage({'value': value, 'max': maxLimit}));
         }
     } catch (error) {
-        console.log(error.name);
-        console.log(error.errors);
+        transformedValue = error.value
         isInvalid = true;
         messages = error.errors;
     }
-    return {'isInvalid': isInvalid, 'messages': messages};
+    return {'transformedValue': transformedValue, 'isInvalid': isInvalid, 'messages': messages};
 }

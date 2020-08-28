@@ -485,8 +485,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         if (validationResult.isInvalid) {
             reportErrors(validationResult.messages);
         }
-        const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(createInvalidUniqnameMessage(uniqname));
+        const user = users!.find(u => u.username === validationResult.transformedValue);
+        if (!user) throw new Error(createInvalidUniqnameMessage(validationResult.transformedValue));
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
     }
@@ -504,8 +504,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         if (validationResult.isInvalid) {
             reportErrors(validationResult.messages);
         }
-        const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(createInvalidUniqnameMessage(uniqname));
+        const user = users!.find(u => u.username === validationResult.transformedValue);
+        if (!user) throw new Error(createInvalidUniqnameMessage(validationResult.transformedValue));
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id, backend);
     }
