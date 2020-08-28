@@ -1,4 +1,4 @@
-import { string, StringSchema, SchemaDescription } from 'yup'
+import { string, StringSchema, SchemaDescription, TestMessageParams } from 'yup';
 
 // Yup: https://github.com/jquense/yup
 
@@ -13,17 +13,11 @@ function getMaxLimit (description: SchemaDescription): number | undefined {
     return matches.length === 1 ? matches[0].params.max : undefined;
 }
 
-function createRemainingCharsMessage (data: any): string | undefined {
-    // Type of input could be StringLocale, but wasn't sure how to handle undefineds
-    // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/yup/index.d.ts
-    if (data && 'max' in data && 'value' in data) {
-        const remaining = data!.max - data!.value.length;
-        const charsRemaining = (remaining > 0) ? remaining : 0;
-        const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
-        return `Remaining characters: ${charsRemaining}/${data.max}${charsOver}`;
-    } else {
-        return undefined;
-    }
+function createRemainingCharsMessage (data: { max: number; } & Partial<TestMessageParams>): string {
+    const remaining = data.max - data.value.length;
+    const charsRemaining = (remaining > 0) ? remaining : 0;
+    const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
+    return `Remaining characters: ${charsRemaining}/${data.max}${charsOver}`;
 }
 
 export const createInvalidUniqnameMessage = (uniqname: string) => (
