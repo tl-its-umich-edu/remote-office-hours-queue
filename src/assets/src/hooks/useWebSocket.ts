@@ -49,8 +49,9 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             setError(undefined);
         }
         ws.onerror = (e) => {
+            console.error("ws.onerror");
             console.error(e);
-            setError(new Error(e.toString()));
+            setError(e.error);
         }
         return () => {
             ws.close();
