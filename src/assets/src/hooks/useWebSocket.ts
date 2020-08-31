@@ -13,7 +13,13 @@ const closeCodes = {
 export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onDelete?: (setError: (React.Dispatch<React.SetStateAction<Error | undefined>>)) => void) => {
     const [error, setError] = useState(undefined as Error | undefined);
     useEffect(() => {
-        const ws = new ReconnectingWebSocket(url);
+        const ws = new ReconnectingWebSocket(
+            url,
+            undefined,
+            {
+                maxRetries: 3,
+            },
+        );
         ws.onmessage = (e: MessageEvent) => {
             const m = JSON.parse(e.data) as OfficeHoursMessage<T>;
             console.log(m);
