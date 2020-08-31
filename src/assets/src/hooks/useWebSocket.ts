@@ -55,6 +55,10 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             setError(new Error(`An unexpected error (${e.error.name}) occured. Trying to reconnect...`));
         }
         return () => {
+            ws.onclose = null;
+            ws.onopen = null;
+            ws.onclose = null;
+            ws.onmessage = null;
             ws.close();
         }
     }, []);
