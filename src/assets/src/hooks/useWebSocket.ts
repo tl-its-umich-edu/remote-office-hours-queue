@@ -6,10 +6,6 @@ interface OfficeHoursMessage<T> {
     content: T;
 }
 
-const closeCodes = {
-    4404: "The resource you're looking for could not be found. Maybe it was deleted?",
-} as {[closeCode: number]: string}
-
 export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onDelete?: (setError: (React.Dispatch<React.SetStateAction<Error | undefined>>)) => void) => {
     const [error, setError] = useState(undefined as Error | undefined);
     useEffect(() => {
@@ -44,12 +40,7 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
                 ws.close();
             }
             console.error(e);
-            setError(
-                new Error(
-                    closeCodes[e.code]
-                    ?? `An unexpected error (${e.code.toString()}) occured. Trying to reconnect...`
-                )
-            );
+            setError(new Error(`The connection unexpected closed (${e.code.toString()}). Trying to reconnect...`));
         }
         ws.onopen = (e) => {
             setError(undefined);
@@ -57,7 +48,7 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
         ws.onerror = (e) => {
             console.error("ws.onerror");
             console.error(e);
-            setError(e.error);
+            setError(new Error(`An unexpected error (${e.error.name}) occured. Trying to reconnect...`));
         }
         return () => {
             ws.close();
