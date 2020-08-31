@@ -40,7 +40,7 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
                 ws.close();
             }
             console.error(e);
-            setError(new Error(`The connection unexpected closed (${e.code.toString()}). Trying to reconnect...`));
+            setError(new Error(`The connection unexpectedly closed (${e.code.toString()}). Trying to reconnect...`));
         }
         ws.onopen = (e) => {
             setError(undefined);
