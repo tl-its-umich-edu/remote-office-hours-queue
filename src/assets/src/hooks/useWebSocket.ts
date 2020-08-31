@@ -41,6 +41,8 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             } else if (e.code === 1011) { // Equivalent of HTTP 500
                 setError(new Error("Sorry, there was a system error. Please try refreshing. If you continue to receive this error, contact the ITS Service Center."));
                 ws.close();
+            } else if (e.code === 1001) { // Page refreshed (Firefox)
+                ws.close();  
             } else { // Retry all others
                 console.error(e);
                 setError(new Error(`The connection unexpectedly closed (${e.code.toString()}). Trying to reconnect...`));
