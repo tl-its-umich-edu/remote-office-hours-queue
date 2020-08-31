@@ -107,10 +107,6 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
             ? props.defaultBackend
             : Array.from(props.allowedBackends)[0]
     );
-    const inputRef = createRef<HTMLInputElement>();
-    useEffect(() => {
-        inputRef.current!.focus();
-    }, []);
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(attendee, selectedBackend);
@@ -121,7 +117,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     return (
         <form onSubmit={submit} className="input-group">
             <input onChange={(e) => setAttendee(e.target.value)} value={attendee}
-                ref={inputRef} type="text" className="form-control" placeholder="Uniqname..."
+                type="text" className="form-control" placeholder="Uniqname..."
                 disabled={props.disabled} id="add_attendee" />
             <div className="input-group-append">
                 <MeetingBackendSelector options={options}
