@@ -56,8 +56,8 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             console.error("ws.onerror");
             console.error(e);
             const errorName = e?.error?.name as string | undefined; // On Safari, Event is sometimes emitted instead of ErrorEvent
-            const errorText = errorName ? `(${errorName}) ` : "";
-            setError(new Error(`An unexpected error ${errorText}occured. Trying to reconnect...`));
+            const errorText = errorName ? ` (${errorName})` : "";
+            setError(new Error(`An unexpected error occurred${errorText}. Trying to reconnect...`));
         }
         return () => {
             ws.onclose = null;
