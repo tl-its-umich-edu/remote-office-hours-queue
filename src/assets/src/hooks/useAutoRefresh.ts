@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Subject, interval, merge } from "rxjs";
 import { debounceTime, map, withLatestFrom, filter, tap } from "rxjs/operators";
 
-export const useAutoRefresh = (refresh: () => void, intervalMs=3000) => {
+export const useAutoRefresh = (refresh: () => void, intervalMs=10000) => {
     const [interactions] = useState(() => {
         const subj = new Subject<boolean>();
         return subj;
