@@ -16,13 +16,6 @@ export const useQueueWebSocket = (queue_id: number, onUpdate: (q: QueueHost | Qu
     );
 }
 
-export const useUsersWebSocket = (onUpdate: (users: User[]) => void) => {
-    return useWebSocket(
-        `${getProtocol()}//${location.host}/ws/users/`,
-        onUpdate,
-    );
-}
-
 export const useUserWebSocket = (user_id: number | undefined, onUpdate: (user: User | MyUser) => void) => {
     return typeof user_id === "number"
         ? useWebSocket(

@@ -4,16 +4,15 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import { Modal, Button, Table, Alert, Form } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
-import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, invalidUniqnameMessage, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector, DropdownValue } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector, DropdownValue } from "./common";
 import { usePromise } from "../hooks/usePromise";
-import { redirectToLogin, sanitizeUniqname, validateUniqname, redirectToSearch } from "../utils";
+import { redirectToLogin, sanitizeUniqname, validateAndFetchUserByUniqname, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
-import { useQueueWebSocket, useUsersWebSocket } from "../services/sockets";
+import { useQueueWebSocket } from "../services/sockets";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -432,8 +431,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         }
     }
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
-    const [users, setUsers] = useState(undefined as User[] | undefined);
-    const usersWebSocketError = useUsersWebSocket(setUsers)
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
@@ -447,9 +444,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     }
     const addHost = async (uniqname: string) => {
         uniqname = sanitizeUniqname(uniqname);
-        validateUniqname(uniqname);
-        const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(invalidUniqnameMessage(uniqname));
+        const user = await validateAndFetchUserByUniqname(uniqname);
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
     }
@@ -464,9 +459,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     }
     const addMeeting = async (uniqname: string, backend: string) => {
         uniqname = sanitizeUniqname(uniqname);
-        validateUniqname(uniqname);
-        const user = users!.find(u => u.username === uniqname);
-        if (!user) throw new Error(invalidUniqnameMessage(uniqname));
+        const user = await validateAndFetchUserByUniqname(uniqname);
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id, backend);
     }
@@ -521,7 +514,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
-        {source: 'Users Connection', error: usersWebSocketError}, 
         {source: 'Remove Host', error: removeHostError}, 
         {source: 'Add Host', error: addHostError}, 
         {source: 'Remove Meeting', error: removeMeetingError}, 
@@ -534,10 +526,10 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         {source: 'Allowed Meeting Types', error: updateAllowedMeetingTypesError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isChanging || !users}/>
+    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue}  disabled={isChanging || !users} user={props.user!}
+        && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
             backends={props.backends} defaultBackend={props.defaultBackend}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
