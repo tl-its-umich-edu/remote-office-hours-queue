@@ -26,6 +26,13 @@ class ForbiddenError extends Error {
     }
 }
 
+class NotFoundError extends Error {
+    public name = "NotFoundError";
+    constructor() {
+        super("The resource you're looking for was not found. Maybe it was deleted.");
+    }
+}
+
 const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
     let text: string;
@@ -40,6 +47,10 @@ const handleErrors = async (resp: Response) => {
             text = await resp.text();
             console.error(text);
             throw new ForbiddenError();
+        case 404:
+            text = await resp.text();
+            console.error(text);
+            throw new NotFoundError();
         case 502:
             json = await resp.json();
             console.error(json);
@@ -169,13 +180,19 @@ export const setStatus = async (queue_id: number, open: boolean) => {
     return await resp.json();
 }
 
-export const getMyUser = async (user_id: number) => {
-    const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
+const getUser = async (identifier: number | string) => {
+    const resp = await fetch(`/api/users/${identifier}/`, { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as MyUser;
+    return await resp.json() as User | MyUser;
 }
 
-export const updateMyUser = async (user_id: number, phone_number: string) => {
+export const getUserById = async (user_id: number) =>
+    getUser(user_id);
+
+export const getUserByUniqname = async (uniqname: string) =>
+    getUser(uniqname);
+
+export const updateUser = async (user_id: number, phone_number: string) => {
     const resp = await fetch(`/api/profiles/${user_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
@@ -184,7 +201,7 @@ export const updateMyUser = async (user_id: number, phone_number: string) => {
         }),
     });
     await handleErrors(resp);
-    return await resp.json() as MyUser;
+    return await resp.json() as User | MyUser;
 }
 
 export const searchQueue = async (term: string) => {

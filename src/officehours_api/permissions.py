@@ -3,15 +3,6 @@ from rest_framework import permissions
 from .models import Queue, Meeting, Profile
 
 
-class IsCurrentUser(permissions.BasePermission):
-    '''
-    Custom permission to only allow users to view themselves.
-    '''
-
-    def has_object_permission(self, request, view, obj: User):
-        return obj == request.user
-
-
 class IsCurrentProfile(permissions.BasePermission):
     def has_object_permission(self, request, view, obj: Profile):
         return obj.user == request.user

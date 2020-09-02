@@ -78,7 +78,7 @@ class NestedAttendeeSerializer(serializers.ModelSerializer):
         fields = ['id', 'user_id', 'username', 'first_name', 'last_name']
 
 
-class UserListSerializer(serializers.ModelSerializer):
+class ShallowUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name']

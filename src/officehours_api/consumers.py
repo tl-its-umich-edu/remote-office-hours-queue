@@ -145,66 +145,6 @@ def trigger_queue_update_for_hosts(sender, instance, action, **kwargs):
         transaction.on_commit(lambda: send_queue_update(instance.id))
 
 
-class UsersConsumer(JsonWebsocketConsumer):
-    _user: User
-    group_name = "users"
-
-    @property
-    def user(self):
-        return self._user
-
-    def _get_users(self):
-        return list(
-            NestedUserSerializer(u).data
-            for u in User.objects.all()
-        )
-
-    def connect(self):
-        self._user = self.scope["user"]
-        async_to_sync(self.channel_layer.group_add)(
-            self.group_name,
-            self.channel_name
-        )
-        self.accept()
-        users_data = self._get_users()
-        self.send_json({
-            'type': 'init',
-            'content': users_data,
-        })
-
-    def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(
-            self.group_name,
-            self.channel_name
-        )
-
-    def users_update(self, event):
-        # Doesn't scale well - should send only the updated parts instead
-        users_data = self._get_users()
-        self.send_json({
-            'type': 'update',
-            'content': users_data,
-        })
-
-
-def send_users_update(channel_layer=None):
-    channel_layer = channel_layer or get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        UsersConsumer.group_name,
-        {
-            'type': 'users.update',
-        }
-    )
-
-
-@receiver(post_save, sender=User)
-@receiver(post_delete, sender=User)
-@receiver(post_save, sender=Profile)
-@receiver(post_delete, sender=Profile)
-def trigger_users_update(sender, instance: User, created, **kwargs):
-    transaction.on_commit(send_users_update)
-
-
 class UserConsumer(JsonWebsocketConsumer):
     _user_id: int
     _user: User
