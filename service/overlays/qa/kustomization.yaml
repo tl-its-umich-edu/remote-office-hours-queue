@@ -36,6 +36,7 @@ secretGenerator:
   behavior: merge
   type: Opaque
   files:
+  - secret/EMAIL_SUBJECT_PREFIX
   - secret/DEBUG
   - secret/SECRET_KEY
   - secret/DATABASE_URL
