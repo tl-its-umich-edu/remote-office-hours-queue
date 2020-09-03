@@ -19,7 +19,7 @@ interface ManageQueueListProps {
 
 function ManageQueueList(props: ManageQueueListProps) {
     const queueResults = props.queues.length
-        ? <QueueList queues={props.queues}/>
+        ? <QueueList queues={props.queues} manageLink={true}/>
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>
     return (
         <div>
