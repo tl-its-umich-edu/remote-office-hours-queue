@@ -239,7 +239,8 @@ def trigger_user_deleted(sender, instance: User, **kwargs):
 @receiver(post_save, sender=Profile)
 @receiver(post_delete, sender=Profile)
 def trigger_user_update_for_profile(sender, instance: Profile, **kwargs):
-    transaction.on_commit(lambda: send_user_update(instance.user.id))
+    user_id = instance.user.id
+    transaction.on_commit(lambda: send_user_update(user_id))
 
 
 @receiver(m2m_changed, sender=User.meeting_set.through)
