@@ -641,3 +641,7 @@ div[role=main] {
 .meeting-type-message {
 	padding-left: 5px
 }
+
+.queue-list-badge {
+	font-size: 90%;
+}

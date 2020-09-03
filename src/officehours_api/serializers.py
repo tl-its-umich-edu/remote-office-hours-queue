@@ -132,7 +132,7 @@ class ShallowQueueSerializer(serializers.ModelSerializer):
     '''
     class Meta:
         model = Queue
-        fields = ['id', 'name', 'created_at', 'status']
+        fields = ['id', 'name', 'status']
 
 
 class QueueAttendeeSerializer(serializers.ModelSerializer):
