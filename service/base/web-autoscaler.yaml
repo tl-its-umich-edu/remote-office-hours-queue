@@ -1,0 +1,12 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web
+spec:
+  scaleTargetRef:
+    apiVersion: v1
+    kind: DeploymentConfig
+    name: officehours-web-dev
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 50

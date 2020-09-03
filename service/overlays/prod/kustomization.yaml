@@ -25,6 +25,12 @@ patchesJson6902:
     kind: BuildConfig
     name: web
   path: build.yaml
+- target:
+    group: autoscaling
+    version: v1
+    kind: HorizontalPodAutoscaler
+    name: web
+  path: web-autoscaler.yaml
 secretGenerator:
 - name: secrets
   behavior: merge

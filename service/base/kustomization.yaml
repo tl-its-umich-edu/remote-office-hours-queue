@@ -6,6 +6,7 @@ resources:
 - redis-deployment.yaml
 - redis-service.yaml
 - web-deployment.yaml
+- web-autoscaler.yaml
 - web-service.yaml
 - web-ingress.yaml
 - build.yaml
