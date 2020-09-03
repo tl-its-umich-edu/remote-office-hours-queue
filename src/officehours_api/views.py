@@ -13,8 +13,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.serializers import (
-    ShallowUserSerializer, UserSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer,
+    ShallowUserSerializer, UserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer
 )
 from officehours_api.permissions import (
     IsHostOrReadOnly, IsHostOrAttendee, is_host, IsCurrentProfile
@@ -84,7 +84,7 @@ class QueueList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView)
 
 class QueueListSearch(DecoupledContextMixin, generics.ListAPIView):
     queryset = Queue.objects.all()
-    serializer_class = QueueAttendeeSerializer
+    serializer_class = ShallowQueueSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['name', '=hosts__username']
     filterset_fields = ['status']
