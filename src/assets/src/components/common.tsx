@@ -3,7 +3,7 @@ import { createRef, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { Alert, Breadcrumb, Button, Col, Form, ListGroup, Modal, Row, Badge, ListGroupItem } from "react-bootstrap"
+import { Alert, Breadcrumb, Button, Col, Form, ListGroup, Modal, Row, Badge } from "react-bootstrap"
 import { QueueAttendee, QueueBase, User } from "../models"
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
