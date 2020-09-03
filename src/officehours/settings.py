@@ -296,7 +296,7 @@ LOGGING_METHODS = csv_to_list(
 
 # Email
 EMAIL_HOST = os.getenv('EMAIL_HOST')
-EMAIL_SUBJECT_PREFIX = os.getenv('EMAIL_SUBJECT_PREFIX', 'ROHQ').strip()
+EMAIL_SUBJECT_PREFIX = os.getenv('EMAIL_SUBJECT_PREFIX', '[ROHQ] ').strip()
 
 ADMINS = [('Admins', os.getenv('ADMIN_EMAIL'))]
 MANAGERS = ADMINS
