@@ -480,10 +480,9 @@ export function QueueList (props: QueueListProps) {
         <Link to={`${linkBase}${q.id}`}>
             <ListGroup.Item key={q.id}>
                 <Row>
-                    <Col lg={1}><Badge variant='primary' pill={true}>{q.id}</Badge></Col>
-                    <Col lg={4}>{q.name}</Col>
-                    <Col lg={1}><Badge variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>{q.status}</Badge></Col>
-                    <Col lg={4}><DateTimeDisplay dateTime={q.created_at} /></Col>
+                    <Col lg={2} sm={2} xs={3}><Badge bsPrefix='queue-list-badge badge' variant='primary' pill={true}>{q.id}</Badge></Col>
+                    <Col lg={8} sm={8} xs={6}>{q.name}</Col>
+                    <Col lg={2} sm={2} xs={3}><Badge bsPrefix='queue-list-badge badge' variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>{q.status}</Badge></Col>
                 </Row>
             </ListGroup.Item>
         </Link>
@@ -492,10 +491,9 @@ export function QueueList (props: QueueListProps) {
         <ListGroup>
             <ListGroup.Item>
                 <Row>
-                    <Col lg={1}><strong>ID</strong></Col>
-                    <Col lg={4}><strong>Name</strong></Col>
-                    <Col lg={1}><strong>Status</strong></Col>
-                    <Col lg={4}><strong>Created At</strong></Col>
+                    <Col lg={2} sm={2} xs={3}><strong>ID</strong></Col>
+                    <Col lg={8} sm={8} xs={6}><strong>Name</strong></Col>
+                    <Col lg={2} sm={2} xs={3}><strong>Status</strong></Col>
                 </Row>
             </ListGroup.Item>
             {queueItems}

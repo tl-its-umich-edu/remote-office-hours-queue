@@ -34,11 +34,11 @@ export interface Meeting {
 export interface QueueBase {
     id: number;
     name: string;
-    created_at: string;
     status: "open" | "closed";
 }
 
 export interface QueueFull extends QueueBase {
+    created_at: string;
     description: string;
     hosts: User[];
     allowed_backends: string[];
