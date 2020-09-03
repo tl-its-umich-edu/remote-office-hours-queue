@@ -1,7 +1,5 @@
 import * as React from "react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ListGroup } from "react-bootstrap";
 
 import * as api from "../services/api";
 import { useUserWebSocket } from "../services/sockets";
@@ -9,7 +7,9 @@ import { QueueBase } from "../models";
 import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
+import { QueueList } from "./common";
 import { PageProps } from "./page";
+
 
 interface ManageQueueListProps {
     queues: ReadonlyArray<QueueBase>;
@@ -18,21 +18,12 @@ interface ManageQueueListProps {
 }
 
 function ManageQueueList(props: ManageQueueListProps) {
-    // TO DO: refactor this and the similar component from search page into QueueList in common
-    // TO DO: redesign look and get feedback
-    const queueItems = props.queues.map((q) => (
-        <Link to={`/manage/${q.id}`}>
-            <ListGroup.Item key={q.id}>
-                {q.id} - {q.name} - {q.created_at} - {q.status}
-            </ListGroup.Item>
-        </Link>
-    ));
-    const queueList = queueItems.length
-        ? <ListGroup>{queueItems}</ListGroup>
+    const queueResults = props.queues.length
+        ? <QueueList queues={props.queues}/>
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>
     return (
         <div>
-            {queueList}
+            {queueResults}
             <SingleInputForm 
                 id="add_queue"
                 placeholder="Queue name..." 

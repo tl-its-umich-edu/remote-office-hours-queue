@@ -3,8 +3,8 @@ import { createRef, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { Alert, Breadcrumb, Button, Form, Modal } from "react-bootstrap"
-import { QueueAttendee, User } from "../models"
+import { Alert, Breadcrumb, Button, Form, ListGroup, Modal } from "react-bootstrap"
+import { QueueAttendee, QueueBase, User } from "../models"
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -467,4 +467,22 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
         </Breadcrumb>
 
     );
+}
+
+interface QueueListProps {
+    queues: ReadonlyArray<QueueBase>;
+    manageLink?: boolean;
+}
+
+// TO DO: redesign look and get feedback
+export function QueueList (props: QueueListProps) {
+    const linkBase = props.manageLink ? '/manage/' : '/queue/'
+    const queueItems = props.queues.map(q => (
+        <Link to={`${linkBase}${q.id}`}>
+            <ListGroup.Item key={q.id}>
+                ID: {q.id} - Name: {q.name} - Created at: {q.created_at} - Status: {q.status}
+            </ListGroup.Item>
+        </Link>
+    ));
+    return <ListGroup>{queueItems}</ListGroup>;
 }
