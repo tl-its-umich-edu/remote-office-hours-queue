@@ -1,31 +1,34 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { ListGroup } from "react-bootstrap";
 
 import * as api from "../services/api";
-import { QueueHost } from "../models";
+import { useUserWebSocket } from "../services/sockets";
+import { QueueBase } from "../models";
 import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
-import { useAutoRefresh } from "../hooks/useAutoRefresh";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
 interface ManageQueueListProps {
-    queues: QueueHost[];
+    queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
     onAddQueue: (uniqname: string) => Promise<void>;
 }
 
 function ManageQueueList(props: ManageQueueListProps) {
-    const queues = props.queues.map((q) => 
-        <li className="list-group-item" key={q.id}>
-            <Link to={`/manage/${q.id}`}>
-                {q.name}
-            </Link>
-        </li>
-    );
-    const queueList = queues.length
-        ? <ul className="list-group">{queues}</ul>
+    // TO DO: refactor this and the similar component from search page into QueueList in common
+    // TO DO: redesign look and get feedback
+    const queueItems = props.queues.map((q) => (
+        <Link to={`/manage/${q.id}`}>
+            <ListGroup.Item key={q.id}>
+                {q.id} - {q.name} - {q.created_at} - {q.status}
+            </ListGroup.Item>
+        </Link>
+    ));
+    const queueList = queueItems.length
+        ? <ListGroup>{queueItems}</ListGroup>
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>
     return (
         <div>
@@ -46,28 +49,22 @@ export function ManagePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
-    const [queues, setQueues] = useState(undefined as QueueHost[] | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getQueues(), setQueues);
-    useEffect(() => {
-        doRefresh();
-    }, []);
-    const [interactions] = useAutoRefresh(doRefresh);
+    const [queues, setQueues] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
+    const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
+
     const addQueue = async (queueName: string) => {
-        interactions.next(true);
         if (!queueName) return;
         await api.createQueue(queueName, new Set(Object.keys(props.backends)));
-        doRefresh();
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
     
     const isChanging = addQueueLoading;
-    const isLoading = refreshLoading || isChanging;
     const errorSources = [
-        {source: 'Queue Connection', error: refreshError}, 
+        {source: 'User Connection', error: userWebSocketError},
         {source: 'Add Queue', error: addQueueError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isLoading}/>
+    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueList = queues !== undefined
         && <ManageQueueList queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
