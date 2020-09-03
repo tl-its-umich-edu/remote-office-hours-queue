@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 
-import { QueueAttendee, QueueBase } from "../models";
+import { QueueBase } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs, QueueList } from "./common";
