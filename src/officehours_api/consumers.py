@@ -129,6 +129,8 @@ def trigger_queue_update(sender, instance: Queue, created, **kwargs):
 @receiver(post_softdelete, sender=Queue)
 def trigger_queue_delete(sender, instance: Queue, **kwargs):
     transaction.on_commit(lambda: send_queue_delete(instance.id))
+    for host in list(instance.hosts.all()):
+        transaction.on_commit(lambda: send_user_update(host.id))
 
 
 @receiver(post_save, sender=Meeting)
@@ -140,9 +142,17 @@ def trigger_queue_update_for_meeting(sender, instance: Meeting, **kwargs):
 
 
 @receiver(m2m_changed, sender=Queue.hosts.through)
-def trigger_queue_update_for_hosts(sender, instance, action, **kwargs):
-    if action == "post_remove" or action == "post_clear" or action == "post_add":
+def trigger_queue_update_for_hosts(sender, instance, action, pk_set, **kwargs):
+    if action not in ["post_remove", "post_clear", "post_add"]:
+        return
+    if isinstance(instance, Queue):
         transaction.on_commit(lambda: send_queue_update(instance.id))
+        for host_id in pk_set:
+            transaction.on_commit(lambda: send_user_update(host_id))
+    else: # is User - not even sure if this will get invoked, need to test once User deletion works.
+        transaction.on_commit(lambda: send_user_update(instance.id))
+        for queue_id in pk_set:
+            transaction.on_commit(lambda: send_queue_update(queue_id))
 
 
 class UserConsumer(JsonWebsocketConsumer):
@@ -229,6 +239,9 @@ def send_user_deleted(user_id: int, channel_layer=None):
 @receiver(post_save, sender=User)
 def trigger_user_update(sender, instance: User, **kwargs):
     transaction.on_commit(lambda: send_user_update(instance.id))
+    # Tried to also get hostnames to update on change in the edit queue page, but this didn't do it alone
+    # for queue in list(instance.queue_set.all()):
+    #     transaction.on_commit(lambda: send_queue_update(queue.id))
 
 
 @receiver(post_delete, sender=User)

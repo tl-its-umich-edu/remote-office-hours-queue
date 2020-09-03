@@ -88,10 +88,11 @@ class UserSerializer(serializers.ModelSerializer):
     context: UserContext
 
     my_queue = serializers.SerializerMethodField(read_only=True)
+    hosted_queues = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue',]
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues']
 
     def get_my_queue(self, obj):
         try:
@@ -100,6 +101,13 @@ class UserSerializer(serializers.ModelSerializer):
             return None
 
         serializer = QueueAttendeeSerializer(meeting.queue, context=self.context)
+        return serializer.data
+
+    def get_hosted_queues(self, obj):
+        queues_qs: QuerySet = obj.queue_set.all()
+        if not queues_qs.exists():
+            return []
+        serializer = ShallowQueueSerializer(queues_qs, many=True)
         return serializer.data
 
     def update(self, instance, validated_data):
@@ -116,6 +124,15 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['user', 'phone_number']
+
+
+class ShallowQueueSerializer(serializers.ModelSerializer):
+    '''
+    Serializer used to list Queues (including basic info) related to a user or search
+    '''
+    class Meta:
+        model = Queue
+        fields = ['id', 'name', 'created_at', 'status']
 
 
 class QueueAttendeeSerializer(serializers.ModelSerializer):
