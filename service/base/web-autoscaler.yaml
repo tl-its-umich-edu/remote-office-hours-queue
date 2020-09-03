@@ -8,5 +8,5 @@ spec:
     kind: DeploymentConfig
     name: officehours-web-dev
   minReplicas: 1
-  maxReplicas: 4
-  targetCPUUtilizationPercentage: 50
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 70
