@@ -3,7 +3,7 @@ import { createRef, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { Alert, Breadcrumb, Button, Form, ListGroup, Modal } from "react-bootstrap"
+import { Alert, Breadcrumb, Button, Col, Form, ListGroup, Modal, Row, Badge, ListGroupItem } from "react-bootstrap"
 import { QueueAttendee, QueueBase, User } from "../models"
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
@@ -474,15 +474,31 @@ interface QueueListProps {
     manageLink?: boolean;
 }
 
-// TO DO: redesign look and get feedback
 export function QueueList (props: QueueListProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
     const queueItems = props.queues.map(q => (
         <Link to={`${linkBase}${q.id}`}>
             <ListGroup.Item key={q.id}>
-                ID: {q.id} - Name: {q.name} - Created at: {q.created_at} - Status: {q.status}
+                <Row>
+                    <Col lg={1}><Badge variant='primary' pill={true}>{q.id}</Badge></Col>
+                    <Col lg={4}>{q.name}</Col>
+                    <Col lg={1}><Badge variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>{q.status}</Badge></Col>
+                    <Col lg={4}><DateTimeDisplay dateTime={q.created_at} /></Col>
+                </Row>
             </ListGroup.Item>
         </Link>
     ));
-    return <ListGroup>{queueItems}</ListGroup>;
+    return (
+        <ListGroup>
+            <ListGroup.Item>
+                <Row>
+                    <Col lg={1}><strong>ID</strong></Col>
+                    <Col lg={4}><strong>Name</strong></Col>
+                    <Col lg={1}><strong>Status</strong></Col>
+                    <Col lg={4}><strong>Created At</strong></Col>
+                </Row>
+            </ListGroup.Item>
+            {queueItems}
+        </ListGroup>
+    );
 }
