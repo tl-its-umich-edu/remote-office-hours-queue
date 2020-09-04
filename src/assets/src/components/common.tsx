@@ -3,7 +3,7 @@ import { createRef, useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { Alert, Breadcrumb, Button, Col, Form, ListGroup, Modal, Row, Badge } from "react-bootstrap"
+import { Alert, Badge, Breadcrumb, Button, Col, Form, ListGroup, Modal, Row } from "react-bootstrap"
 import { QueueAttendee, QueueBase, User } from "../models"
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
@@ -471,32 +471,43 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
 
 interface QueueListProps {
     queues: ReadonlyArray<QueueBase>;
-    manageLink?: boolean;
+    manageLink?: boolean | undefined;
 }
 
 export function QueueList (props: QueueListProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
+    const badgeClass = 'queue-list-badge'
+
     const queueItems = props.queues.map(q => (
         <Link to={`${linkBase}${q.id}`}>
             <ListGroup.Item key={q.id}>
                 <Row>
-                    <Col lg={2} sm={2} xs={3}><Badge bsPrefix='queue-list-badge badge' variant='primary' pill={true}>{q.id}</Badge></Col>
-                    <Col lg={8} sm={8} xs={6}>{q.name}</Col>
-                    <Col lg={2} sm={2} xs={3}><Badge bsPrefix='queue-list-badge badge' variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>{q.status}</Badge></Col>
+                    <Col lg={2} sm={2} xs={2}>
+                        <Badge className={badgeClass} variant='primary' pill={true}>{q.id}</Badge>
+                    </Col>
+                    <Col lg={8} sm={8} xs={7}>{q.name}</Col>
+                    <Col lg={2} sm={2} xs={3}>
+                        <Badge className={badgeClass} variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
+                            {q.status}
+                        </Badge>
+                    </Col>
                 </Row>
             </ListGroup.Item>
         </Link>
     ));
     return (
-        <ListGroup>
-            <ListGroup.Item>
-                <Row>
-                    <Col lg={2} sm={2} xs={3}><strong>ID</strong></Col>
-                    <Col lg={8} sm={8} xs={6}><strong>Name</strong></Col>
-                    <Col lg={2} sm={2} xs={3}><strong>Status</strong></Col>
-                </Row>
-            </ListGroup.Item>
-            {queueItems}
-        </ListGroup>
+        <div>
+            <ListGroup>
+                <ListGroup.Item>
+                    <Row>
+                        <Col lg={2} sm={2} xs={2}><strong>ID</strong></Col>
+                        <Col lg={8} sm={8} xs={7}><strong>Name</strong></Col>
+                        <Col lg={2} sm={2} xs={3}><strong>Status</strong></Col>
+                    </Row>
+                </ListGroup.Item>
+            </ListGroup>
+            <ListGroup className='mt-2'>{queueItems}</ListGroup>
+        </div>
+
     );
 }

@@ -24,13 +24,14 @@ function ManageQueueList(props: ManageQueueListProps) {
     return (
         <div>
             {queueResults}
-            <SingleInputForm 
+            <SingleInputForm
                 id="add_queue"
-                placeholder="Queue name..." 
+                placeholder="Queue name..."
                 buttonType="success"
-                onSubmit={props.onAddQueue} 
-                disabled={props.disabled}>
-                    + Add Queue
+                onSubmit={props.onAddQueue}
+                disabled={props.disabled}
+            >
+                + Add Queue
             </SingleInputForm>
         </div>
     );
