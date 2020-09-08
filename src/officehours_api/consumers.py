@@ -239,9 +239,6 @@ def send_user_deleted(user_id: int, channel_layer=None):
 @receiver(post_save, sender=User)
 def trigger_user_update(sender, instance: User, **kwargs):
     transaction.on_commit(lambda: send_user_update(instance.id))
-    # Tried to also get hostnames to update on change in the edit queue page, but this didn't do it alone
-    # for queue in list(instance.queue_set.all()):
-    #     transaction.on_commit(lambda: send_queue_update(queue.id))
 
 
 @receiver(post_delete, sender=User)
