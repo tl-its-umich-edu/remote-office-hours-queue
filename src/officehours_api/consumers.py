@@ -129,7 +129,7 @@ def trigger_queue_update(sender, instance: Queue, created, **kwargs):
 @receiver(post_softdelete, sender=Queue)
 def trigger_queue_delete(sender, instance: Queue, **kwargs):
     transaction.on_commit(lambda: send_queue_delete(instance.id))
-    for host in list(instance.hosts.all()):
+    for host in instance.hosts.all():
         transaction.on_commit(lambda: send_user_update(host.id))
 
 
