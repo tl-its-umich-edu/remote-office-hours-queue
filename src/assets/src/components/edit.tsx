@@ -291,14 +291,17 @@ function QueueEditor(props: QueueEditorProps) {
                         <ul className="list-group">
                             {hosts}
                         </ul>
-                        <SingleInputForm 
-                            id="add_host"
-                            placeholder="Uniqname..."
-                            buttonType="success"
-                            onSubmit={props.onAddHost}
-                            disabled={props.disabled}>
+                        <div className='page-content-flow'>
+                            <SingleInputForm
+                                id="add_host"
+                                placeholder="Uniqname..."
+                                buttonType="success"
+                                onSubmit={props.onAddHost}
+                                disabled={props.disabled}
+                            >
                                 + Add Host
-                        </SingleInputForm>
+                            </SingleInputForm>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -311,7 +314,7 @@ function QueueEditor(props: QueueEditorProps) {
                 </div>
             </div>
             <div className="row">
-                <div className="col-md-8">
+                <div className="page-content-flow col-md-8">
                     <AddAttendeeForm allowedBackends={new Set(props.queue.allowed_backends)} backends={props.backends}
                         defaultBackend={props.defaultBackend} disabled={props.disabled}
                         onSubmit={props.onAddMeeting}/>

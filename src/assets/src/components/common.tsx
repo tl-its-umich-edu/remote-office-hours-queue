@@ -506,8 +506,7 @@ export function QueueList (props: QueueListProps) {
                     </Row>
                 </ListGroup.Item>
             </ListGroup>
-            <ListGroup className='mt-2'>{queueItems}</ListGroup>
+            <ListGroup className='page-content-flow'>{queueItems}</ListGroup>
         </div>
-
     );
 }
