@@ -149,7 +149,7 @@ def trigger_queue_update_for_hosts(sender, instance, action, pk_set, **kwargs):
         transaction.on_commit(lambda: send_queue_update(instance.id))
         for host_id in pk_set:
             transaction.on_commit(lambda: send_user_update(host_id))
-    else: # is User - not even sure if this will get invoked, need to test once User deletion works.
+    else:  # is User
         transaction.on_commit(lambda: send_user_update(instance.id))
         for queue_id in pk_set:
             transaction.on_commit(lambda: send_queue_update(queue_id))
