@@ -24,15 +24,17 @@ function ManageQueueList(props: ManageQueueListProps) {
     return (
         <div>
             {queueResults}
-            <SingleInputForm
-                id="add_queue"
-                placeholder="Queue name..."
-                buttonType="success"
-                onSubmit={props.onAddQueue}
-                disabled={props.disabled}
-            >
-                + Add Queue
-            </SingleInputForm>
+            <div className="page-content-flow">
+                <SingleInputForm
+                    id="add_queue"
+                    placeholder="Queue name..."
+                    buttonType="success"
+                    onSubmit={props.onAddQueue}
+                    disabled={props.disabled}
+                >
+                    + Add Queue
+                </SingleInputForm>
+            </div>
         </div>
     );
 }
