@@ -479,8 +479,8 @@ export function QueueList (props: QueueListProps) {
     const badgeClass = 'queue-list-badge'
 
     const queueItems = props.queues.map(q => (
-        <Link to={`${linkBase}${q.id}`}>
-            <ListGroup.Item key={q.id}>
+        <Link key={q.id} to={`${linkBase}${q.id}`}>
+            <ListGroup.Item>
                 <Row>
                     <Col lg={2} sm={2} xs={2}>
                         <Badge className={badgeClass} variant='primary' pill={true}>{q.id}</Badge>
