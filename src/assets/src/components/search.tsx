@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { QueueBase } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
-import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs, QueueList } from "./common";
+import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs, QueueTable } from "./common";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
@@ -39,7 +39,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
                     No results were found for "{term}".
                 </p>
             )
-            : <QueueList queues={searchResults} />
+            : <QueueTable queues={searchResults} />
     const redirectAlert = props.location.search.includes("redirected=true") && !/^\d+$/.exec(term)
         && (
             <p className="alert alert-warning">
