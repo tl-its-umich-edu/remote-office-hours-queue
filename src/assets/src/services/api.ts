@@ -180,17 +180,11 @@ export const setStatus = async (queue_id: number, open: boolean) => {
     return await resp.json();
 }
 
-const getUser = async (identifier: number | string) => {
-    const resp = await fetch(`/api/users/${identifier}/`, { method: "GET" });
+export const getUser = async (id_or_username: number | string) => {
+    const resp = await fetch(`/api/users/${id_or_username}/`, { method: "GET" });
     await handleErrors(resp);
     return await resp.json() as User | MyUser;
 }
-
-export const getUserById = async (user_id: number) =>
-    getUser(user_id);
-
-export const getUserByUniqname = async (uniqname: string) =>
-    getUser(uniqname);
 
 export const updateUser = async (user_id: number, phone_number: string) => {
     const resp = await fetch(`/api/profiles/${user_id}/`, {

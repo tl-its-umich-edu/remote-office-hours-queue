@@ -10,7 +10,7 @@ import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector, DropdownValue } from "./common";
 import { usePromise } from "../hooks/usePromise";
-import { redirectToLogin, sanitizeUniqname, validateAndFetchUserByUniqname, redirectToSearch } from "../utils";
+import { redirectToLogin, sanitizeUniqname, validateAndFetchUser, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
 import { useQueueWebSocket } from "../services/sockets";
 
@@ -444,7 +444,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     }
     const addHost = async (uniqname: string) => {
         uniqname = sanitizeUniqname(uniqname);
-        const user = await validateAndFetchUserByUniqname(uniqname);
+        const user = await validateAndFetchUser(uniqname);
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
     }
@@ -459,7 +459,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     }
     const addMeeting = async (uniqname: string, backend: string) => {
         uniqname = sanitizeUniqname(uniqname);
-        const user = await validateAndFetchUserByUniqname(uniqname);
+        const user = await validateAndFetchUser(uniqname);
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id, backend);
     }
