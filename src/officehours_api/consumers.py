@@ -239,6 +239,7 @@ def trigger_user_deleted(sender, instance: User, **kwargs):
 @receiver(post_save, sender=Profile)
 @receiver(post_delete, sender=Profile)
 def trigger_user_update_for_profile(sender, instance: Profile, **kwargs):
+    # Get user_id before commit in case user is deleted
     user_id = instance.user.id
     transaction.on_commit(lambda: send_user_update(user_id))
 
