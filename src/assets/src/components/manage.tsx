@@ -7,19 +7,19 @@ import { QueueBase } from "../models";
 import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
-import { QueueList } from "./common";
+import { QueueTable } from "./common";
 import { PageProps } from "./page";
 
 
-interface ManageQueueListProps {
+interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
     onAddQueue: (uniqname: string) => Promise<void>;
 }
 
-function ManageQueueList(props: ManageQueueListProps) {
+function ManageQueueTable(props: ManageQueueTableProps) {
     const queueResults = props.queues.length
-        ? <QueueList queues={props.queues} manageLink={true}/>
+        ? <QueueTable queues={props.queues} manageLink={true}/>
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>
     return (
         <div>
@@ -60,8 +60,8 @@ export function ManagePage(props: PageProps) {
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
-    const queueList = queues !== undefined
-        && <ManageQueueList queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
+    const queueTable = queues !== undefined
+        && <ManageQueueTable queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
@@ -70,7 +70,7 @@ export function ManagePage(props: PageProps) {
             {errorDisplay}
             <h1>My Meeting Queues</h1>
             <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
-            {queueList}
+            {queueTable}
             <hr/>
             <a target="_blank" href="https://documentation.its.umich.edu/node/1830">
                 Learn more about using Remote Office Hours Queue as a host

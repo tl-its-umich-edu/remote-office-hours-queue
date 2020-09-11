@@ -555,11 +555,15 @@ h3.alert-heading {
 }
 
 .table-hover tbody tr:hover {
-	background-color: inherit;
+	background-color: #c9e5ee;
 }
 
 .table tbody+tbody {
 	border-top: 0;
+}
+
+.table td a {
+	display: block;
 }
 
 .assign {
@@ -642,6 +646,6 @@ div[role=main] {
 	padding-left: 5px
 }
 
-.queue-list-badge {
+.queue-table-badge {
 	font-size: 90%;
 }

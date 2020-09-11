@@ -1,10 +1,10 @@
-import * as React from "react"
-import { createRef, useEffect, useState } from "react"
-import { Link } from "react-router-dom"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons'
-import { Alert, Badge, Breadcrumb, Button, Col, Form, ListGroup, Modal, Row } from "react-bootstrap"
-import { QueueAttendee, QueueBase, User } from "../models"
+import * as React from "react";
+import { createRef, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
+import { Alert, Badge, Breadcrumb, Button, Form, Modal, Table } from "react-bootstrap";
+import { QueueAttendee, QueueBase, User } from "../models";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -469,44 +469,44 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
     );
 }
 
-interface QueueListProps {
+interface QueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     manageLink?: boolean | undefined;
 }
 
-export function QueueList (props: QueueListProps) {
+export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
-    const badgeClass = 'queue-list-badge'
+    const badgeClass = 'queue-table-badge'
 
     const queueItems = props.queues.map(q => (
-        <Link key={q.id} to={`${linkBase}${q.id}`}>
-            <ListGroup.Item>
-                <Row>
-                    <Col lg={2} sm={2} xs={2}>
-                        <Badge className={badgeClass} variant='primary' pill={true}>{q.id}</Badge>
-                    </Col>
-                    <Col lg={8} sm={8} xs={7}>{q.name}</Col>
-                    <Col lg={2} sm={2} xs={3}>
-                        <Badge className={badgeClass} variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
-                            {q.status}
-                        </Badge>
-                    </Col>
-                </Row>
-            </ListGroup.Item>
-        </Link>
+        <tr key={q.id}>
+            <td aria-label={`Queue ID Number`}>
+                <Link to={`${linkBase}${q.id}`}>
+                    <Badge className={badgeClass} variant='primary' pill={true}>{q.id}</Badge>
+                </Link>
+            </td>
+            <td aria-label={`Name for Queue ID ${q.id}`}>
+                <Link to={`${linkBase}${q.id}`}>{q.name}</Link>
+            </td>
+            <td aria-label={`Status for Queue ID ${q.id}`}>
+                <Link to={`${linkBase}${q.id}`}>
+                    <Badge className={badgeClass} variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
+                        {q.status}
+                    </Badge>
+                </Link>
+            </td>
+        </tr>
     ));
     return (
-        <div>
-            <ListGroup>
-                <ListGroup.Item>
-                    <Row>
-                        <Col lg={2} sm={2} xs={2}><strong>ID</strong></Col>
-                        <Col lg={8} sm={8} xs={7}><strong>Name</strong></Col>
-                        <Col lg={2} sm={2} xs={3}><strong>Status</strong></Col>
-                    </Row>
-                </ListGroup.Item>
-            </ListGroup>
-            <ListGroup className='page-content-flow'>{queueItems}</ListGroup>
-        </div>
+        <Table bordered hover aria-label='Queue Table with Links'>
+            <thead>
+                <tr>
+                    <th aria-label='Queue ID Number'>Queue ID</th>
+                    <th aria-label='Queue Name'>Name</th>
+                    <th aria-label='Queue Status'>Status</th>
+                </tr>
+            </thead>
+            <tbody>{queueItems}</tbody>
+        </Table>
     );
 }
