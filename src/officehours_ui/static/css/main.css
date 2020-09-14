@@ -492,8 +492,8 @@ h3.alert-heading {
 	margin-left: 20px;
 }
 
-.input-group {
-	margin: 0.2rem;
+.page-content-flow {
+	margin-top: 0.5rem;
 }
 
 .input-group-text {
@@ -555,11 +555,15 @@ h3.alert-heading {
 }
 
 .table-hover tbody tr:hover {
-	background-color: inherit;
+	background-color: #c9e5ee;
 }
 
 .table tbody+tbody {
 	border-top: 0;
+}
+
+.table td a {
+	display: block;
 }
 
 .assign {
@@ -640,4 +644,8 @@ div[role=main] {
 
 .meeting-type-message {
 	padding-left: 5px
+}
+
+.queue-table-badge {
+	font-size: 90%;
 }

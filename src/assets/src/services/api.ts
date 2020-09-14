@@ -1,4 +1,4 @@
-import { QueueHost, QueueAttendee, User, MyUser, Meeting } from "../models";
+import { QueueBase, QueueHost, QueueAttendee, User, MyUser, Meeting } from "../models";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -26,6 +26,13 @@ class ForbiddenError extends Error {
     }
 }
 
+class NotFoundError extends Error {
+    public name = "NotFoundError";
+    constructor() {
+        super("The resource you're looking for was not found. Maybe it was deleted.");
+    }
+}
+
 const handleErrors = async (resp: Response) => {
     if (resp.ok) return;
     let text: string;
@@ -40,6 +47,10 @@ const handleErrors = async (resp: Response) => {
             text = await resp.text();
             console.error(text);
             throw new ForbiddenError();
+        case 404:
+            text = await resp.text();
+            console.error(text);
+            throw new NotFoundError();
         case 502:
             json = await resp.json();
             console.error(json);
@@ -169,13 +180,13 @@ export const setStatus = async (queue_id: number, open: boolean) => {
     return await resp.json();
 }
 
-export const getMyUser = async (user_id: number) => {
-    const resp = await fetch(`/api/users/${user_id}/`, { method: "GET" });
+export const getUser = async (id_or_username: number | string) => {
+    const resp = await fetch(`/api/users/${id_or_username}/`, { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as MyUser;
+    return await resp.json() as User | MyUser;
 }
 
-export const updateMyUser = async (user_id: number, phone_number: string) => {
+export const updateUser = async (user_id: number, phone_number: string) => {
     const resp = await fetch(`/api/profiles/${user_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
@@ -184,13 +195,13 @@ export const updateMyUser = async (user_id: number, phone_number: string) => {
         }),
     });
     await handleErrors(resp);
-    return await resp.json() as MyUser;
+    return await resp.json() as User | MyUser;
 }
 
 export const searchQueue = async (term: string) => {
     const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
     await handleErrors(resp);
-    return await resp.json() as QueueAttendee[];
+    return await resp.json() as ReadonlyArray<QueueBase>;
 }
 
 export const changeAgenda = async (meeting_id: number, agenda: string) => {

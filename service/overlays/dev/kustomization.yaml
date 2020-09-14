@@ -6,3 +6,9 @@ commonLabels:
 nameSuffix: -dev
 bases:
 - ../../base
+secretGenerator:
+  - name: secrets
+    behavior: merge
+    type: Opaque
+    files:
+    - secret/EMAIL_SUBJECT_PREFIX
