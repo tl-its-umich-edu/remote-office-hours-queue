@@ -13,7 +13,8 @@ from safedelete.signals import post_softdelete
 from officehours_api.models import Queue, Meeting, Profile
 from officehours_api.permissions import is_host
 from officehours_api.serializers import (
-    QueueHostSerializer, QueueAttendeeSerializer, UserSerializer
+    QueueHostSerializer, QueueAttendeeSerializer, UserSerializer,
+    NestedUserSerializer
 )
 
 
@@ -123,11 +124,15 @@ def trigger_queue_update(sender, instance: Queue, created, **kwargs):
     if instance.deleted:
         return
     transaction.on_commit(lambda: send_queue_update(instance.id))
+    for host in instance.hosts.all():
+        transaction.on_commit(lambda: send_user_update(host.id))
 
 
 @receiver(post_softdelete, sender=Queue)
 def trigger_queue_delete(sender, instance: Queue, **kwargs):
     transaction.on_commit(lambda: send_queue_delete(instance.id))
+    for host in instance.hosts.all():
+        transaction.on_commit(lambda: send_user_update(host.id))
 
 
 @receiver(post_save, sender=Meeting)
@@ -139,69 +144,17 @@ def trigger_queue_update_for_meeting(sender, instance: Meeting, **kwargs):
 
 
 @receiver(m2m_changed, sender=Queue.hosts.through)
-def trigger_queue_update_for_hosts(sender, instance, action, **kwargs):
-    if action == "post_remove" or action == "post_clear" or action == "post_add":
+def trigger_queue_update_for_hosts(sender, instance, action, pk_set, **kwargs):
+    if action not in ["post_remove", "post_clear", "post_add"]:
+        return
+    if isinstance(instance, Queue):
         transaction.on_commit(lambda: send_queue_update(instance.id))
-
-
-class UsersConsumer(JsonWebsocketConsumer):
-    _user: User
-    group_name = "users"
-
-    @property
-    def user(self):
-        return self._user
-
-    def _get_users(self):
-        return list(
-            UserSerializer(u, context={'user': self.user}).data
-            for u in User.objects.all()
-        )
-
-    def connect(self):
-        self._user = self.scope["user"]
-        async_to_sync(self.channel_layer.group_add)(
-            self.group_name,
-            self.channel_name
-        )
-        self.accept()
-        users_data = self._get_users()
-        self.send_json({
-            'type': 'init',
-            'content': users_data,
-        })
-
-    def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(
-            self.group_name,
-            self.channel_name
-        )
-
-    def users_update(self, event):
-        # Doesn't scale well - should send only the updated parts instead
-        users_data = self._get_users()
-        self.send_json({
-            'type': 'update',
-            'content': users_data,
-        })
-
-
-def send_users_update(channel_layer=None):
-    channel_layer = channel_layer or get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        UsersConsumer.group_name,
-        {
-            'type': 'users.update',
-        }
-    )
-
-
-@receiver(post_save, sender=User)
-@receiver(post_delete, sender=User)
-@receiver(post_save, sender=Profile)
-@receiver(post_delete, sender=Profile)
-def trigger_users_update(sender, instance: User, created, **kwargs):
-    transaction.on_commit(send_users_update)
+        for host_id in pk_set:
+            transaction.on_commit(lambda: send_user_update(host_id))
+    else:  # is User
+        transaction.on_commit(lambda: send_user_update(instance.id))
+        for queue_id in pk_set:
+            transaction.on_commit(lambda: send_queue_update(queue_id))
 
 
 class UserConsumer(JsonWebsocketConsumer):
@@ -298,7 +251,9 @@ def trigger_user_deleted(sender, instance: User, **kwargs):
 @receiver(post_save, sender=Profile)
 @receiver(post_delete, sender=Profile)
 def trigger_user_update_for_profile(sender, instance: Profile, **kwargs):
-    transaction.on_commit(lambda: send_user_update(instance.user.id))
+    # Get user_id before commit in case user or profile are deleted or unlinked
+    user_id = instance.user.id
+    transaction.on_commit(lambda: send_user_update(user_id))
 
 
 @receiver(m2m_changed, sender=User.meeting_set.through)

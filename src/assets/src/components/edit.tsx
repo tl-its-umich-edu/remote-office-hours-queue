@@ -1,10 +1,9 @@
 import * as React from "react";
-import { useState, createRef, ChangeEvent, useEffect } from "react";
+import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import { Modal, Button, Table, Alert, Form } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
-import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css';
 
 import * as api from "../services/api";
@@ -15,16 +14,15 @@ import {
     Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector,
     DropdownValue
 } from "./common";
+import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
+import { useQueueWebSocket } from "../services/sockets";
+import { redirectToLogin, sanitizeUniqname, validateAndFetchUser, redirectToSearch } from "../utils";
 import {
     queueTitleSchema, queueDescriptSchema, uniqnameSchema, validateString, reportErrors,
     createInvalidUniqnameMessage
-}
-from "../validation";
+} from "../validation";
 
-import { redirectToLogin, redirectToSearch } from "../utils";
-import { PageProps } from "./page";
-import { useQueueWebSocket, useUsersWebSocket } from "../services/sockets";
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -118,10 +116,6 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
             ? props.defaultBackend
             : Array.from(props.allowedBackends)[0]
     );
-    const inputRef = createRef<HTMLInputElement>();
-    useEffect(() => {
-        inputRef.current!.focus();
-    }, []);
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(attendee, selectedBackend);
@@ -132,7 +126,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     return (
         <form onSubmit={submit} className="input-group">
             <input onChange={(e) => setAttendee(e.target.value)} value={attendee}
-                ref={inputRef} type="text" className="form-control" placeholder="Uniqname..."
+                type="text" className="form-control" placeholder="Uniqname..."
                 disabled={props.disabled} id="add_attendee" />
             <div className="input-group-append">
                 <MeetingBackendSelector options={options}
@@ -326,15 +320,17 @@ function QueueEditor(props: QueueEditorProps) {
                         <ul className="list-group">
                             {hosts}
                         </ul>
-                        <SingleInputForm
-                            id="add_host"
-                            placeholder="Uniqname..."
-                            buttonType="success"
-                            onSubmit={props.onAddHost}
-                            disabled={props.disabled}
-                        >
-                            + Add Host
-                        </SingleInputForm>
+                        <div className='page-content-flow'>
+                            <SingleInputForm
+                                id="add_host"
+                                placeholder="Uniqname..."
+                                buttonType="success"
+                                onSubmit={props.onAddHost}
+                                disabled={props.disabled}
+                            >
+                                + Add Host
+                            </SingleInputForm>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -347,7 +343,7 @@ function QueueEditor(props: QueueEditorProps) {
                 </div>
             </div>
             <div className="row">
-                <div className="col-md-8">
+                <div className="page-content-flow col-md-8">
                     <AddAttendeeForm allowedBackends={new Set(props.queue.allowed_backends)} backends={props.backends}
                         defaultBackend={props.defaultBackend} disabled={props.disabled}
                         onSubmit={props.onAddMeeting}/>
@@ -467,8 +463,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         }
     }
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
-    const [users, setUsers] = useState(undefined as User[] | undefined);
-    const usersWebSocketError = useUsersWebSocket(setUsers)
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
     //Setup interactions
@@ -481,12 +475,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
     }
     const addHost = async (uniqname: string) => {
-        const validationResult = validateString(uniqname, uniqnameSchema, false);
-        if (validationResult.isInvalid) {
-            reportErrors(validationResult.messages);
-        }
-        const user = users!.find(u => u.username === validationResult.transformedValue);
-        if (!user) throw new Error(createInvalidUniqnameMessage(validationResult.transformedValue));
+        uniqname = sanitizeUniqname(uniqname);
+        const user = await validateAndFetchUser(uniqname);
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
     }
@@ -500,12 +490,8 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string, backend: string) => {
-        const validationResult = validateString(uniqname, uniqnameSchema, false);
-        if (validationResult.isInvalid) {
-            reportErrors(validationResult.messages);
-        }
-        const user = users!.find(u => u.username === validationResult.transformedValue);
-        if (!user) throw new Error(createInvalidUniqnameMessage(validationResult.transformedValue));
+        uniqname = sanitizeUniqname(uniqname);
+        const user = await validateAndFetchUser(uniqname);
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id, backend);
     }
@@ -560,7 +546,6 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
-        {source: 'Users Connection', error: usersWebSocketError}, 
         {source: 'Remove Host', error: removeHostError}, 
         {source: 'Add Host', error: addHostError}, 
         {source: 'Remove Meeting', error: removeMeetingError}, 
@@ -576,7 +561,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueEditor = queue
-        && <QueueEditor queue={queue}  disabled={isChanging} user={props.user!}
+        && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
             backends={props.backends} defaultBackend={props.defaultBackend}
             onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
             onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 

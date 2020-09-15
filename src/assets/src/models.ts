@@ -4,6 +4,7 @@ export interface User {
     first_name: string;
     last_name: string;
     attendee_set?: User[];
+    hosted_queues?: ReadonlyArray<QueueBase>;
 }
 
 export interface MyUser extends User {
@@ -29,25 +30,29 @@ export interface Meeting {
     created_at: string;
 }
 
+
+export interface QueueBase {
+    id: number;
+    name: string;
+    status: "open" | "closed";
+}
+
+export interface QueueFull extends QueueBase {
+    created_at: string;
+    description: string;
+    hosts: User[];
+    allowed_backends: string[];
+}
+
 export interface QueueHost extends QueueAttendee {
     meeting_set: Meeting[];
 }
 
-export interface QueueAttendee extends QueueBase {
+export interface QueueAttendee extends QueueFull {
     my_meeting: Meeting | null;
     line_length: number;
 }
 
 export const isQueueHost = (q: QueueAttendee | QueueHost): q is QueueHost => {
     return (q as QueueHost).meeting_set !== undefined;
-}
-
-export interface QueueBase {
-    id: number;
-    name: string;
-    description: string;
-    hosts: User[];
-    created_at: string;
-    status: "open"|"closed";
-    allowed_backends: string[];
 }

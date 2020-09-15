@@ -13,11 +13,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.serializers import (
-    UserListSerializer, UserSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer,
+    ShallowUserSerializer, UserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer
 )
 from officehours_api.permissions import (
-    IsCurrentUser, IsHostOrReadOnly, IsHostOrAttendee, is_host, IsCurrentProfile
+    IsHostOrReadOnly, IsHostOrAttendee, is_host, IsCurrentProfile
 )
 
 
@@ -50,13 +50,24 @@ class DecoupledContextMixin:
 
 class UserList(DecoupledContextMixin, generics.ListAPIView):
     queryset = User.objects.all()
-    serializer_class = UserListSerializer
+    serializer_class = ShallowUserSerializer
 
 
 class UserDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (IsAuthenticated, IsCurrentUser,)
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        user = self.get_object()
+        if user == request.user:
+            serializer = UserSerializer(user, context={'user': request.user})
+        else:
+            serializer = ShallowUserSerializer(user, context={'user': request.user})
+        return Response(serializer.data)
+
+
+class UserUniqnameDetail(UserDetail):
+    lookup_field = 'username'
 
 
 class QueueList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
@@ -73,7 +84,7 @@ class QueueList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView)
 
 class QueueListSearch(DecoupledContextMixin, generics.ListAPIView):
     queryset = Queue.objects.all()
-    serializer_class = QueueAttendeeSerializer
+    serializer_class = ShallowQueueSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['name', '=hosts__username']
     filterset_fields = ['status']
@@ -110,7 +121,7 @@ class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
         except ObjectDoesNotExist:
             return Response({'detail': 'Host not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = UserListSerializer(host, context={'user': request.user})
+        serializer = ShallowUserSerializer(host, context={'user': request.user})
         return Response(serializer.data)
 
     def post(self, request, pk, user_id, format=None):
@@ -118,7 +129,7 @@ class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
         self.check_queue_permission(request, queue)
         host = get_object_or_404(User, pk=user_id)
         queue.hosts.add(host)
-        serializer = UserListSerializer(host, context={'user': request.user})
+        serializer = ShallowUserSerializer(host, context={'user': request.user})
         return Response(serializer.data)
 
     def delete(self, request, pk, user_id, format=None):
@@ -156,6 +167,7 @@ class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
 class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
+
 
 class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()

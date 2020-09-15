@@ -1,32 +1,13 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 
-import { QueueAttendee } from "../models";
+import { QueueBase } from "../models";
 import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
-import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs } from "./common";
+import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs, QueueTable } from "./common";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
-interface AttendingQueueListProps {
-    queues: QueueAttendee[];
-}
-
-function AttendingQueueList(props: AttendingQueueListProps) {
-    const queues = props.queues.map(q => 
-        <li className="list-group-item" key={q.id}>
-            <Link to={`/queue/${q.id}`}>
-                {q.name}
-            </Link>
-        </li>
-    );
-    return (
-        <ul className="list-group">
-            {queues}
-        </ul>
-    );
-}
 
 interface SearchPageParams {
     term: string;
@@ -37,7 +18,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
         redirectToLogin(props.loginUrl);
     }
     const term = props.match.params.term;
-    const [searchResults, setSearchResults] = useState(undefined as QueueAttendee[] | undefined);
+    const [searchResults, setSearchResults] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
     const [doSearch, searchLoading, searchError] = usePromise(
         (term: string) => apiSearchQueue(term),
         setSearchResults
@@ -58,7 +39,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
                     No results were found for "{term}".
                 </p>
             )
-            : <AttendingQueueList queues={searchResults} />
+            : <QueueTable queues={searchResults} />
     const redirectAlert = props.location.search.includes("redirected=true") && !/^\d+$/.exec(term)
         && (
             <p className="alert alert-warning">

@@ -3,10 +3,10 @@ import { createRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
-import { Alert, Breadcrumb, Button, Form, InputGroup, Modal } from "react-bootstrap";
+import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import { StringSchema } from "yup";
+import { QueueAttendee, QueueBase, User } from "../models";
 import { validateString } from "../validation";
-import { QueueAttendee, User } from "../models";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -476,5 +476,47 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
             {intermediateCrumbs}
             {current}
         </Breadcrumb>
+    );
+}
+
+interface QueueTableProps {
+    queues: ReadonlyArray<QueueBase>;
+    manageLink?: boolean | undefined;
+}
+
+export function QueueTable (props: QueueTableProps) {
+    const linkBase = props.manageLink ? '/manage/' : '/queue/'
+    const badgeClass = 'queue-table-badge'
+
+    const queueItems = props.queues.map(q => (
+        <tr key={q.id}>
+            <td aria-label={`Queue ID Number`}>
+                <Link to={`${linkBase}${q.id}`}>
+                    <Badge className={badgeClass} variant='primary' pill={true}>{q.id}</Badge>
+                </Link>
+            </td>
+            <td aria-label={`Name for Queue ID ${q.id}`}>
+                <Link to={`${linkBase}${q.id}`}>{q.name}</Link>
+            </td>
+            <td aria-label={`Status for Queue ID ${q.id}`}>
+                <Link to={`${linkBase}${q.id}`}>
+                    <Badge className={badgeClass} variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
+                        {q.status}
+                    </Badge>
+                </Link>
+            </td>
+        </tr>
+    ));
+    return (
+        <Table bordered hover aria-label='Queue Table with Links'>
+            <thead>
+                <tr>
+                    <th aria-label='Queue ID Number'>Queue ID</th>
+                    <th aria-label='Queue Name'>Name</th>
+                    <th aria-label='Queue Status'>Status</th>
+                </tr>
+            </thead>
+            <tbody>{queueItems}</tbody>
+        </Table>
     );
 }
