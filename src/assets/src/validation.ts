@@ -6,7 +6,7 @@ import { string, StringSchema, SchemaDescription, TestMessageParams } from 'yup'
 // Utilities
 
 function getMaxLimit (description: SchemaDescription): number | undefined {
-    const matches = description.tests.filter((obj) => obj.params?.max);
+    const matches = description.tests.filter((obj: any) => obj.params?.max);
     if (matches.length !== 1) {
         console.error('Invalid use of getMaxLimit: ' + matches);
     }

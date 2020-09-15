@@ -1,5 +1,6 @@
 import * as ReactGA from "react-ga";
 import { getUser } from "./services/api";
+import { reportErrors, createInvalidUniqnameMessage, validateString, ValidationResult, uniqnameSchema} from "./validation"
 
 export const redirectToLogin = (loginUrl: string) => {
     ReactGA.event({
@@ -19,22 +20,16 @@ export const redirectToSearch = (term: string) => {
     location.href = `/search/${term}/?redirected=true`;
 }
 
-const invalidUniqnameMessage = (uniqname: string) =>
-    uniqname + " is not a valid user. Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
-
 export const validateAndFetchUser = async (uniqname: string) => {
-    if (uniqname.length < 3) throw new Error("Uniqnames must be at least 3 characters long.");
-    if (uniqname.length > 8) throw new Error("Uniqnames must be at most 8 characters long.");
-    if (!uniqname.match(/^[a-z]+$/i)) throw new Error("Uniqnames cannot contain non-alphanumeric characters.");
+    const result: ValidationResult = validateString(uniqname, uniqnameSchema, false)
+    if (result.isInvalid) {
+        reportErrors(result.messages)
+    }
     try {
-        return await getUser(uniqname);
+        return await getUser(result.transformedValue);
     } catch (err) {
         throw err.name === "NotFoundError"
-            ? new Error(invalidUniqnameMessage(uniqname))
+            ? new Error(createInvalidUniqnameMessage(result.transformedValue))
             : err;
     }
-}
-
-export const sanitizeUniqname = (unsanitized: string) => {
-    return unsanitized.trim().toLowerCase();
 }
