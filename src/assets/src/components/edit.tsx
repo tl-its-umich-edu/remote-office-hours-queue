@@ -8,7 +8,7 @@ import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector, DropdownValue } from "./common";
+import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, sanitizeUniqname, validateAndFetchUser, redirectToSearch } from "../utils";
 import { PageProps } from "./page";
@@ -101,25 +101,23 @@ interface AddAttendeeFormProps {
 
 function AddAttendeeForm(props: AddAttendeeFormProps) {
     const [attendee, setAttendee] = useState("");
-    const [selectedBackend, setSelectedBackend] = useState(
-        props.allowedBackends.has(props.defaultBackend)
-            ? props.defaultBackend
-            : Array.from(props.allowedBackends)[0]
-    );
+    let [selectedBackend, setSelectedBackend] = useState(props.defaultBackend);
+    if (!props.allowedBackends.has(selectedBackend)) {
+        setSelectedBackend(Array.from(props.allowedBackends)[0])
+    }
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        console.log(selectedBackend);
         props.onSubmit(attendee, selectedBackend);
         setAttendee("");
     }
-    const options = Array.from(props.allowedBackends)
-        .map((b) => ({value: b, displayValue: props.backends[b]} as DropdownValue));
     return (
         <form onSubmit={submit} className="input-group">
             <input onChange={(e) => setAttendee(e.target.value)} value={attendee}
                 type="text" className="form-control" placeholder="Uniqname..."
                 disabled={props.disabled} id="add_attendee" />
             <div className="input-group-append">
-                <MeetingBackendSelector options={options}
+                <MeetingBackendSelector allowedBackends={props.allowedBackends} backends={props.backends}
                     onChange={setSelectedBackend} selectedBackend={selectedBackend}/>
             </div>
             <div className="input-group-append">

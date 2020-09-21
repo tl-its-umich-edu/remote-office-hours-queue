@@ -7,7 +7,7 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
-import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, BackendSelector, DropdownValue} from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DisabledMessage, JoinedQueueAlert, LoginDialog, Breadcrumbs, EditToggleField, BlueJeansDialInMessage, DateTimeDisplay, BackendSelector } from "./common";
 import * as api from "../services/api";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin, redirectToSearch } from "../utils";
@@ -25,14 +25,14 @@ interface JoinQueueProps {
 }
 
 const JoinQueue: React.FC<JoinQueueProps> = (props) => {
-    const options = props.queue.allowed_backends.map((b) => ({value: b, displayValue: props.backends[b]} as DropdownValue));
     return (
         <>
         <div className="row col-lg">
             <p className="mb-0">Select Meeting Type</p>
             <p className="mb-0 required">*</p>
         </div>
-        <BackendSelector options={options} onChange={props.onChangeSelectedBackend} selectedBackend={props.selectedBackend}/>
+        <BackendSelector backends={props.backends} allowedBackends={new Set(props.queue.allowed_backends)}
+            onChange={props.onChangeSelectedBackend} selectedBackend={props.selectedBackend}/>
         <div className="row">
             <div className="col-lg">
                 <button disabled={props.disabled} onClick={() => props.onJoinQueue(props.selectedBackend)} type="button" className="btn btn-primary bottom-content">
@@ -242,7 +242,6 @@ interface ChangeMeetingTypeDialogProps {
 }
 
 const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
-    const options = props.queue.allowed_backends.map((b) => ({value: b, displayValue: props.backends[b]} as DropdownValue));
     const handleSubmit = () => {
         props.onClose();
         props.onSubmit(props.queue.my_meeting?.backend_type as string);
@@ -257,7 +256,8 @@ const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
                     <p>Select Meeting Type</p>
                     <p className="required">*</p>
                 </div>
-                <BackendSelector options={options} 
+                <BackendSelector backends={props.backends}
+                    allowedBackends={new Set(props.queue.allowed_backends)}
                     onChange={props.onChangeBackend}
                     selectedBackend={props.selectedBackend}/>
             </Modal.Body>
