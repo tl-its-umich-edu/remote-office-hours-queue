@@ -337,7 +337,7 @@ interface EditToggleFieldProps extends SingleInputFieldProps {
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     const [editing, setEditing] = useState(props.initialState);
     const [editorValue, setEditorValue] = useState(props.text);
-    const editSubmit = (value: string) => {
+    const submit = (value: string) => {
         props.onSubmit(value);
         setEditing(false);
     }
@@ -347,7 +347,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     }
 
     const statelessComponent = (
-        <props.fieldComponent {...props} onSubmit={editSubmit} value={editorValue} onChangeValue={setEditorValue} toggable={true}>
+        <props.fieldComponent {...props} onSubmit={submit} value={editorValue} onChangeValue={setEditorValue} toggable={true}>
             {props.children}
         </props.fieldComponent>
     )
