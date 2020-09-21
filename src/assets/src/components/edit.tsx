@@ -9,7 +9,7 @@ import 'react-phone-input-2/lib/style.css';
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import { 
-    UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm,
+    UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField,
     DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm, LoginDialog,
     Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector,
     DropdownValue
@@ -18,7 +18,7 @@ import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useQueueWebSocket } from "../services/sockets";
 import { redirectToLogin, validateAndFetchUser, redirectToSearch } from "../utils";
-import { queueTitleSchema, queueDescriptSchema } from "../validation";
+import { queueTitleSchema, queueDescriptSchema, uniqnameSchema } from "../validation";
 
 
 interface MeetingEditorProps {
@@ -318,15 +318,18 @@ function QueueEditor(props: QueueEditorProps) {
                             {hosts}
                         </ul>
                         <div className='page-content-flow'>
-                            <SingleInputForm
+                            <SingleInputField
                                 id="add_host"
+                                fieldComponent={StatelessInputGroupForm}
                                 placeholder="Uniqname..."
                                 buttonType="success"
                                 onSubmit={props.onAddHost}
                                 disabled={props.disabled}
+                                fieldSchema={uniqnameSchema}
+                                showRemaining={false}
                             >
                                 + Add Host
-                            </SingleInputForm>
+                            </SingleInputField>
                         </div>
                     </div>
                 </div>
