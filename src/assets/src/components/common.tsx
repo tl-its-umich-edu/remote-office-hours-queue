@@ -166,27 +166,22 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
     );
 }
 
-export interface DropdownValue {
-    value: string;
-    displayValue: string;
-}
-
 interface BackendSelectorProps {
-    options: DropdownValue[];
+    allowedBackends: Set<string>;
+    backends: {[backend_type: string]: string};
     selectedBackend: string;
     onChange: (backend: string) => void;
 }
 
-export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
-    const dropdownOptions = props.options.map(a =>
-        <option key={a.value} value={a.value}>{a.displayValue}</option>
-    );
+export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {  
+    const options = Array.from(props.allowedBackends)
+        .map(a => <option key={a} value={a}>{props.backends[a]}</option>);
     const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
         props.onChange(event.currentTarget.value);
     }
     return (
         <select className="btn btn-sm select-dropdown" onChange={handleChange} value={props.selectedBackend}>
-            {dropdownOptions}
+            {options}
         </select>
     );
 }

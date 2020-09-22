@@ -11,8 +11,7 @@ import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee
 import { 
     UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField,
     DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm, LoginDialog,
-    Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector,
-    DropdownValue
+    Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector
 } from "./common";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
@@ -108,25 +107,22 @@ interface AddAttendeeFormProps {
 
 function AddAttendeeForm(props: AddAttendeeFormProps) {
     const [attendee, setAttendee] = useState("");
-    const [selectedBackend, setSelectedBackend] = useState(
-        props.allowedBackends.has(props.defaultBackend)
-            ? props.defaultBackend
-            : Array.from(props.allowedBackends)[0]
-    );
+    const [selectedBackend, setSelectedBackend] = useState(props.defaultBackend);
+    if (!props.allowedBackends.has(selectedBackend)) {
+        setSelectedBackend(Array.from(props.allowedBackends)[0])
+    }
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(attendee, selectedBackend);
         setAttendee("");
     }
-    const options = Array.from(props.allowedBackends)
-        .map((b) => ({value: b, displayValue: props.backends[b]} as DropdownValue));
     return (
         <form onSubmit={submit} className="input-group">
             <input onChange={(e) => setAttendee(e.target.value)} value={attendee}
                 type="text" className="form-control" placeholder="Uniqname..."
                 disabled={props.disabled} id="add_attendee" />
             <div className="input-group-append">
-                <MeetingBackendSelector options={options}
+                <MeetingBackendSelector allowedBackends={props.allowedBackends} backends={props.backends}
                     onChange={setSelectedBackend} selectedBackend={selectedBackend}/>
             </div>
             <div className="input-group-append">
