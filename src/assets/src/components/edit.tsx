@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
-import { Modal, Button, Table, Alert, Form } from "react-bootstrap";
+import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 import 'react-phone-input-2/lib/style.css';
 
@@ -17,7 +17,7 @@ import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useQueueWebSocket } from "../services/sockets";
 import { redirectToLogin, validateAndFetchUser, redirectToSearch } from "../utils";
-import { queueTitleSchema, queueDescriptSchema, uniqnameSchema } from "../validation";
+import { queueTitleSchema, queueDescriptSchema, uniqnameSchema, validateString } from "../validation";
 
 
 interface MeetingEditorProps {
@@ -111,26 +111,53 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     if (!props.allowedBackends.has(selectedBackend)) {
         setSelectedBackend(Array.from(props.allowedBackends)[0])
     }
-    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(attendee, selectedBackend);
         setAttendee("");
     }
+    const handleChange = (e: any) => setAttendee(e.currentTarget.value);
+
+    const { isInvalid, messages } = validateString(attendee, uniqnameSchema, false);
+    const isBlank = attendee.length === 0;
+    const styleAsInvalid = isInvalid && !(isBlank);  // Don't warn if blank, since it's always visible
+    const textClass = styleAsInvalid ? ' text-danger' : '';
+
+    let feedback;
+    if (messages && !isBlank) {
+        // Only show one message at a time.
+        feedback = <Form.Text bsPrefix={`form-text remaining-feedback${textClass}`}>{messages[0]}</Form.Text>;
+    }
+
     return (
-        <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => setAttendee(e.target.value)} value={attendee}
-                type="text" className="form-control" placeholder="Uniqname..."
-                disabled={props.disabled} id="add_attendee" />
-            <div className="input-group-append">
-                <MeetingBackendSelector allowedBackends={props.allowedBackends} backends={props.backends}
-                    onChange={setSelectedBackend} selectedBackend={selectedBackend}/>
-            </div>
-            <div className="input-group-append">
-                <button className="btn btn-success" type="submit" disabled={props.disabled}>
-                    + Add Attendee
-                </button>
-            </div>
-        </form>
+        <Form onSubmit={handleSubmit}>
+            <InputGroup>
+                <Form.Control
+                    id='add_attendee'
+                    as='input'
+                    bsPrefix='form-control form-control-remaining'
+                    value={attendee}
+                    placeholder='Uniqname...'
+                    onChange={handleChange}
+                    disabled={props.disabled}
+                    isInvalid={styleAsInvalid}
+                />
+                <InputGroup.Append>
+                    <MeetingBackendSelector
+                        allowedBackends={props.allowedBackends}
+                        backends={props.backends}
+                        onChange={setSelectedBackend}
+                        selectedBackend={selectedBackend}
+                    />
+                </InputGroup.Append>
+                <InputGroup.Append>
+                    <Button bsPrefix="btn btn-success" type='submit' disabled={props.disabled || isInvalid}>
+                        + Add Attendee
+                    </Button>
+                </InputGroup.Append>
+            </InputGroup>
+            {feedback}
+        </Form>
     );
 }
 

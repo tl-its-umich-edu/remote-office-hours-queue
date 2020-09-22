@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createRef, useEffect, useState } from "react";
+import { createRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
@@ -209,25 +209,22 @@ interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType}`;
-    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining)
-    
-    const softenBlankFeedback = !props.toggable && props.value.length === 0
-    const styleAsInvalid = isInvalid && !(softenBlankFeedback)
-    const textClass = styleAsInvalid ? ' text-danger' : '';
-
-    // Only show one message at a time.
-    let feedback;
-    if (messages) {
-        const feedbackMessage = softenBlankFeedback ? 'Type a valid entry to enable button.' : messages[0];
-        feedback = <Form.Text bsPrefix={`form-text remaining-feedback${textClass}`}>{feedbackMessage}</Form.Text>
-    }
-
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(props.value);
         props.onChangeValue('');
     };
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
+
+    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining);
+    const softenBlankFeedback = !props.toggable && props.value.length === 0;
+    const styleAsInvalid = isInvalid && !(softenBlankFeedback);
+    const textClass = styleAsInvalid ? ' text-danger' : '';
+    let feedback;
+    if (messages && !softenBlankFeedback) {
+        // Only show one message at a time.
+        feedback = <Form.Text bsPrefix={`form-text remaining-feedback${textClass}`}>{messages[0]}</Form.Text>;
+    }
 
     return (
         <Form onSubmit={handleSubmit}>
@@ -255,25 +252,22 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 
 export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType} remaining-controls`;
-
-    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining);
-    const softenBlankFeedback = !props.toggable && props.value.length === 0
-    const styleAsInvalid = isInvalid && !(softenBlankFeedback)
-    const textClass = styleAsInvalid ? ' text-danger' : '';
-
-    // Only show one message at a time.
-    let feedback;
-    if (messages) {
-        const feedbackMessage = softenBlankFeedback ? 'Type a valid entry to enable button.' : messages[0];
-        feedback = <span className={'remaining-feedback' + textClass}>{feedbackMessage}</span>
-    }
-
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(props.value);
         props.onChangeValue('');
     };
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
+
+    const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining);
+    const softenBlankFeedback = !props.toggable && props.value.length === 0;
+    const styleAsInvalid = isInvalid && !(softenBlankFeedback);
+    const textClass = styleAsInvalid ? ' text-danger' : '';
+    let feedback;
+    if (messages && !softenBlankFeedback) {
+        // Only show one message at a time.
+        feedback = <span className={`remaining-feedback${textClass}`}>{messages[0]}</span>;
+    }
 
     return (
         <Form onSubmit={handleSubmit}>
