@@ -25,12 +25,6 @@ export const createInvalidUniqnameMessage = (uniqname: string) => (
     "Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
 )
 
-export function reportErrors(messages: ReadonlyArray<string>) {
-    for (let message of messages) {
-        throw new Error(message);
-    }
-}
-
 
 // Schemas
 

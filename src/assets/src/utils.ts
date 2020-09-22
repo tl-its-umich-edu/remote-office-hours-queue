@@ -1,6 +1,6 @@
 import * as ReactGA from "react-ga";
 import { getUser } from "./services/api";
-import { reportErrors, createInvalidUniqnameMessage, validateString, ValidationResult, uniqnameSchema} from "./validation"
+import { createInvalidUniqnameMessage } from "./validation";
 
 export const redirectToLogin = (loginUrl: string) => {
     ReactGA.event({
