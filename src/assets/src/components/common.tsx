@@ -204,7 +204,7 @@ interface ValidatedInputFormProps extends SingleInputFormProps {
 interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
     value: string;
     onChangeValue: (value: string) => void;
-    toggable?: boolean;
+    toggleable?: boolean;
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
@@ -217,7 +217,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining);
-    const softenBlankFeedback = !props.toggable && props.value.length === 0;
+    const softenBlankFeedback = !props.toggleable && props.value.length === 0;
     const styleAsInvalid = isInvalid && !(softenBlankFeedback);
     const textClass = styleAsInvalid ? ' text-danger' : '';
     let feedback;
@@ -260,7 +260,7 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     const { isInvalid, messages } = validateString(props.value, props.fieldSchema, !!props.showRemaining);
-    const softenBlankFeedback = !props.toggable && props.value.length === 0;
+    const softenBlankFeedback = !props.toggleable && props.value.length === 0;
     const styleAsInvalid = isInvalid && !(softenBlankFeedback);
     const textClass = styleAsInvalid ? ' text-danger' : '';
     let feedback;
@@ -311,7 +311,7 @@ interface SingleInputFieldProps {
 export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
     const [value, setValue] = useState('');
     return (
-        <props.fieldComponent {...props} value={value} onChangeValue={setValue} toggable={false}>
+        <props.fieldComponent {...props} value={value} onChangeValue={setValue} toggleable={false}>
             {props.children}
         </props.fieldComponent>
     );
@@ -336,7 +336,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     }
 
     const statelessComponent = (
-        <props.fieldComponent {...props} onSubmit={submit} value={editorValue} onChangeValue={setEditorValue} toggable={true}>
+        <props.fieldComponent {...props} onSubmit={submit} value={editorValue} onChangeValue={setEditorValue} toggleable={true}>
             {props.children}
         </props.fieldComponent>
     )
