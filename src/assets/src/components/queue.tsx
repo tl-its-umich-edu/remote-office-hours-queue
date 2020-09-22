@@ -173,6 +173,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const changeMeetingType = props.queue.my_meeting?.assignee 
         ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
+    const agendaText = props.queue.my_meeting!.agenda
     return (
         <>
             {closedAlert}
@@ -187,13 +188,13 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     <Card.Text>Meeting Agenda (Optional)</Card.Text>
                     <EditToggleField
                         id='agenda'
-                        text={props.queue.my_meeting!.agenda}
+                        text={agendaText}
                         disabled={props.disabled}
                         onSubmit={props.onChangeAgenda}
                         buttonType='success'
                         fieldComponent={StatelessInputGroupForm}
                         placeholder=''
-                        initialState={false}
+                        initialState={!agendaText}
                         fieldSchema={meetingAgendaSchema}
                         showRemaining={true}
                     >
