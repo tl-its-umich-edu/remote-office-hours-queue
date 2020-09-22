@@ -20,16 +20,13 @@ export const redirectToSearch = (term: string) => {
     location.href = `/search/${term}/?redirected=true`;
 }
 
-export const validateAndFetchUser = async (uniqname: string) => {
-    const result: ValidationResult = validateString(uniqname, uniqnameSchema, false)
-    if (result.isInvalid) {
-        reportErrors(result.messages)
-    }
+export const confirmUserExists = async (uniqname: string) => {
+    const sanitizedUniqname = uniqname.trim().toLowerCase();
     try {
-        return await getUser(result.transformedValue);
+        return await getUser(sanitizedUniqname);
     } catch (err) {
         throw err.name === "NotFoundError"
-            ? new Error(createInvalidUniqnameMessage(result.transformedValue))
+            ? new Error(createInvalidUniqnameMessage(sanitizedUniqname))
             : err;
     }
 }

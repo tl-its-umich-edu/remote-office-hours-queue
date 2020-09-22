@@ -16,7 +16,7 @@ import {
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useQueueWebSocket } from "../services/sockets";
-import { redirectToLogin, validateAndFetchUser, redirectToSearch } from "../utils";
+import { confirmUserExists, redirectToLogin } from "../utils";
 import { queueTitleSchema, queueDescriptSchema, uniqnameSchema, validateString } from "../validation";
 
 
@@ -498,7 +498,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
     }
     const addHost = async (uniqname: string) => {
-        const user = await validateAndFetchUser(uniqname);
+        const user = await confirmUserExists(uniqname);
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
     }
@@ -512,7 +512,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string, backend: string) => {
-        const user = await validateAndFetchUser(uniqname);
+        const user = await confirmUserExists(uniqname);
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id, backend);
     }
