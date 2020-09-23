@@ -188,6 +188,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                         {changeMeetingType}
                     </Card.Text>
                     <Card.Text>Meeting Agenda (Optional)</Card.Text>
+                    <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
                     <EditToggleField
                         id='agenda'
                         text={agendaText}
@@ -202,7 +203,6 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     >
                         Update
                     </EditToggleField>
-                    <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
                 </Card.Body>
             </Card>
             <p>
