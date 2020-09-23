@@ -1,6 +1,4 @@
 import * as ReactGA from "react-ga";
-import { getUser } from "./services/api";
-import { createInvalidUniqnameMessage } from "./validation";
 
 export const redirectToLogin = (loginUrl: string) => {
     ReactGA.event({
@@ -18,15 +16,4 @@ export const redirectToSearch = (term: string) => {
         nonInteraction: true,
     });
     location.href = `/search/${term}/?redirected=true`;
-}
-
-export const confirmUserExists = async (uniqname: string) => {
-    const sanitizedUniqname = uniqname.trim().toLowerCase();
-    try {
-        return await getUser(sanitizedUniqname);
-    } catch (err) {
-        throw err.name === "NotFoundError"
-            ? new Error(createInvalidUniqnameMessage(sanitizedUniqname))
-            : err;
-    }
 }

@@ -1,4 +1,5 @@
 import { string, StringSchema, SchemaDescription, TestMessageParams } from 'yup';
+import { getUser } from "./services/api";
 
 // Yup: https://github.com/jquense/yup
 
@@ -20,10 +21,21 @@ function createRemainingCharsMessage (data: { max: number; } & Partial<TestMessa
     return `Remaining characters: ${charsRemaining}/${data.max}${charsOver}`;
 }
 
-export const createInvalidUniqnameMessage = (uniqname: string) => (
+const createInvalidUniqnameMessage = (uniqname: string) => (
     uniqname + " is not a valid user. " +
     "Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
 )
+
+export const confirmUserExists = async (uniqname: string) => {
+    const sanitizedUniqname = uniqname.trim().toLowerCase();
+    try {
+        return await getUser(sanitizedUniqname);
+    } catch (err) {
+        throw err.name === "NotFoundError"
+            ? new Error(createInvalidUniqnameMessage(sanitizedUniqname))
+            : err;
+    }
+}
 
 
 // Schemas

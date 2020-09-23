@@ -16,8 +16,8 @@ import {
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useQueueWebSocket } from "../services/sockets";
-import { confirmUserExists, redirectToLogin } from "../utils";
-import { queueTitleSchema, queueDescriptSchema, uniqnameSchema, validateString } from "../validation";
+import { redirectToLogin } from "../utils";
+import { confirmUserExists, queueDescriptSchema, queueTitleSchema, uniqnameSchema, validateString } from "../validation";
 
 
 interface MeetingEditorProps {
