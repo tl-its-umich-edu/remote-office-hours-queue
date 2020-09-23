@@ -11,8 +11,6 @@ services:
       - DEBUG=True
       - DATABASE_URL=postgresql://admin:admin@database/postgres
       - FEEDBACK_EMAIL=office-hours-devs@umich.edu
-    env_file:
-      - .env
     ports:
       - 8003:8001
     volumes:
