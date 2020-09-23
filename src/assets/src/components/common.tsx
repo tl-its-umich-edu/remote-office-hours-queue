@@ -223,7 +223,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
     let feedback;
     if (messages && !softenBlankFeedback) {
         // Only show one message at a time.
-        feedback = <Form.Text bsPrefix={`form-text remaining-feedback${textClass}`}>{messages[0]}</Form.Text>;
+        feedback = <Form.Text bsPrefix={`form-text form-feedback${textClass}`}>{messages[0]}</Form.Text>;
     }
 
     return (
@@ -266,7 +266,7 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
     let feedback;
     if (messages && !softenBlankFeedback) {
         // Only show one message at a time.
-        feedback = <span className={`remaining-feedback${textClass}`}>{messages[0]}</span>;
+        feedback = <span className={`form-feedback${textClass}`}>{messages[0]}</span>;
     }
 
     return (

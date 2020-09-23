@@ -482,8 +482,8 @@ h3.alert-heading {
 	background-image: none;
 }
 
-/* Overrides font styling of feedback so it can be used consistently, anywhere */
-.remaining-feedback {
+/* Overrides styling of feedback so it can be used consistently, anywhere */
+.form-feedback {
 	color: #333333;
 	font-size: 1rem;
 	font-weight: 400;
