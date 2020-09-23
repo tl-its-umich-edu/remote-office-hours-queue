@@ -122,6 +122,8 @@ class Meeting(SafeDeleteModel):
 
     def save(self, *args, **kwargs):
         backend = backend_instances[self.backend_type]
+        # TODO Clear self.backend_metadata if backend_type has changed
+        # Otherwise, changing backends will not work
         user_email = self.queue.hosts.first().email
         self.backend_metadata['user_email'] = user_email
         try:
