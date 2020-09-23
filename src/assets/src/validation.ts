@@ -48,7 +48,7 @@ export const meetingAgendaSchema = string().max(100, createRemainingCharsMessage
 export const uniqnameSchema = string().trim().lowercase()
     .min(3, 'Uniqnames must be at least 3 characters long.')
     .max(8, 'Uniqnames must be at most 8 characters long.')
-    .matches(/^[a-z]+$/i, 'Uniqnames cannot contain non-alphanumeric characters.');
+    .matches(/^[a-z]+$/i, 'Uniqnames cannot contain non-alphabetical characters.');
 
 
 // Type validator(s)
