@@ -126,7 +126,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     let feedback;
     if (messages && !isBlank) {
         // Only show one message at a time.
-        feedback = <Form.Text bsPrefix={`form-text remaining-feedback${textClass}`}>{messages[0]}</Form.Text>;
+        feedback = <Form.Text bsPrefix={`form-text form-feedback${textClass}`}>{messages[0]}</Form.Text>;
     }
 
     return (
