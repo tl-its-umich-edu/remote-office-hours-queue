@@ -115,7 +115,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
         setSelectedBackend(Array.from(props.allowedBackends)[0]);
     }
 
-    const validateAttendee = (value: string) => {
+    const validateAttendee = (value: string): boolean => {
         const { isInvalid, messages } = validateString(value, uniqnameSchema, false);
         setIsInvalid(isInvalid);
         setFeedbackMessages(messages);

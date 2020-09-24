@@ -309,7 +309,7 @@ export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
     const [isInvalid, setIsInvalid] = useState(undefined as undefined | boolean);
     const [feedbackMessages, setFeedbackMessages] = useState([] as ReadonlyArray<string>);
 
-    const validate = (value: string) => {
+    const validate = (value: string): boolean => {
         const { isInvalid, messages } = validateString(value, props.fieldSchema, !!props.showRemaining);
         setIsInvalid(isInvalid);
         setFeedbackMessages(messages);
