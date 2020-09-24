@@ -191,15 +191,15 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
                     <EditToggleField
                         id='agenda'
-                        text={agendaText}
+                        value={agendaText}
+                        placeholder=''
+                        buttonType='success'
                         disabled={props.disabled}
                         onSubmit={props.onChangeAgenda}
-                        buttonType='success'
                         fieldComponent={StatelessInputGroupForm}
-                        placeholder=''
-                        initialState={!agendaText}
                         fieldSchema={meetingAgendaSchema}
                         showRemaining={true}
+                        initialState={!agendaText}
                     >
                         Update
                     </EditToggleField>
