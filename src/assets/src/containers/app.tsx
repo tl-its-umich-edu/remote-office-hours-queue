@@ -10,7 +10,7 @@ import { ManagePage } from "../components/manage";
 import { QueuePage } from "../components/queue";
 import { QueueEditorPage } from "../components/edit";
 import { SearchPage } from "../components/search";
-import { AddQueuePage } from "../components/add_queue";
+import { AddQueuePage } from "../components/addQueue";
 import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
 
 interface AppProps extends RouteComponentProps {

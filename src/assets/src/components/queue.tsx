@@ -7,16 +7,17 @@ import Dialog from "react-bootstrap-dialog";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
 import {
-    checkForbiddenError, BackendSelector, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay,
+    checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay,
     DisabledMessage, EditToggleField, StatelessInputGroupForm, ErrorDisplay, FormError, JoinedQueueAlert,
     LoadingDisplay, LoginDialog
 } from "./common";
+import { BackendSelector } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
-import { meetingAgendaSchema } from "../validation";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { redirectToLogin } from "../utils";
+import { meetingAgendaSchema } from "../validation";
 
 
 interface JoinQueueProps {
