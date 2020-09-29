@@ -40,8 +40,10 @@ function GeneralTab(props: GeneralTabProps) {
                 onChange={props.onChangeAllowed}
                 disabled={props.disabled}
             />
-            <Button variant='primary' disabled={props.disabled} onClick={(e: any) => props.onSuccess()}>Next</Button>
-            <Button className='ml-3' href='/manage/' variant='danger' disabled={props.disabled}>Cancel</Button>
+            <div className='mt-4'>
+                <Button variant='primary' disabled={props.disabled} onClick={(e: any) => props.onSuccess()}>Next</Button>
+                <Button className='ml-3' href='/manage/' variant='danger' disabled={props.disabled}>Cancel</Button>
+            </div>
         </div>
     );
 }
@@ -64,17 +66,19 @@ function ManageHostsTab(props: ManageHostsTabProps) {
 
     return (
         <div>
-            <Col sm={10}>
-                <h2>Manage Hosts</h2>
-                <h3>Add Hosts</h3>
-                <p>You have been added to the list of hosts automatically. Add additional hosts here.</p>
-                <Alert variant='primary'>
-                    <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
-                    at least once in order to be added.
-                </Alert>
-                <h3>Remove Hosts</h3>
-                <ListGroup>{hostsSoFar}</ListGroup>
-            </Col>
+            <h2>Manage Hosts</h2>
+            <h3>Add Hosts</h3>
+            <p>You have been added to the list of hosts automatically. Add additional hosts here.</p>
+            <Alert variant='primary'>
+                <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
+                at least once in order to be added.
+            </Alert>
+            <h3>Remove Hosts</h3>
+            <ListGroup>{hostsSoFar}</ListGroup>
+            <div className='mt-4'>
+                <Button variant='primary' disabled={props.disabled} onClick={(e: any) => props.onSuccess()}>Finish Adding Queue</Button>
+                <Button className='ml-3' href='/manage/' variant='danger' disabled={props.disabled}>Cancel</Button>
+            </div>
         </div>
     );
 }
@@ -94,13 +98,16 @@ interface AddQueueEditorProps {
 function AddQueueEditor(props: AddQueueEditorProps) {
     // Would like to use an enum or CV here, not sure I can with onSelect
     const [activeKey, setActiveKey] = useState('general' as string);
+    const [navMessage, setNavMessage] = useState(null as string | null);
+
+    const finishTabMessage = 'You must finish the current tab before proceeding to the next.'
 
     return (
         <Tab.Container
             id='add-queue-editor'
             defaultActiveKey='general'
             activeKey={activeKey}
-            onSelect={(eventKey: string) => setActiveKey(eventKey)}
+            onSelect={(eventKey: string) => eventKey !== 'hosts' ? setActiveKey(eventKey) : setNavMessage(finishTabMessage)}
         >
             <Row>
                 <Col sm={3}>
@@ -109,19 +116,23 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                         <Nav.Item><Nav.Link eventKey='hosts'>Manage Hosts</Nav.Link></Nav.Item>
                     </Nav>
                 </Col>
-                <Col sm={9}>
+                <Col sm={7}>
                     <h1>Add Queue</h1>
+                    {navMessage ? <Alert variant='danger'>{navMessage}</Alert> : null}
                     <Tab.Content>
-                        <Tab.Pane eventKey="general">
+                        <Tab.Pane eventKey='general'>
                             <GeneralTab
                                 disabled={props.disabled}
                                 backends={props.backends}
                                 allowedMeetingTypes={props.allowedMeetingTypes}
                                 onChangeAllowed={props.onChangeAllowed}
-                                onSuccess={() => setActiveKey('hosts')}
+                                onSuccess={() => {
+                                    setActiveKey('hosts');
+                                    if (navMessage) { setNavMessage(null) };
+                                }}
                             />
                         </Tab.Pane>
-                        <Tab.Pane eventKey="hosts">
+                        <Tab.Pane eventKey='hosts'>
                             <ManageHostsTab
                                 disabled={props.disabled}
                                 hosts={props.hosts}
@@ -136,15 +147,6 @@ function AddQueueEditor(props: AddQueueEditorProps) {
     );
 }
 
-interface AddQueueTabProps {
-    disabled: boolean;
-}
-
-interface GeneralTabProps extends AddQueueTabProps {
-    backends: {[backend_type: string]: string};
-    allowedMeetingTypes: Set<string>;
-    onChangeAllowed: (allowed: Set<string>) => void;
-}
 
 export function AddQueuePage(props: PageProps) {
     if (!props.user) {
@@ -170,6 +172,7 @@ export function AddQueuePage(props: PageProps) {
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
+
     const addQueueEditor = (
         <AddQueueEditor
             disabled={isChanging}
@@ -185,7 +188,7 @@ export function AddQueuePage(props: PageProps) {
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
-            <Breadcrumbs currentPageTitle="Add Queue"/>
+            <Breadcrumbs currentPageTitle='Add Queue' />
             {errorDisplay}
             {addQueueEditor}
         </div>
