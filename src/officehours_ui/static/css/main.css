@@ -482,6 +482,17 @@ h3.alert-heading {
 	background-image: none;
 }
 
+/* Overrides styling of feedback so it can be used consistently, anywhere */
+.form-feedback {
+	color: #333333;
+	font-size: 1rem;
+	font-weight: 400;
+	padding-top: 0.25rem;
+	padding-right: 0.5rem;
+	padding-bottom: 0.25rem;
+	padding-left: 0.5rem;
+}
+
 .remaining-controls-group {
 	margin: 0;
 	padding: 0;

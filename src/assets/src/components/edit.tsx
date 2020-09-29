@@ -2,17 +2,23 @@ import * as React from "react";
 import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
-import { Modal, Button, Table, Alert, Form } from "react-bootstrap";
+import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
-import 'react-phone-input-2/lib/style.css'
+import 'react-phone-input-2/lib/style.css';
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
-import { UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, DateDisplay, CopyField, EditToggleField, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, ShowRemainingField, BackendSelector as MeetingBackendSelector } from "./common";
-import { usePromise } from "../hooks/usePromise";
-import { redirectToLogin, sanitizeUniqname, validateAndFetchUser, redirectToSearch } from "../utils";
+import { 
+    UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField,
+    DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm, LoginDialog,
+    Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector
+} from "./common";
 import { PageProps } from "./page";
+import { usePromise } from "../hooks/usePromise";
 import { useQueueWebSocket } from "../services/sockets";
+import { redirectToLogin } from "../utils";
+import { confirmUserExists, queueDescriptSchema, queueTitleSchema, uniqnameSchema, validateString } from "../validation";
+
 
 interface MeetingEditorProps {
     meeting: Meeting;
@@ -102,29 +108,77 @@ interface AddAttendeeFormProps {
 function AddAttendeeForm(props: AddAttendeeFormProps) {
     const [attendee, setAttendee] = useState("");
     const [selectedBackend, setSelectedBackend] = useState(props.defaultBackend);
+    const [isInvalid, setIsInvalid] = useState(undefined as undefined | boolean);
+    const [feedbackMessages, setFeedbackMessages] = useState([] as ReadonlyArray<string>);
+
     if (!props.allowedBackends.has(selectedBackend)) {
-        setSelectedBackend(Array.from(props.allowedBackends)[0])
+        setSelectedBackend(Array.from(props.allowedBackends)[0]);
     }
-    const submit = (e: React.FormEvent<HTMLFormElement>) => {
+
+    const validateAttendee = (value: string): boolean => {
+        const { isInvalid, messages } = validateString(value, uniqnameSchema, false);
+        setIsInvalid(isInvalid);
+        setFeedbackMessages(messages);
+        return isInvalid;
+    }
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        props.onSubmit(attendee, selectedBackend);
-        setAttendee("");
+        // If it hasn't been validated yet, validate it now.
+        let newIsInvalid = undefined as undefined | boolean;
+        if (isInvalid === undefined) {
+            newIsInvalid = validateAttendee(attendee);
+        }
+        if (isInvalid === false || newIsInvalid === false) {
+            props.onSubmit(attendee, selectedBackend);
+            setIsInvalid(undefined);
+            setFeedbackMessages([]);
+            setAttendee(''); // Clear successful input
+        }
     }
+
+    const handleAttendeeChange = (e: any) => {
+        const attendee = e.currentTarget.value;
+        setAttendee(attendee);
+        validateAttendee(attendee);
+    }
+
+    const feedbackTextClass = isInvalid ? ' text-danger' : '';
+    let feedback;
+    if (feedbackMessages) {
+        // Only show one message at a time.
+        feedback = <Form.Text bsPrefix={`form-text form-feedback${feedbackTextClass}`}>{feedbackMessages[0]}</Form.Text>;
+    }
+
     return (
-        <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => setAttendee(e.target.value)} value={attendee}
-                type="text" className="form-control" placeholder="Uniqname..."
-                disabled={props.disabled} id="add_attendee" />
-            <div className="input-group-append">
-                <MeetingBackendSelector allowedBackends={props.allowedBackends} backends={props.backends}
-                    onChange={setSelectedBackend} selectedBackend={selectedBackend}/>
-            </div>
-            <div className="input-group-append">
-                <button className="btn btn-success" type="submit" disabled={props.disabled}>
-                    + Add Attendee
-                </button>
-            </div>
-        </form>
+        <Form onSubmit={handleSubmit}>
+            <InputGroup>
+                <Form.Control
+                    id='add_attendee'
+                    as='input'
+                    bsPrefix='form-control form-control-remaining'
+                    value={attendee}
+                    placeholder='Uniqname...'
+                    onChange={handleAttendeeChange}
+                    disabled={props.disabled}
+                    isInvalid={isInvalid}
+                />
+                <InputGroup.Append>
+                    <MeetingBackendSelector
+                        allowedBackends={props.allowedBackends}
+                        backends={props.backends}
+                        onChange={setSelectedBackend}
+                        selectedBackend={selectedBackend}
+                    />
+                </InputGroup.Append>
+                <InputGroup.Append>
+                    <Button bsPrefix="btn btn-success" type='submit' disabled={props.disabled}>
+                        + Add Attendee
+                    </Button>
+                </InputGroup.Append>
+            </InputGroup>
+            {feedback}
+        </Form>
     );
 }
 
@@ -219,6 +273,7 @@ function QueueEditor(props: QueueEditorProps) {
     const toggleStatus = (e: ChangeEvent<HTMLSelectElement>) => {
         props.onSetStatus(e.target.value === "open");
     }
+
     return (
         <div>
             <div className="float-right">
@@ -226,14 +281,23 @@ function QueueEditor(props: QueueEditorProps) {
                     Delete Queue
                 </button>
             </div>
-            <h1 className="form-inline">
-                <span className="mr-2">Manage: </span>
-                <EditToggleField text={props.queue.name} disabled={props.disabled} id="name"
-                    onSubmit={props.onChangeName} buttonType="success" placeholder="New name..." initialState={false}>
-                        Change
+            <h1 className='form-inline'>
+                <span className='mr-2'>Manage: </span>
+                <EditToggleField
+                    id='name'
+                    value={props.queue.name}
+                    placeholder='New name...'
+                    buttonType='success'
+                    disabled={props.disabled}
+                    onSubmit={props.onChangeName}
+                    fieldComponent={StatelessInputGroupForm}
+                    fieldSchema={queueTitleSchema}
+                    showRemaining={true}
+                    initialState={false}
+                >
+                    Change
                 </EditToggleField>
             </h1>
-
             <p>
                 <Link to={"/queue/" + props.queue.id}>
                     View as visitor
@@ -275,11 +339,20 @@ function QueueEditor(props: QueueEditorProps) {
                 <div className="form-group row">
                     <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
                     <div className="col-md-6">
-                        <ShowRemainingField text={props.queue.description} disabled={props.disabled} id="description"
-                            onSubmit={props.onChangeDescription} buttonType="success" placeholder="New description..."
-                            initialState={false} maxLength={1000}>
-                                Change
-                        </ShowRemainingField>
+                        <EditToggleField
+                            id='description'
+                            value={props.queue.description}
+                            placeholder='New description...'
+                            buttonType='success'
+                            disabled={props.disabled}
+                            onSubmit={props.onChangeDescription}
+                            fieldComponent={StatelessTextAreaForm}
+                            fieldSchema={queueDescriptSchema}
+                            showRemaining={true}
+                            initialState={false}
+                        >
+                            Change
+                        </EditToggleField>
                     </div>
                 </div>
                 <div className="row">
@@ -289,15 +362,18 @@ function QueueEditor(props: QueueEditorProps) {
                             {hosts}
                         </ul>
                         <div className='page-content-flow'>
-                            <SingleInputForm
+                            <SingleInputField
                                 id="add_host"
+                                fieldComponent={StatelessInputGroupForm}
                                 placeholder="Uniqname..."
                                 buttonType="success"
                                 onSubmit={props.onAddHost}
                                 disabled={props.disabled}
+                                fieldSchema={uniqnameSchema}
+                                showRemaining={false}
                             >
                                 + Add Host
-                            </SingleInputForm>
+                            </SingleInputField>
                         </div>
                     </div>
                 </div>
@@ -443,8 +519,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
     }
     const addHost = async (uniqname: string) => {
-        uniqname = sanitizeUniqname(uniqname);
-        const user = await validateAndFetchUser(uniqname);
+        const user = await confirmUserExists(uniqname);
         recordQueueManagementEvent("Added Host");
         await api.addHost(queue!.id, user.id);
     }
@@ -458,8 +533,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
     }
     const addMeeting = async (uniqname: string, backend: string) => {
-        uniqname = sanitizeUniqname(uniqname);
-        const user = await validateAndFetchUser(uniqname);
+        const user = await confirmUserExists(uniqname);
         recordQueueManagementEvent("Added Meeting");
         await api.addMeeting(queue!.id, user.id, backend);
     }

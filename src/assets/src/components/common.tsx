@@ -1,10 +1,12 @@
 import * as React from "react";
-import { createRef, useEffect, useState } from "react";
+import { createRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
-import { Alert, Badge, Breadcrumb, Button, Form, Modal, Table } from "react-bootstrap";
+import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
+import { StringSchema } from "yup";
 import { QueueAttendee, QueueBase, User } from "../models";
+import { validateString } from "../validation";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -97,57 +99,6 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
 }
 
 
-interface SingleInputFormProps {
-    placeholder: string;
-    disabled: boolean;
-    onSubmit: (value: string) => void;
-    buttonType: BootstrapButtonTypes;
-    id: string;
-}
-
-interface StatelessSingleInputFormProps extends SingleInputFormProps {
-    value: string;
-    autofocus?: boolean;
-    onChangeValue: (value: string) => void;
-}
-
-const StatelessSingleInputForm: React.FC<StatelessSingleInputFormProps> = (props) => {
-    const inputRef = createRef<HTMLInputElement>();
-    useEffect(() => {
-        if (!props.autofocus) return;
-        inputRef.current!.focus();
-    }, []);
-    const submit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-            props.onSubmit(props.value);
-            props.onChangeValue("");
-    }
-    const buttonClass = "btn btn-" + props.buttonType;
-    return (
-        <form onSubmit={submit} className="input-group">
-            <input onChange={(e) => props.onChangeValue(e.target.value)} value={props.value}
-                ref={inputRef} type="text" className="form-control" placeholder={props.placeholder}
-                disabled={props.disabled} id={props.id} />
-            <div className="input-group-append">
-                <button className={buttonClass} type="submit" disabled={props.disabled}>
-                    {props.children}
-                </button>
-            </div>
-        </form>
-    );
-}
-
-
-export const SingleInputForm: React.FC<SingleInputFormProps> = (props) => {
-    const [value, setValue] = useState("");
-    return (
-        <StatelessSingleInputForm
-            value={value} onChangeValue={setValue}
-            {...props}
-        />
-    );
-}
-
 interface DateDisplayProps {
     date: string;
 }
@@ -215,51 +166,6 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
     );
 }
 
-
-interface EditToggleFieldProps {
-    text: string;
-    placeholder: string;
-    disabled: boolean;
-    buttonType: BootstrapButtonTypes;
-    id: string;
-    onSubmit: (value: string) => void;
-    initialState: boolean;
-}
-
-export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
-    const [editing, setEditing] = useState(props.initialState);
-    const [editorValue, setEditorValue] = useState(props.text);
-    const submit = (value: string) => {
-        props.onSubmit(value);
-        setEditing(false);
-    }
-    const enableEditMode = () => {
-        setEditing(true);
-        setEditorValue(props.text);
-    }
-    const contents = (editing && !props.disabled)
-        ? (
-            <StatelessSingleInputForm
-                id={props.id}
-                autofocus={true}
-                onSubmit={submit}
-                value={editorValue} onChangeValue={setEditorValue}
-                placeholder={props.placeholder} disabled={props.disabled}
-                buttonType="success">
-                {props.children}
-            </StatelessSingleInputForm>
-        )
-        : (
-            <div className="input-group">
-                <span>{props.text}</span>
-                <button onClick={enableEditMode} type="button" className="btn btn-sm">
-                    <FontAwesomeIcon icon={faPencilAlt} /> Edit
-                </button>
-            </div>
-        );
-    return contents;
-}
-
 interface BackendSelectorProps {
     allowedBackends: Set<string>;
     backends: {[backend_type: string]: string};
@@ -280,25 +186,82 @@ export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
     );
 }
 
-interface SingleInputFormShowRemainingProps extends StatelessSingleInputFormProps {
-    maxLength: number
+interface SingleInputFormProps {
+    id: string;
+    placeholder: string;
+    disabled: boolean;
+    onSubmit: (value: string) => void;
+    buttonType: BootstrapButtonTypes;
 }
 
-export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemainingProps> = (props) => {
+// Stateless Field Components
+
+interface ValidatedInputFormProps extends SingleInputFormProps {
+    fieldSchema: StringSchema;
+    showRemaining?: boolean;
+}
+
+interface StatelessValidatedInputFormProps extends ValidatedInputFormProps {
+    value: string;
+    feedbackMessages: ReadonlyArray<string>;
+    isInvalid: boolean | undefined;
+    onChangeValue: (value: string) => void;
+}
+
+export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
+    const buttonClass = `btn btn-${props.buttonType}`;
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        props.onSubmit(props.value);
+    };
+    const handleChange = (newValue: string) => props.onChangeValue(newValue);
+
+    const feedbackTextClass = props.isInvalid ? ' text-danger' : '';
+    let feedback;
+    if (props.feedbackMessages) {
+        // Only show one message at a time.
+        feedback = <Form.Text bsPrefix={`form-text form-feedback${feedbackTextClass}`}>{props.feedbackMessages[0]}</Form.Text>;
+    }
+
+    return (
+        <Form onSubmit={handleSubmit}>
+            <InputGroup>
+                <Form.Control
+                    id={props.id}
+                    as='input'
+                    bsPrefix='form-control form-control-remaining'
+                    value={props.value}
+                    placeholder={props.placeholder}
+                    onChange={(e: any) => handleChange(e.currentTarget.value)}
+                    disabled={props.disabled}
+                    isInvalid={props.isInvalid}
+                />
+                <InputGroup.Append>
+                    <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>
+                        {props.children}
+                    </Button>
+                </InputGroup.Append>
+            </InputGroup>
+            {feedback}
+        </Form>
+    );
+}
+
+export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
     const buttonClass = `btn btn-${props.buttonType} remaining-controls`;
-    const remaining = props.maxLength - props.value.length;
-    const isInvalid = props.value.length > props.maxLength;
+    const feedbackTextClass = props.isInvalid ? ' text-danger' : '';
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         props.onSubmit(props.value);
-        props.onChangeValue('');
-    }
+    };
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
-    const charsRemaining = (remaining > 0) ? remaining : 0;
-    const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
-    const feedbackText = `Remaining characters: ${charsRemaining}/${props.maxLength}${charsOver}`;
+    let feedback;
+    if (props.feedbackMessages) {
+        // Only show one message at a time.
+        feedback = <span className={`form-feedback${feedbackTextClass}`}>{props.feedbackMessages[0]}</span>;
+    }
 
     return (
         <Form onSubmit={handleSubmit}>
@@ -312,59 +275,107 @@ export const SingleInputFormShowRemaining: React.FC<SingleInputFormShowRemaining
                     placeholder={props.placeholder}
                     onChange={(e) => handleChange(e.currentTarget.value)}
                     disabled={props.disabled}
-                    isInvalid={isInvalid}
+                    isInvalid={props.isInvalid}
                 />
             </Form.Group>
             <div className="remaining-controls-group">
-                <span className={isInvalid ? 'text-danger' : undefined}>{feedbackText}</span>
-                <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled || isInvalid}>{props.children}</Button>
+                {feedback}
+                <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>
+                    {props.children}
+                </Button>
             </div>
         </Form>
     );
 }
 
+// Stateful Field Components
 
-interface ShowRemainingFieldProps extends EditToggleFieldProps {
-    maxLength: number;
+interface SingleInputFieldProps {
+    id: string;
+    value?: string;
+    placeholder: string;
+    buttonType: BootstrapButtonTypes;
+    disabled: boolean;
+    onSubmit: (value: string) => void;
+    fieldComponent: React.FC<StatelessValidatedInputFormProps>;
+    fieldSchema: StringSchema;
+    showRemaining?: boolean;
+    onSuccess?: () => void;
 }
 
-export const ShowRemainingField: React.FC<ShowRemainingFieldProps> = (props) => {
-    const [editing, setEditing] = useState(props.initialState);
-    const [editorValue, setEditorValue] = useState(props.text);
-    const submit = (value: string) => {
-        props.onSubmit(value);
-        setEditing(false);
-    }
-    const enableEditMode = () => {
-        setEditing(true);
-        setEditorValue(props.text);
+// Stateful wrapper for one text input field and associated feedback
+export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
+    const [value, setValue] = useState(props.value ? props.value : '');
+    const [isInvalid, setIsInvalid] = useState(undefined as undefined | boolean);
+    const [feedbackMessages, setFeedbackMessages] = useState([] as ReadonlyArray<string>);
+
+    const validate = (value: string): boolean => {
+        const { isInvalid, messages } = validateString(value, props.fieldSchema, !!props.showRemaining);
+        setIsInvalid(isInvalid);
+        setFeedbackMessages(messages);
+        return isInvalid;
     }
 
+    const handleSubmit = (value: string) => {
+        // If it hasn't been validated yet, validate it now.
+        let newIsInvalid = undefined as undefined | boolean;
+        if (isInvalid === undefined) {
+            newIsInvalid = validate(value);
+        }
+        if (isInvalid === false || newIsInvalid === false) {
+            props.onSubmit(value);
+            setIsInvalid(undefined);
+            setFeedbackMessages([]);
+            setValue('');
+            if (props.onSuccess) {
+                props.onSuccess();
+            }
+        }
+    };
+
+    const handleChange = (value: string) => {
+        setValue(value);
+        validate(value);
+    };
+
+    return (
+        <props.fieldComponent
+            {...props}
+            value={value}
+            isInvalid={isInvalid}
+            feedbackMessages={feedbackMessages}
+            onSubmit={handleSubmit}
+            onChangeValue={handleChange}
+        >
+            {props.children}
+        </props.fieldComponent>
+    );
+}
+
+interface EditToggleFieldProps extends SingleInputFieldProps {
+    value: string;
+    initialState: boolean;
+}
+
+// Wrapper for input fields that can be expanded or hidden with an Edit button
+export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
+    const [editing, setEditing] = useState(props.initialState);
+
+    const toggleEditMode = () => setEditing(!editing);
+
     const contents = (editing && !props.disabled)
-        ? (
-            <SingleInputFormShowRemaining
-                id={props.id}
-                autofocus={true}
-                onSubmit={submit}
-                value={editorValue}
-                onChangeValue={setEditorValue}
-                placeholder={props.placeholder}
-                disabled={props.disabled}
-                buttonType="success"
-                maxLength={props.maxLength}>
-                {props.children}
-            </SingleInputFormShowRemaining>
-        )
+        ? <SingleInputField {...props} onSuccess={toggleEditMode}>{props.children}</SingleInputField>
         : (
             <div className="input-group">
-                <span>{props.text}</span>
-                <button onClick={enableEditMode} type="button" className="btn btn-sm">
+                <span>{props.value}</span>
+                <button onClick={toggleEditMode} type="button" className="btn btn-sm">
                     <FontAwesomeIcon icon={faPencilAlt} /> Edit
                 </button>
             </div>
         );
     return contents;
 }
+
 
 interface JoinedQueueAlertProps {
     joinedQueue: QueueAttendee;
@@ -460,7 +471,6 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
             {intermediateCrumbs}
             {current}
         </Breadcrumb>
-
     );
 }
 

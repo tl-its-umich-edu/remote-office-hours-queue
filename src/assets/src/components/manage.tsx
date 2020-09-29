@@ -4,9 +4,10 @@ import { useState } from "react";
 import * as api from "../services/api";
 import { useUserWebSocket } from "../services/sockets";
 import { QueueBase } from "../models";
-import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputForm, LoginDialog, Breadcrumbs } from "./common";
+import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField, LoginDialog, Breadcrumbs, StatelessInputGroupForm } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
+import { queueTitleSchema } from "../validation";
 import { QueueTable } from "./common";
 import { PageProps } from "./page";
 
@@ -25,15 +26,18 @@ function ManageQueueTable(props: ManageQueueTableProps) {
         <div>
             {queueResults}
             <div className="page-content-flow">
-                <SingleInputForm
+                <SingleInputField
                     id="add_queue"
+                    fieldComponent={StatelessInputGroupForm}
                     placeholder="Queue name..."
                     buttonType="success"
                     onSubmit={props.onAddQueue}
                     disabled={props.disabled}
+                    fieldSchema={queueTitleSchema}
+                    showRemaining={true}
                 >
                     + Add Queue
-                </SingleInputForm>
+                </SingleInputField>
             </div>
         </div>
     );
