@@ -2,13 +2,17 @@ import * as React from "react";
 import { useState } from "react";
 import { Alert, Button, Col, ListGroup, Nav, Row, Tab } from "react-bootstrap";
 
-import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog, RemoveButton, UserDisplay } from "./common";
+import {
+    Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog, RemoveButton, SingleInputField,
+    StatelessInputGroupForm, UserDisplay
+} from "./common";
 import { PageProps } from "./page";
 import { AllowedBackendsForm } from "./meetingType";
 import { usePromise } from "../hooks/usePromise";
 import { User } from "../models";
 import * as api from "../services/api";
 import { redirectToLogin } from "../utils";
+import { confirmUserExists, uniqnameSchema } from "../validation";
 
 
 interface AddQueueTabProps {
@@ -22,16 +26,11 @@ interface GeneralTabProps extends AddQueueTabProps {
     onChangeAllowed: (allowed: Set<string>) => void;
 }
 
-interface ManageHostsTabProps extends AddQueueTabProps {
-    hosts: User[];
-    onChangeHosts: (hosts: User[]) => void;
-}
-
 function GeneralTab(props: GeneralTabProps) {
     return (
         <div>
             <h2>General</h2>
-            <h3>Title</h3>
+            <h3>Name</h3>
             <h3>Description</h3>
             <h3>Meeting Types</h3>
             <AllowedBackendsForm
@@ -46,6 +45,12 @@ function GeneralTab(props: GeneralTabProps) {
             </div>
         </div>
     );
+}
+
+interface ManageHostsTabProps extends AddQueueTabProps {
+    hosts: User[];
+    onNewHost: (uniqname: string) => void;
+    onChangeHosts: (hosts: User[]) => void;
 }
 
 function ManageHostsTab(props: ManageHostsTabProps) {
@@ -73,6 +78,18 @@ function ManageHostsTab(props: ManageHostsTabProps) {
                 <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
                 at least once in order to be added.
             </Alert>
+            <SingleInputField
+                id="add_host"
+                fieldComponent={StatelessInputGroupForm}
+                placeholder="Uniqname..."
+                buttonType='success'
+                onSubmit={props.onNewHost}
+                disabled={props.disabled}
+                fieldSchema={uniqnameSchema}
+                showRemaining={false}
+            >
+                + Add Host
+            </SingleInputField>
             <h3>Remove Hosts</h3>
             <ListGroup>{hostsSoFar}</ListGroup>
             <div className='mt-4'>
@@ -90,6 +107,7 @@ interface AddQueueEditorProps {
     allowedMeetingTypes: Set<string>;
     onChangeAllowed: (allowed: Set<string>) => void;
     hosts: User[];
+    onNewHost: (uniqname: string) => void;
     onChangeHosts: (hosts: User[]) => void;
     onTabsSuccess: () => void;
 }
@@ -136,6 +154,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                             <ManageHostsTab
                                 disabled={props.disabled}
                                 hosts={props.hosts}
+                                onNewHost={props.onNewHost}
                                 onChangeHosts={props.onChangeHosts}
                                 onSuccess={() => {}}
                             />
@@ -157,7 +176,16 @@ export function AddQueuePage(props: PageProps) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
+    
     const [hosts, setHosts] = useState([props.user] as User[]);
+
+    const checkHost = async (uniqname: string): Promise<User> => {
+        return await confirmUserExists(uniqname);
+    }
+    const [doCheckHost, checkHostLoading, checkHostError] = usePromise(
+        checkHost,
+        (value: User) => setHosts([...hosts].concat(value))
+    );
 
     // Set up interactions
     const addQueue = async () => {
@@ -165,10 +193,12 @@ export function AddQueuePage(props: PageProps) {
             throw new Error("Queue name is required.")
         }
     }
+    // Queue Management Events?
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
-    const isChanging = addQueueLoading;
+    const isChanging = checkHostLoading;
     const errorSources = [
-        {source: 'Add Queue', error: addQueueError}
+        {source: 'Add Queue', error: addQueueError},
+        {source: 'Check User', error: checkHostError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
@@ -180,6 +210,7 @@ export function AddQueuePage(props: PageProps) {
             backends={props.backends}
             onChangeAllowed={setAllowedMeetingTypes}
             hosts={hosts}
+            onNewHost={doCheckHost}
             onChangeHosts={setHosts}
             onTabsSuccess={() => {}}
         />
