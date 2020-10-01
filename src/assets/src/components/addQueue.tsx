@@ -291,8 +291,6 @@ export function AddQueuePage(props: PageProps) {
     );
 
     // Set up interactions
-    // Queue Management Events?
-
     const addQueue = async (
         queueName: string, allowedBackends: Set<string>, queueDescription: string, hosts: User[]
     ): Promise<QueueHost> => {
