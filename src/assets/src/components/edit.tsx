@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
-import * as ReactGA from "react-ga";
 import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 import 'react-phone-input-2/lib/style.css';
@@ -17,7 +16,7 @@ import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { AllowedBackendsForm, BackendSelector as MeetingBackendSelector } from "./meetingType";
 import { useQueueWebSocket } from "../services/sockets";
-import { redirectToLogin } from "../utils";
+import { recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, validateString } from "../validation";
 
 
@@ -426,13 +425,6 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
             </Modal.Footer>
         </Modal>
     );
-}
-
-const recordQueueManagementEvent = (action: string) => {
-    ReactGA.event({
-        category: "Queue Management",
-        action,
-    });
 }
 
 const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, actionDescription: string) => {

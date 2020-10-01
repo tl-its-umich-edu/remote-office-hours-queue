@@ -12,7 +12,7 @@ import { AllowedBackendsForm } from "./meetingType";
 import { usePromise } from "../hooks/usePromise";
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
-import { redirectToLogin } from "../utils";
+import { recordQueueManagementEvent, redirectToLogin } from "../utils";
 import {
     confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, ValidationResult, validateString
 } from "../validation";
@@ -300,7 +300,11 @@ export function AddQueuePage(props: PageProps) {
     }
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(
         addQueue,
-        (queue: QueueHost) => { location.href = `/manage/${queue.id}/` }
+        (queue: QueueHost) => {
+            recordQueueManagementEvent('Added Queue');
+            queue.hosts.map(h => recordQueueManagementEvent('Added Host'));
+            location.href = `/manage/${queue.id}/`;
+        }
     );
 
     const isChanging = checkHostLoading || addQueueLoading;
