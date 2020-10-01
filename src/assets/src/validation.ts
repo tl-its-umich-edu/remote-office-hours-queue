@@ -42,7 +42,7 @@ export const confirmUserExists = async (uniqname: string) => {
 
 const blankText = 'This field may not be left blank.'
 
-export const queueTitleSchema = string().required(blankText).max(100, createRemainingCharsMessage);
+export const queueNameSchema = string().required(blankText).max(100, createRemainingCharsMessage);
 export const queueDescriptSchema = string().max(1000, createRemainingCharsMessage);
 export const meetingAgendaSchema = string().max(100, createRemainingCharsMessage);
 export const uniqnameSchema = string().trim().lowercase()

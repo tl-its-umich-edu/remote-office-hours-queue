@@ -18,7 +18,7 @@ import { usePromise } from "../hooks/usePromise";
 import { AllowedBackendsForm, BackendSelector as MeetingBackendSelector } from "./meetingType";
 import { useQueueWebSocket } from "../services/sockets";
 import { redirectToLogin } from "../utils";
-import { confirmUserExists, queueDescriptSchema, queueTitleSchema, uniqnameSchema, validateString } from "../validation";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, validateString } from "../validation";
 
 
 interface MeetingEditorProps {
@@ -259,7 +259,7 @@ function QueueEditor(props: QueueEditorProps) {
                     disabled={props.disabled}
                     onSubmit={props.onChangeName}
                     fieldComponent={StatelessInputGroupForm}
-                    fieldSchema={queueTitleSchema}
+                    fieldSchema={queueNameSchema}
                     showRemaining={true}
                     initialState={false}
                 >
