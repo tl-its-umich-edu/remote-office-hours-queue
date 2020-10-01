@@ -139,20 +139,13 @@ function GeneralTab(props: GeneralTabProps) {
 }
 
 interface ManageHostsTabProps extends AddQueueTabProps {
+    currentUser?: User;
     hosts: User[];
     onNewHost: (username: string) => void;
     onChangeHosts: (hosts: User[]) => void;
 }
 
 function ManageHostsTab(props: ManageHostsTabProps) {
-    const hostsIsInvalid = props.hosts.length === 0;
-
-    const handleFinishClick = (e: any) => {
-        if (!hostsIsInvalid) {
-            props.onSubmit();
-        }
-    };
-
     const hostUsernames = props.hosts.map(h => h.username);
     const filterOutHost = (host: User) => props.hosts.filter((user: User) => user.id !== host.id);
     const hostsSoFar = props.hosts.map((host, key) => (
@@ -162,7 +155,7 @@ function ManageHostsTab(props: ManageHostsTabProps) {
                 <RemoveButton
                     onRemove={() => props.onChangeHosts(filterOutHost(host))}
                     size='sm'
-                    disabled={props.disabled}
+                    disabled={props.disabled || host.id === props.currentUser?.id}
                     screenReaderLabel='Remove Host'
                 />
             </div>
@@ -173,12 +166,13 @@ function ManageHostsTab(props: ManageHostsTabProps) {
         <div>
             <h2>Manage Hosts</h2>
             <h3>Add Hosts</h3>
-            <p>You have been added to the list of hosts automatically. Add additional hosts here.</p>
+            <p>
+                You have been added to the list of hosts automatically. (You cannot remove yourself as a host.) Add additional hosts here.
+            </p>
             <Alert variant='primary'>
                 <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
                 at least once in order to be added.
             </Alert>
-            {hostsIsInvalid ? <Alert variant='danger'>You must specify at least one host.</Alert> : undefined}
             <SingleInputField
                 id="add_host"
                 fieldComponent={StatelessInputGroupForm}
@@ -195,10 +189,10 @@ function ManageHostsTab(props: ManageHostsTabProps) {
             >
                 + Add Host
             </SingleInputField>
-            <h3>Remove Hosts</h3>
+            <h3>Current Hosts</h3>
             <ListGroup>{hostsSoFar}</ListGroup>
             <div className='mt-4'>
-                <Button variant='primary' disabled={props.disabled} onClick={handleFinishClick} aria-label='Next'>
+                <Button variant='primary' disabled={props.disabled} onClick={props.onSubmit} aria-label='Next'>
                     Finish Adding Queue
                 </Button>
                 <CancelAddButton disabled={props.disabled} />
@@ -214,6 +208,7 @@ interface AddQueueEditorProps {
     onChangeDescription: (value: string) => void;
     backends: {[backend_type: string]: string};
     onChangeAllowed: (allowed: Set<string>) => void;
+    currentUser?: User;
     hosts: User[];
     onNewHost: (username: string) => void;
     onChangeHosts: (hosts: User[]) => void;
@@ -262,6 +257,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                         <Tab.Pane eventKey='hosts'>
                             <ManageHostsTab
                                 disabled={props.disabled}
+                                currentUser={props.currentUser}
                                 hosts={props.hosts}
                                 onNewHost={props.onNewHost}
                                 onChangeHosts={props.onChangeHosts}
@@ -280,7 +276,7 @@ export function AddQueuePage(props: PageProps) {
         redirectToLogin(props.loginUrl);
     }
 
-    // Final state to be used by API interactions (already validated once in child components)
+    // Final state to be used by API interactions (already validated in child components)
     const [name, setName] = useState(undefined as undefined | string);
     const [description, setDescription] = useState('');
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(undefined as undefined | Set<string>);
@@ -326,6 +322,7 @@ export function AddQueuePage(props: PageProps) {
                 onChangeName={setName}
                 backends={props.backends}
                 onChangeAllowed={setAllowedMeetingTypes}
+                currentUser={props.user}
                 hosts={hosts}
                 onNewHost={doCheckHost}
                 onChangeHosts={setHosts}
