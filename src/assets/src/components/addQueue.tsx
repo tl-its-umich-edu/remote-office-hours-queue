@@ -18,13 +18,15 @@ import {
 } from "../validation";
 
 
+const buttonSpacing = 'ml-3'
+
 interface CancelAddButtonProps {
     disabled: boolean;
 }
 
 function CancelAddButton (props: CancelAddButtonProps) {
     return (
-        <Button className='ml-3' href='/manage/' variant='danger' disabled={props.disabled} aria-label='Cancel'>
+        <Button variant='danger' className={buttonSpacing} aria-label='Cancel' href='/manage/' disabled={props.disabled}>
             Cancel
         </Button>
     );
@@ -143,6 +145,7 @@ interface ManageHostsTabProps extends AddQueueTabProps {
     hosts: User[];
     onNewHost: (username: string) => void;
     onChangeHosts: (hosts: User[]) => void;
+    onBack: () => void;
 }
 
 function ManageHostsTab(props: ManageHostsTabProps) {
@@ -167,7 +170,8 @@ function ManageHostsTab(props: ManageHostsTabProps) {
             <h2>Manage Hosts</h2>
             <h3>Add Hosts</h3>
             <p>
-                You have been added to the list of hosts automatically. (You cannot remove yourself as a host.) Add additional hosts here.
+                You have been added to the list of hosts automatically.
+                (You cannot remove yourself as a host.) Add additional hosts here.
             </p>
             <Alert variant='primary'>
                 <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
@@ -192,7 +196,16 @@ function ManageHostsTab(props: ManageHostsTabProps) {
             <h3>Current Hosts</h3>
             <ListGroup>{hostsSoFar}</ListGroup>
             <div className='mt-4'>
-                <Button variant='primary' disabled={props.disabled} onClick={props.onSubmit} aria-label='Next'>
+                <Button variant='primary' aria-label='Back' disabled={props.disabled} onClick={props.onBack}>
+                    Back
+                </Button>
+                <Button
+                    variant='primary'
+                    className={buttonSpacing}
+                    aria-label='Finish Adding Queue'
+                    disabled={props.disabled}
+                    onClick={props.onSubmit}
+                >
                     Finish Adding Queue
                 </Button>
                 <CancelAddButton disabled={props.disabled} />
@@ -233,8 +246,8 @@ function AddQueueEditor(props: AddQueueEditorProps) {
             <Row>
                 <Col sm={3}>
                     <Nav variant='pills' className='flex-column mt-5'>
-                        <Nav.Item><Nav.Link eventKey='general' tabIndex={0}>General</Nav.Link></Nav.Item>
-                        <Nav.Item><Nav.Link eventKey='hosts' tabIndex={0}>Manage Hosts</Nav.Link></Nav.Item>
+                        <Nav.Item><Nav.Link eventKey='general'>General</Nav.Link></Nav.Item>
+                        <Nav.Item><Nav.Link eventKey='hosts'>Manage Hosts</Nav.Link></Nav.Item>
                     </Nav>
                 </Col>
                 <Col sm={6}>
@@ -262,6 +275,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                 onNewHost={props.onNewHost}
                                 onChangeHosts={props.onChangeHosts}
                                 onSubmit={props.onTabsSuccess}
+                                onBack={() => setActiveKey('general')}
                             />
                         </Tab.Pane>
                     </Tab.Content>
