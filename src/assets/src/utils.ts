@@ -17,3 +17,10 @@ export const redirectToSearch = (term: string) => {
     });
     location.href = `/search/${term}/?redirected=true`;
 }
+
+export const recordQueueManagementEvent = (action: string) => {
+    ReactGA.event({
+        category: "Queue Management",
+        action,
+    });
+}
