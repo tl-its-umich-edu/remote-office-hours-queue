@@ -6,7 +6,7 @@ import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHo
 import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import { StringSchema } from "yup";
 import { QueueAttendee, QueueBase, User } from "../models";
-import { validateString, ValidationResult } from "../validation";
+import { validateString } from "../validation";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
