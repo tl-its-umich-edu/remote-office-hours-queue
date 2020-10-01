@@ -1,47 +1,138 @@
 import * as React from "react";
 import { useState } from "react";
 import { Alert, Button, Col, ListGroup, Nav, Row, Tab } from "react-bootstrap";
+import { StringSchema } from "yup";
 
 import {
-    Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog, RemoveButton, SingleInputField,
-    StatelessInputGroupForm, UserDisplay
+    Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog, RemoveButton,
+    SingleInputField, StatelessInputGroupForm, StatelessTextAreaForm, UserDisplay
 } from "./common";
 import { PageProps } from "./page";
 import { AllowedBackendsForm } from "./meetingType";
 import { usePromise } from "../hooks/usePromise";
-import { User } from "../models";
+import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { redirectToLogin } from "../utils";
-import { confirmUserExists, uniqnameSchema } from "../validation";
+import {
+    confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, ValidationResult, validateString
+} from "../validation";
+
+
+interface CancelAddButtonProps {
+    disabled: boolean;
+}
+
+function CancelAddButton (props: CancelAddButtonProps) {
+    return (
+        <Button className='ml-3' href='/manage/' variant='danger' disabled={props.disabled} aria-label='Cancel'>
+            Cancel
+        </Button>
+    );
+}
 
 
 interface AddQueueTabProps {
     disabled: boolean;
-    onSuccess: () => void;
+    onSubmit: () => void;
 }
 
 interface GeneralTabProps extends AddQueueTabProps {
+    onChangeName: (value: string) => void;
+    onChangeDescription: (value: string) => void;
     backends: {[backend_type: string]: string};
-    allowedMeetingTypes: Set<string>;
     onChangeAllowed: (allowed: Set<string>) => void;
 }
 
 function GeneralTab(props: GeneralTabProps) {
+    const [name, setName] = useState('');
+    const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
+
+    const [description, setDescription] = useState('');
+    const [descriptValidationResult, setDescriptValidationResult] = useState(undefined as undefined | ValidationResult);
+
+    const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
+    const [allowedIsInvalid, setAllowedIsInvalid] = useState(undefined as undefined | boolean);
+
+    function validateSomething (
+        someValue: string,
+        schema: StringSchema,
+        someSetter: React.Dispatch<React.SetStateAction<undefined | ValidationResult>>,
+    ): ValidationResult {
+        const validationResult = validateString(someValue, schema, true);
+        someSetter(validationResult);
+        return validationResult;
+    }
+
+    const validateMeetingTypes = (allowedBackends: Set<string>): boolean => {
+        const isInvalid = allowedBackends.size === 0;
+        setAllowedIsInvalid(isInvalid);
+        return isInvalid;
+    }
+
+    const handleNextClick = (e: any) => {
+        let curNameValidationResult = nameValidationResult;
+        let curDescriptValidationResult = descriptValidationResult;
+        let curAllowedIsInvalid = allowedIsInvalid;
+        if (!nameValidationResult) {
+            curNameValidationResult = validateSomething(name, queueNameSchema, setNameValidationResult);
+        }
+        if (!descriptValidationResult) {
+            curDescriptValidationResult = validateSomething(description, queueDescriptSchema, setDescriptValidationResult);
+        }
+        if (allowedIsInvalid === undefined) {
+            curAllowedIsInvalid = validateMeetingTypes(allowedMeetingTypes);
+        }
+        if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && curAllowedIsInvalid === false) {
+            props.onChangeName(name);
+            props.onChangeDescription(description);
+            props.onChangeAllowed(allowedMeetingTypes);
+            props.onSubmit();
+        }
+    };
+
     return (
         <div>
             <h2>General</h2>
             <h3>Name</h3>
+            <StatelessInputGroupForm
+                id='name'
+                value={name}
+                placeholder='Queue name...'
+                disabled={props.disabled}
+                isInvalid={nameValidationResult ? nameValidationResult.isInvalid : undefined}
+                feedbackMessages={nameValidationResult ? nameValidationResult.messages : []}
+                onChangeValue={(newName: string) => {
+                    setName(newName);
+                    validateSomething(newName, queueNameSchema, setNameValidationResult);
+                }}
+            />
             <h3>Description</h3>
+            <StatelessTextAreaForm
+                id='description'
+                value={description}
+                placeholder='Queue description...'
+                disabled={props.disabled}
+                isInvalid={descriptValidationResult ? descriptValidationResult.isInvalid : undefined}
+                feedbackMessages={descriptValidationResult ? descriptValidationResult.messages : []}
+                onChangeValue={(newDescription: string) => {
+                    setDescription(newDescription);
+                    validateSomething(newDescription, queueDescriptSchema, setDescriptValidationResult);
+                }}
+            />
             <h3>Meeting Types</h3>
+            {allowedIsInvalid ? <Alert variant='danger'>You must select at least one allowed meeting type.</Alert> : undefined}
             <AllowedBackendsForm
-                allowed={props.allowedMeetingTypes}
+                allowed={allowedMeetingTypes}
                 backends={props.backends}
-                onChange={props.onChangeAllowed}
+                onChange={(allowedBackends) => {
+                    setAllowedMeetingTypes(allowedBackends);
+                    validateMeetingTypes(allowedBackends);
+                }}
                 disabled={props.disabled}
             />
             <div className='mt-4'>
-                <Button variant='primary' disabled={props.disabled} onClick={(e: any) => props.onSuccess()}>Next</Button>
-                <Button className='ml-3' href='/manage/' variant='danger' disabled={props.disabled}>Cancel</Button>
+                <Button variant='primary' disabled={props.disabled} onClick={handleNextClick}>Next</Button>
+                <CancelAddButton disabled={props.disabled} />
             </div>
         </div>
     );
@@ -49,11 +140,20 @@ function GeneralTab(props: GeneralTabProps) {
 
 interface ManageHostsTabProps extends AddQueueTabProps {
     hosts: User[];
-    onNewHost: (uniqname: string) => void;
+    onNewHost: (username: string) => void;
     onChangeHosts: (hosts: User[]) => void;
 }
 
 function ManageHostsTab(props: ManageHostsTabProps) {
+    const hostsIsInvalid = props.hosts.length === 0;
+
+    const handleFinishClick = (e: any) => {
+        if (!hostsIsInvalid) {
+            props.onSubmit();
+        }
+    };
+
+    const hostUsernames = props.hosts.map(h => h.username);
     const filterOutHost = (host: User) => props.hosts.filter((user: User) => user.id !== host.id);
     const hostsSoFar = props.hosts.map((host, key) => (
         <ListGroup.Item key={key}>
@@ -67,7 +167,7 @@ function ManageHostsTab(props: ManageHostsTabProps) {
                 />
             </div>
         </ListGroup.Item>
-    ))
+    ));
 
     return (
         <div>
@@ -78,12 +178,17 @@ function ManageHostsTab(props: ManageHostsTabProps) {
                 <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
                 at least once in order to be added.
             </Alert>
+            {hostsIsInvalid ? <Alert variant='danger'>You must specify at least one host.</Alert> : undefined}
             <SingleInputField
                 id="add_host"
                 fieldComponent={StatelessInputGroupForm}
                 placeholder="Uniqname..."
                 buttonType='success'
-                onSubmit={props.onNewHost}
+                onSubmit={(username) => {
+                    if (!hostUsernames.includes(username)) {
+                        props.onNewHost(username)
+                    }
+                }}
                 disabled={props.disabled}
                 fieldSchema={uniqnameSchema}
                 showRemaining={false}
@@ -93,8 +198,10 @@ function ManageHostsTab(props: ManageHostsTabProps) {
             <h3>Remove Hosts</h3>
             <ListGroup>{hostsSoFar}</ListGroup>
             <div className='mt-4'>
-                <Button variant='primary' disabled={props.disabled} onClick={(e: any) => props.onSuccess()}>Finish Adding Queue</Button>
-                <Button className='ml-3' href='/manage/' variant='danger' disabled={props.disabled}>Cancel</Button>
+                <Button variant='primary' disabled={props.disabled} onClick={handleFinishClick} aria-label='Next'>
+                    Finish Adding Queue
+                </Button>
+                <CancelAddButton disabled={props.disabled} />
             </div>
         </div>
     );
@@ -103,11 +210,12 @@ function ManageHostsTab(props: ManageHostsTabProps) {
 
 interface AddQueueEditorProps {
     disabled: boolean;
+    onChangeName: (value: string) => void;
+    onChangeDescription: (value: string) => void;
     backends: {[backend_type: string]: string};
-    allowedMeetingTypes: Set<string>;
     onChangeAllowed: (allowed: Set<string>) => void;
     hosts: User[];
-    onNewHost: (uniqname: string) => void;
+    onNewHost: (username: string) => void;
     onChangeHosts: (hosts: User[]) => void;
     onTabsSuccess: () => void;
 }
@@ -129,22 +237,23 @@ function AddQueueEditor(props: AddQueueEditorProps) {
         >
             <Row>
                 <Col sm={3}>
-                    <Nav variant='pills' className='flex-column mt-4'>
-                        <Nav.Item><Nav.Link eventKey='general'>General</Nav.Link></Nav.Item>
-                        <Nav.Item><Nav.Link eventKey='hosts'>Manage Hosts</Nav.Link></Nav.Item>
+                    <Nav variant='pills' className='flex-column mt-5'>
+                        <Nav.Item><Nav.Link eventKey='general' tabIndex={0}>General</Nav.Link></Nav.Item>
+                        <Nav.Item><Nav.Link eventKey='hosts' tabIndex={0}>Manage Hosts</Nav.Link></Nav.Item>
                     </Nav>
                 </Col>
-                <Col sm={7}>
+                <Col sm={6}>
                     <h1>Add Queue</h1>
                     {navMessage ? <Alert variant='danger'>{navMessage}</Alert> : null}
                     <Tab.Content>
                         <Tab.Pane eventKey='general'>
                             <GeneralTab
                                 disabled={props.disabled}
+                                onChangeDescription={props.onChangeDescription}
+                                onChangeName={props.onChangeName}
                                 backends={props.backends}
-                                allowedMeetingTypes={props.allowedMeetingTypes}
                                 onChangeAllowed={props.onChangeAllowed}
-                                onSuccess={() => {
+                                onSubmit={() => {
                                     setActiveKey('hosts');
                                     if (navMessage) { setNavMessage(null) };
                                 }}
@@ -156,7 +265,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                 hosts={props.hosts}
                                 onNewHost={props.onNewHost}
                                 onChangeHosts={props.onChangeHosts}
-                                onSuccess={() => {}}
+                                onSubmit={props.onTabsSuccess}
                             />
                         </Tab.Pane>
                     </Tab.Content>
@@ -166,17 +275,15 @@ function AddQueueEditor(props: AddQueueEditorProps) {
     );
 }
 
-
 export function AddQueuePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
 
-    // Set up basic state
-    const [name, setName] = useState('');
+    // Final state to be used by API interactions (already validated once in child components)
+    const [name, setName] = useState(undefined as undefined | string);
     const [description, setDescription] = useState('');
-    const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
-    
+    const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(undefined as undefined | Set<string>);
     const [hosts, setHosts] = useState([props.user] as User[]);
 
     const checkHost = async (uniqname: string): Promise<User> => {
@@ -188,40 +295,48 @@ export function AddQueuePage(props: PageProps) {
     );
 
     // Set up interactions
-    const addQueue = async () => {
-        if (!name) {
-            throw new Error("Queue name is required.")
-        }
-    }
     // Queue Management Events?
-    const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
-    const isChanging = checkHostLoading;
+
+    const addQueue = async (
+        queueName: string, allowedBackends: Set<string>, queueDescription: string, hosts: User[]
+    ): Promise<QueueHost> => {
+        return await api.createQueue(queueName, allowedBackends, queueDescription, hosts);
+    }
+    const [doAddQueue, addQueueLoading, addQueueError] = usePromise(
+        addQueue,
+        (queue: QueueHost) => { location.href = `/manage/${queue.id}/` }
+    );
+
+    const isChanging = checkHostLoading || addQueueLoading;
     const errorSources = [
         {source: 'Add Queue', error: addQueueError},
         {source: 'Check User', error: checkHostError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
-
-    const addQueueEditor = (
-        <AddQueueEditor
-            disabled={isChanging}
-            allowedMeetingTypes={allowedMeetingTypes}
-            backends={props.backends}
-            onChangeAllowed={setAllowedMeetingTypes}
-            hosts={hosts}
-            onNewHost={doCheckHost}
-            onChangeHosts={setHosts}
-            onTabsSuccess={() => {}}
-        />
-    );
 
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle='Add Queue' />
-            {errorDisplay}
-            {addQueueEditor}
+            <LoadingDisplay loading={isChanging} />
+            <ErrorDisplay formErrors={errorSources} />
+            <AddQueueEditor
+                disabled={isChanging}
+                onChangeDescription={setDescription}
+                onChangeName={setName}
+                backends={props.backends}
+                onChangeAllowed={setAllowedMeetingTypes}
+                hosts={hosts}
+                onNewHost={doCheckHost}
+                onChangeHosts={setHosts}
+                onTabsSuccess={() => {
+                    if (name !== undefined && allowedMeetingTypes !== undefined) {
+                        doAddQueue(name, allowedMeetingTypes, description, hosts);
+                    } else {
+                        throw Error('Application attempted to pass invalid data to API for queue creation.')
+                    }
+                }}
+            />
         </div>
     );
 }
