@@ -19,6 +19,7 @@ import {
 
 
 const buttonSpacing = 'ml-3'
+const requiredSymbol = <span className='text-danger'>*</span>;
 
 interface CancelAddButtonProps {
     disabled: boolean;
@@ -26,7 +27,7 @@ interface CancelAddButtonProps {
 
 function CancelAddButton (props: CancelAddButtonProps) {
     return (
-        <Button variant='danger' className={buttonSpacing} aria-label='Cancel' href='/manage/' disabled={props.disabled}>
+        <Button variant='light' className={`text-danger ${buttonSpacing}`} aria-label='Cancel' href='/manage/' disabled={props.disabled}>
             Cancel
         </Button>
     );
@@ -54,7 +55,7 @@ function GeneralTab(props: GeneralTabProps) {
     return (
         <div>
             <h2>General</h2>
-            <h3>Name</h3>
+            <h3>Name {requiredSymbol}</h3>
             <StatelessInputGroupForm
                 id='name'
                 value={props.name}
@@ -74,7 +75,8 @@ function GeneralTab(props: GeneralTabProps) {
                 feedbackMessages={props.descriptValidationResult ? props.descriptValidationResult.messages : []}
                 onChangeValue={props.onChangeDescription}
             />
-            <h3>Meeting Types</h3>
+            <h3>Meeting Types {requiredSymbol}</h3>
+            <p>Allow the following meeting types (select at least one):</p>
             {props.allowedIsInvalid ? <Alert variant='danger'>You must select at least one allowed meeting type.</Alert> : undefined}
             <AllowedBackendsForm
                 allowed={props.allowedMeetingTypes}
@@ -122,8 +124,8 @@ function ManageHostsTab(props: ManageHostsTabProps) {
             <h2>Manage Hosts</h2>
             <h3>Add Hosts</h3>
             <p>
-                You have been added to the list of hosts automatically.
-                (You cannot remove yourself as a host.) Add additional hosts here.
+                You have been added to the list of hosts automatically. Add additional hosts here.
+                (You cannot remove yourself as a host.)
             </p>
             <Alert variant='primary'>
                 <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
@@ -196,14 +198,8 @@ interface AddQueueEditorProps {
 
 // https://react-bootstrap.github.io/components/tabs/#tabs-custom-layout
 function AddQueueEditor(props: AddQueueEditorProps) {
-
     return (
-        <Tab.Container
-            id='add-queue-editor'
-            defaultActiveKey='general'
-            activeKey={props.activeKey}
-            onSelect={props.onTabSelect}
-        >
+        <Tab.Container id='add-queue-editor' defaultActiveKey='general' activeKey={props.activeKey} onSelect={props.onTabSelect}>
             <Row>
                 <Col sm={3}>
                     <Nav variant='pills' className='flex-column mt-5'>
