@@ -144,6 +144,7 @@ interface ManageHostsTabProps extends AddQueueTabProps {
     currentUser?: User;
     hosts: User[];
     onNewHost: (username: string) => void;
+    checkHostError?: FormError;
     onChangeHosts: (hosts: User[]) => void;
     onBack: () => void;
 }
@@ -177,6 +178,7 @@ function ManageHostsTab(props: ManageHostsTabProps) {
                 <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
                 at least once in order to be added.
             </Alert>
+            {props.checkHostError ? <ErrorDisplay formErrors={[props.checkHostError]} /> : undefined}
             <SingleInputField
                 id="add_host"
                 fieldComponent={StatelessInputGroupForm}
@@ -224,6 +226,7 @@ interface AddQueueEditorProps {
     currentUser?: User;
     hosts: User[];
     onNewHost: (username: string) => void;
+    checkHostError?: FormError;
     onChangeHosts: (hosts: User[]) => void;
     onTabsSuccess: () => void;
 }
@@ -273,6 +276,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                 currentUser={props.currentUser}
                                 hosts={props.hosts}
                                 onNewHost={props.onNewHost}
+                                checkHostError={props.checkHostError}
                                 onChangeHosts={props.onChangeHosts}
                                 onSubmit={props.onTabsSuccess}
                                 onBack={() => setActiveKey('general')}
@@ -309,7 +313,7 @@ export function AddQueuePage(props: PageProps) {
         queueName: string, allowedBackends: Set<string>, queueDescription: string, hosts: User[]
     ): Promise<QueueHost> => {
         return await api.createQueue(queueName, allowedBackends, queueDescription, hosts);
-    }
+    };
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(
         addQueue,
         (queue: QueueHost) => {
@@ -320,18 +324,18 @@ export function AddQueuePage(props: PageProps) {
     );
 
     const isChanging = checkHostLoading || addQueueLoading;
-    const errorSources = [
-        {source: 'Add Queue', error: addQueueError},
-        {source: 'Check User', error: checkHostError}
+    const globalErrors = [
+        {source: 'Add Queue', error: addQueueError}
     ].filter(e => e.error) as FormError[];
-    const loginDialogVisible = errorSources.some(checkForbiddenError);
+
+    const loginDialogVisible = globalErrors.some(checkForbiddenError);
 
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle='Add Queue' />
             <LoadingDisplay loading={isChanging} />
-            <ErrorDisplay formErrors={errorSources} />
+            <ErrorDisplay formErrors={globalErrors} />
             <AddQueueEditor
                 disabled={isChanging}
                 onChangeDescription={setDescription}
@@ -341,12 +345,13 @@ export function AddQueuePage(props: PageProps) {
                 currentUser={props.user}
                 hosts={hosts}
                 onNewHost={doCheckHost}
+                checkHostError={checkHostError ? { source: 'Check Host', error: checkHostError } : undefined}
                 onChangeHosts={setHosts}
                 onTabsSuccess={() => {
                     if (name !== undefined && allowedMeetingTypes !== undefined) {
                         doAddQueue(name, allowedMeetingTypes, description, hosts);
                     } else {
-                        throw Error('Application attempted to pass invalid data to API for queue creation.')
+                        throw Error('Invalid data passed to API for queue creation.')
                     }
                 }}
             />
