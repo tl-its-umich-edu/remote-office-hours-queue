@@ -266,12 +266,32 @@ export function AddQueuePage(props: PageProps) {
 
     const [hosts, setHosts] = useState([props.user] as User[]);
 
+    // Set up API interactions
+    const checkHost = async (uniqname: string): Promise<User> => {
+        return await confirmUserExists(uniqname);
+    }
+    const [doCheckHost, checkHostLoading, checkHostError] = usePromise(
+        checkHost,
+        (value: User) => setHosts([...hosts].concat(value))
+    );
+
+    const addQueue = async (
+        queueName: string, allowedBackends: Set<string>, queueDescription: string, hosts: User[]
+    ): Promise<QueueHost> => {
+        return await api.createQueue(queueName, allowedBackends, queueDescription, hosts);
+    };
+    const [doAddQueue, addQueueLoading, addQueueError] = usePromise(
+        addQueue,
+        (queue: QueueHost) => {
+            recordQueueManagementEvent('Added Queue');
+            queue.hosts.map(h => recordQueueManagementEvent('Added Host'));
+            location.href = `/manage/${queue.id}/`;
+        }
+    );
+
     // Validation functions
-    function validateSomething (
-        someValue: string,
-        schema: StringSchema,
-        someSetter: React.Dispatch<React.SetStateAction<undefined | ValidationResult>>,
-    ): ValidationResult {
+    type ValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | ValidationResult>>;
+    function validateSomething (someValue: string, schema: StringSchema, someSetter: ValidationResultSetter): ValidationResult {
         const validationResult = validateString(someValue, schema, true);
         someSetter(validationResult);
         return validationResult;
@@ -330,29 +350,6 @@ export function AddQueuePage(props: PageProps) {
             handleGeneralNextClick();  // Use same logic as Next button click handler
         }
     };
-
-    // Set up interactions
-    const checkHost = async (uniqname: string): Promise<User> => {
-        return await confirmUserExists(uniqname);
-    }
-    const [doCheckHost, checkHostLoading, checkHostError] = usePromise(
-        checkHost,
-        (value: User) => setHosts([...hosts].concat(value))
-    );
-
-    const addQueue = async (
-        queueName: string, allowedBackends: Set<string>, queueDescription: string, hosts: User[]
-    ): Promise<QueueHost> => {
-        return await api.createQueue(queueName, allowedBackends, queueDescription, hosts);
-    };
-    const [doAddQueue, addQueueLoading, addQueueError] = usePromise(
-        addQueue,
-        (queue: QueueHost) => {
-            recordQueueManagementEvent('Added Queue');
-            queue.hosts.map(h => recordQueueManagementEvent('Added Host'));
-            location.href = `/manage/${queue.id}/`;
-        }
-    );
 
     const isChanging = checkHostLoading || addQueueLoading;
     const globalErrors = [
