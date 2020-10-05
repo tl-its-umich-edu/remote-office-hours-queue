@@ -48,13 +48,17 @@ interface GeneralTabProps extends AddQueueTabProps {
     allowedMeetingTypes: Set<string>;
     allowedIsInvalid?: boolean;
     onChangeAllowed: (allowed: Set<string>) => void;
+    showCorrectGeneralMessage: boolean;
     onNext: () => void;
 }
 
 function GeneralTab(props: GeneralTabProps) {
+    const correctMessage = 'Please correct the invalid entries below in order to proceed.'
+
     return (
         <div>
             <h2>General</h2>
+            {props.showCorrectGeneralMessage ? <Alert variant='danger'>{correctMessage}</Alert> : undefined}
             <p>{requiredSymbol} indicates a required field.</p>
             <h3>Name {requiredSymbol}</h3>
             <StatelessInputGroupForm
@@ -186,6 +190,7 @@ interface AddQueueEditorProps {
     allowedMeetingTypes: Set<string>;
     allowedIsInvalid?: boolean;
     onChangeAllowed: (allowed: Set<string>) => void;
+    showCorrectGeneralMessage: boolean;
     onGeneralNextClick: () => void;
     // Manage Hosts Tab
     currentUser?: User;
@@ -224,6 +229,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                 allowedMeetingTypes={props.allowedMeetingTypes}
                                 allowedIsInvalid={props.allowedIsInvalid}
                                 onChangeAllowed={props.onChangeAllowed}
+                                showCorrectGeneralMessage={props.showCorrectGeneralMessage}
                                 onNext={props.onGeneralNextClick}
                             />
                         </Tab.Pane>
@@ -253,7 +259,7 @@ export function AddQueuePage(props: PageProps) {
 
     // Set up page state
     const [activeKey, setActiveKey] = useState('general');
-
+    const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
     const [name, setName] = useState('');
     const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
     const [description, setDescription] = useState('');
@@ -329,6 +335,9 @@ export function AddQueuePage(props: PageProps) {
         }
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && curAllowedIsInvalid === false) {
             setActiveKey('hosts');
+            if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
+        } else {
+            if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
         }
     };
 
@@ -374,6 +383,7 @@ export function AddQueuePage(props: PageProps) {
                 allowedMeetingTypes={allowedMeetingTypes}
                 allowedIsInvalid={allowedIsInvalid}
                 onChangeAllowed={handleAllowedChange}
+                showCorrectGeneralMessage={showCorrectGeneralMessage}
                 onGeneralNextClick={handleGeneralNextClick}
                 currentUser={props.user}
                 hosts={hosts}
