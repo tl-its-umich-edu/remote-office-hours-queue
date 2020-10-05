@@ -55,6 +55,7 @@ function GeneralTab(props: GeneralTabProps) {
     return (
         <div>
             <h2>General</h2>
+            <p>{requiredSymbol} indicates a required field.</p>
             <h3>Name {requiredSymbol}</h3>
             <StatelessInputGroupForm
                 id='name'
