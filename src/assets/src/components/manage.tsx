@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "react-bootstrap";
 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoginDialog, QueueTable } from "./common";
 import { PageProps } from "./page";
@@ -22,8 +23,8 @@ function ManageQueueTable(props: ManageQueueTableProps) {
         <div>
             {queueResults}
             <div className="page-content-flow">
-                <Link to="/add_queue" className="btn btn-success">
-                    + Add Queue
+                <Link to="/add_queue">
+                    <Button variant='success' aria-label='Add Queue'>+ Add Queue</Button>
                 </Link>
             </div>
         </div>
