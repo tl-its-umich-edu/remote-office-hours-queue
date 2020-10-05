@@ -44,18 +44,8 @@ class NestedMyMeetingSerializer(serializers.ModelSerializer):
         fields = ['id', 'line_place', 'agenda', 'assignee', 'backend_type', 'backend_metadata', 'created_at']
 
     def get_line_place(self, obj):
-        i = 0
-        in_line = False
-        meetings = obj.queue.meeting_set.order_by('id')
-        for i in range(0, len(meetings)):
-            if self.context['user'] in meetings[i].attendees.all():
-                in_line = True
-                break
-
-        if in_line:
-            return i
-        else:
-            return None
+        meeting = self.context['user'].meeting_set.first()
+        return None if not meeting else meeting.line_place
 
 
 class NestedMeetingSetSerializer(serializers.ModelSerializer):
