@@ -18,6 +18,8 @@ import {
 } from "../validation";
 
 
+type availableTabs = 'general' | 'hosts';
+
 const buttonSpacing = 'ml-3'
 const requiredSymbol = <span className='text-danger'>*</span>;
 
@@ -177,7 +179,7 @@ function ManageHostsTab(props: ManageHostsTabProps) {
 interface AddQueueEditorProps {
     // Shared
     disabled: boolean;
-    activeKey: string;
+    activeKey: availableTabs;
     onTabSelect: (eventKey: string) => void;
     // General Tab
     name: string;
@@ -258,7 +260,7 @@ export function AddQueuePage(props: PageProps) {
     }
 
     // Set up page state
-    const [activeKey, setActiveKey] = useState('general');
+    const [activeKey, setActiveKey] = useState('general' as availableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
     const [name, setName] = useState('');
     const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
@@ -340,20 +342,19 @@ export function AddQueuePage(props: PageProps) {
             if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
         }
     };
-
-    // Improve this?
-    const handleManageHostsFinishClick = () => {
-        if (name !== '' && allowedMeetingTypes.size !== 0) {
-            doAddQueue(name, allowedMeetingTypes, description, hosts);
-        } else {
-            throw Error('Attempted to pass invalid data to API for queue creation')
-        }
-    };
     const handleTabSelect = (activeKey: string) => {
         if (activeKey === 'general') {
             setActiveKey(activeKey);
         } else if (activeKey === 'hosts') {
             handleGeneralNextClick();  // Use same logic as Next button click handler
+        }
+    };
+
+    const handleManageHostsFinishClick = () => {
+        if (name !== '' && allowedMeetingTypes.size !== 0) {
+            doAddQueue(name, allowedMeetingTypes, description, hosts);
+        } else {
+            throw Error('Attempted to pass invalid data to API for queue creation');
         }
     };
 
