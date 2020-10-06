@@ -13,7 +13,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.serializers import (
-    ShallowUserSerializer, UserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
+    ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer
 )
 from officehours_api.permissions import (
@@ -60,7 +60,7 @@ class UserDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         user = self.get_object()
         if user == request.user:
-            serializer = UserSerializer(user, context={'user': request.user})
+            serializer = MyUserSerializer(user, context={'user': request.user})
         else:
             serializer = ShallowUserSerializer(user, context={'user': request.user})
         return Response(serializer.data)

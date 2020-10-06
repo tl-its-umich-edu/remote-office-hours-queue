@@ -74,7 +74,7 @@ class ShallowUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name']
 
 
-class UserSerializer(serializers.ModelSerializer):
+class MyUserSerializer(serializers.ModelSerializer):
     context: UserContext
 
     my_queue = serializers.SerializerMethodField(read_only=True)
@@ -100,12 +100,6 @@ class UserSerializer(serializers.ModelSerializer):
         serializer = ShallowQueueSerializer(queues_qs, many=True)
         return serializer.data
     
-    def get_phone_number(self, obj):
-        if self.context['user'] != obj:
-            return None
-        serializer = serializers.CharField(source='profile.phone_number')
-        return serializer.data
-
     def update(self, instance, validated_data):
         profile = validated_data['profile']
         instance = super().update(instance, validated_data)
