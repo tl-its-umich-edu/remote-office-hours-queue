@@ -1,27 +1,21 @@
 import * as React from "react";
 import { useState } from "react";
-import { Alert, Button, Col, ListGroup, Nav, Row, Tab } from "react-bootstrap";
+import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
 import { StringSchema } from "yup";
 
-import {
-    Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog, RemoveButton,
-    SingleInputField, StatelessInputGroupForm, StatelessTextAreaForm, UserDisplay
-} from "./common";
+import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog } from "./common";
 import { PageProps } from "./page";
-import { AllowedBackendsForm } from "./meetingType";
+import { GeneralEditor, ManageHostsEditor } from "./queueEditors";
 import { usePromise } from "../hooks/usePromise";
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import {
-    confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, ValidationResult, validateString
-} from "../validation";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema, ValidationResult, validateString } from "../validation";
 
 
 type availableTabs = 'general' | 'hosts';
 
 const buttonSpacing = 'ml-3'
-const requiredSymbol = <span className='text-danger'>*</span>;
 
 interface CancelAddButtonProps {
     disabled: boolean;
@@ -35,146 +29,6 @@ function CancelAddButton (props: CancelAddButtonProps) {
     );
 }
 
-interface AddQueueTabProps {
-    disabled: boolean;
-}
-
-interface GeneralTabProps extends AddQueueTabProps {
-    name: string;
-    nameValidationResult?: ValidationResult;
-    onChangeName: (value: string) => void;
-    description: string;
-    descriptValidationResult?: ValidationResult;
-    onChangeDescription: (value: string) => void;
-    backends: {[backend_type: string]: string};
-    allowedMeetingTypes: Set<string>;
-    allowedIsInvalid?: boolean;
-    onChangeAllowed: (allowed: Set<string>) => void;
-    showCorrectGeneralMessage: boolean;
-    onNext: () => void;
-}
-
-function GeneralTab(props: GeneralTabProps) {
-    const correctMessage = 'Please correct the invalid entries below in order to proceed.'
-
-    return (
-        <div>
-            <h2>General</h2>
-            {props.showCorrectGeneralMessage ? <Alert variant='danger'>{correctMessage}</Alert> : undefined}
-            <p>{requiredSymbol} indicates a required field.</p>
-            <h3>Name {requiredSymbol}</h3>
-            <StatelessInputGroupForm
-                id='name'
-                value={props.name}
-                placeholder='Queue name...'
-                disabled={props.disabled}
-                isInvalid={props.nameValidationResult ? props.nameValidationResult.isInvalid : undefined}
-                feedbackMessages={props.nameValidationResult ? props.nameValidationResult.messages : []}
-                onChangeValue={props.onChangeName}
-            />
-            <h3>Description</h3>
-            <StatelessTextAreaForm
-                id='description'
-                value={props.description}
-                placeholder='Queue description...'
-                disabled={props.disabled}
-                isInvalid={props.descriptValidationResult ? props.descriptValidationResult.isInvalid : undefined}
-                feedbackMessages={props.descriptValidationResult ? props.descriptValidationResult.messages : []}
-                onChangeValue={props.onChangeDescription}
-            />
-            <h3>Meeting Types {requiredSymbol}</h3>
-            <p>Allow the following meeting types (select at least one):</p>
-            {props.allowedIsInvalid ? <Alert variant='danger'>You must select at least one allowed meeting type.</Alert> : undefined}
-            <AllowedBackendsForm
-                allowed={props.allowedMeetingTypes}
-                backends={props.backends}
-                onChange={props.onChangeAllowed}
-                disabled={props.disabled}
-            />
-            <div className='mt-4'>
-                <Button variant='primary' disabled={props.disabled} onClick={props.onNext}>Next</Button>
-                <CancelAddButton disabled={props.disabled} />
-            </div>
-        </div>
-    );
-}
-
-interface ManageHostsTabProps extends AddQueueTabProps {
-    currentUser?: User;
-    hosts: User[];
-    onNewHost: (username: string) => void;
-    checkHostError?: FormError;
-    onChangeHosts: (hosts: User[]) => void;
-    onFinish: () => void;
-    onBack: () => void;
-}
-
-function ManageHostsTab(props: ManageHostsTabProps) {
-    const hostUsernames = props.hosts.map(h => h.username);
-    const filterOutHost = (host: User) => props.hosts.filter((user: User) => user.id !== host.id);
-    const hostsSoFar = props.hosts.map((host, key) => (
-        <ListGroup.Item key={key}>
-            <UserDisplay user={host} />
-            <div className='float-right'>
-                <RemoveButton
-                    onRemove={() => props.onChangeHosts(filterOutHost(host))}
-                    size='sm'
-                    disabled={props.disabled || host.id === props.currentUser?.id}
-                    screenReaderLabel='Remove Host'
-                />
-            </div>
-        </ListGroup.Item>
-    ));
-
-    return (
-        <div>
-            <h2>Manage Hosts</h2>
-            <h3>Add Hosts</h3>
-            <p>
-                You have been added to the list of hosts automatically. Add additional hosts here.
-                (You cannot remove yourself as a host.)
-            </p>
-            <Alert variant='primary'>
-                <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
-                at least once in order to be added.
-            </Alert>
-            {props.checkHostError ? <ErrorDisplay formErrors={[props.checkHostError]} /> : undefined}
-            <SingleInputField
-                id="add_host"
-                fieldComponent={StatelessInputGroupForm}
-                placeholder="Uniqname..."
-                buttonType='success'
-                onSubmit={(username) => {
-                    if (!hostUsernames.includes(username)) {
-                        props.onNewHost(username)
-                    }
-                }}
-                disabled={props.disabled}
-                fieldSchema={uniqnameSchema}
-                showRemaining={false}
-            >
-                + Add Host
-            </SingleInputField>
-            <h3>Current Hosts</h3>
-            <ListGroup>{hostsSoFar}</ListGroup>
-            <div className='mt-4'>
-                <Button variant='primary' aria-label='Back' disabled={props.disabled} onClick={props.onBack}>
-                    Back
-                </Button>
-                <Button
-                    variant='primary'
-                    className={buttonSpacing}
-                    aria-label='Finish Adding Queue'
-                    disabled={props.disabled}
-                    onClick={props.onFinish}
-                >
-                    Finish Adding Queue
-                </Button>
-                <CancelAddButton disabled={props.disabled} />
-            </div>
-        </div>
-    );
-}
 
 interface AddQueueEditorProps {
     // Shared
@@ -219,7 +73,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                     <h1>Add Queue</h1>
                     <Tab.Content>
                         <Tab.Pane eventKey='general'>
-                            <GeneralTab
+                            <GeneralEditor
                                 disabled={props.disabled}
                                 name={props.name}
                                 nameValidationResult={props.nameValidationResult}
@@ -232,20 +86,36 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                 allowedIsInvalid={props.allowedIsInvalid}
                                 onChangeAllowed={props.onChangeAllowed}
                                 showCorrectGeneralMessage={props.showCorrectGeneralMessage}
-                                onNext={props.onGeneralNextClick}
                             />
+                            <div className='mt-4'>
+                                <Button variant='primary' disabled={props.disabled} onClick={props.onGeneralNextClick}>Next</Button>
+                                <CancelAddButton disabled={props.disabled} />
+                            </div>
                         </Tab.Pane>
                         <Tab.Pane eventKey='hosts'>
-                            <ManageHostsTab
+                            <ManageHostsEditor
                                 disabled={props.disabled}
                                 currentUser={props.currentUser}
                                 hosts={props.hosts}
                                 onNewHost={props.onNewHost}
                                 checkHostError={props.checkHostError}
                                 onChangeHosts={props.onChangeHosts}
-                                onBack={props.onBackClick}
-                                onFinish={props.onFinishClick}
                             />
+                            <div className='mt-4'>
+                                <Button variant='primary' aria-label='Back' disabled={props.disabled} onClick={props.onBackClick}>
+                                    Back
+                                </Button>
+                                <Button
+                                    variant='primary'
+                                    className={buttonSpacing}
+                                    aria-label='Finish Adding Queue'
+                                    disabled={props.disabled}
+                                    onClick={props.onFinishClick}
+                                >
+                                    Finish Adding Queue
+                                </Button>
+                                <CancelAddButton disabled={props.disabled} />
+                            </div>
                         </Tab.Pane>
                     </Tab.Content>
                 </Col>
