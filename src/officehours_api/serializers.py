@@ -20,11 +20,9 @@ class AttendeeSerializer(serializers.ModelSerializer):
 
 
 class NestedUserSerializer(serializers.ModelSerializer):
-    phone_number = serializers.CharField(source='profile.phone_number')
-
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
