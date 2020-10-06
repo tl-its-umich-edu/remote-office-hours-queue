@@ -150,3 +150,6 @@ def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
         instance.profile
     except User.profile.RelatedObjectDoesNotExist:
         instance.profile = Profile.objects.create(user=instance)
+
+
+import officehours_api.notifications
