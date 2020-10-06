@@ -20,9 +20,11 @@ class AttendeeSerializer(serializers.ModelSerializer):
 
 
 class NestedUserSerializer(serializers.ModelSerializer):
+    phone_number = serializers.CharField(source='profile.phone_number')
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name',]
+        fields = ['id', 'username', 'first_name', 'last_name', 'phone_number']
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
@@ -79,17 +81,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     my_queue = serializers.SerializerMethodField(read_only=True)
     hosted_queues = serializers.SerializerMethodField(read_only=True)
+    phone_number = serializers.CharField(source='profile.phone_number')
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues', 'phone_number']
 
     def get_my_queue(self, obj):
         try:
             meeting = obj.meeting_set.get()
         except Meeting.DoesNotExist:
             return None
-
         serializer = QueueAttendeeSerializer(meeting.queue, context=self.context)
         return serializer.data
 
@@ -98,6 +100,12 @@ class UserSerializer(serializers.ModelSerializer):
         if not queues_qs.exists():
             return []
         serializer = ShallowQueueSerializer(queues_qs, many=True)
+        return serializer.data
+    
+    def get_phone_number(self, obj):
+        if self.context['user'] != obj:
+            return None
+        serializer = serializers.CharField(source='profile.phone_number')
         return serializer.data
 
     def update(self, instance, validated_data):
