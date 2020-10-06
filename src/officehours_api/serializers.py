@@ -36,16 +36,11 @@ class NestedMeetingSerializer(serializers.ModelSerializer):
 
 
 class NestedMyMeetingSerializer(serializers.ModelSerializer):
-    line_place = serializers.SerializerMethodField(read_only=True)
     backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
         fields = ['id', 'line_place', 'agenda', 'assignee', 'backend_type', 'backend_metadata', 'created_at']
-
-    def get_line_place(self, obj):
-        meeting = self.context['user'].meeting_set.first()
-        return None if not meeting else meeting.line_place
 
 
 class NestedMeetingSetSerializer(serializers.ModelSerializer):
