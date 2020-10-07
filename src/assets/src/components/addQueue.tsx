@@ -5,7 +5,7 @@ import { StringSchema } from "yup";
 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog } from "./common";
 import { PageProps } from "./page";
-import { GeneralEditor, ManageHostsEditor } from "./queueEditors";
+import { GeneralEditor, ManageHostsEditor, MultiTabEditorProps } from "./queueEditors";
 import { usePromise } from "../hooks/usePromise";
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
@@ -30,30 +30,13 @@ function CancelAddButton (props: CancelAddButtonProps) {
 }
 
 
-interface AddQueueEditorProps {
+interface AddQueueEditorProps extends MultiTabEditorProps {
     // Shared
-    disabled: boolean;
     activeKey: availableTabs;
-    onTabSelect: (eventKey: string) => void;
     // General Tab
-    name: string;
-    nameValidationResult?: ValidationResult;
-    onChangeName: (value: string) => void;
-    description: string;
-    descriptValidationResult?: ValidationResult;
-    onChangeDescription: (value: string) => void;
-    backends: {[backend_type: string]: string};
-    allowedMeetingTypes: Set<string>;
-    allowedIsInvalid?: boolean;
-    onChangeAllowed: (allowed: Set<string>) => void;
-    showCorrectGeneralMessage: boolean;
     onGeneralNextClick: () => void;
     // Manage Hosts Tab
-    currentUser?: User;
-    hosts: User[];
-    onNewHost: (username: string) => void;
     checkHostError?: FormError;
-    onChangeHosts: (hosts: User[]) => void;
     onBackClick: () => void;
     onFinishClick: () => void;
 }
@@ -73,34 +56,14 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                     <h1>Add Queue</h1>
                     <Tab.Content>
                         <Tab.Pane eventKey='general'>
-                            <GeneralEditor
-                                disabled={props.disabled}
-                                name={props.name}
-                                nameValidationResult={props.nameValidationResult}
-                                onChangeName={props.onChangeName}
-                                description={props.description}
-                                descriptValidationResult={props.descriptValidationResult}
-                                onChangeDescription={props.onChangeDescription}
-                                backends={props.backends}
-                                allowedMeetingTypes={props.allowedMeetingTypes}
-                                allowedIsInvalid={props.allowedIsInvalid}
-                                onChangeAllowed={props.onChangeAllowed}
-                                showCorrectGeneralMessage={props.showCorrectGeneralMessage}
-                            />
+                            <GeneralEditor {...props} />
                             <div className='mt-4'>
                                 <Button variant='primary' disabled={props.disabled} onClick={props.onGeneralNextClick}>Next</Button>
                                 <CancelAddButton disabled={props.disabled} />
                             </div>
                         </Tab.Pane>
                         <Tab.Pane eventKey='hosts'>
-                            <ManageHostsEditor
-                                disabled={props.disabled}
-                                currentUser={props.currentUser}
-                                hosts={props.hosts}
-                                onNewHost={props.onNewHost}
-                                checkHostError={props.checkHostError}
-                                onChangeHosts={props.onChangeHosts}
-                            />
+                            <ManageHostsEditor {...props} />
                             <div className='mt-4'>
                                 <Button variant='primary' aria-label='Back' disabled={props.disabled} onClick={props.onBackClick}>
                                     Back
