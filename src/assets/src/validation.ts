@@ -1,4 +1,5 @@
 import { string, StringSchema, SchemaDescription, TestMessageParams } from 'yup';
+import { QueueHost } from "./models";
 import { getUser } from "./services/api";
 
 // Yup: https://github.com/jquense/yup
@@ -83,3 +84,68 @@ export function validateString (value: string, schema: StringSchema, showRemaini
     }
     return {'transformedValue': transformedValue, 'isInvalid': isInvalid, 'messages': messages};
 }
+
+
+export const meetingConflictMessage = (
+    'You cannot disallow one or more of the below meeting types until ' +
+    'the following meetings that use them have been removed from the queue:'
+);
+
+export interface MeetingTypesValidationResult {
+    isInvalid: boolean;
+    messages: ReadonlyArray<string>;
+    existingMeetingConflict: boolean;
+    meetingConflicts?: ReadonlyArray<string>;
+}
+
+export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): MeetingTypesValidationResult {
+    let messages = Array();
+
+    const noTypesSelected = value.size === 0;
+    if (noTypesSelected) messages.push('You must select at least one allowed meeting type.');
+
+    let existingMeetingConflict = false;
+    let meetingConflicts;
+    if (queue) {
+        const meetingsWithDisallowedBackends = queue!.meeting_set.filter(m => !value.has(m.backend_type));
+        if (meetingsWithDisallowedBackends.length) {
+            existingMeetingConflict = true;
+            meetingConflicts = meetingsWithDisallowedBackends.map((m) => {
+                const meetingType = m.backend_type;
+                const attendeeStrings = m.attendees.map(u => `${u.first_name} ${u.last_name} (${u.username})`);
+                return `${meetingType} meeting with ${attendeeStrings.join(', ')}`;
+            })
+        }
+    }
+    return {
+        isInvalid: (noTypesSelected || existingMeetingConflict),
+        messages: messages,
+        existingMeetingConflict: existingMeetingConflict,
+        meetingConflicts: meetingConflicts
+    }
+}
+
+
+// Utility wrappers for both validating and updating React state using hook setter functions
+
+type StringValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | ValidationResult>>;
+type MeetingTypesValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | MeetingTypesValidationResult>>
+
+export function validateAndSetStringResult (
+    someValue: string,
+    schema: StringSchema,
+    resultSetter: StringValidationResultSetter,
+    showRemaining?: boolean
+): ValidationResult {
+    const validationResult = validateString(someValue, schema, !!showRemaining);
+    resultSetter(validationResult);
+    return validationResult;
+};
+
+export function validateAndSetMeetingTypesResult (
+    allowedBackends: Set<string>, resultSetter: MeetingTypesValidationResultSetter, queue?: QueueHost
+): MeetingTypesValidationResult {
+    const validationResult = validateMeetingTypes(allowedBackends, queue);
+    resultSetter(validationResult);
+    return validationResult;
+};

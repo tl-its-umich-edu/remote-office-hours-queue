@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
 import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
-import { StringSchema } from "yup";
 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog } from "./common";
 import { PageProps } from "./page";
@@ -10,10 +9,13 @@ import { usePromise } from "../hooks/usePromise";
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { confirmUserExists, queueDescriptSchema, queueNameSchema, ValidationResult, validateString } from "../validation";
+import {
+    confirmUserExists, MeetingTypesValidationResult, queueDescriptSchema, queueNameSchema, ValidationResult,
+    validateAndSetStringResult, validateAndSetMeetingTypesResult
+} from "../validation";
 
 
-type availableTabs = 'general' | 'hosts';
+type AvailableTabs = 'general' | 'hosts';
 
 const buttonSpacing = 'ml-3'
 
@@ -32,7 +34,7 @@ function CancelAddButton (props: CancelAddButtonProps) {
 
 interface AddQueueEditorProps extends MultiTabEditorProps {
     // Shared
-    activeKey: availableTabs;
+    activeKey: AvailableTabs;
     // General Tab
     onGeneralNextClick: () => void;
     // Manage Hosts Tab
@@ -93,14 +95,14 @@ export function AddQueuePage(props: PageProps) {
     }
 
     // Set up page state
-    const [activeKey, setActiveKey] = useState('general' as availableTabs);
+    const [activeKey, setActiveKey] = useState('general' as AvailableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
     const [name, setName] = useState('');
     const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
     const [description, setDescription] = useState('');
     const [descriptValidationResult, setDescriptValidationResult] = useState(undefined as undefined | ValidationResult);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
-    const [allowedIsInvalid, setAllowedIsInvalid] = useState(undefined as undefined | boolean);
+    const [allowedValidationResult, setAllowedValidationResult] = useState(undefined as undefined | MeetingTypesValidationResult);
 
     const [hosts, setHosts] = useState([props.user] as User[]);
 
@@ -127,48 +129,32 @@ export function AddQueuePage(props: PageProps) {
         }
     );
 
-    // Validation functions
-    type ValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | ValidationResult>>;
-    function validateSomething (someValue: string, schema: StringSchema, someSetter: ValidationResultSetter): ValidationResult {
-        const validationResult = validateString(someValue, schema, true);
-        someSetter(validationResult);
-        return validationResult;
-    };
-    const validateMeetingTypes = (allowedBackends: Set<string>): boolean => {
-        const isInvalid = allowedBackends.size === 0;
-        setAllowedIsInvalid(isInvalid);
-        return isInvalid;
-    };
-
     // On change handlers
     const handleNameChange = (newName: string) => {
         setName(newName);
-        validateSomething(newName, queueNameSchema, setNameValidationResult);
+        validateAndSetStringResult(newName, queueNameSchema, setNameValidationResult);
     };
     const handleDescriptionChange = (newDescription: string) => {
         setDescription(newDescription);
-        validateSomething(newDescription, queueDescriptSchema, setDescriptValidationResult);
+        validateAndSetStringResult(newDescription, queueDescriptSchema, setDescriptValidationResult);
     };
     const handleAllowedChange = (newAllowedBackends: Set<string>) => {
         setAllowedMeetingTypes(newAllowedBackends);
-        validateMeetingTypes(newAllowedBackends);
+        validateAndSetMeetingTypesResult(newAllowedBackends, setAllowedValidationResult);
     };
 
     // On click handlers
     const handleGeneralNextClick = () => {
-        let curNameValidationResult = nameValidationResult;
-        let curDescriptValidationResult = descriptValidationResult;
-        let curAllowedIsInvalid = allowedIsInvalid;
-        if (!nameValidationResult) {
-            curNameValidationResult = validateSomething(name, queueNameSchema, setNameValidationResult);
-        }
-        if (!descriptValidationResult) {
-            curDescriptValidationResult = validateSomething(description, queueDescriptSchema, setDescriptValidationResult);
-        }
-        if (allowedIsInvalid === undefined) {
-            curAllowedIsInvalid = validateMeetingTypes(allowedMeetingTypes);
-        }
-        if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && curAllowedIsInvalid === false) {
+        const curNameValidationResult = !nameValidationResult
+            ? validateAndSetStringResult(name, queueNameSchema, setNameValidationResult, true)
+            : nameValidationResult;
+        const curDescriptValidationResult = !descriptValidationResult
+            ? validateAndSetStringResult(description, queueDescriptSchema, setDescriptValidationResult, true)
+            : descriptValidationResult;
+        const curAllowedValidationResult = !allowedValidationResult
+            ? validateAndSetMeetingTypesResult(allowedMeetingTypes, setAllowedValidationResult)
+            : nameValidationResult;
+        if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
             setActiveKey('hosts');
             if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
         } else {
@@ -215,7 +201,7 @@ export function AddQueuePage(props: PageProps) {
                 onChangeDescription={handleDescriptionChange}
                 backends={props.backends}
                 allowedMeetingTypes={allowedMeetingTypes}
-                allowedIsInvalid={allowedIsInvalid}
+                allowedValidationResult={allowedValidationResult}
                 onChangeAllowed={handleAllowedChange}
                 showCorrectGeneralMessage={showCorrectGeneralMessage}
                 onGeneralNextClick={handleGeneralNextClick}
