@@ -1,19 +1,21 @@
 import * as React from "react";
 import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import * as api from "../services/api";
-import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import { 
     UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField,
-    DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm, LoginDialog,
-    Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage
+    DateDisplay, CopyField, EditToggleField, showConfirmation, StatelessInputGroupForm, StatelessTextAreaForm,
+    LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage
 } from "./common";
+import { AllowedBackendsForm, BackendSelector as MeetingBackendSelector } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
-import { AllowedBackendsForm, BackendSelector as MeetingBackendSelector } from "./meetingType";
+import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
+import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, validateString } from "../validation";
@@ -243,7 +245,13 @@ function QueueEditor(props: QueueEditorProps) {
     return (
         <div>
             <div className="float-right">
-                <button onClick={props.onRemoveQueue} disabled={props.disabled} className="btn btn-danger">
+                <Link to={`/manage/${props.queue.id}/settings`}>
+                    <Button variant='primary' aria-label='Settings'>
+                        <FontAwesomeIcon icon={faCog} />
+                        <span className='ml-2'>Settings</span>
+                    </Button>
+                </Link>
+                <button onClick={props.onRemoveQueue} disabled={props.disabled} className="btn btn-danger ml-3">
                     Delete Queue
                 </button>
             </div>
@@ -424,17 +432,6 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
             </Modal.Footer>
         </Modal>
     );
-}
-
-const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, actionDescription: string) => {
-    dialog.current!.show({
-        title: title,
-        body: `Are you sure you want to ${actionDescription}?`,
-        actions: [
-            Dialog.CancelAction(),
-            Dialog.OKAction(action),
-        ],
-    });
 }
 
 interface EditPageParams {
