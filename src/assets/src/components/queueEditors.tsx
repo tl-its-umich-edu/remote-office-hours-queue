@@ -7,7 +7,7 @@ import {
 } from "./common";
 import { AllowedBackendsForm } from "./meetingType";
 import { User } from "../models";
-import { uniqnameSchema, ValidationResult } from "../validation";
+import { meetingConflictMessage, MeetingTypesValidationResult, uniqnameSchema, ValidationResult } from "../validation";
 
 
 const requiredSymbol = <span className='text-danger'>*</span>;
@@ -25,13 +25,27 @@ interface GeneralEditorProps extends QueueEditorProps {
     onChangeDescription: (value: string) => void;
     backends: {[backend_type: string]: string};
     allowedMeetingTypes: Set<string>;
-    allowedIsInvalid?: boolean;
+    allowedValidationResult?: MeetingTypesValidationResult;
     onChangeAllowed: (allowed: Set<string>) => void;
     showCorrectGeneralMessage: boolean;
 }
 
 export function GeneralEditor(props: GeneralEditorProps) {
-    const correctMessage = 'Please correct the invalid entries below in order to proceed.'
+    const correctMessage = 'Please correct the invalid entries below in order to proceed.';
+
+    let allowedFeedbackMessages;
+    let meetingConflictsAlert;
+    if (props.allowedValidationResult && props.allowedValidationResult.isInvalid) {
+        allowedFeedbackMessages = props.allowedValidationResult.messages.map((m, key) => <Alert key={key} variant='danger'>{m}</Alert>);
+        if (props.allowedValidationResult.existingMeetingConflict) {
+            meetingConflictsAlert = (
+                <Alert variant='danger'>
+                    <span>{meetingConflictMessage}</span>
+                    <ul>{props.allowedValidationResult.meetingConflicts?.map((mc, key) => <li key={key}>{mc}</li>)}</ul>
+                </Alert>
+            );
+        }
+    }
 
     return (
         <div>
@@ -60,7 +74,8 @@ export function GeneralEditor(props: GeneralEditorProps) {
             />
             <h3>Meeting Types {requiredSymbol}</h3>
             <p>Allow the following meeting types (select at least one):</p>
-            {props.allowedIsInvalid ? <Alert variant='danger'>You must select at least one allowed meeting type.</Alert> : undefined}
+            <div>{allowedFeedbackMessages}</div>
+            {meetingConflictsAlert}
             <AllowedBackendsForm
                 allowed={props.allowedMeetingTypes}
                 backends={props.backends}
