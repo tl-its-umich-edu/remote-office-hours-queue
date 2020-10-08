@@ -144,6 +144,8 @@ export function AddQueuePage(props: PageProps) {
     };
 
     // On click handlers
+    const handleHostRemoveClick = (host: User) => setHosts(hosts.filter((user: User) => user.id !== host.id));
+
     const handleGeneralNextClick = () => {
         const curNameValidationResult = !nameValidationResult
             ? validateAndSetStringResult(name, queueNameSchema, setNameValidationResult, true)
@@ -207,9 +209,9 @@ export function AddQueuePage(props: PageProps) {
                 onGeneralNextClick={handleGeneralNextClick}
                 currentUser={props.user}
                 hosts={hosts}
-                onNewHost={doCheckHost}
+                onAddHost={doCheckHost}
+                onRemoveHost={handleHostRemoveClick}
                 checkHostError={checkHostError ? { source: 'Check Host', error: checkHostError } : undefined}
-                onChangeHosts={setHosts}
                 onBackClick={() => setActiveKey('general')}
                 onFinishClick={handleManageHostsFinishClick}
             />

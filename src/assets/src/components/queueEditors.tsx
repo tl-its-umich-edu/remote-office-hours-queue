@@ -89,20 +89,20 @@ export function GeneralEditor(props: GeneralEditorProps) {
 interface ManageHostsEditorProps extends QueueEditorProps {
     currentUser?: User;
     hosts: User[];
-    onNewHost: (username: string) => void;
+    onAddHost: (username: string) => void;
+    onRemoveHost: (user: User) => void;
     checkHostError?: FormError;
-    onChangeHosts: (hosts: User[]) => void;
 }
 
 export function ManageHostsEditor(props: ManageHostsEditorProps) {
     const hostUsernames = props.hosts.map(h => h.username);
-    const filterOutHost = (host: User) => props.hosts.filter((user: User) => user.id !== host.id);
+
     const hostsSoFar = props.hosts.map((host, key) => (
         <ListGroup.Item key={key}>
             <UserDisplay user={host} />
             <div className='float-right'>
                 <RemoveButton
-                    onRemove={() => props.onChangeHosts(filterOutHost(host))}
+                    onRemove={() => props.onRemoveHost(host)}
                     size='sm'
                     disabled={props.disabled || host.id === props.currentUser?.id}
                     screenReaderLabel='Remove Host'
@@ -131,7 +131,7 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
                 buttonType='success'
                 onSubmit={(username) => {
                     if (!hostUsernames.includes(username)) {
-                        props.onNewHost(username)
+                        props.onAddHost(username)
                     }
                 }}
                 disabled={props.disabled}
