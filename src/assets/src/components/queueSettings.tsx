@@ -75,7 +75,7 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                         </Tab.Pane>
                         <Tab.Pane eventKey='delete'>
                             <h2>Delete Queue</h2>
-                            <p>Delete the entire queue, including all hosts and current meetings in queue. This cannot be undone.</p>
+                            <p>Delete the entire queue, including all hosts and current meetings in queue. <strong>This cannot be undone.</strong></p>
                             <div className='mt-4'>
                                 <Button variant='danger' disabled={props.disabled} aria-label='Delete Queue' onClick={props.onDeleteClick}>
                                     Delete Queue
@@ -212,7 +212,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             : descriptValidationResult;
         const curAllowedValidationResult = !allowedValidationResult
             ? validateAndSetMeetingTypesResult(allowedMeetingTypes, setAllowedValidationResult, queue)
-            : nameValidationResult;
+            : allowedValidationResult;
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
             if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
             if (name !== queue?.name) doChangeName(name);
