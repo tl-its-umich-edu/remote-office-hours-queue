@@ -23,6 +23,12 @@ export const UserDisplay = (props: UserDisplayProps) =>
         {props.user.first_name} {props.user.last_name} <em>({props.user.username})</em>
     </span>
 
+export const userLoggedOnWarning = (
+    <Alert variant='primary'>
+        <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
+        at least once in order to be added.
+    </Alert>
+);
 
 interface RemoveButtonProps {
     onRemove: () => void;
