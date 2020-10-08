@@ -7,18 +7,17 @@ import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
 import { 
-    UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField,
-    DateDisplay, CopyField, EditToggleField, showConfirmation, StatelessInputGroupForm, StatelessTextAreaForm,
-    LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage
+    UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
+    CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage
 } from "./common";
-import { AllowedBackendsForm, BackendSelector as MeetingBackendSelector } from "./meetingType";
+import { BackendSelector as MeetingBackendSelector } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, validateString } from "../validation";
+import { confirmUserExists, uniqnameSchema, validateString } from "../validation";
 
 
 interface MeetingEditorProps {
@@ -77,24 +76,6 @@ function MeetingEditor(props: MeetingEditorProps) {
             <RemoveButton onRemove={() => props.onRemove(props.meeting)} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
         </td>
         </>
-    );
-}
-
-interface HostEditorProps {
-    host: User;
-    disabled: boolean;
-    onRemove?: (h: User) => void;
-}
-
-function HostEditor(props: HostEditorProps) {
-    const removeButton = props.onRemove
-        ? <RemoveButton onRemove={() => props.onRemove!(props.host)} size="sm" disabled={props.disabled} screenReaderLabel="Remove Host"/>
-        : undefined;
-    return (
-        <span>
-            <UserDisplay user={props.host}/>
-            <span className="float-right">{removeButton}</span>
-        </span>
     );
 }
 
@@ -183,7 +164,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     );
 }
 
-interface QueueEditorProps {
+interface QueueManagerProps {
     queue: QueueHost;
     user: User;
     disabled: boolean;
@@ -191,24 +172,12 @@ interface QueueEditorProps {
     defaultBackend: string;
     onAddMeeting: (uniqname: string, backend: string) => void;
     onRemoveMeeting: (m: Meeting) => void;
-    onAddHost: (uniqname: string) => void;
-    onRemoveHost: (h: User) => void;
-    onChangeName: (name: string) => void;
-    onChangeDescription: (description: string) => void;
-    onRemoveQueue: () => void;
     onSetStatus: (open: boolean) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
-    onUpdateAllowedBackends: (allowedBackends: Set<string>) => void;
 }
 
-function QueueEditor(props: QueueEditorProps) {
-    const lastHost = props.queue.hosts.length === 1;
-    const hosts = props.queue.hosts.map(h =>
-        <li className="list-group-item" key={h.id}>
-            <HostEditor host={h} onRemove={props.onRemoveHost} disabled={props.disabled || lastHost}/>
-        </li>
-    );
+function QueueManager(props: QueueManagerProps) {
     const meetings = props.queue.meeting_set
         .sort((a, b) => a.id - b.id)
         .map((m, i) =>
@@ -251,32 +220,9 @@ function QueueEditor(props: QueueEditorProps) {
                         <span className='ml-2'>Settings</span>
                     </Button>
                 </Link>
-                <button onClick={props.onRemoveQueue} disabled={props.disabled} className="btn btn-danger ml-3">
-                    Delete Queue
-                </button>
             </div>
-            <h1 className='form-inline'>
-                <span className='mr-2'>Manage: </span>
-                <EditToggleField
-                    id='name'
-                    value={props.queue.name}
-                    placeholder='New name...'
-                    buttonType='success'
-                    disabled={props.disabled}
-                    onSubmit={props.onChangeName}
-                    fieldComponent={StatelessInputGroupForm}
-                    fieldSchema={queueNameSchema}
-                    showRemaining={true}
-                    initialState={false}
-                >
-                    Change
-                </EditToggleField>
-            </h1>
-            <p>
-                <Link to={"/queue/" + props.queue.id}>
-                    View as visitor
-                </Link>
-            </p>
+            <h1>Manage: {props.queue.name}</h1>
+            <p><Link to={"/queue/" + props.queue.id}>View as visitor</Link></p>
             <div>
                 <div className="form-group row">
                     <label htmlFor="url" className="col-md-2 col-form-label">Queue URL:</label>
@@ -297,58 +243,6 @@ function QueueEditor(props: QueueEditorProps) {
                             <option value="open">Open</option>
                             <option value="closed">Closed</option>
                         </select>
-                    </div>
-                </div>
-                <div className="form-group row">
-                    <label htmlFor="allowed meeting types" className="col-md-2 col-form-label">Allowed Meeting Types:</label>
-                    <div className="col-md-6">
-                        <AllowedBackendsForm 
-                            allowed={new Set(props.queue.allowed_backends)}
-                            onChange={props.onUpdateAllowedBackends}
-                            disabled={props.disabled}
-                            backends={props.backends}
-                        />
-                    </div>
-                </div>
-                <div className="form-group row">
-                    <label htmlFor="description" className="col-md-2 col-form-label">Description:</label>
-                    <div className="col-md-6">
-                        <EditToggleField
-                            id='description'
-                            value={props.queue.description}
-                            placeholder='New description...'
-                            buttonType='success'
-                            disabled={props.disabled}
-                            onSubmit={props.onChangeDescription}
-                            fieldComponent={StatelessTextAreaForm}
-                            fieldSchema={queueDescriptSchema}
-                            showRemaining={true}
-                            initialState={false}
-                        >
-                            Change
-                        </EditToggleField>
-                    </div>
-                </div>
-                <div className="row">
-                    <label className="col-md-2 col-form-label">Hosted By:</label>
-                    <div className="col-md-6">
-                        <ul className="list-group">
-                            {hosts}
-                        </ul>
-                        <div className='page-content-flow'>
-                            <SingleInputField
-                                id="add_host"
-                                fieldComponent={StatelessInputGroupForm}
-                                placeholder="Uniqname..."
-                                buttonType="success"
-                                onSubmit={props.onAddHost}
-                                disabled={props.disabled}
-                                fieldSchema={uniqnameSchema}
-                                showRemaining={false}
-                            >
-                                + Add Host
-                            </SingleInputField>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -434,11 +328,11 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
     );
 }
 
-interface EditPageParams {
+interface QueueManagerPageParams {
     queue_id: string;
 }
 
-export function QueueEditorPage(props: PageProps<EditPageParams>) {
+export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
@@ -448,7 +342,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
 
-    //Setup basic state
+    // Set up basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
@@ -465,21 +359,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
-    //Setup interactions
-    const removeHost = async (h: User) => {
-        recordQueueManagementEvent("Removed Host");
-        await api.removeHost(queue!.id, h.id);
-    }
-    const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
-    const confirmRemoveHost = (h: User) => {
-        showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
-    }
-    const addHost = async (uniqname: string) => {
-        const user = await confirmUserExists(uniqname);
-        recordQueueManagementEvent("Added Host");
-        await api.addHost(queue!.id, user.id);
-    }
-    const [doAddHost, addHostLoading, addHostError] = usePromise(addHost);
+    // Set up API interactions
     const removeMeeting = async (m: Meeting) => {
         recordQueueManagementEvent("Removed Meeting");
         await api.removeMeeting(m.id);
@@ -494,25 +374,7 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         await api.addMeeting(queue!.id, user.id, backend);
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
-    const changeName = async (name: string) => {
-        recordQueueManagementEvent("Changed Name");
-        return await api.changeQueueName(queue!.id, name);
-    }
-    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueueChecked);
-    const changeDescription = async (description: string) => {
-        recordQueueManagementEvent("Changed Description");
-        return await api.changeQueueDescription(queue!.id, description);
-    }
-    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueueChecked);
-    const removeQueue = async () => {
-        recordQueueManagementEvent("Removed Host");
-        await api.deleteQueue(queue!.id);
-        location.href = '/manage';
-    }
-    const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue);
-    const confirmRemoveQueue = () => {
-        showConfirmation(dialogRef, () => doRemoveQueue(), "Delete Queue?", "permanently delete this queue");
-    }
+
     const setStatus = async (open: boolean) => {
         recordQueueManagementEvent("Set Open/Close: " + open);
         return await api.setStatus(queue!.id, open);
@@ -523,63 +385,42 @@ export function QueueEditorPage(props: PageProps<EditPageParams>) {
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
-    const updateAllowedBackends = async (allowedBackends: Set<string>) => {
-        if (allowedBackends.size === 0) {    
-            throw new Error("Must have at least one allowed meeting type.");
-        }
-        const meetingsWithDisallowedBackends = queue!.meeting_set.filter(m => !allowedBackends.has(m.backend_type));
-        if (meetingsWithDisallowedBackends.length) {
-            const meetingsList = meetingsWithDisallowedBackends
-                .map(m => m.attendees[0])
-                .map(u => `${u.first_name} ${u.last_name} (${u.username})`)
-                .reduce((p, c) => p + ', ' + c);
-            throw new Error(`You can't disallow this meeting type until the following meetings that use it have been removed from the queue: ${meetingsList}`);
-        }
-        await api.updateAllowedMeetingTypes(queue!.id, allowedBackends);
-    }
-    const [doUpdateAllowedBackends, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedBackends);
     
     //Render
-    const isChanging = removeHostLoading || addHostLoading || removeMeetingLoading || addMeetingLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading || setStatusLoading || changeAssigneeLoading || updateAllowedMeetingTypesLoading;
+    const isChanging = removeMeetingLoading || addMeetingLoading || setStatusLoading || changeAssigneeLoading;
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
-        {source: 'Remove Host', error: removeHostError}, 
-        {source: 'Add Host', error: addHostError}, 
         {source: 'Remove Meeting', error: removeMeetingError}, 
         {source: 'Add Meeting', error: addMeetingError}, 
-        {source: 'Queue Name', error: changeNameError}, 
-        {source: 'Queue Description', error: changeDescriptionError}, 
-        {source: 'Delete Queue', error: removeQueueError}, 
         {source: 'Queue Status', error: setStatusError}, 
-        {source: 'Assignee', error: changeAssigneeError},
-        {source: 'Allowed Meeting Types', error: updateAllowedMeetingTypesError}
+        {source: 'Assignee', error: changeAssigneeError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
-    const queueEditor = queue
-        && <QueueEditor queue={queue} disabled={isChanging} user={props.user!}
-            backends={props.backends} defaultBackend={props.defaultBackend}
-            onAddHost={doAddHost} onRemoveHost={confirmRemoveHost} 
-            onAddMeeting={doAddMeeting} onRemoveMeeting={confirmRemoveMeeting} 
-            onChangeName={doChangeName} onChangeDescription={doChangeDescription}
-            onSetStatus={doSetStatus} onRemoveQueue={confirmRemoveQueue}
-            onShowMeetingInfo={setVisibleMeetingDialog} onChangeAssignee={doChangeAssignee}
-            onUpdateAllowedBackends={doUpdateAllowedBackends}/>
+    const queueManager = queue
+        && <QueueManager
+                queue={queue}
+                disabled={isChanging}
+                user={props.user!}
+                backends={props.backends}
+                defaultBackend={props.defaultBackend}
+                onAddMeeting={doAddMeeting}
+                onRemoveMeeting={confirmRemoveMeeting}
+                onSetStatus={doSetStatus}
+                onShowMeetingInfo={setVisibleMeetingDialog}
+                onChangeAssignee={doChangeAssignee}
+            />
     return (
         <>
-        <Dialog ref={dialogRef}/>
-        <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
-        <MeetingInfoDialog
-            meeting={visibleMeetingDialog}
-            onClose={() => setVisibleMeetingDialog(undefined)} />
-        <Breadcrumbs
-            currentPageTitle={queue?.name ?? queueIdParsed.toString()}
-            intermediatePages={[{title: "Manage", href: "/manage"}]} />
-        {loadingDisplay}
-        {errorDisplay}
-        {queueEditor}
+            <Dialog ref={dialogRef}/>
+            <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
+            <MeetingInfoDialog meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)} />
+            <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()} intermediatePages={[{title: "Manage", href: "/manage"}]} />
+            {loadingDisplay}
+            {errorDisplay}
+            {queueManager}
         </>
     );
 }
