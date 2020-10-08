@@ -9,6 +9,7 @@ urlpatterns = [
     path('queue/<str:queue_id>/', SpaView.as_view(), name='queue'),
     path('manage/', SpaView.as_view(), name='manage'),
     path('manage/<str:queue_id>/', SpaView.as_view(), name='edit'),
+    path('manage/<str:queue_id>/settings', SpaView.as_view()),
     path('search/<str:term>/', SpaView.as_view()),
     path('preferences/', SpaView.as_view(), name='preferences'),
     path('add_queue/', SpaView.as_view(), name='add_queue'),

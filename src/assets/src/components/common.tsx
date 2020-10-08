@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
+import Dialog from "react-bootstrap-dialog";
 import { StringSchema } from "yup";
 import { QueueAttendee, QueueBase, User } from "../models";
 import { validateString } from "../validation";
@@ -76,6 +77,19 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
     );
 }
 
+
+export const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, actionDescription: string) => {
+    dialog.current!.show({
+        title: title,
+        body: `Are you sure you want to ${actionDescription}?`,
+        actions: [
+            Dialog.CancelAction(),
+            Dialog.OKAction(action),
+        ],
+    });
+}
+
+
 export interface FormError {
     source: string;
     error: Error;
@@ -88,7 +102,6 @@ export const checkForbiddenError = (pair: FormError) => {
 interface ErrorDisplayProps {
     formErrors: FormError[];
 }
-
 
 export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
     const messages = props.formErrors.map(
@@ -114,7 +127,6 @@ export const DateDisplay = (props: DateDisplayProps) =>
             day: 'numeric',
         }).format(new Date(props.date))
     }</span>
-
 
 interface DateTimeDisplayProps {
     dateTime: string;
