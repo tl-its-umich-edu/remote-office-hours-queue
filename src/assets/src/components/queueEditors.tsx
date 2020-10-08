@@ -3,11 +3,11 @@ import { Alert, ListGroup } from "react-bootstrap";
 
 import {
     ErrorDisplay, FormError, RemoveButton, SingleInputField, StatelessInputGroupForm, StatelessTextAreaForm,
-    UserDisplay
+    UserDisplay, userLoggedOnWarning
 } from "./common";
 import { AllowedBackendsForm } from "./meetingType";
 import { User } from "../models";
-import { meetingConflictMessage, MeetingTypesValidationResult, uniqnameSchema, ValidationResult } from "../validation";
+import { MeetingTypesValidationResult, uniqnameSchema, ValidationResult } from "../validation";
 
 
 const requiredSymbol = <span className='text-danger'>*</span>;
@@ -33,19 +33,9 @@ interface GeneralEditorProps extends QueueEditorProps {
 export function GeneralEditor(props: GeneralEditorProps) {
     const correctMessage = 'Please correct the invalid entries below in order to proceed.';
 
-    let allowedFeedbackMessages;
-    let meetingConflictsAlert;
-    if (props.allowedValidationResult && props.allowedValidationResult.isInvalid) {
-        allowedFeedbackMessages = props.allowedValidationResult.messages.map((m, key) => <Alert key={key} variant='danger'>{m}</Alert>);
-        if (props.allowedValidationResult.existingMeetingConflict) {
-            meetingConflictsAlert = (
-                <Alert variant='danger'>
-                    <span>{meetingConflictMessage}</span>
-                    <ul>{props.allowedValidationResult.meetingConflicts?.map((mc, key) => <li key={key}>{mc}</li>)}</ul>
-                </Alert>
-            );
-        }
-    }
+    const allowedFeedbackMessages = (props.allowedValidationResult && props.allowedValidationResult.isInvalid)
+        ? props.allowedValidationResult.messages.map((m, key) => <Alert key={key} variant='danger'>{m}</Alert>)
+        : undefined;
 
     return (
         <div>
@@ -75,7 +65,6 @@ export function GeneralEditor(props: GeneralEditorProps) {
             <h3>Meeting Types {requiredSymbol}</h3>
             <p>Allow the following meeting types (select at least one):</p>
             <div>{allowedFeedbackMessages}</div>
-            {meetingConflictsAlert}
             <AllowedBackendsForm
                 allowed={props.allowedMeetingTypes}
                 backends={props.backends}
@@ -115,14 +104,8 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
         <div>
             <h2>Manage Hosts</h2>
             <h3>Add Hosts</h3>
-            <p>
-                You have been added to the list of hosts automatically. Add additional hosts here.
-                (You cannot remove yourself as a host.)
-            </p>
-            <Alert variant='primary'>
-                <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
-                at least once in order to be added.
-            </Alert>
+            <p>You have been added to the list of hosts automatically. Add additional hosts here.</p>
+            {userLoggedOnWarning}
             {props.checkHostError ? <ErrorDisplay formErrors={[props.checkHostError]} /> : undefined}
             <SingleInputField
                 id="add_host"
@@ -141,6 +124,7 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
                 + Add Host
             </SingleInputField>
             <h3>Current Hosts</h3>
+            <p>To remove a current host, select the trash icon to the right of user's name. You cannot remove yourself as a host.</p>
             <ListGroup>{hostsSoFar}</ListGroup>
         </div>
     );

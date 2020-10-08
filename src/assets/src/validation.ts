@@ -86,16 +86,9 @@ export function validateString (value: string, schema: StringSchema, showRemaini
 }
 
 
-export const meetingConflictMessage = (
-    'You cannot disallow one or more of the below meeting types until ' +
-    'the following meetings that use them have been removed from the queue:'
-);
-
 export interface MeetingTypesValidationResult {
     isInvalid: boolean;
     messages: ReadonlyArray<string>;
-    existingMeetingConflict: boolean;
-    meetingConflicts?: ReadonlyArray<string>;
 }
 
 export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): MeetingTypesValidationResult {
@@ -105,24 +98,23 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
     if (noTypesSelected) messages.push('You must select at least one allowed meeting type.');
 
     let existingMeetingConflict = false;
-    let meetingConflicts;
     if (queue) {
-        const meetingsWithDisallowedBackends = queue!.meeting_set.filter(m => !value.has(m.backend_type));
-        if (meetingsWithDisallowedBackends.length) {
-            existingMeetingConflict = true;
-            meetingConflicts = meetingsWithDisallowedBackends.map((m) => {
-                const meetingType = m.backend_type;
-                const attendeeStrings = m.attendees.map(u => `${u.first_name} ${u.last_name} (${u.username})`);
-                return `${meetingType} meeting with ${attendeeStrings.join(', ')}`;
-            })
+        const uniqueMeetingTypes = new Set(queue!.meeting_set.map(m => m.backend_type));
+        let conflictingTypes = Array();
+        uniqueMeetingTypes.forEach(uniqueMeetingType => {
+            if (!value.has(uniqueMeetingType)) conflictingTypes.push(uniqueMeetingType);
+        });
+
+        if (conflictingTypes.length > 0) {
+            existingMeetingConflict = true
+            messages.push(
+                'You cannot disallow the following meeting types until the meetings ' +
+                'using them have been removed from the queue: ' +
+                conflictingTypes.join(', ')
+            );
         }
     }
-    return {
-        isInvalid: (noTypesSelected || existingMeetingConflict),
-        messages: messages,
-        existingMeetingConflict: existingMeetingConflict,
-        meetingConflicts: meetingConflicts
-    }
+    return { isInvalid: (noTypesSelected || existingMeetingConflict), messages: messages };
 }
 
 
