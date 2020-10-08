@@ -1,14 +1,12 @@
 import * as React from "react";
-import { createRef } from "react";
 import { Route, withRouter } from 'react-router-dom'
 import { RouteComponentProps, Switch } from 'react-router'
-import Dialog from "react-bootstrap-dialog";
 
 import { Globals } from "..";
 import { HomePage } from "../components/home";
 import { ManagePage } from "../components/manage";
 import { QueuePage } from "../components/queue";
-import { QueueEditorPage } from "../components/edit";
+import { QueueManagerPage } from "../components/queueManager";
 import { SearchPage } from "../components/search";
 import { PreferencesPage } from "../components/preferences";
 import { AddQueuePage } from "../components/addQueue";
@@ -30,7 +28,7 @@ function App(props: AppProps) {
                 <ManagePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} defaultBackend={props.globals.default_backend} />
             }/>
             <Route path='/manage/:queue_id' exact render={p => 
-                <QueueEditorPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} key={(p.match.params as any).queue_id} defaultBackend={props.globals.default_backend} />
+                <QueueManagerPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} key={(p.match.params as any).queue_id} defaultBackend={props.globals.default_backend} />
             }/>
             <Route path='/queue/:queue_id' exact render={p => 
                 <QueuePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} key={(p.match.params as any).queue_id} defaultBackend={props.globals.default_backend} />
