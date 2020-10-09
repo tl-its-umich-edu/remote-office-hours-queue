@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
+import { Link } from 'react-router-dom';
 import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog } from "./common";
@@ -17,7 +18,7 @@ import {
 
 type AvailableTabs = 'general' | 'hosts';
 
-const buttonSpacing = 'ml-3'
+const buttonSpacing = 'mr-3 mb-3'
 
 interface CancelAddButtonProps {
     disabled: boolean;
@@ -25,9 +26,12 @@ interface CancelAddButtonProps {
 
 function CancelAddButton (props: CancelAddButtonProps) {
     return (
-        <Button variant='light' className={`text-danger ${buttonSpacing}`} aria-label='Cancel' href='/manage/' disabled={props.disabled}>
-            Cancel
-        </Button>
+        <Link to='/manage/'>
+            <Button variant='light' className={'text-danger ' + buttonSpacing} aria-label='Cancel' disabled={props.disabled}>
+                Cancel
+            </Button>
+        </Link>
+
     );
 }
 
@@ -48,26 +52,40 @@ function AddQueueEditor(props: AddQueueEditorProps) {
     return (
         <Tab.Container id='add-queue-editor' defaultActiveKey='general' activeKey={props.activeKey} onSelect={props.onTabSelect}>
             <Row>
-                <Col sm={3}>
+                <Col md={3} sm={3}>
                     <Nav variant='pills' className='flex-column mt-5'>
                         <Nav.Item><Nav.Link eventKey='general'>General</Nav.Link></Nav.Item>
                         <Nav.Item><Nav.Link eventKey='hosts'>Manage Hosts</Nav.Link></Nav.Item>
                     </Nav>
                 </Col>
-                <Col sm={6}>
+                <Col md={6} sm={9}>
                     <h1>Add Queue</h1>
                     <Tab.Content>
                         <Tab.Pane eventKey='general'>
                             <GeneralEditor {...props} />
                             <div className='mt-4'>
-                                <Button variant='primary' disabled={props.disabled} onClick={props.onGeneralNextClick}>Next</Button>
+                                <Button
+                                    variant='primary'
+                                    className={buttonSpacing}
+                                    aria-label='Next'
+                                    disabled={props.disabled}
+                                    onClick={props.onGeneralNextClick}
+                                >
+                                    Next
+                                </Button>
                                 <CancelAddButton disabled={props.disabled} />
                             </div>
                         </Tab.Pane>
                         <Tab.Pane eventKey='hosts'>
                             <ManageHostsEditor {...props} />
                             <div className='mt-4'>
-                                <Button variant='primary' aria-label='Back' disabled={props.disabled} onClick={props.onBackClick}>
+                                <Button
+                                    variant='primary'
+                                    className={buttonSpacing}
+                                    aria-label='Back'
+                                    disabled={props.disabled}
+                                    onClick={props.onBackClick}
+                                >
                                     Back
                                 </Button>
                                 <Button

@@ -21,7 +21,7 @@ import {
 
 type AvailableTabs = 'general' | 'hosts' | 'delete';
 
-const buttonSpacing = 'ml-3'
+const buttonSpacing = 'mr-3 mb-3'
 
 interface QueueSettingsProps extends MultiTabEditorProps {
     // Shared
@@ -38,14 +38,14 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
     return (
         <Tab.Container id='add-queue-editor' defaultActiveKey='general' activeKey={props.activeKey} onSelect={props.onTabSelect}>
             <Row>
-                <Col sm={3}>
+                <Col md={3} sm={3}>
                     <Nav variant='pills' className='flex-column mt-5'>
                         <Nav.Item><Nav.Link eventKey='general'>General</Nav.Link></Nav.Item>
                         <Nav.Item><Nav.Link eventKey='hosts'>Manage Hosts</Nav.Link></Nav.Item>
                         <Nav.Item><Nav.Link eventKey='delete'>Delete Queue</Nav.Link></Nav.Item>
                     </Nav>
                 </Col>
-                <Col sm={6}>
+                <Col md={6} sm={9}>
                     <h1>Settings</h1>
                     <Tab.Content>
                         <Tab.Pane eventKey='general'>
@@ -53,6 +53,7 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                             <div className='mt-4'>
                                 <Button
                                     variant='primary'
+                                    className={buttonSpacing}
                                     disabled={props.disabled}
                                     aria-label='Save Changes'
                                     onClick={props.onSaveGeneralClick}
@@ -61,7 +62,7 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                                 </Button>
                                 <Button
                                     variant='light'
-                                    className={`text-danger ${buttonSpacing}`}
+                                    className={'text-danger ' + buttonSpacing}
                                     disabled={props.disabled}
                                     aria-label='Discard Changes'
                                     onClick={props.onDiscardGeneralClick}
