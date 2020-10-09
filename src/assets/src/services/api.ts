@@ -96,6 +96,23 @@ export const createQueue = async (
     return await resp.json() as QueueHost;
 }
 
+export const updateQueue = async (
+    queue_id: number, name?: string, description?: string, allowed_backends?: Set<string>
+) => {
+    const queuePatched = Object();
+    if (name !== undefined) queuePatched['name'] = name;
+    if (description !== undefined) queuePatched['description'] = description;
+    if (allowed_backends) queuePatched['allowed_backends'] = Array.from(allowed_backends);
+
+    const resp = await fetch(`/api/queues/${queue_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify(queuePatched)
+    });
+    await handleErrors(resp);
+    return await resp.json() as QueueHost | QueueAttendee;
+}
+
 export const deleteQueue = async (id: number) => {
     const resp = await fetch(`/api/queues/${id}/`, { 
         method: "DELETE",
@@ -147,29 +164,6 @@ export const removeHost = async (queue_id: number, user_id: number) => {
     return resp;
 }
 
-export const changeQueueName = async (queue_id: number, name: string) => {
-    const resp = await fetch(`/api/queues/${queue_id}/`, {
-        method: "PATCH",
-        headers: getPatchHeaders(),
-        body: JSON.stringify({
-            name: name,
-        }),
-    });
-    await handleErrors(resp);
-    return await resp.json();
-}
-
-export const changeQueueDescription = async (queue_id: number, description: string) => {
-    const resp = await fetch(`/api/queues/${queue_id}/`, {
-        method: "PATCH",
-        headers: getPatchHeaders(),
-        body: JSON.stringify({
-            description: description,
-        }),
-    });
-    await handleErrors(resp);
-    return await resp.json();
-}
 
 export const setStatus = async (queue_id: number, open: boolean) => {
     const resp = await fetch(`/api/queues/${queue_id}/`, {
@@ -243,16 +237,4 @@ export const changeMeetingType = async (meeting_id: number, backend_type: string
     });
     await handleErrors(resp);
     return await resp.json() as Meeting;
-}
-
-export const updateAllowedMeetingTypes = async (queue_id: number, allowed_backends: Set<string>) => {
-    const resp = await fetch(`/api/queues/${queue_id}/`, {
-        method: "PATCH",
-        headers: getPatchHeaders(),
-        body: JSON.stringify({
-            allowed_backends: Array.from(allowed_backends),
-        }),
-    });
-    await handleErrors(resp);
-    return await resp.json() as QueueHost | QueueAttendee;
 }
