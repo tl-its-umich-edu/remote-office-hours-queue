@@ -81,6 +81,7 @@ export function GeneralEditor(props: GeneralEditorProps) {
 interface ManageHostsEditorProps extends QueueEditorProps {
     currentUser?: User;
     hosts: User[];
+    addHostTextPrefix?: string;
     onAddHost: (username: string) => void;
     onRemoveHost: (user: User) => void;
     checkHostError?: FormError;
@@ -107,7 +108,7 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
         <div>
             <h2>Manage Hosts</h2>
             <h3>Add Hosts</h3>
-            <p>You have been added to the list of hosts automatically. Add additional hosts here.</p>
+            <p>{props.addHostTextPrefix} Add additional hosts to the queue here.</p>
             {userLoggedOnWarning}
             {props.checkHostError ? <ErrorDisplay formErrors={[props.checkHostError]} /> : undefined}
             <SingleInputField
@@ -127,7 +128,7 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
                 + Add Host
             </SingleInputField>
             <h3>Current Hosts</h3>
-            <p>To remove a host, select the trash icon to the right of user's name. You cannot remove yourself as a host.</p>
+            <p>To remove a host, select the trash icon to the right of the user's name. You cannot remove yourself as a host.</p>
             <ListGroup>{hostsSoFar}</ListGroup>
         </div>
     );
