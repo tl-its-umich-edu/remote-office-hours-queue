@@ -227,6 +227,7 @@ export function AddQueuePage(props: PageProps) {
                 onGeneralNextClick={handleGeneralNextClick}
                 currentUser={props.user}
                 hosts={hosts}
+                addHostTextPrefix='You were added to the list of pending hosts automatically.'
                 onAddHost={doCheckHost}
                 onRemoveHost={handleHostRemoveClick}
                 checkHostError={checkHostError ? { source: 'Check Host', error: checkHostError } : undefined}
