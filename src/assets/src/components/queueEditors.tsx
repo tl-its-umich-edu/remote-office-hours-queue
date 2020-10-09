@@ -28,10 +28,12 @@ interface GeneralEditorProps extends QueueEditorProps {
     allowedValidationResult?: MeetingTypesValidationResult;
     onChangeAllowed: (allowed: Set<string>) => void;
     showCorrectGeneralMessage: boolean;
+    showSuccessMessage?: boolean;
 }
 
 export function GeneralEditor(props: GeneralEditorProps) {
     const correctMessage = 'Please correct the invalid entries below in order to proceed.';
+    const successMessage = 'Your changes were saved successfully!'
 
     const allowedFeedbackMessages = (props.allowedValidationResult && props.allowedValidationResult.isInvalid)
         ? props.allowedValidationResult.messages.map((m, key) => <Alert key={key} variant='danger'>{m}</Alert>)
@@ -40,6 +42,7 @@ export function GeneralEditor(props: GeneralEditorProps) {
     return (
         <div>
             <h2>General</h2>
+            {props.showSuccessMessage ? <Alert variant='success'>{successMessage}</Alert> : undefined}
             {props.showCorrectGeneralMessage ? <Alert variant='danger'>{correctMessage}</Alert> : undefined}
             <p>{requiredSymbol} indicates a required field.</p>
             <h3>Name {requiredSymbol}</h3>
@@ -124,7 +127,7 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
                 + Add Host
             </SingleInputField>
             <h3>Current Hosts</h3>
-            <p>To remove a current host, select the trash icon to the right of user's name. You cannot remove yourself as a host.</p>
+            <p>To remove a host, select the trash icon to the right of user's name. You cannot remove yourself as a host.</p>
             <ListGroup>{hostsSoFar}</ListGroup>
         </div>
     );
