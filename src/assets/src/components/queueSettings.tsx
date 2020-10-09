@@ -89,7 +89,6 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
     );
 }
 
-
 interface SettingsPageParams {
     queue_id: string;
 }
@@ -126,6 +125,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
 
     const [activeKey, setActiveKey] = useState('general' as AvailableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [name, setName] = useState('');
     const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
     const [description, setDescription] = useState('');
@@ -148,20 +148,11 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
 
     // Set up API interactions
-    const changeName = async (name: string) => {
-        recordQueueManagementEvent("Changed Name");
-        return await api.changeQueueName(queue!.id, name);
+    const updateQueue = async (name?: string, description?: string, allowed_backends?: Set<string>) => {
+        recordQueueManagementEvent("Updated Queue Details");
+        return await api.updateQueue(queue!.id, name, description, allowed_backends);
     }
-    const [doChangeName, changeNameLoading, changeNameError] = usePromise(changeName, setQueueChecked);
-    const changeDescription = async (description: string) => {
-        recordQueueManagementEvent("Changed Description");
-        return await api.changeQueueDescription(queue!.id, description);
-    }
-    const [doChangeDescription, changeDescriptionLoading, changeDescriptionError] = usePromise(changeDescription, setQueueChecked);
-    const updateAllowedBackends = async (allowedBackends: Set<string>) => {
-        await api.updateAllowedMeetingTypes(queue!.id, allowedBackends);
-    }
-    const [doUpdateAllowedBackends, updateAllowedMeetingTypesLoading, updateAllowedMeetingTypesError] = usePromise(updateAllowedBackends);
+    const [doUpdateQueue, updateQueueLoading, updateQueueError] = usePromise(updateQueue, setQueueChecked);
 
     const removeHost = async (h: User) => {
         recordQueueManagementEvent("Removed Host");
@@ -192,14 +183,17 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     const handleNameChange = (newName: string) => {
         setName(newName);
         validateAndSetStringResult(newName, queueNameSchema, setNameValidationResult, true);
+        if (showSuccessMessage) setShowSuccessMessage(false);
     };
     const handleDescriptionChange = (newDescription: string) => {
         setDescription(newDescription);
         validateAndSetStringResult(newDescription, queueDescriptSchema, setDescriptValidationResult, true);
+        if (showSuccessMessage) setShowSuccessMessage(false);
     };
     const handleAllowedChange = (newAllowedBackends: Set<string>) => {
         setAllowedMeetingTypes(newAllowedBackends);
         validateAndSetMeetingTypesResult(newAllowedBackends, setAllowedValidationResult, queue)
+        if (showSuccessMessage) setShowSuccessMessage(false);
     };
 
     // On click handlers
@@ -213,12 +207,16 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         const curAllowedValidationResult = !allowedValidationResult
             ? validateAndSetMeetingTypesResult(allowedMeetingTypes, setAllowedValidationResult, queue)
             : allowedValidationResult;
+
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
             if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
-            if (name !== queue?.name) doChangeName(name);
-            if (description !== queue?.description) doChangeDescription(description);
-            doUpdateAllowedBackends(allowedMeetingTypes);  // compare using _.isEqual()?
+            doUpdateQueue(
+                name.trim() !== queue?.name ? name : undefined,
+                description.trim() !== queue?.description ? description : undefined,
+                allowedMeetingTypes // compare using _.isEqual()?
+            );
             resetValidationResults();
+            setShowSuccessMessage(true);
         } else {
             if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
         }
@@ -241,18 +239,13 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         }
     };
 
-    const isChanging = (
-        addHostLoading || removeHostLoading || changeNameLoading || changeDescriptionLoading || removeQueueLoading ||
-        updateAllowedMeetingTypesLoading
-    );
+    const isChanging = updateQueueLoading || addHostLoading || removeHostLoading || removeQueueLoading;
     const globalErrors = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: userWebSocketError},
-        {source: 'Queue Name', error: changeNameError}, 
-        {source: 'Queue Description', error: changeDescriptionError},
-        {source: 'Allowed Meeting Types', error: updateAllowedMeetingTypesError},
+        {source: 'Update Queue', error: updateQueueError},
         {source: 'Remove Host', error: removeHostError},
-        {source: 'Delete Queue', error: removeQueueError} 
+        {source: 'Remove Queue', error: removeQueueError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = globalErrors.some(checkForbiddenError);
 
@@ -274,6 +267,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
                 allowedValidationResult={allowedValidationResult}
                 onChangeAllowed={handleAllowedChange}
                 showCorrectGeneralMessage={showCorrectGeneralMessage}
+                showSuccessMessage={showSuccessMessage}
                 onSaveGeneralClick={handleSaveGeneralClick}
                 onDiscardGeneralClick={handleDiscardGeneralClick}
                 currentUser={props.user}
