@@ -3,12 +3,13 @@ import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
-import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
+import { Alert, Button, Col, Form, InputGroup, Modal, Row, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
 import { 
     UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
-    CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage
+    CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage,
+    userLoggedOnWarning
 } from "./common";
 import { BackendSelector as MeetingBackendSelector } from "./meetingType";
 import { PageProps } from "./page";
@@ -34,7 +35,7 @@ interface MeetingEditorProps {
 function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0];
     const joinUrl = props.meeting.backend_metadata?.meeting_url;
-    const joinLink = joinUrl 
+    const joinLink = joinUrl
         ? (
             <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
                 Start Meeting
@@ -60,21 +61,28 @@ function MeetingEditor(props: MeetingEditorProps) {
             : props.onChangeAssignee(props.potentialAssignees.find(a => a.id === +e.target.value));
     return (
         <>
-        <td>
-            <UserDisplay user={user}/>
-        </td>
-        <td className="form-group">
-            <select className="form-control assign"
-                value={props.meeting.assignee?.id ?? ""} 
-                onChange={onChangeAssignee}>
-                {assigneeOptions}
-            </select>
-        </td>
-        <td>
-            {joinLink}
-            {infoButton}
-            <RemoveButton onRemove={() => props.onRemove(props.meeting)} size="sm" disabled={props.disabled} screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}/>
-        </td>
+            <td><UserDisplay user={user}/></td>
+            <td className="form-group">
+                <select className="form-control assign"
+                    value={props.meeting.assignee?.id ?? ""}
+                    onChange={onChangeAssignee}
+                >
+                    {assigneeOptions}
+                </select>
+            </td>
+            <td>
+                <Row>
+                    <Col md={6}>{joinLink}</Col>
+                    <Col md={4}>{infoButton}</Col>
+                    <Col md={2}>
+                        <RemoveButton
+                            onRemove={() => props.onRemove(props.meeting)}
+                            size="sm" disabled={props.disabled}
+                            screenReaderLabel={`Remove Meeting with ${user.first_name} ${user.last_name}`}
+                        />
+                    </Col>
+                </Row>
+            </td>
         </>
     );
 }
@@ -183,8 +191,17 @@ function QueueManager(props: QueueManagerProps) {
         .map((m, i) =>
             <tr key={m.id}>
                 <th scope="row" className="d-none d-sm-table-cell">{i+1}</th>
-                <MeetingEditor key={m.id} user={props.user} potentialAssignees={props.queue.hosts} meeting={m} disabled={props.disabled} backends={props.backends}
-                    onRemove={props.onRemoveMeeting} onShowMeetingInfo={props.onShowMeetingInfo} onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m) }/>
+                <MeetingEditor
+                    key={m.id}
+                    user={props.user}
+                    potentialAssignees={props.queue.hosts}
+                    meeting={m}
+                    disabled={props.disabled}
+                    backends={props.backends}
+                    onRemove={props.onRemoveMeeting}
+                    onShowMeetingInfo={props.onShowMeetingInfo}
+                    onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m)}
+                />
             </tr>
         );
     const meetingsTable = props.queue.meeting_set.length
@@ -195,7 +212,7 @@ function QueueManager(props: QueueManagerProps) {
                         <th scope="col" className="d-none d-sm-table-cell">Queue #</th>
                         <th scope="col">Attendee</th>
                         <th scope="col">Host</th>
-                        <th scope="col">Actions</th>
+                        <th scope="col">Meeting Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -206,10 +223,9 @@ function QueueManager(props: QueueManagerProps) {
         : (
             <Alert variant="dark">No meetings in queue.</Alert>
         );
+
+    const currentStatus = props.queue.status === 'open';
     const absoluteUrl = `${location.origin}/queue/${props.queue.id}`;
-    const toggleStatus = (e: ChangeEvent<HTMLSelectElement>) => {
-        props.onSetStatus(e.target.value === "open");
-    }
 
     return (
         <div>
@@ -223,44 +239,47 @@ function QueueManager(props: QueueManagerProps) {
             </div>
             <h1>Manage: {props.queue.name}</h1>
             <p><Link to={"/queue/" + props.queue.id}>View as visitor</Link></p>
-            <div>
-                <div className="form-group row">
-                    <label htmlFor="url" className="col-md-2 col-form-label">Queue URL:</label>
-                    <div className="col-md-6">
-                        <CopyField text={absoluteUrl} id="url"/>
-                    </div>
-                </div>
-                <div className="form-group row">
-                    <label className="col-md-2 col-form-label">Created:</label>
-                    <div className="col-md-6">
-                        <DateDisplay date={props.queue.created_at}/>
-                    </div>
-                </div>
-                <div className="form-group row">
-                    <label htmlFor="status" className="col-md-2 col-form-label">Queue Status:</label>
-                    <div className="col-md-6">
-                        <select className="form-control" id="status" onChange={toggleStatus} value={props.queue.status}>
-                            <option value="open">Open</option>
-                            <option value="closed">Closed</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <h3>Meetings Up Next</h3>
-            <div className="row">
-                <div className="col-md-12">
-                    <div className="table-responsive">
-                        {meetingsTable}
-                    </div>
-                </div>
-            </div>
-            <div className="row">
-                <div className="page-content-flow col-md-8">
-                    <AddAttendeeForm allowedBackends={new Set(props.queue.allowed_backends)} backends={props.backends}
-                        defaultBackend={props.defaultBackend} disabled={props.disabled}
-                        onSubmit={props.onAddMeeting}/>
-                </div>
-            </div>
+            <Row noGutters>
+                <Col md={2}><Form.Label htmlFor='queue-url'>Queue URL</Form.Label></Col>
+                <Col md={6}><CopyField text={absoluteUrl} id="queue-url"/></Col>
+            </Row>
+            <Row noGutters className='mt-4'>
+                <Col md={2}><Form.Label htmlFor='queue-status'>Queue Status</Form.Label></Col>
+                <Col md={6}>
+                    <Form.Check
+                        className='switch'
+                        id='queue-status'
+                        type='switch'
+                        label={currentStatus ? 'Open' : 'Closed'}
+                        checked={props.queue.status === 'open'}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => props.onSetStatus(!currentStatus)}
+                    />
+                </Col>
+            </Row>
+
+            <Row noGutters className='mt-4'>
+                <Col md={2}><div id='created-at'>Created At</div></Col>
+                <Col md={6}><div aria-labelledby='created-at'><DateDisplay date={props.queue.created_at}/></div></Col>
+            </Row>
+
+            <h2 className='mt-4'>Meetings in Queue</h2>
+            <Row noGutters>
+                <Col md={8}>
+                    {userLoggedOnWarning}
+                    <AddAttendeeForm
+                        allowedBackends={new Set(props.queue.allowed_backends)}
+                        backends={props.backends}
+                        defaultBackend={props.defaultBackend}
+                        disabled={props.disabled}
+                        onSubmit={props.onAddMeeting}
+                    />
+                </Col>
+            </Row>
+            <Row noGutters className="mt-2">
+                <Col md={12}>
+                    <div className="table-responsive">{meetingsTable}</div>
+                </Col>
+            </Row>
         </div>
     );
 }
@@ -386,14 +405,14 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
     
-    //Render
+    // Render
     const isChanging = removeMeetingLoading || addMeetingLoading || setStatusLoading || changeAssigneeLoading;
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
-        {source: 'Remove Meeting', error: removeMeetingError}, 
-        {source: 'Add Meeting', error: addMeetingError}, 
-        {source: 'Queue Status', error: setStatusError}, 
+        {source: 'Remove Meeting', error: removeMeetingError},
+        {source: 'Add Meeting', error: addMeetingError},
+        {source: 'Queue Status', error: setStatusError},
         {source: 'Assignee', error: changeAssigneeError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
