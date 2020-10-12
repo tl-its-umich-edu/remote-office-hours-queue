@@ -1,12 +1,12 @@
 from unittest import mock
 
-from django.test import TransactionTestCase, override_settings
+from django.test import TestCase, override_settings
 
 from officehours_api.models import User, Queue, Meeting
 
 
 @override_settings(TWILIO_ACCOUNT_SID='aaa', TWILIO_AUTH_TOKEN='bbb', TWILIO_PHONE_FROM='+15555552323')
-class NotificationTestCase(TransactionTestCase):
+class NotificationTestCase(TestCase):
     def setUp(self):
         self.foo = User.objects.create(username='foo', email='foo@example.com')
         self.foo.profile.phone_number = '+15555550000'
