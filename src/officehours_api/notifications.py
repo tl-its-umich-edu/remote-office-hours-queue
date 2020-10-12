@@ -13,12 +13,17 @@ if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILI
     twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
     def notify_next_in_line(next_in_line: Meeting):
-        phone_numbers = (
+        print('notify_next_in_line', next_in_line.attendees.all())
+        print('with phones:', next_in_line.attendees_with_phone_numbers)
+        for a in next_in_line.attendees.all():
+            print(a)
+            print(a.profile.phone_number)
+        phone_numbers = list(
             u.profile.phone_number for u in
-            next_in_line.attendees
-                .exclude(profile__phone_number__isnull=True)
-                .exclude(profile__phone_number__exact='')
+            next_in_line.attendees_with_phone_numbers
         )
+        if not phone_numbers:
+            print('no phone numbers to notify')
         for p in phone_numbers:
             print(p)
             domain = Site.objects.get_current().domain
@@ -32,16 +37,16 @@ if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILI
                     f"for instructions to join."
                 ),
             )
-            print(message.sid)
-    
+            print('sid', message.sid)
+
     def notify_queue_no_longer_empty(first: Meeting):
         print('notify_queue_no_longer_empty', first)
-        phone_numbers = (
+        print('with phones:', first.queue.hosts_with_phone_numbers)
+        phone_numbers = list(
             h.profile.phone_number for h in
-            first.queue.hosts
-                .exclude(profile__phone_number__isnull=True)
-                .exclude(profile__phone_number__exact='')
+            first.queue.hosts_with_phone_numbers
         )
+        if not len(list(phone_numbers)): print('no phone numbers to notify')
         for p in phone_numbers:
             print(p)
             domain = Site.objects.get_current().domain
@@ -51,28 +56,30 @@ if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILI
                 to=p,
                 from_=settings.TWILIO_PHONE_FROM,
                 body=(
-                    f"Someone has joined your queue! Please visit {edit_url} "
+                    f"Someone has joined your queue, {first.queue.name}! "
+                    f"Please visit {edit_url} "
                     f"to start a meeting."
                 ),
             )
-            print(message.sid)
+            print('sid', message.sid)
 
     @receiver(pre_delete, sender=Meeting)
     def trigger_notification_delete(sender, instance: Meeting, **kwargs):
         print('trigger_notification_delete', instance)
         print('line_place', instance.line_place)
         if instance.line_place == 0:
+            print('meetings:', instance.queue.meeting_set.all())
             if instance.queue.meeting_set.count() <= 1:
+                print('this was the last queue so there is no next_in_line')
                 return
             next_in_line = instance.queue.meeting_set.order_by('id')[1]
+            print('next_in_line', next_in_line)
             notify_next_in_line(next_in_line)
 
     @receiver(post_save, sender=Meeting)
     def trigger_notification_create(sender, instance: Meeting, created, **kwargs):
         print('trigger_notification_create')
-        if instance.deleted:
-            return
-        if not created:
+        if instance.deleted or not created:
             return
         print('line_place', instance.line_place)
         if instance.line_place == 0:
