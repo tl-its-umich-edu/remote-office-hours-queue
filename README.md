@@ -15,3 +15,18 @@ Visit `localhost:8003/admin` in your browser and log in with your admin credenti
 ## Architectural Overview
 
 We use Django 3 as a backend and React+TypeScript in the frontend. The frontend is served through [django-webpack-loader](https://github.com/owais/django-webpack-loader) and integrates with the backend via [DRF](https://www.django-rest-framework.org/) REST endpoints and [Django Channels](https://channels.readthedocs.io/en/latest/) websockets. Authentication is handled with OIDC via [mozilla-django-oidc](https://github.com/mozilla/mozilla-django-oidc).
+
+### Backends
+
+Remote Office Hours Queue currently supports meetings in-person or via BlueJeans. These meeting providers -- `inperson` and `bluejeans` -- are considered *backends*.
+
+To use or develop with BlueJeans, set `BLUEJEANS_CLIENT_ID` and `BLUEJEANS_CLIENT_SECRET` as environment variables.
+
+### Notifications
+
+SMS notifications for hosts and attendees are provided via [Twilio](https://www.twilio.com/).
+
+To use or develop with SMS notifications, set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_FROM` (e.g.: +15555552323) as environment variables. Twilio provides free trial accounts with limited credit. You can also test notifications via unit tests, where Twilio is mocked: 
+```
+docker-compose run web python manage.py test officehours_api.tests.NotificationTestCase
+```
