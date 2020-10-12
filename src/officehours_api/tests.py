@@ -76,9 +76,7 @@ class NotificationTestCase(TransactionTestCase):
         self.create_meeting([self.bar, self.baz])
         mock_twilio.reset_mock()
         m1.delete()
-        print(mock_twilio.mock_calls)
         receivers = self.get_receivers(mock_twilio)
-        print(receivers)
         self.assertTrue(
             receivers >=
             {'+15555550001', '+15555550002',}
