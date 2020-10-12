@@ -6,8 +6,6 @@ services:
   web:
     build:
       context: src
-    env_file:
-      - .env
     environment:
       - ALLOWED_HOSTS=*
       - DEBUG=True
