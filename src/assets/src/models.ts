@@ -3,13 +3,15 @@ export interface User {
     username: string;
     first_name: string;
     last_name: string;
-    phone_number: string;
     attendee_set?: User[];
     hosted_queues?: ReadonlyArray<QueueBase>;
 }
 
 export interface MyUser extends User {
     my_queue: QueueAttendee | null;
+    phone_number: string;
+    notify_me_attendee: boolean;
+    notify_me_host: boolean;
 }
 
 export interface BluejeansMetadata {

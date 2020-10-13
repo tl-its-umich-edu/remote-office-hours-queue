@@ -5,7 +5,7 @@ import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/style.css'
 
 import * as api from "../services/api";
-import { User } from "../models";
+import { MyUser } from "../models";
 import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, LoginDialog, Breadcrumbs } from "./common";
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
@@ -19,9 +19,9 @@ const validatePhoneNumber = (phone: string, countryDialCode: string): Error[] =>
 }
 
 interface PreferencesEditorProps {
-    user: User;
+    user: MyUser;
     disabled: boolean;
-    onUpdateInfo: (phoneNumber: string) => void;
+    onUpdateInfo: (phoneNumber: string, notifyMeAttendee: boolean, notifyMeHost: boolean) => void;
     errorOccurred: boolean;
 }
 
@@ -30,6 +30,8 @@ type ValidationStatus = null | Error[]; // null = no changes, [] = valid
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
     const [countryDialCode, setCountryDialCode] = useState("");
+    const [notifyMeAttendee, setNotifyMeAttendee] = useState(props.user.notify_me_attendee)
+    const [notifyMeHost, setNotifyMeHost] = useState(props.user.notify_me_host)
     const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus);
 
     const phoneInput = (
@@ -44,6 +46,19 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             inputProps={{id: 'phone'}}
         />
     );
+    const notifyMeAttendeeInput = (
+        <div>
+            <label>As an attendee, notify me via SMS when it becomes my turn.</label>
+            <input type="checkbox" disabled={!phoneField} checked={notifyMeAttendee} onChange={() => setNotifyMeAttendee(!notifyMeAttendee)} />
+        </div>
+    );
+    const notifyMeHostInput = (
+        <div>
+            <label>As a host, notify me via SMS when someone joins my empty queue.</label>
+            <input type="checkbox" disabled={!phoneField} checked={notifyMeHost} onChange={() => setNotifyMeHost(!notifyMeHost)} />
+        </div>
+    );
+
     const validateAndSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
         if (props.user.phone_number === phoneField) {
@@ -55,13 +70,13 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             // Seems to be a known issue where the last character can't be removed as part of onChange:
             // https://github.com/bl00mber/react-phone-input-2/issues/231
             setValidationStatus([]);
-            props.onUpdateInfo('');
+            props.onUpdateInfo('', notifyMeAttendee, notifyMeHost);
             return; // Cleared form, so submit empty without validating
         }
         const validationErrors = validatePhoneNumber(phoneField, countryDialCode);
         setValidationStatus(validationErrors);
         if (!validationErrors.length)
-            props.onUpdateInfo(phoneField);
+            props.onUpdateInfo(phoneField, notifyMeAttendee, notifyMeHost);
     }
 
     const alertBlock =
@@ -85,6 +100,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                     <Form.Label>Phone Number</Form.Label>
                     {phoneInput}
                 </Form.Group>
+                {notifyMeAttendeeInput}
+                {notifyMeHostInput}
                 <Button variant="primary" type="submit" disabled={props.disabled}>Save</Button>
             </Form>
         </div>
@@ -100,15 +117,16 @@ export function PreferencesPage(props: PageProps) {
     const userId = props.user.id
 
     // Setup basic state
-    const [user, setUser] = useState(undefined as User | undefined);
-    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getUser(userId) as Promise<User>, setUser);
+    const [user, setUser] = useState(undefined as MyUser | undefined);
+    const [doRefresh, refreshLoading, refreshError] = usePromise(() => api.getUser(userId) as Promise<MyUser>, setUser);
     useEffect(() => {
         doRefresh();
     }, []);
 
     // Setup interactions
     const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise(
-        (phoneNumber: string) => api.updateProfile(userId, phoneNumber) as Promise<User>, setUser
+        (phoneNumber, notifyMeAttendee, notifyMeHost) =>
+            api.updateProfile(userId, phoneNumber, notifyMeAttendee, notifyMeHost) as Promise<MyUser>, setUser
     );
 
     // Render

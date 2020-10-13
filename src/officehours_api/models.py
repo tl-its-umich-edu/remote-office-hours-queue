@@ -29,6 +29,8 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
     )
     phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
+    notify_me_attendee = models.BooleanField(default=False)
+    notify_me_host = models.BooleanField(default=False)
 
     def __str__(self):
         return f'user={self.user.username}'
@@ -41,7 +43,7 @@ def get_user_emails(manager: models.Manager):
 
 
 def get_default_allowed_backends():
-    return list([settings.DEFAULT_ALLOWED_BACKENDS])
+    return settings.DEFAULT_ALLOWED_BACKENDS
 
 
 def get_backend_types():

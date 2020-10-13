@@ -75,10 +75,15 @@ class MyUserSerializer(serializers.ModelSerializer):
     my_queue = serializers.SerializerMethodField(read_only=True)
     hosted_queues = serializers.SerializerMethodField(read_only=True)
     phone_number = serializers.CharField(source='profile.phone_number')
+    notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
+    notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues', 'phone_number']
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name', 'my_queue',
+            'hosted_queues', 'phone_number', 'notify_me_attendee', 'notify_me_host'
+        ]
 
     def get_my_queue(self, obj):
         try:
@@ -99,6 +104,8 @@ class MyUserSerializer(serializers.ModelSerializer):
         profile = validated_data['profile']
         instance = super().update(instance, validated_data)
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
+        instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me_attendee)
+        instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me_host)
         instance.profile.save()
         return instance
 
@@ -108,7 +115,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['user', 'phone_number']
+        fields = ['user', 'phone_number', 'notify_me_attendee', 'notify_me_host']
 
 
 class ShallowQueueSerializer(serializers.ModelSerializer):
