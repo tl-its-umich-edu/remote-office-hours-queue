@@ -11,6 +11,13 @@ import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
+const validatePhoneNumber = (phone: string, countryDialCode: string): Error[] => {
+    return [
+        (countryDialCode === '1' && phone.length !== 11)
+            && new Error("The phone number entered was invalid; USA phone numbers must have 11 digits."),
+    ].filter(e => e) as Error[];
+}
+
 interface PreferencesEditorProps {
     user: User;
     disabled: boolean;
@@ -18,11 +25,12 @@ interface PreferencesEditorProps {
     errorOccurred: boolean;
 }
 
+type ValidationStatus = null | Error[]; // null = no changes, [] = valid
+
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
     const [countryDialCode, setCountryDialCode] = useState("");
-    const [phoneIsValid, setPhoneIsValid] = useState(undefined as undefined | null | boolean)
-    const [phoneValidationError, setPhoneValidationError] = useState(undefined as undefined | string)
+    const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus)
 
     const phoneInput = (
         <PhoneInput
@@ -38,60 +46,41 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     )
     const validateAndSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
-        // Determine if there was a change that warrants a submit
-        const num = props.user.phone_number;
-        let validCheck = null as boolean | null
-        let validationError = undefined as undefined | string
-        if (
-            (num.length === 0 && phoneField.length > countryDialCode.length) ||
-            (num.length > 0 && phoneField !== num && phoneField.length > 1)
-        ) {
-            // If USA number, ensure it's 11 digits to submit 
-            if (countryDialCode === '1') {
-                if (phoneField.length == 11) {
-                    validCheck = true
-                    props.onUpdateInfo(phoneField)
-                } else {
-                    validCheck = false
-                    validationError = 'The phone number entered was invalid; USA phone numbers must have 11 digits.'
-                }
-            } else {
-                validCheck = true
-                props.onUpdateInfo(phoneField)
-            }
-        } else if (phoneField.length <= 1 && num !== '') {
+        if (props.user.phone_number === phoneField) {
+            setValidationStatus(null);
+            return; // No changes, so don't bother validating.
+        }
+        if (phoneField.length <= 1) {
             // Update phone number to be empty if they try to delete everything in the phone field
             // Seems to be a known issue where the last character can't be removed as part of onChange:
             // https://github.com/bl00mber/react-phone-input-2/issues/231
-            validCheck = true
+            setValidationStatus([]);
             props.onUpdateInfo('')
+            return;
         }
-
-        setPhoneIsValid(validCheck)
-        if (validCheck === false) {
-            setPhoneValidationError(validationError)
-        }
+        const validationErrors = validatePhoneNumber(phoneField, countryDialCode);
+        setValidationStatus(validationErrors);
+        if (!validationErrors.length)
+            props.onUpdateInfo(phoneField)
     }
 
-    let alertBlock
-    if (phoneIsValid === false) {
-        alertBlock = <Alert variant='danger'>{phoneValidationError ? phoneValidationError : 'One or more of your entries is invalid.'}</Alert>
-    } else if (phoneIsValid === null) {
-        alertBlock = <Alert variant='primary'>Your preferences were not changed.</Alert>
-    } else if (phoneIsValid === true && props.errorOccurred) {
-        alertBlock = <Alert variant='danger'>An error occurred while trying to update your preferences; please try again later.</Alert>
-    } else if (phoneIsValid === true) {
-        // props.errorOccurred === false is implied
-        alertBlock = <Alert variant='success'>Your preferences were successfully updated.</Alert>
-    }
-    // if alertBlock is still undefined, don't display an Alert
+    const alertBlock =
+        validationStatus === undefined // not yet validated
+            ? undefined
+        : validationStatus === null
+            ? <Alert variant='primary'>Your preferences were not changed.</Alert>
+        : validationStatus.length
+            ? <Alert variant='danger'>{validationStatus.map(e => <p>{e.message}</p>)}</Alert>
+        : props.errorOccurred
+            ? <Alert variant='danger'>An error occurred while trying to update your preferences; please try again later.</Alert>
+        : <Alert variant='success'>Your preferences were successfully updated.</Alert>
 
     return (
         <div>
             <h1>View/Update Preferences</h1>
             {alertBlock}
             <Form onSubmit={validateAndSubmit}>
-                <p>Please provide alternate means by which the host may contact you in the event of technical difficulties.</p>
+                <p>Enter a phone number in order to opt in to SMS notifications.</p>
                 <Form.Group controlId='phone'>
                     <Form.Label>Phone Number</Form.Label>
                     {phoneInput}
@@ -137,7 +126,7 @@ export function PreferencesPage(props: PageProps) {
                 user={user}
                 disabled={isChanging}
                 onUpdateInfo={doUpdateInfo}
-                errorOccurred={(errorSources.length > 0) ? true : false}
+                errorOccurred={!!errorSources.length}
             />
         )
     return (
