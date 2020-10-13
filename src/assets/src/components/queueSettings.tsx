@@ -12,7 +12,7 @@ import { usePromise } from "../hooks/usePromise";
 import { QueueAttendee, QueueHost, User, isQueueHost } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets"
-import { recordQueueManagementEvent, redirectToLogin } from "../utils";
+import { compareStringArrays, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { 
     confirmUserExists, queueDescriptSchema, queueNameSchema, ValidationResult, MeetingTypesValidationResult,
     validateAndSetStringResult, validateAndSetMeetingTypesResult
@@ -214,14 +214,15 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             : allowedValidationResult;
 
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
-            if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
-            doUpdateQueue(
-                name.trim() !== queue?.name ? name : undefined,
-                description.trim() !== queue?.description ? description : undefined,
-                allowedMeetingTypes // compare using _.isEqual()?
-            );
-            resetValidationResults();
-            setShowSuccessMessage(true);
+            const nameForUpdate = name.trim() !== queue?.name ? name : undefined;
+            const descriptForUpdate = description.trim() !== queue?.description ? description : undefined;
+            const allowedForUpdate = !compareStringArrays(Array.from(allowedMeetingTypes), queue!.allowed_backends)
+                ? allowedMeetingTypes : undefined;
+            if (nameForUpdate || descriptForUpdate || allowedForUpdate) {
+                doUpdateQueue(nameForUpdate, descriptForUpdate, allowedForUpdate);
+                setShowSuccessMessage(true);
+                resetValidationResults();
+            }
         } else {
             if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
         }
