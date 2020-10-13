@@ -104,9 +104,8 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
         uniqueMeetingTypes.forEach(uniqueMeetingType => {
             if (!value.has(uniqueMeetingType)) conflictingTypes.push(uniqueMeetingType);
         });
-
         if (conflictingTypes.length > 0) {
-            existingMeetingConflict = true
+            existingMeetingConflict = true;
             messages.push(
                 'You cannot disallow the following meeting types until the meetings ' +
                 'using them have been removed from the queue: ' +
