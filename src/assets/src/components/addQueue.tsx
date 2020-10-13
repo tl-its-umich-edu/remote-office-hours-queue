@@ -16,7 +16,10 @@ import {
 } from "../validation";
 
 
-type AvailableTabs = 'general' | 'hosts';
+enum AvailableTabs {
+    General = 'general',
+    Hosts = 'hosts'
+}
 
 const buttonSpacing = 'mr-3 mb-3'
 
@@ -113,7 +116,7 @@ export function AddQueuePage(props: PageProps) {
     }
 
     // Set up page state
-    const [activeKey, setActiveKey] = useState('general' as AvailableTabs);
+    const [activeKey, setActiveKey] = useState(AvailableTabs.General as AvailableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
     const [name, setName] = useState('');
     const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
@@ -150,7 +153,7 @@ export function AddQueuePage(props: PageProps) {
     // On change handlers
     const handleNameChange = (newName: string) => {
         setName(newName);
-        validateAndSetStringResult(newName, queueNameSchema, setNameValidationResult);
+        validateAndSetStringResult(newName, queueNameSchema, setNameValidationResult, true);
     };
     const handleDescriptionChange = (newDescription: string) => {
         setDescription(newDescription);
@@ -175,16 +178,17 @@ export function AddQueuePage(props: PageProps) {
             ? validateAndSetMeetingTypesResult(allowedMeetingTypes, setAllowedValidationResult)
             : nameValidationResult;
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
-            setActiveKey('hosts');
+            setActiveKey(AvailableTabs.Hosts);
             if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
         } else {
             if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
         }
     };
-    const handleTabSelect = (activeKey: string) => {
-        if (activeKey === 'general') {
-            setActiveKey(activeKey);
-        } else if (activeKey === 'hosts') {
+
+    const handleTabSelect = (eventKey: string) => {
+        if (eventKey === AvailableTabs.General) {
+            setActiveKey(AvailableTabs.General);
+        } else if (eventKey === AvailableTabs.Hosts) {
             handleGeneralNextClick();  // Use same logic as Next button click handler
         }
     };
@@ -231,7 +235,7 @@ export function AddQueuePage(props: PageProps) {
                 onAddHost={doCheckHost}
                 onRemoveHost={handleHostRemoveClick}
                 checkHostError={checkHostError ? { source: 'Check Host', error: checkHostError } : undefined}
-                onBackClick={() => setActiveKey('general')}
+                onBackClick={() => setActiveKey(AvailableTabs.General)}
                 onFinishClick={handleManageHostsFinishClick}
             />
         </div>

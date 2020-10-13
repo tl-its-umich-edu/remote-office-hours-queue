@@ -19,7 +19,11 @@ import {
 } from "../validation";
 
 
-type AvailableTabs = 'general' | 'hosts' | 'delete';
+enum AvailableTabs {
+    General = 'general',
+    Hosts = 'hosts',
+    Delete = 'delete'
+}
 
 const buttonSpacing = 'mr-3 mb-3'
 
@@ -124,7 +128,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
     const userWebSocketError = useQueueWebSocket(queueIDInt, setQueueChecked);
 
-    const [activeKey, setActiveKey] = useState('general' as AvailableTabs);
+    const [activeKey, setActiveKey] = useState(AvailableTabs.General as AvailableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [name, setName] = useState('');
@@ -229,14 +233,12 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         resetValidationResults();
     }
 
-    // Can this be simplified while still using AvailableTabs?
-    const handleTabSelect = (activeKey: string) => {
-        if (activeKey === 'general') {
-            setActiveKey(activeKey);
-        } else if (activeKey === 'hosts') {
-            setActiveKey(activeKey);
-        } else if (activeKey === 'delete') {
-            setActiveKey(activeKey);
+    const handleTabSelect = (eventKey: string) => {
+        if (Object.values(AvailableTabs).some(value => value === activeKey)) {
+            const typedKeyString = eventKey as keyof typeof AvailableTabs;
+            setActiveKey(AvailableTabs[typedKeyString]);
+        } else {
+            throw Error(`eventKey "${eventKey}" is not defined in enum AvailableTabs`);
         }
     };
 
