@@ -48,7 +48,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         e.preventDefault() // Prevent page reload
         if (props.user.phone_number === phoneField) {
             setValidationStatus(null);
-            return; // No changes, so don't bother validating.
+            return; // No changes, so don't bother validating
         }
         if (phoneField.length <= 1) {
             // Update phone number to be empty if they try to delete everything in the phone field
@@ -56,7 +56,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             // https://github.com/bl00mber/react-phone-input-2/issues/231
             setValidationStatus([]);
             props.onUpdateInfo('');
-            return;
+            return; // Cleared form, so submit empty without validating
         }
         const validationErrors = validatePhoneNumber(phoneField, countryDialCode);
         setValidationStatus(validationErrors);
