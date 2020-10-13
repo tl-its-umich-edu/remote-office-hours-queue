@@ -30,7 +30,7 @@ type ValidationStatus = null | Error[]; // null = no changes, [] = valid
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
     const [countryDialCode, setCountryDialCode] = useState("");
-    const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus)
+    const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus);
 
     const phoneInput = (
         <PhoneInput
@@ -43,7 +43,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             disabled={props.disabled}
             inputProps={{id: 'phone'}}
         />
-    )
+    );
     const validateAndSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
         if (props.user.phone_number === phoneField) {
@@ -55,13 +55,13 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             // Seems to be a known issue where the last character can't be removed as part of onChange:
             // https://github.com/bl00mber/react-phone-input-2/issues/231
             setValidationStatus([]);
-            props.onUpdateInfo('')
+            props.onUpdateInfo('');
             return;
         }
         const validationErrors = validatePhoneNumber(phoneField, countryDialCode);
         setValidationStatus(validationErrors);
         if (!validationErrors.length)
-            props.onUpdateInfo(phoneField)
+            props.onUpdateInfo(phoneField);
     }
 
     const alertBlock =
@@ -128,7 +128,7 @@ export function PreferencesPage(props: PageProps) {
                 onUpdateInfo={doUpdateInfo}
                 errorOccurred={!!errorSources.length}
             />
-        )
+        );
     return (
         <>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
