@@ -38,20 +38,33 @@ interface QueueSettingsProps extends MultiTabEditorProps {
     onDeleteClick: () => void;
 }
 
+// The 'tab-custom' role is used to override a default 'tab' role that resulted in tab links not being keyboard accessible.
 function QueueSettingsEditor(props: QueueSettingsProps) {
     return (
         <Tab.Container id='add-queue-editor' defaultActiveKey='general' activeKey={props.activeKey} onSelect={props.onTabSelect}>
             <Row>
                 <Col md={3} sm={3}>
                     <Nav variant='pills' className='flex-column mt-5'>
-                        <Nav.Item><Nav.Link eventKey='general'>General</Nav.Link></Nav.Item>
-                        <Nav.Item><Nav.Link eventKey='hosts'>Manage Hosts</Nav.Link></Nav.Item>
-                        <Nav.Item><Nav.Link eventKey='delete'>Delete Queue</Nav.Link></Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey='general' role='tab-custom' tabIndex={0} aria-label='General Tab'>
+                                General
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey='hosts' role='tab-custom' tabIndex={0} aria-label='Manage Hosts Tab'>
+                                Manage Hosts
+                            </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                            <Nav.Link eventKey='delete' role='tab-custom' tabIndex={0} aria-label='Delete Queue Tab'>
+                                Delete Queue
+                            </Nav.Link>
+                        </Nav.Item>
                     </Nav>
                 </Col>
                 <Col md={6} sm={9}>
                     <h1>Settings</h1>
-                    <Tab.Content>
+                    <Tab.Content aria-live='polite'>
                         <Tab.Pane eventKey='general'>
                             <GeneralEditor {...props} />
                             <div className='mt-4'>
@@ -235,7 +248,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
 
     const handleTabSelect = (eventKey: string) => {
-        if (Object.values(AvailableTabs).some(value => value === activeKey)) {
+        if (Object.values(AvailableTabs).some(value => value === eventKey)) {
             const typedKeyString = eventKey as keyof typeof AvailableTabs;
             setActiveKey(AvailableTabs[typedKeyString]);
         } else {
