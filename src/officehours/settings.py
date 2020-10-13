@@ -46,6 +46,12 @@ if BLUEJEANS_CLIENT_ID and BLUEJEANS_CLIENT_SECRET:
     )
     DEFAULT_BACKEND = "bluejeans"
 
+DEFAULT_ALLOWED_BACKENDS = (
+    csv_to_list(os.getenv('DEFAULT_ALLOWED_BACKENDS'))
+    if os.getenv('DEFAULT_ALLOWED_BACKENDS', None)
+    else [DEFAULT_BACKEND]
+)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/

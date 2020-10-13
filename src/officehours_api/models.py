@@ -40,6 +40,16 @@ def get_user_emails(manager: models.Manager):
             .exclude(profile__phone_number__exact='')
 
 
+def get_default_allowed_backends():
+    return list([settings.DEFAULT_ALLOWED_BACKENDS])
+
+
+def get_backend_types():
+    return [
+        [key, value.friendly_name]
+        for key, value in settings.BACKENDS.items()
+    ]
+
 class Queue(SafeDeleteModel):
     _safedelete_policy = SOFT_DELETE_CASCADE
     name = models.CharField(max_length=100)
@@ -58,13 +68,9 @@ class Queue(SafeDeleteModel):
         ],
         default='open',
     )
-    MEETING_BACKEND_TYPES = [
-        (key, value.friendly_name)
-        for key, value in settings.BACKENDS.items()
-    ]
     allowed_backends = ArrayField(
-        models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False),
-        default=lambda: list([settings.DEFAULT_BACKEND])
+        models.CharField(max_length=20, choices=get_backend_types(), blank=False),
+        default=get_default_allowed_backends,
     )
 
     @property
@@ -73,6 +79,10 @@ class Queue(SafeDeleteModel):
 
     def __str__(self):
         return self.name
+
+
+def get_default_backend():
+    return settings.DEFAULT_BACKEND
 
 
 class Meeting(SafeDeleteModel):
@@ -89,15 +99,11 @@ class Meeting(SafeDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True)
     agenda = models.CharField(max_length=100, null=False, default="", blank=True)
 
-    MEETING_BACKEND_TYPES = [
-        (key, value.friendly_name)
-        for key, value in settings.BACKENDS.items()
-    ]
     backend_type = models.CharField(
         max_length=20,
-        choices=MEETING_BACKEND_TYPES,
+        choices=get_backend_types(),
         null=False,
-        default=settings.DEFAULT_BACKEND,
+        default=get_default_backend,
     )
     backend_metadata = JSONField(null=True, default=dict)
 
