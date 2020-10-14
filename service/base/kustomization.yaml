@@ -34,6 +34,9 @@ secretGenerator:
   - secret/EMAIL_HOST
   - secret/GA_TRACKING_ID
   - secret/REDIS_HOST
+  - secret/TWILIO_ACCOUNT_SID
+  - secret/TWILIO_AUTH_TOKEN
+  - secret/TWILIO_PHONE_FROM
   type: Opaque
 - name: web-tls
   type: "kubernetes.io/tls"
