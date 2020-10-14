@@ -19,7 +19,7 @@ def notify_next_in_line(next_in_line: Meeting):
     twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
         u.profile.phone_number for u in
-        next_in_line.attendees_with_phone_numbers
+        next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
     )
     for p in phone_numbers:
         logger.info('notify_next_in_line: %s', p)
@@ -41,7 +41,7 @@ def notify_queue_no_longer_empty(first: Meeting):
     twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
         h.profile.phone_number for h in
-        first.queue.hosts_with_phone_numbers
+        first.queue.hosts_with_phone_numbers.filter(profile__notify_me_host__exact=True)
     )
     for p in phone_numbers:
         logger.info('notify_queue_no_longer_empty: %s', p)

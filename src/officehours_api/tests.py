@@ -10,19 +10,39 @@ class NotificationTestCase(TestCase):
     def setUp(self):
         self.foo = User.objects.create(username='foo', email='foo@example.com')
         self.foo.profile.phone_number = '+15555550000'
+        self.foo.profile.notify_me_attendee = True
+        self.foo.profile.notify_me_host = True
         self.foo.profile.save()
         self.bar = User.objects.create(username='bar', email='bar@example.com')
         self.bar.profile.phone_number = '+15555550001'
+        self.bar.profile.notify_me_attendee = True
+        self.bar.profile.notify_me_host = True
         self.bar.profile.save()
         self.baz = User.objects.create(username='baz', email='baz@example.com')
         self.baz.profile.phone_number = '+15555550002'
+        self.baz.profile.notify_me_attendee = True
+        self.baz.profile.notify_me_host = True
         self.baz.profile.save()
+        self.attendeeoptout = User.objects.create(username='attendeeoptout', email='attendeeoptout@example.com')
+        self.attendeeoptout.profile.phone_number = '+15555550003'
+        self.attendeeoptout.profile.notify_me_attendee = False
+        self.attendeeoptout.profile.notify_me_host = False
+        self.attendeeoptout.profile.save()
         self.hostie = User.objects.create(username='hostie', email='hostie@example.com')
         self.hostie.profile.phone_number = '+15555551111'
+        self.hostie.profile.notify_me_attendee = True
+        self.hostie.profile.notify_me_host = True
         self.hostie.profile.save()
         self.hostacular = User.objects.create(username='hostacular', email='hostacular@example.com')
         self.hostacular.profile.phone_number = '+15555552222'
+        self.hostacular.profile.notify_me_attendee = True
+        self.hostacular.profile.notify_me_host = True
         self.hostacular.profile.save()
+        self.hostoptout = User.objects.create(username='hostoptout', email='hostoptout@example.com')
+        self.hostoptout.profile.notify_me_attendee = False
+        self.hostoptout.profile.notify_me_host = False
+        self.hostoptout.profile.phone_number = '+15555553333'
+        self.hostoptout.profile.save()
         self.queue = Queue.objects.create(
             name='NotificationTest',
         )
@@ -43,12 +63,22 @@ class NotificationTestCase(TestCase):
 
     @mock.patch('officehours_api.notifications.TwilioClient')
     def test_first_meeting_notifies_hosts(self, MockTwilio: mock.MagicMock):
-        self.create_meeting([self.foo, self.bar, self.baz])
+        self.create_meeting([self.foo, self.bar, self.baz, self.hostoptout])
         self.assertEqual(MockTwilio().messages.create.call_count, 2)
         receivers = self.get_receivers(MockTwilio)
         self.assertTrue(
             receivers >=
             {'+15555551111','+15555552222',}
+        )
+    
+    @mock.patch('officehours_api.notifications.TwilioClient')
+    def test_first_meeting_doesnt_notify_optout_hosts(self, MockTwilio: mock.MagicMock):
+        self.create_meeting([self.foo, self.bar, self.baz, self.hostoptout])
+        self.assertEqual(MockTwilio().messages.create.call_count, 2)
+        receivers = self.get_receivers(MockTwilio)
+        self.assertFalse(
+            receivers >=
+            {'+15555553333',}
         )
 
     @mock.patch('officehours_api.notifications.TwilioClient')
@@ -81,6 +111,18 @@ class NotificationTestCase(TestCase):
         self.assertTrue(
             receivers >=
             {'+15555550001', '+15555550002',}
+        )
+
+    @mock.patch('officehours_api.notifications.TwilioClient')
+    def test_first_meeting_removal_doesnt_notify_optout(self, MockTwilio: mock.MagicMock):
+        m1 = self.create_meeting([self.foo,])
+        self.create_meeting([self.bar, self.baz, self.attendeeoptout,])
+        MockTwilio.reset_mock()
+        m1.delete()
+        receivers = self.get_receivers(MockTwilio)
+        self.assertFalse(
+            receivers >=
+            {'+15555550003',}
         )
 
     @mock.patch('officehours_api.notifications.TwilioClient')
