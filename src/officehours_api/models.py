@@ -38,8 +38,8 @@ class Profile(models.Model):
 
 def get_user_emails(manager: models.Manager):
     return manager\
-            .exclude(profile__phone_number__isnull=True)\
-            .exclude(profile__phone_number__exact='')
+        .exclude(profile__phone_number__isnull=True)\
+        .exclude(profile__phone_number__exact='')
 
 
 def get_default_allowed_backends():
