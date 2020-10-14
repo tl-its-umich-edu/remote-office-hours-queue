@@ -47,23 +47,32 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         />
     );
     const notifyMeAttendeeInput = (
-        <div>
-            <label>As an attendee, notify me via SMS when it becomes my turn.</label>
-            <input type="checkbox" disabled={!phoneField} checked={notifyMeAttendee} onChange={() => setNotifyMeAttendee(!notifyMeAttendee)} />
-        </div>
+        <Form.Check 
+            type="checkbox"
+            id="notify-me-attendee"
+            disabled={!phoneField} 
+            checked={notifyMeAttendee} 
+            onChange={() => setNotifyMeAttendee(!notifyMeAttendee)}
+            label="As an attendee, notify me via SMS when it becomes my turn." />
     );
     const notifyMeHostInput = (
-        <div>
-            <label>As a host, notify me via SMS when someone joins my empty queue.</label>
-            <input type="checkbox" disabled={!phoneField} checked={notifyMeHost} onChange={() => setNotifyMeHost(!notifyMeHost)} />
-        </div>
+        <Form.Check 
+            type="checkbox"
+            id="notify-me-host"
+            disabled={!phoneField} 
+            checked={notifyMeHost}
+            onChange={() => setNotifyMeHost(!notifyMeHost)}
+            label="As an attendee, notify me via SMS when it becomes my turn." />
     );
 
     const validateAndSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
-        if (props.user.phone_number === phoneField) {
+        const changed = props.user.phone_number !== phoneField
+            || props.user.notify_me_attendee !== notifyMeAttendee
+            || props.user.notify_me_host !== notifyMeHost;
+        if (!changed) {
             setValidationStatus(null);
-            return; // No changes, so don't bother validating
+            return;
         }
         if (phoneField.length <= 1) {
             // Update phone number to be empty if they try to delete everything in the phone field
@@ -99,9 +108,9 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 <Form.Group controlId='phone'>
                     <Form.Label>Phone Number</Form.Label>
                     {phoneInput}
+                    {notifyMeAttendeeInput}
+                    {notifyMeHostInput}
                 </Form.Group>
-                {notifyMeAttendeeInput}
-                {notifyMeHostInput}
                 <Button variant="primary" type="submit" disabled={props.disabled}>Save</Button>
             </Form>
         </div>
