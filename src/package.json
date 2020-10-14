@@ -12,10 +12,10 @@
     "react-dev-utils": "~8.0.0",
     "react-dom": "^16.10.2",
     "react-ga": "~2.7.0",
-    "react-phone-input-2": "^2.13.5",
+    "react-phone-input-2": "^2.13.8",
     "react-router-dom": "^5.0.0",
-    "yup": "^0.29.3",
-    "reconnecting-websocket": "^4.4.0"
+    "reconnecting-websocket": "^4.4.0",
+    "yup": "^0.29.3"
   },
   "scripts": {
     "prod": "webpack --config webpack.config.js --mode production",
