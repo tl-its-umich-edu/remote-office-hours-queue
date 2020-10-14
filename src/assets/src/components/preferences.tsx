@@ -34,6 +34,12 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     const [notifyMeHost, setNotifyMeHost] = useState(props.user.notify_me_host)
     const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus);
 
+    const hasStartedEnteringPhoneNumber = phoneField.length > countryDialCode.length;
+    const phoneNumberToSubmit = !hasStartedEnteringPhoneNumber ? "" : phoneField;
+    const changed = props.user.phone_number !== phoneNumberToSubmit
+        || props.user.notify_me_attendee !== notifyMeAttendee
+        || props.user.notify_me_host !== notifyMeHost;
+
     const phoneInput = (
         <PhoneInput
             country={'us'}
@@ -50,7 +56,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         <Form.Check 
             type="checkbox"
             id="notify-me-attendee"
-            disabled={!phoneField} 
+            disabled={!hasStartedEnteringPhoneNumber} 
             checked={notifyMeAttendee} 
             onChange={() => setNotifyMeAttendee(!notifyMeAttendee)}
             label="As an attendee, notify me via SMS when it becomes my turn." />
@@ -59,7 +65,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         <Form.Check 
             type="checkbox"
             id="notify-me-host"
-            disabled={!phoneField} 
+            disabled={!hasStartedEnteringPhoneNumber} 
             checked={notifyMeHost}
             onChange={() => setNotifyMeHost(!notifyMeHost)}
             label="As a host, notify me via SMS when someone joins my empty queue." />
@@ -67,17 +73,11 @@ function PreferencesEditor(props: PreferencesEditorProps) {
 
     const validateAndSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
-        const changed = props.user.phone_number !== phoneField
-            || props.user.notify_me_attendee !== notifyMeAttendee
-            || props.user.notify_me_host !== notifyMeHost;
         if (!changed) {
             setValidationStatus(null);
             return;
         }
-        if (phoneField.length <= 1) {
-            // Update phone number to be empty if they try to delete everything in the phone field
-            // Seems to be a known issue where the last character can't be removed as part of onChange:
-            // https://github.com/bl00mber/react-phone-input-2/issues/231
+        if (!hasStartedEnteringPhoneNumber) {
             setValidationStatus([]);
             props.onUpdateInfo('', notifyMeAttendee, notifyMeHost);
             return; // Cleared form, so submit empty without validating
