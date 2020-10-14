@@ -62,7 +62,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             disabled={!phoneField} 
             checked={notifyMeHost}
             onChange={() => setNotifyMeHost(!notifyMeHost)}
-            label="As an attendee, notify me via SMS when it becomes my turn." />
+            label="As a host, notify me via SMS when someone joins my empty queue." />
     );
 
     const validateAndSubmit = (e: React.SyntheticEvent) => {
