@@ -24,8 +24,8 @@ type ValidationStatus = null | Error[]; // null = no changes, [] = valid
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
     const [countryDialCode, setCountryDialCode] = useState("");
-    const [notifyMeAttendee, setNotifyMeAttendee] = useState(props.user.notify_me_attendee)
-    const [notifyMeHost, setNotifyMeHost] = useState(props.user.notify_me_host)
+    const [notifyMeAttendee, setNotifyMeAttendee] = useState(props.user.notify_me_attendee);
+    const [notifyMeHost, setNotifyMeHost] = useState(props.user.notify_me_host);
     const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus);
 
     const hasStartedEnteringPhoneNumber = phoneField.length > countryDialCode.length;
