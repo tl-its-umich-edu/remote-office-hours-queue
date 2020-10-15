@@ -136,7 +136,8 @@ export function PreferencesPage(props: PageProps) {
     const isChanging = updateInfoLoading;
     const isLoading = isChanging;
     const errorSources = [
-        {source: 'Update Preferences', error: updateInfoError}
+        {source: 'Update Preferences', error: updateInfoError},
+        {source: 'Load User', error: refreshError},
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isLoading}/>
