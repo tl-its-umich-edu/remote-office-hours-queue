@@ -61,7 +61,7 @@ def notify_queue_no_longer_empty(first: Meeting):
                 ),
             )
         except:
-            logger.exception(f"Error while sending host notification to {p} for queue {next_in_line.queue.id}")
+            logger.exception(f"Error while sending host notification to {p} for queue {first.queue.id}")
 
 @receiver(pre_delete, sender=Meeting)
 def trigger_notification_delete(sender, instance: Meeting, **kwargs):
