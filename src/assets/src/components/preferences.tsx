@@ -10,13 +10,7 @@ import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, LoginDial
 import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
-
-const validatePhoneNumber = (phone: string, countryDialCode: string): Error[] => {
-    return [
-        (countryDialCode === '1' && phone.length !== 11)
-            && new Error("The phone number entered was invalid; USA phone numbers must have 11 digits."),
-    ].filter(e => e) as Error[];
-}
+import { validatePhoneNumber } from "../validation";
 
 interface PreferencesEditorProps {
     user: MyUser;
