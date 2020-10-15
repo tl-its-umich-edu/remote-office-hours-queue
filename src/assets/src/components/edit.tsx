@@ -4,8 +4,6 @@ import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
