@@ -99,7 +99,7 @@ class MyUserSerializer(serializers.ModelSerializer):
             return []
         serializer = ShallowQueueSerializer(queues_qs, many=True)
         return serializer.data
-    
+
     def update(self, instance, validated_data):
         profile = validated_data['profile']
         instance = super().update(instance, validated_data)
