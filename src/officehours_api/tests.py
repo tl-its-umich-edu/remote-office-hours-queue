@@ -91,7 +91,6 @@ class NotificationTestCase(TestCase):
         )
         self.assertEqual(self.exceptions, 1)
 
-
     @mock.patch('officehours_api.notifications.TwilioClient')
     def test_first_meeting_doesnt_notify_optout_hosts(self, MockTwilio: mock.MagicMock):
         self.create_meeting([self.foo, self.bar, self.baz, self.attendeeoptout])
