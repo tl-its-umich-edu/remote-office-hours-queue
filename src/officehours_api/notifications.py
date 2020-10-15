@@ -21,19 +21,22 @@ def notify_next_in_line(next_in_line: Meeting):
         u.profile.phone_number for u in
         next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
     )
+    domain = Site.objects.get_current().domain
+    queue_path = reverse('queue', kwargs={'queue_id': next_in_line.queue.id})
+    queue_url = f"https://{domain}{queue_path}"
     for p in phone_numbers:
-        logger.info('notify_next_in_line: %s', p)
-        domain = Site.objects.get_current().domain
-        queue_path = reverse('queue', kwargs={'queue_id': next_in_line.queue.id})
-        queue_url = f"https://{domain}{queue_path}"
-        twilio.messages.create(
-            to=p,
-            from_=settings.TWILIO_PHONE_FROM,
-            body=(
-                f"You're next in line! Please visit {queue_url} "
-                f"for instructions to join."
-            ),
-        )
+        try:
+            logger.info('notify_next_in_line: %s', p)
+            twilio.messages.create(
+                to=p,
+                from_=settings.TWILIO_PHONE_FROM,
+                body=(
+                    f"You're next in line! Please visit {queue_url} "
+                    f"for instructions to join."
+                ),
+            )
+        except:
+            logger.exception(f"Error while sending attendee notification to {p} for queue {next_in_line.queue.id}")
 
 def notify_queue_no_longer_empty(first: Meeting):
     if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_PHONE_FROM):
@@ -43,20 +46,22 @@ def notify_queue_no_longer_empty(first: Meeting):
         h.profile.phone_number for h in
         first.queue.hosts_with_phone_numbers.filter(profile__notify_me_host__exact=True)
     )
+    domain = Site.objects.get_current().domain
+    edit_path = reverse('edit', kwargs={'queue_id': first.queue.id})
+    edit_url = f"https://{domain}{edit_path}"
     for p in phone_numbers:
-        logger.info('notify_queue_no_longer_empty: %s', p)
-        domain = Site.objects.get_current().domain
-        edit_path = reverse('edit', kwargs={'queue_id': first.queue.id})
-        edit_url = f"https://{domain}{edit_path}"
-        twilio.messages.create(
-            to=p,
-            from_=settings.TWILIO_PHONE_FROM,
-            body=(
-                f"Someone has joined your queue, {first.queue.name}! "
-                f"Please visit {edit_url} "
-                f"to start a meeting."
-            ),
-        )
+        try:
+            logger.info('notify_queue_no_longer_empty: %s', p)
+            twilio.messages.create(
+                to=p,
+                from_=settings.TWILIO_PHONE_FROM,
+                body=(
+                    f"Someone has joined your queue, {first.queue.name}! "
+                    f"Please visit {edit_url} to start a meeting."
+                ),
+            )
+        except:
+            logger.exception(f"Error while sending host notification to {p} for queue {next_in_line.queue.id}")
 
 @receiver(pre_delete, sender=Meeting)
 def trigger_notification_delete(sender, instance: Meeting, **kwargs):
