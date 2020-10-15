@@ -36,7 +36,7 @@ class Profile(models.Model):
         return f'user={self.user.username}'
 
 
-def get_user_emails(manager: models.Manager):
+def get_users_with_emails(manager: models.Manager):
     return manager\
         .exclude(profile__phone_number__isnull=True)\
         .exclude(profile__phone_number__exact='')
@@ -77,7 +77,7 @@ class Queue(SafeDeleteModel):
 
     @property
     def hosts_with_phone_numbers(self):
-        return get_user_emails(self.hosts)
+        return get_users_with_emails(self.hosts)
 
     def __str__(self):
         return self.name
@@ -111,7 +111,7 @@ class Meeting(SafeDeleteModel):
 
     @property
     def attendees_with_phone_numbers(self):
-        return get_user_emails(self.attendees)
+        return get_users_with_emails(self.attendees)
 
     def save(self, *args, **kwargs):
         backend = settings.BACKENDS[self.backend_type]
