@@ -53,7 +53,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             disabled={!hasStartedEnteringPhoneNumber} 
             checked={notifyMeAttendee} 
             onChange={() => setNotifyMeAttendee(!notifyMeAttendee)}
-            label="As an attendee, notify me via SMS when it becomes my turn." />
+            label="As an attendee, I want to be notified via SMS when it becomes my turn." />
     );
     const notifyMeHostInput = (
         <Form.Check 
@@ -62,7 +62,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             disabled={!hasStartedEnteringPhoneNumber} 
             checked={notifyMeHost}
             onChange={() => setNotifyMeHost(!notifyMeHost)}
-            label="As a host, notify me via SMS when someone joins my empty queue." />
+            label="As a host, I want to be notified via SMS when someone joins my empty queue." />
     );
 
     const validateAndSubmit = (e: React.SyntheticEvent) => {
