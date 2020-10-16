@@ -28,8 +28,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     const [notifyMeHost, setNotifyMeHost] = useState(props.user.notify_me_host);
     const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus);
 
-    const hasStartedEnteringPhoneNumber = phoneField.length > countryDialCode.length;
-    const phoneNumberToSubmit = !hasStartedEnteringPhoneNumber ? "" : phoneField;
+    const phoneNumberToSubmit = (phoneField.length <= countryDialCode.length) ? "" : phoneField;
     const changed = props.user.phone_number !== phoneNumberToSubmit
         || props.user.notify_me_attendee !== notifyMeAttendee
         || props.user.notify_me_host !== notifyMeHost;
@@ -50,8 +49,9 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         <Form.Check 
             type="checkbox"
             id="notify-me-attendee"
-            disabled={!hasStartedEnteringPhoneNumber} 
-            checked={notifyMeAttendee} 
+            className="mt-3"
+            disabled={props.disabled}
+            checked={notifyMeAttendee}
             onChange={() => setNotifyMeAttendee(!notifyMeAttendee)}
             label="As an attendee, I want to be notified via SMS when it becomes my turn." />
     );
@@ -59,7 +59,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         <Form.Check 
             type="checkbox"
             id="notify-me-host"
-            disabled={!hasStartedEnteringPhoneNumber} 
+            className="mt-2"
+            disabled={props.disabled}
             checked={notifyMeHost}
             onChange={() => setNotifyMeHost(!notifyMeHost)}
             label="As a host, I want to be notified via SMS when someone joins my empty queue." />
@@ -71,15 +72,19 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             setValidationStatus(null);
             return;
         }
-        if (!hasStartedEnteringPhoneNumber) {
-            setValidationStatus([]);
-            props.onUpdateInfo('', notifyMeAttendee, notifyMeHost);
-            return; // Cleared form, so submit empty without validating
-        }
-        const validationErrors = validatePhoneNumber(phoneField, countryDialCode);
+        const phoneValidationErrors = phoneNumberToSubmit
+            ? validatePhoneNumber(phoneField, countryDialCode)
+            : [];
+        const optInValidationErrors = [
+            (notifyMeAttendee && !phoneNumberToSubmit)
+                && new Error("You must enter a phone number to opt in to attendee SMS notifications."),
+            (notifyMeHost && !phoneNumberToSubmit)
+                && new Error("You must enter a phone number to opt in to host SMS notifications."),
+        ].filter(e => e) as Error[];
+        const validationErrors = phoneValidationErrors.concat(optInValidationErrors);
         setValidationStatus(validationErrors);
         if (!validationErrors.length)
-            props.onUpdateInfo(phoneField, notifyMeAttendee, notifyMeHost);
+            props.onUpdateInfo(phoneNumberToSubmit, notifyMeAttendee, notifyMeHost);
     }
 
     const alertBlock =
@@ -88,7 +93,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         : validationStatus === null
             ? <Alert variant='primary'>Your preferences were not changed.</Alert>
         : validationStatus.length
-            ? <Alert variant='danger'>{validationStatus.map(e => <p>{e.message}</p>)}</Alert>
+            ? <Alert variant='danger'><ul className="mb-0">{validationStatus.map(e => <li>{e.message}</li>)}</ul></Alert>
         : props.errorOccurred
             ? <Alert variant='danger'>An error occurred while trying to update your preferences; please try again later.</Alert>
         : <Alert variant='success'>Your preferences were successfully updated.</Alert>
