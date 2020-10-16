@@ -13,7 +13,7 @@ from safedelete.signals import post_softdelete
 from officehours_api.models import Queue, Meeting, Profile
 from officehours_api.permissions import is_host
 from officehours_api.serializers import (
-    QueueHostSerializer, QueueAttendeeSerializer, UserSerializer,
+    QueueHostSerializer, QueueAttendeeSerializer, MyUserSerializer,
     NestedUserSerializer
 )
 
@@ -186,7 +186,7 @@ class UserConsumer(JsonWebsocketConsumer):
         )
         self.accept()
         try:
-            user_data = UserSerializer(
+            user_data = MyUserSerializer(
                 User.objects.get(pk=self.user_id), context={'user': self.user}
             ).data
         except User.DoesNotExist:
@@ -204,7 +204,7 @@ class UserConsumer(JsonWebsocketConsumer):
         )
 
     def user_update(self, event):
-        user_data = UserSerializer(
+        user_data = MyUserSerializer(
             User.objects.get(pk=self.user_id), context={'user': self.user}
         ).data
         self.send_json({

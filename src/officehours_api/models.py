@@ -29,10 +29,28 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
     )
     phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
+    notify_me_attendee = models.BooleanField(default=False)
+    notify_me_host = models.BooleanField(default=False)
 
     def __str__(self):
         return f'user={self.user.username}'
 
+
+def get_users_with_emails(manager: models.Manager):
+    return manager\
+        .exclude(profile__phone_number__isnull=True)\
+        .exclude(profile__phone_number__exact='')
+
+
+def get_default_allowed_backends():
+    return settings.DEFAULT_ALLOWED_BACKENDS
+
+
+def get_backend_types():
+    return [
+        [key, value.friendly_name]
+        for key, value in settings.BACKENDS.items()
+    ]
 
 class Queue(SafeDeleteModel):
     _safedelete_policy = SOFT_DELETE_CASCADE
@@ -52,18 +70,21 @@ class Queue(SafeDeleteModel):
         ],
         default='open',
     )
-    MEETING_BACKEND_TYPES = [
-        (key, value.friendly_name)
-        for key, value in settings.BACKENDS.items()
-    ]
-    DEFAULT_ALLOWED_TYPES = [settings.DEFAULT_BACKEND]
     allowed_backends = ArrayField(
-        models.CharField(max_length=20, choices=MEETING_BACKEND_TYPES, blank=False),
-        default=lambda: list(DEFAULT_ALLOWED_TYPES)
+        models.CharField(max_length=20, choices=get_backend_types(), blank=False),
+        default=get_default_allowed_backends,
     )
+
+    @property
+    def hosts_with_phone_numbers(self):
+        return get_users_with_emails(self.hosts)
 
     def __str__(self):
         return self.name
+
+
+def get_default_backend():
+    return settings.DEFAULT_BACKEND
 
 
 class Meeting(SafeDeleteModel):
@@ -80,17 +101,17 @@ class Meeting(SafeDeleteModel):
     created_at = models.DateTimeField(auto_now_add=True)
     agenda = models.CharField(max_length=100, null=False, default="", blank=True)
 
-    MEETING_BACKEND_TYPES = [
-        (key, value.friendly_name)
-        for key, value in settings.BACKENDS.items()
-    ]
     backend_type = models.CharField(
         max_length=20,
-        choices=MEETING_BACKEND_TYPES,
+        choices=get_backend_types(),
         null=False,
-        default=settings.DEFAULT_BACKEND,
+        default=get_default_backend,
     )
     backend_metadata = JSONField(null=True, default=dict)
+
+    @property
+    def attendees_with_phone_numbers(self):
+        return get_users_with_emails(self.attendees)
 
     def save(self, *args, **kwargs):
         backend = settings.BACKENDS[self.backend_type]
@@ -110,6 +131,16 @@ class Meeting(SafeDeleteModel):
         self.attendees.remove(*self.attendees.all())
         self.save()
         super().delete(*args, **kwargs)
+
+    @property
+    def line_place(self):
+        if not self.queue:
+            return None
+        meetings = self.queue.meeting_set.order_by('id')
+        for i in range(0, len(meetings)):
+            m = meetings[i]
+            if m == self:
+                return i
 
     def __str__(self):
         return f'{self.id}: {self.backend_type} {self.backend_metadata}'
@@ -140,3 +171,6 @@ def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
         instance.profile
     except User.profile.RelatedObjectDoesNotExist:
         instance.profile = Profile.objects.create(user=instance)
+
+
+import officehours_api.notifications

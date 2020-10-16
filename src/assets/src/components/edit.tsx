@@ -3,7 +3,6 @@ import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
-import 'react-phone-input-2/lib/style.css';
 
 import * as api from "../services/api";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";

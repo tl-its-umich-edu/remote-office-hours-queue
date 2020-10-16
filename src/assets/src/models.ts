@@ -9,6 +9,9 @@ export interface User {
 
 export interface MyUser extends User {
     my_queue: QueueAttendee | null;
+    phone_number: string;
+    notify_me_attendee: boolean;
+    notify_me_host: boolean;
 }
 
 export interface BluejeansMetadata {

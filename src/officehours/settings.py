@@ -46,6 +46,12 @@ if BLUEJEANS_CLIENT_ID and BLUEJEANS_CLIENT_SECRET:
     )
     DEFAULT_BACKEND = "bluejeans"
 
+DEFAULT_ALLOWED_BACKENDS = (
+    csv_to_list(os.getenv('DEFAULT_ALLOWED_BACKENDS'))
+    if os.getenv('DEFAULT_ALLOWED_BACKENDS', None)
+    else [DEFAULT_BACKEND]
+)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -321,3 +327,8 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# Notifications
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
+TWILIO_PHONE_FROM = os.getenv('TWILIO_PHONE_FROM') # e.g.: +15555552323

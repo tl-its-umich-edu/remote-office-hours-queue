@@ -55,6 +55,9 @@
                   <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
                     Manage Queues
                   </a>
+                  <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
+                    Preferences
+                  </a>
                   <form action="{% url 'oidc_logout' %}" method="post">
                     {% csrf_token %}
                     <input type="submit" value="Logout" style="background-color: white" class="dropdown-item">

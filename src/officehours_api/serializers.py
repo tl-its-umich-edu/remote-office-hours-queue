@@ -23,7 +23,7 @@ class AttendeeSerializer(serializers.ModelSerializer):
 class NestedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name',]
+        fields = ['id', 'username', 'first_name', 'last_name']
 
 
 class NestedMeetingSerializer(serializers.ModelSerializer):
@@ -37,26 +37,11 @@ class NestedMeetingSerializer(serializers.ModelSerializer):
 
 
 class NestedMyMeetingSerializer(serializers.ModelSerializer):
-    line_place = serializers.SerializerMethodField(read_only=True)
     backend_metadata = serializers.JSONField(read_only=True)
 
     class Meta:
         model = Meeting
         fields = ['id', 'line_place', 'agenda', 'assignee', 'backend_type', 'backend_metadata', 'created_at']
-
-    def get_line_place(self, obj):
-        i = 0
-        in_line = False
-        meetings = obj.queue.meeting_set.order_by('id')
-        for i in range(0, len(meetings)):
-            if self.context['user'] in meetings[i].attendees.all():
-                in_line = True
-                break
-
-        if in_line:
-            return i
-        else:
-            return None
 
 
 class NestedMeetingSetSerializer(serializers.ModelSerializer):
@@ -85,22 +70,27 @@ class ShallowUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name']
 
 
-class UserSerializer(serializers.ModelSerializer):
+class MyUserSerializer(serializers.ModelSerializer):
     context: UserContext
 
     my_queue = serializers.SerializerMethodField(read_only=True)
     hosted_queues = serializers.SerializerMethodField(read_only=True)
+    phone_number = serializers.CharField(source='profile.phone_number')
+    notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
+    notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues']
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name', 'my_queue',
+            'hosted_queues', 'phone_number', 'notify_me_attendee', 'notify_me_host'
+        ]
 
     def get_my_queue(self, obj):
         try:
             meeting = obj.meeting_set.get()
         except Meeting.DoesNotExist:
             return None
-
         serializer = QueueAttendeeSerializer(meeting.queue, context=self.context)
         return serializer.data
 
@@ -115,6 +105,8 @@ class UserSerializer(serializers.ModelSerializer):
         profile = validated_data['profile']
         instance = super().update(instance, validated_data)
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
+        instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me_attendee)
+        instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me_host)
         instance.profile.save()
         return instance
 
@@ -124,7 +116,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['user', 'phone_number']
+        fields = ['user', 'phone_number', 'notify_me_attendee', 'notify_me_host']
 
 
 class ShallowQueueSerializer(serializers.ModelSerializer):
