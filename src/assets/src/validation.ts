@@ -49,9 +49,9 @@ export const validatePhoneNumber = (phone: string, countryDialCode: string): Err
 
 const blankText = 'This field may not be left blank.'
 
-export const queueTitleSchema = string().required(blankText).max(100, createRemainingCharsMessage);
-export const queueDescriptSchema = string().max(1000, createRemainingCharsMessage);
-export const meetingAgendaSchema = string().max(100, createRemainingCharsMessage);
+export const queueNameSchema = string().trim().required(blankText).max(100, createRemainingCharsMessage);
+export const queueDescriptSchema = string().trim().max(1000, createRemainingCharsMessage);
+export const meetingAgendaSchema = string().trim().max(100, createRemainingCharsMessage);
 export const uniqnameSchema = string().trim().lowercase()
     .min(3, 'Uniqnames must be at least 3 characters long.')
     .max(8, 'Uniqnames must be at most 8 characters long.')
@@ -74,7 +74,7 @@ export function validateString (value: string, schema: StringSchema, showRemaini
         transformedValue = schema.validateSync(value)
         const maxLimit = getMaxLimit(schema.describe());
         if (showRemaining && maxLimit) {
-            messages.push(createRemainingCharsMessage({'value': value, 'max': maxLimit}));
+            messages.push(createRemainingCharsMessage({'value': transformedValue, 'max': maxLimit}));
         }
     } catch (error) {
         transformedValue = error.value

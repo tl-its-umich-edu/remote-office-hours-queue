@@ -79,13 +79,16 @@ export const getQueue = async (id: number) => {
     return await resp.json() as QueueHost | QueueAttendee;
 }
 
-export const createQueue = async (name: string, allowed_backends: Set<string>) => {
+export const createQueue = async (
+    name: string, allowed_backends: Set<string>, description?: string, hosts?: User[]
+) => {
     const resp = await fetch("/api/queues/", { 
         method: "POST",
         body: JSON.stringify({
             name: name,
-            host_ids: [],  //Ideally, this wouldn't be required
             allowed_backends: Array.from(allowed_backends),
+            description: description,
+            host_ids: hosts ? hosts.map(h => h.id) : []
         }),
         headers: getPostHeaders(),
     });

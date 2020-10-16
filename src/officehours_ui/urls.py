@@ -11,4 +11,5 @@ urlpatterns = [
     path('manage/<str:queue_id>/', SpaView.as_view(), name='edit'),
     path('search/<str:term>/', SpaView.as_view()),
     path('preferences/', SpaView.as_view(), name='preferences'),
+    path('add_queue/', SpaView.as_view(), name='add_queue'),
 ]

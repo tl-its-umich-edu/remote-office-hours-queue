@@ -1,21 +1,18 @@
 import * as React from "react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "react-bootstrap";
 
-import * as api from "../services/api";
-import { useUserWebSocket } from "../services/sockets";
-import { QueueBase } from "../models";
-import { ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField, LoginDialog, Breadcrumbs, StatelessInputGroupForm } from "./common";
-import { usePromise } from "../hooks/usePromise";
-import { redirectToLogin } from "../utils";
-import { queueTitleSchema } from "../validation";
-import { QueueTable } from "./common";
+import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoginDialog, QueueTable } from "./common";
 import { PageProps } from "./page";
+import { QueueBase } from "../models";
+import { useUserWebSocket } from "../services/sockets";
+import { redirectToLogin } from "../utils";
 
 
 interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
-    onAddQueue: (uniqname: string) => Promise<void>;
 }
 
 function ManageQueueTable(props: ManageQueueTableProps) {
@@ -26,18 +23,9 @@ function ManageQueueTable(props: ManageQueueTableProps) {
         <div>
             {queueResults}
             <div className="page-content-flow">
-                <SingleInputField
-                    id="add_queue"
-                    fieldComponent={StatelessInputGroupForm}
-                    placeholder="Queue name..."
-                    buttonType="success"
-                    onSubmit={props.onAddQueue}
-                    disabled={props.disabled}
-                    fieldSchema={queueTitleSchema}
-                    showRemaining={true}
-                >
-                    + Add Queue
-                </SingleInputField>
+                <Link to="/add_queue">
+                    <Button variant='success' aria-label='Add Queue'>+ Add Queue</Button>
+                </Link>
             </div>
         </div>
     );
@@ -49,31 +37,21 @@ export function ManagePage(props: PageProps) {
     }
     const [queues, setQueues] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
-
-    const addQueue = async (queueName: string) => {
-        if (!queueName) return;
-        await api.createQueue(queueName, new Set(Object.keys(props.backends)));
-    }
-    const [doAddQueue, addQueueLoading, addQueueError] = usePromise(addQueue);
     
-    const isChanging = addQueueLoading;
     const errorSources = [
-        {source: 'User Connection', error: userWebSocketError},
-        {source: 'Add Queue', error: addQueueError}
+        {source: 'User Connection', error: userWebSocketError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueTable = queues !== undefined
-        && <ManageQueueTable queues={queues} disabled={isChanging} onAddQueue={doAddQueue}/>
+        && <ManageQueueTable queues={queues} disabled={false}/>
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle="Manage"/>
-            {loadingDisplay}
             {errorDisplay}
             <h1>My Meeting Queues</h1>
-            <p>Create a way for people to wait in line when you hold office hours. You can have multiple queues, add or remove additional hosts, and manage the list of participants in queue.</p>
+            <p>These are all the queues you are a host of. Select a queue to manage it or add a queue below.</p>
             {queueTable}
             <hr/>
             <a target="_blank" href="https://documentation.its.umich.edu/node/1830">

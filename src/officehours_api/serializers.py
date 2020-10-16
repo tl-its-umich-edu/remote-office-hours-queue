@@ -2,6 +2,7 @@ from typing import TypedDict, Literal
 
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.db.models import QuerySet
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 
 

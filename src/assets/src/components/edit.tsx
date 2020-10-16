@@ -1,7 +1,6 @@
 import * as React from "react";
 import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
-import * as ReactGA from "react-ga";
 import { Alert, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
@@ -10,13 +9,14 @@ import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee
 import { 
     UserDisplay, RemoveButton, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, SingleInputField,
     DateDisplay, CopyField, EditToggleField, StatelessInputGroupForm, StatelessTextAreaForm, LoginDialog,
-    Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage, BackendSelector as MeetingBackendSelector
+    Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage
 } from "./common";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
+import { AllowedBackendsForm, BackendSelector as MeetingBackendSelector } from "./meetingType";
 import { useQueueWebSocket } from "../services/sockets";
-import { redirectToLogin } from "../utils";
-import { confirmUserExists, queueDescriptSchema, queueTitleSchema, uniqnameSchema, validateString } from "../validation";
+import { recordQueueManagementEvent, redirectToLogin } from "../utils";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema, uniqnameSchema, validateString } from "../validation";
 
 
 interface MeetingEditorProps {
@@ -181,39 +181,6 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     );
 }
 
-interface AllowedMeetingBackendsFormProps {
-    queue: QueueHost;
-    backends: {[backend_type: string]: string};
-    allowed: Set<string>;
-    onChange: (allowedBackends: Set<string>) => void;
-    disabled: boolean;
-}
-
-function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
-    const toggleAllowed = (backend_type: string) => {
-        const newAllowed = new Set(props.allowed);
-        if (newAllowed.has(backend_type)) {
-            newAllowed.delete(backend_type);
-        } else {
-            newAllowed.add(backend_type);
-        }
-        props.onChange(newAllowed);
-    }
-    const allowedMeetingTypeEditors = Object.keys(props.backends)
-        .map((b) =>
-            <Form.Group key={b} controlId={b}>
-                <Form.Check type="checkbox" label={props.backends[b]}
-                    checked={props.allowed.has(b)}
-                    onChange={() => toggleAllowed(b)}/>
-            </Form.Group>
-        );
-    return (
-        <Form>
-            {allowedMeetingTypeEditors}
-        </Form>
-    );
-}
-
 interface QueueEditorProps {
     queue: QueueHost;
     user: User;
@@ -290,7 +257,7 @@ function QueueEditor(props: QueueEditorProps) {
                     disabled={props.disabled}
                     onSubmit={props.onChangeName}
                     fieldComponent={StatelessInputGroupForm}
-                    fieldSchema={queueTitleSchema}
+                    fieldSchema={queueNameSchema}
                     showRemaining={true}
                     initialState={false}
                 >
@@ -328,11 +295,11 @@ function QueueEditor(props: QueueEditorProps) {
                     <label htmlFor="allowed meeting types" className="col-md-2 col-form-label">Allowed Meeting Types:</label>
                     <div className="col-md-6">
                         <AllowedBackendsForm 
-                            queue={props.queue}
                             allowed={new Set(props.queue.allowed_backends)}
                             onChange={props.onUpdateAllowedBackends}
                             disabled={props.disabled}
-                            backends={props.backends}/>
+                            backends={props.backends}
+                        />
                     </div>
                 </div>
                 <div className="form-group row">
@@ -457,13 +424,6 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
             </Modal.Footer>
         </Modal>
     );
-}
-
-const recordQueueManagementEvent = (action: string) => {
-    ReactGA.event({
-        category: "Queue Management",
-        action,
-    });
 }
 
 const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, actionDescription: string) => {
