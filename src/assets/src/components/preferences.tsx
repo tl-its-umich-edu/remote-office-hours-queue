@@ -43,6 +43,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             }}
             disabled={props.disabled}
             inputProps={{id: 'phone'}}
+            placeholder=""
         />
     );
     const notifyMeAttendeeInput = (
