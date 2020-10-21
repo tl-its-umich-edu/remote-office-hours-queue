@@ -72,7 +72,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
         if user != request.user:
             self.permission_denied(request)
 
-    def update(self, request, pk, *args, **kwargs):
+    def update(self, request, *args, **kwargs):
         user = self.get_object()
         self.check_change_permission(request, user)
         return super().update(request, *args, **kwargs)
