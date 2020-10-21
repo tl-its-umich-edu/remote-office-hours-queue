@@ -14,7 +14,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, ProfileSerializer
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
 )
 from officehours_api.permissions import (
     IsHostOrReadOnly, IsHostOrAttendee, is_host, IsCurrentProfile
@@ -53,17 +53,34 @@ class UserList(DecoupledContextMixin, generics.ListAPIView):
     serializer_class = ShallowUserSerializer
 
 
-class UserDetail(DecoupledContextMixin, generics.RetrieveAPIView):
+class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
+    def get_serializer(self, instance, data=None, many=None, partial=None):
+        ctx = self.get_serializer_context()
+        kwargs = {}
+        if data:
+            kwargs['data'] = data
+        return (
+            MyUserSerializer(instance, context=ctx, **kwargs)
+            if instance == ctx['user']
+            else ShallowUserSerializer(instance, context=ctx, **kwargs)
+        )
+
+    def check_change_permission(self, request, user):
+        if user != request.user:
+            self.permission_denied(request)
+
+    def update(self, request, pk, *args, **kwargs):
         user = self.get_object()
-        if user == request.user:
-            serializer = MyUserSerializer(user, context={'user': request.user})
-        else:
-            serializer = ShallowUserSerializer(user, context={'user': request.user})
-        return Response(serializer.data)
+        self.check_change_permission(request, user)
+        return super().update(request, *args, **kwargs)
+    
+    def partial_update(self, request, *args, **kwargs):
+        user = self.get_object()
+        self.check_change_permission(request, user)
+        return super().update(request, *args, **kwargs)
 
 
 class UserUniqnameDetail(UserDetail):
@@ -167,9 +184,3 @@ class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
 class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
-
-
-class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    permission_classes = (IsAuthenticated, IsCurrentProfile,)

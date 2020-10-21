@@ -16,7 +16,6 @@ urlpatterns = [
     path('meetings/<int:pk>/', views.MeetingDetail.as_view(), name='meeting-detail'),
     path('attendees/', views.AttendeeList.as_view(), name='attendee-list'),
     path('attendees/<int:pk>/', views.AttendeeDetail.as_view(), name='attendee-detail'),
-    path('profiles/<int:pk>/', views.ProfileDetail.as_view(), name='profile-detail'),
 ]
 
 if settings.DEBUG:
