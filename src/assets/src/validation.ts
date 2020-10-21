@@ -92,7 +92,7 @@ export interface MeetingTypesValidationResult {
 }
 
 export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): MeetingTypesValidationResult {
-    let messages = Array();
+    let messages = [];
 
     const noTypesSelected = value.size === 0;
     if (noTypesSelected) messages.push('You must select at least one allowed meeting type.');
@@ -100,7 +100,7 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
     let existingMeetingConflict = false;
     if (queue) {
         const uniqueMeetingTypes = new Set(queue!.meeting_set.map(m => m.backend_type));
-        let conflictingTypes = Array();
+        let conflictingTypes = [];
         uniqueMeetingTypes.forEach(uniqueMeetingType => {
             if (!value.has(uniqueMeetingType)) conflictingTypes.push(uniqueMeetingType);
         });

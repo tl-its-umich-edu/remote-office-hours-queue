@@ -99,7 +99,7 @@ export const createQueue = async (
 export const updateQueue = async (
     queue_id: number, name?: string, description?: string, allowed_backends?: Set<string>
 ) => {
-    const queuePatched = Object();
+    const queuePatched = {};
     if (name !== undefined) queuePatched['name'] = name;
     if (description !== undefined) queuePatched['description'] = description;
     if (allowed_backends) queuePatched['allowed_backends'] = Array.from(allowed_backends);
