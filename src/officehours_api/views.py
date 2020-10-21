@@ -17,7 +17,7 @@ from officehours_api.serializers import (
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
 )
 from officehours_api.permissions import (
-    IsHostOrReadOnly, IsHostOrAttendee, is_host, IsCurrentProfile
+    IsHostOrReadOnly, IsHostOrAttendee, is_host,
 )
 
 
