@@ -74,6 +74,7 @@ class MyUserSerializer(serializers.ModelSerializer):
     context: UserContext
 
     username = serializers.CharField(read_only=True)
+    email = serializers.CharField(read_only=True)
     my_queue = serializers.SerializerMethodField(read_only=True)
     hosted_queues = serializers.SerializerMethodField(read_only=True)
     phone_number = serializers.CharField(source='profile.phone_number', allow_blank=True)
