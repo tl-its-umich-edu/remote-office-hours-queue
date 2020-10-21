@@ -87,7 +87,7 @@ class MyUserSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'first_name', 'last_name', 'my_queue',
             'hosted_queues', 'phone_number', 'notify_me_attendee', 'notify_me_host'
         ]
-    
+
     def get_my_queue(self, obj):
         try:
             meeting = obj.meeting_set.get()
