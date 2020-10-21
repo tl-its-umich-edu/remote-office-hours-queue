@@ -25,15 +25,17 @@ export const recordQueueManagementEvent = (action: string) => {
     });
 }
 
-/* Compares two arrays of strings, returning false if any difference in elements is found,
-   true if they have the same elements. */
-export const compareStringArrays = (arrayOne: string[], arrayTwo: string[]): boolean => {
-    if (arrayOne.length !== arrayTwo.length) return false;
-
-    const arrayOneSorted = arrayOne.slice().sort();
-    const arrayTwoSorted = arrayTwo.slice().sort();
-    for (let step = 0; step < arrayOneSorted.length; step++) {
-        if (arrayOneSorted[step] !== arrayTwoSorted[step]) return false;
+/* Determines elements missing from one of the two sets, returning true if there the count is greater than one,
+   false if it is zero. Inspired by the symmetricDifference function for sets implemented by MDN:
+   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set */
+export function checkIfSetsAreDifferent(setA: Set<any>, setB: Set<any>) {
+    let difference = new Set(setA);
+    for (let elem of setB) {
+        if (difference.has(elem)) {
+            difference.delete(elem);
+        } else {
+            difference.add(elem);
+        }
     }
-    return true;
+    return !!difference.size;
 }
