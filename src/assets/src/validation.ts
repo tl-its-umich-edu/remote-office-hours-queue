@@ -100,19 +100,17 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
     let existingMeetingConflict = false;
     if (queue) {
         const uniqueMeetingTypes = new Set(queue!.meeting_set.map(m => m.backend_type));
-        let conflictingTypes = [];
-        uniqueMeetingTypes.forEach(uniqueMeetingType => {
-            if (!value.has(uniqueMeetingType)) conflictingTypes.push(uniqueMeetingType);
-        });
-        if (conflictingTypes.length > 0) {
+        const conflictingTypes = new Set([...uniqueMeetingTypes].filter(uniqueMeetingType => !value.has(uniqueMeetingType)));
+        if (conflictingTypes.size > 0) {
             existingMeetingConflict = true;
             messages.push(
                 'You cannot disallow the following meeting types until the meetings ' +
                 'using them have been removed from the queue: ' +
-                conflictingTypes.join(', ')
+                [...conflictingTypes].join(', ')
             );
         }
     }
+    console.log({ isInvalid: (noTypesSelected || existingMeetingConflict), messages: messages })
     return { isInvalid: (noTypesSelected || existingMeetingConflict), messages: messages };
 }
 
