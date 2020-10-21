@@ -244,14 +244,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         resetValidationResults();
     }
 
-    const handleTabSelect = (eventKey: string) => {
-        if (Object.values(AvailableTabs).some(value => value === eventKey)) {
-            const typedKeyString = eventKey as keyof typeof AvailableTabs;
-            setActiveKey(AvailableTabs[typedKeyString]);
-        } else {
-            throw Error(`eventKey "${eventKey}" is not defined in enum AvailableTabs`);
-        }
-    };
+    const handleTabSelect = (eventKey: string) => setActiveKey(AvailableTabs[eventKey as keyof typeof AvailableTabs]);
 
     const isChanging = updateQueueLoading || addHostLoading || removeHostLoading || removeQueueLoading;
     const globalErrors = [
