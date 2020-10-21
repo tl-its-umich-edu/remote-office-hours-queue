@@ -184,7 +184,7 @@ export function AddQueuePage(props: PageProps) {
             : descriptValidationResult;
         const curAllowedValidationResult = !allowedValidationResult
             ? validateAndSetMeetingTypesResult(allowedMeetingTypes, setAllowedValidationResult)
-            : nameValidationResult;
+            : allowedValidationResult;
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
             setActiveKey(AvailableTabs.Hosts);
             if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
