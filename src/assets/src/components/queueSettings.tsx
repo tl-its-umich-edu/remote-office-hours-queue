@@ -234,8 +234,8 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             if (nameForUpdate || descriptForUpdate || allowedForUpdate) {
                 doUpdateQueue(nameForUpdate, descriptForUpdate, allowedForUpdate);
                 setShowSuccessMessage(true);
-                resetValidationResults();
             }
+            resetValidationResults();
         } else {
             if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
         }
