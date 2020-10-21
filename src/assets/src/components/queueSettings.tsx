@@ -119,7 +119,6 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     // Set up page state
     const dialogRef = createRef<Dialog>();
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
-    const [queueInitialized, setQueueInitialized] = useState(false);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
 
     // Set up WebSocket
@@ -127,19 +126,6 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     if (queueID === undefined) throw new Error("queueID is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIDInt = Number(queueID);
-
-    const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
-        if (!q) {
-            setQueue(q);
-        } else if (isQueueHost(q)) {
-            setQueue(q);
-            setAuthError(undefined);
-        } else {
-            setQueue(undefined);
-            setAuthError(new Error("You are not a host of this queue. If you believe you are seeing this message in error, contact the queue host(s)."));
-        }
-    }
-    const userWebSocketError = useQueueWebSocket(queueIDInt, setQueueChecked);
 
     const [activeKey, setActiveKey] = useState(AvailableTabs.General as AvailableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
@@ -151,12 +137,24 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
     const [allowedValidationResult, setAllowedValidationResult] = useState(undefined as undefined | MeetingTypesValidationResult);
 
-    if (queue && !queueInitialized) {
-        setQueueInitialized(true);
-        setName(queue.name);
-        setDescription(queue.description);
-        setAllowedMeetingTypes(new Set(queue.allowed_backends));
+    const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
+        if (!q) {
+            setQueue(q);
+        } else if (isQueueHost(q)) {
+            if (!queue) {
+                setName(q.name);
+                setDescription(q.description);
+                setAllowedMeetingTypes(new Set(q.allowed_backends));
+            }
+            setQueue(q);
+            setAuthError(undefined);
+        } else {
+            setQueue(undefined);
+            setAuthError(new Error("You are not a host of this queue. If you believe you are seeing this message in error, contact the queue host(s)."));
+        }
     }
+    const userWebSocketError = useQueueWebSocket(queueIDInt, setQueueChecked);
+
 
     const resetValidationResults = () => {
         if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
