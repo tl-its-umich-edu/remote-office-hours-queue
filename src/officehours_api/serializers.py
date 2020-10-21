@@ -73,9 +73,10 @@ class ShallowUserSerializer(serializers.ModelSerializer):
 class MyUserSerializer(serializers.ModelSerializer):
     context: UserContext
 
+    username = serializers.CharField(read_only=True)
     my_queue = serializers.SerializerMethodField(read_only=True)
     hosted_queues = serializers.SerializerMethodField(read_only=True)
-    phone_number = serializers.CharField(source='profile.phone_number')
+    phone_number = serializers.CharField(source='profile.phone_number', allow_blank=True)
     notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
     notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
 
@@ -85,7 +86,7 @@ class MyUserSerializer(serializers.ModelSerializer):
             'id', 'username', 'email', 'first_name', 'last_name', 'my_queue',
             'hosted_queues', 'phone_number', 'notify_me_attendee', 'notify_me_host'
         ]
-
+    
     def get_my_queue(self, obj):
         try:
             meeting = obj.meeting_set.get()
@@ -103,20 +104,13 @@ class MyUserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         profile = validated_data['profile']
-        instance = super().update(instance, validated_data)
+        instance.first_name = validated_data.get('first_name', instance.first_name)
+        instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
         instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me_attendee)
         instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me_host)
         instance.profile.save()
         return instance
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    user = NestedUserSerializer(required=True)
-
-    class Meta:
-        model = Profile
-        fields = ['user', 'phone_number', 'notify_me_attendee', 'notify_me_host']
 
 
 class ShallowQueueSerializer(serializers.ModelSerializer):

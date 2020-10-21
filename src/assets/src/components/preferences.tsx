@@ -135,7 +135,7 @@ export function PreferencesPage(props: PageProps) {
     // Setup interactions
     const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise(
         (phoneNumber, notifyMeAttendee, notifyMeHost) =>
-            api.updateProfile(userId, phoneNumber, notifyMeAttendee, notifyMeHost) as Promise<MyUser>, setUser
+            api.updateUser(userId, phoneNumber, notifyMeAttendee, notifyMeHost) as Promise<MyUser>, setUser
     );
 
     // Render
