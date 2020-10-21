@@ -19,18 +19,11 @@ import {
 } from "../validation";
 
 
-enum AvailableTabs {
-    General = 'general',
-    Hosts = 'hosts',
-    Delete = 'delete'
-}
-
 const buttonSpacing = 'mr-3 mb-3'
 
 interface QueueSettingsProps extends MultiTabEditorProps {
     // Shared
     queue: QueueHost;
-    activeKey: AvailableTabs;
     // General Tab
     onSaveGeneralClick: () => void;
     onDiscardGeneralClick: () => void;
@@ -41,7 +34,7 @@ interface QueueSettingsProps extends MultiTabEditorProps {
 // The 'tab-custom' role is used to override a default 'tab' role that resulted in tab links not being keyboard accessible.
 function QueueSettingsEditor(props: QueueSettingsProps) {
     return (
-        <Tab.Container id='add-queue-editor' defaultActiveKey='general' activeKey={props.activeKey} onSelect={props.onTabSelect}>
+        <Tab.Container id='add-queue-editor' defaultActiveKey='general'>
             <Row>
                 <Col md={3} sm={3}>
                     <Nav variant='pills' className='flex-column mt-5'>
@@ -127,7 +120,6 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     if (!props.user) throw new Error("user is undefined!");
     const queueIDInt = Number(queueID);
 
-    const [activeKey, setActiveKey] = useState(AvailableTabs.General as AvailableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const [name, setName] = useState('');
@@ -244,8 +236,6 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         resetValidationResults();
     }
 
-    const handleTabSelect = (eventKey: string) => setActiveKey(AvailableTabs[eventKey as keyof typeof AvailableTabs]);
-
     const isChanging = updateQueueLoading || addHostLoading || removeHostLoading || removeQueueLoading;
     const globalErrors = [
         {source: 'Access Denied', error: authError},
@@ -261,8 +251,6 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             <QueueSettingsEditor
                 queue={queue}
                 disabled={isChanging}
-                activeKey={activeKey}
-                onTabSelect={handleTabSelect}
                 name={name}
                 nameValidationResult={nameValidationResult}
                 onChangeName={handleNameChange}
