@@ -30,11 +30,10 @@ interface CancelAddButtonProps {
 function CancelAddButton (props: CancelAddButtonProps) {
     return (
         <Link to='/manage/'>
-            <Button variant='light' className={'text-danger ' + buttonSpacing} aria-label='Cancel' disabled={props.disabled}>
+            <Button variant='link' className={'text-danger ' + buttonSpacing} aria-label='Cancel' disabled={props.disabled}>
                 Cancel
             </Button>
         </Link>
-
     );
 }
 

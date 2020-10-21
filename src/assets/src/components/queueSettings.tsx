@@ -71,7 +71,7 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                                     Save Changes
                                 </Button>
                                 <Button
-                                    variant='light'
+                                    variant='link'
                                     className={'text-danger ' + buttonSpacing}
                                     disabled={props.disabled}
                                     aria-label='Discard Changes'
