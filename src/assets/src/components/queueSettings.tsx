@@ -155,7 +155,6 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
     const userWebSocketError = useQueueWebSocket(queueIDInt, setQueueChecked);
 
-
     const resetValidationResults = () => {
         if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
         setNameValidationResult(undefined);
@@ -265,7 +264,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     const loginDialogVisible = globalErrors.some(checkForbiddenError);
 
     const queueSettingsEditor = queue
-        ? (
+        && (
             <QueueSettingsEditor
                 queue={queue}
                 disabled={isChanging}
@@ -286,13 +285,13 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
                 onSaveGeneralClick={handleSaveGeneralClick}
                 onDiscardGeneralClick={handleDiscardGeneralClick}
                 currentUser={props.user}
-                hosts={queue?.hosts}
+                hosts={queue.hosts}
                 onAddHost={doAddHost}
                 onRemoveHost={confirmRemoveHost}
                 checkHostError={addHostError ? { source: 'Add Host', error: addHostError } : undefined}
                 onDeleteClick={confirmRemoveQueue}
             />
-        ) : undefined;
+        );
 
     return (
         <div>
