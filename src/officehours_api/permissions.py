@@ -3,11 +3,6 @@ from rest_framework import permissions
 from .models import Queue, Meeting, Profile
 
 
-class IsCurrentProfile(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj: Profile):
-        return obj.user == request.user
-
-
 def is_host(user: User, queue: Queue):
     return (
         user.is_superuser
