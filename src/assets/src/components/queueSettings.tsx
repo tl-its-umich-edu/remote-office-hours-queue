@@ -156,7 +156,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     const userWebSocketError = useQueueWebSocket(queueIDInt, setQueueChecked);
 
     const resetValidationResults = () => {
-        if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
+        setShowCorrectGeneralMessage(false);
         setNameValidationResult(undefined);
         setDescriptValidationResult(undefined);
         setAllowedValidationResult(undefined);
@@ -234,7 +234,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             }
             resetValidationResults();
         } else {
-            if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
+            setShowCorrectGeneralMessage(true);
         }
     };
     const handleDiscardGeneralClick = () => {
