@@ -110,7 +110,6 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
             );
         }
     }
-    console.log({ isInvalid: (noTypesSelected || existingMeetingConflict), messages: messages })
     return { isInvalid: (noTypesSelected || existingMeetingConflict), messages: messages };
 }
 
