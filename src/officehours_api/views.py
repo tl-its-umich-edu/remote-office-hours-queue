@@ -57,7 +57,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
 
-    def get_serializer(self, instance, data=None, many=None, partial=None):
+    def get_serializer(self, instance=None, data=None, many=None, partial=None):
         ctx = self.get_serializer_context()
         kwargs = {}
         if data:
@@ -80,7 +80,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
     def partial_update(self, request, *args, **kwargs):
         user = self.get_object()
         self.check_change_permission(request, user)
-        return super().update(request, *args, **kwargs)
+        return super().partial_update(request, *args, **kwargs)
 
 
 class UserUniqnameDetail(UserDetail):
