@@ -49,20 +49,20 @@ export function GeneralEditor(props: GeneralEditorProps) {
             <StatelessInputGroupForm
                 id='name'
                 value={props.name}
+                formLabel='Queue name'
                 placeholder='Queue name...'
                 disabled={props.disabled}
-                isInvalid={props.nameValidationResult ? props.nameValidationResult.isInvalid : undefined}
-                feedbackMessages={props.nameValidationResult ? props.nameValidationResult.messages : []}
+                validationResult={props.nameValidationResult}
                 onChangeValue={props.onChangeName}
             />
             <h3>Description</h3>
             <StatelessTextAreaForm
                 id='description'
                 value={props.description}
+                formLabel='Queue description'
                 placeholder='Queue description...'
                 disabled={props.disabled}
-                isInvalid={props.descriptValidationResult ? props.descriptValidationResult.isInvalid : undefined}
-                feedbackMessages={props.descriptValidationResult ? props.descriptValidationResult.messages : []}
+                validationResult={props.descriptValidationResult}
                 onChangeValue={props.onChangeDescription}
             />
             <h3>Meeting Types {requiredSymbol}</h3>
@@ -104,6 +104,10 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
         </ListGroup.Item>
     ));
 
+    const handleSubmit = (username: string) => {
+        if (!hostUsernames.includes(username)) props.onAddHost(username);
+    }
+
     return (
         <div>
             <h2>Manage Hosts</h2>
@@ -114,13 +118,9 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
             <SingleInputField
                 id="add_host"
                 fieldComponent={StatelessInputGroupForm}
+                formLabel='Add Host'
                 placeholder="Uniqname..."
-                buttonType='success'
-                onSubmit={(username) => {
-                    if (!hostUsernames.includes(username)) {
-                        props.onAddHost(username);
-                    }
-                }}
+                buttonOptions={{ onSubmit: handleSubmit, buttonType: 'success' }}
                 disabled={props.disabled}
                 fieldSchema={uniqnameSchema}
                 showRemaining={false}

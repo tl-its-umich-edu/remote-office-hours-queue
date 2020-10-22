@@ -18,7 +18,7 @@ import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { confirmUserExists, uniqnameSchema, validateString } from "../validation";
+import { confirmUserExists, uniqnameSchema, validateAndSetStringResult, ValidationResult } from "../validation";
 
 
 interface MeetingEditorProps {
@@ -72,9 +72,9 @@ function MeetingEditor(props: MeetingEditorProps) {
             </td>
             <td>
                 <Row>
-                    <Col md={6}>{joinLink}</Col>
+                    <Col md={5}>{joinLink}</Col>
                     <Col md={4}>{infoButton}</Col>
-                    <Col md={2}>
+                    <Col md={3}>
                         <RemoveButton
                             onRemove={() => props.onRemove(props.meeting)}
                             size="sm" disabled={props.disabled}
@@ -96,33 +96,22 @@ interface AddAttendeeFormProps {
 }
 
 function AddAttendeeForm(props: AddAttendeeFormProps) {
-    const [attendee, setAttendee] = useState("");
+    const [attendee, setAttendee] = useState('');
     const [selectedBackend, setSelectedBackend] = useState(props.defaultBackend);
-    const [isInvalid, setIsInvalid] = useState(undefined as undefined | boolean);
-    const [feedbackMessages, setFeedbackMessages] = useState([] as ReadonlyArray<string>);
+    const [attendeeValidationResult, setAttendeeValidationResult] = useState(undefined as ValidationResult | undefined);
 
     if (!props.allowedBackends.has(selectedBackend)) {
         setSelectedBackend(Array.from(props.allowedBackends)[0]);
     }
 
-    const validateAttendee = (value: string): boolean => {
-        const { isInvalid, messages } = validateString(value, uniqnameSchema, false);
-        setIsInvalid(isInvalid);
-        setFeedbackMessages(messages);
-        return isInvalid;
-    }
-
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // If it hasn't been validated yet, validate it now.
-        let newIsInvalid = undefined as undefined | boolean;
-        if (isInvalid === undefined) {
-            newIsInvalid = validateAttendee(attendee);
-        }
-        if (isInvalid === false || newIsInvalid === false) {
+        const curAttendeeValidationResult = !attendeeValidationResult
+            ? validateAndSetStringResult(attendee, uniqnameSchema, setAttendeeValidationResult)
+            : attendeeValidationResult;
+        if (!curAttendeeValidationResult.isInvalid) {
             props.onSubmit(attendee, selectedBackend);
-            setIsInvalid(undefined);
-            setFeedbackMessages([]);
+            setAttendeeValidationResult(undefined);
             setAttendee(''); // Clear successful input
         }
     }
@@ -130,28 +119,28 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
     const handleAttendeeChange = (e: any) => {
         const attendee = e.currentTarget.value;
         setAttendee(attendee);
-        validateAttendee(attendee);
+        validateAndSetStringResult(attendee, uniqnameSchema, setAttendeeValidationResult);
     }
 
-    const feedbackTextClass = isInvalid ? ' text-danger' : '';
     let feedback;
-    if (feedbackMessages) {
+    if (attendeeValidationResult) {
         // Only show one message at a time.
-        feedback = <Form.Text bsPrefix={`form-text form-feedback${feedbackTextClass}`}>{feedbackMessages[0]}</Form.Text>;
+        const feedbackTextClass = attendeeValidationResult.isInvalid ? ' text-danger' : '';
+        feedback = <Form.Text className={`form-feedback${feedbackTextClass}`}>{attendeeValidationResult.messages[0]}</Form.Text>;
     }
 
     return (
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} aria-label='Add Attendee'>
             <InputGroup>
                 <Form.Control
                     id='add_attendee'
                     as='input'
-                    bsPrefix='form-control form-control-remaining'
+                    className='form-control-remaining'
                     value={attendee}
                     placeholder='Uniqname...'
                     onChange={handleAttendeeChange}
                     disabled={props.disabled}
-                    isInvalid={isInvalid}
+                    isInvalid={attendeeValidationResult?.isInvalid}
                 />
                 <InputGroup.Append>
                     <MeetingBackendSelector
@@ -162,7 +151,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
                     />
                 </InputGroup.Append>
                 <InputGroup.Append>
-                    <Button bsPrefix="btn btn-success" type='submit' disabled={props.disabled}>
+                    <Button variant='success' type='submit' disabled={props.disabled}>
                         + Add Attendee
                     </Button>
                 </InputGroup.Append>
