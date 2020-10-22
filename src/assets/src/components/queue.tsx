@@ -180,7 +180,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             {closedAlert}
             {alert}
             <h3>You are currently in line.</h3>
-            <Card bsPrefix='card card-middle card-width center-align'>
+            <Card className='card-middle card-width center-align'>
                 <Card.Body>
                     <Card.Text>Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></Card.Text>
                     <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
@@ -193,10 +193,10 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     <EditToggleField
                         id='agenda'
                         value={agendaText}
+                        formLabel='Meeting agenda'
                         placeholder=''
-                        buttonType='success'
+                        buttonOptions={{ onSubmit: props.onChangeAgenda, buttonType: 'success' }}
                         disabled={props.disabled}
-                        onSubmit={props.onChangeAgenda}
                         fieldComponent={StatelessInputGroupForm}
                         fieldSchema={meetingAgendaSchema}
                         showRemaining={true}

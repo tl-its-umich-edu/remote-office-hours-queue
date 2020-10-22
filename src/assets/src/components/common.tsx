@@ -7,7 +7,7 @@ import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from
 import Dialog from "react-bootstrap-dialog";
 import { StringSchema } from "yup";
 import { QueueAttendee, QueueBase, User } from "../models";
-import { validateString } from "../validation";
+import { validateAndSetStringResult, ValidationResult } from "../validation";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -187,28 +187,34 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
 }
 
 
+interface ButtonOptions {
+    onSubmit: (value: string) => void;
+    buttonType: BootstrapButtonTypes;
+}
+
 interface SingleInputFormProps {
     id: string;
+    formLabel: string;
     placeholder: string;
     disabled: boolean;
-    onSubmit?: (value: string) => void;
-    buttonType?: BootstrapButtonTypes;
+    buttonOptions?: ButtonOptions;
 }
 
 // Stateless Field Components
 
 interface StatelessValidatedInputFormProps extends SingleInputFormProps {
     value: string;
-    feedbackMessages: ReadonlyArray<string>;
-    isInvalid: boolean | undefined;
+    validationResult?: ValidationResult;
     onChangeValue: (value: string) => void;
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
+    const handleChange = (newValue: string) => props.onChangeValue(newValue);
+
     let buttonBlock;
     let handleSubmit;
-    if (props.buttonType && props.onSubmit) {
-        const { buttonType, onSubmit } = props;
+    if (props.buttonOptions) {
+        const { onSubmit, buttonType } = props.buttonOptions;
         const buttonClass = `btn btn-${buttonType}`;
         handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
@@ -223,27 +229,28 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
         );
     }
 
-    const handleChange = (newValue: string) => props.onChangeValue(newValue);
-
-    const feedbackTextClass = props.isInvalid ? ' text-danger' : '';
     let feedback;
-    if (props.feedbackMessages.length > 0) {
-        // Only show one message at a time.
-        feedback = <Form.Text bsPrefix={`form-text form-feedback${feedbackTextClass}`}>{props.feedbackMessages[0]}</Form.Text>;
+    if (props.validationResult) {
+        const { isInvalid, messages } = props.validationResult;
+        const feedbackTextClass = isInvalid ? ' text-danger' : '';
+        if (messages.length > 0) {
+            // Only show one message at a time.
+            feedback = <Form.Text className={`form-feedback${feedbackTextClass}`}>{messages[0]}</Form.Text>;
+        }
     }
 
     return (
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} aria-label={props.formLabel}>
             <InputGroup>
                 <Form.Control
                     id={props.id}
                     as='input'
-                    bsPrefix='form-control form-control-remaining'
+                    className='form-control-remaining'
                     value={props.value}
                     placeholder={props.placeholder}
                     onChange={(e: any) => handleChange(e.currentTarget.value)}
                     disabled={props.disabled}
-                    isInvalid={props.isInvalid}
+                    isInvalid={props.validationResult?.isInvalid}
                 />
             {buttonBlock}
             </InputGroup>
@@ -253,10 +260,12 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 }
 
 export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
+    const handleChange = (newValue: string) => props.onChangeValue(newValue);
+
     let buttonBlock;
     let handleSubmit;
-    if (props.buttonType && props.onSubmit) {
-        const { buttonType, onSubmit } = props;
+    if (props.buttonOptions) {
+        const { onSubmit, buttonType } = props.buttonOptions;
         const buttonClass = `btn btn-${buttonType} remaining-controls`;
         handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
             e.preventDefault();
@@ -269,28 +278,29 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
         );
     }
 
-    const handleChange = (newValue: string) => props.onChangeValue(newValue);
-
-    const feedbackTextClass = props.isInvalid ? ' text-danger' : '';
     let feedback;
-    if (props.feedbackMessages.length > 0) {
-        // Only show one message at a time.
-        feedback = <span className={`form-feedback${feedbackTextClass}`}>{props.feedbackMessages[0]}</span>;
+    if (props.validationResult) {
+        const { isInvalid, messages } = props.validationResult;
+        const feedbackTextClass = isInvalid ? ' text-danger' : '';
+        if (messages.length > 0) {
+            // Only show one message at a time.
+            feedback = <span className={`form-feedback${feedbackTextClass}`}>{messages[0]}</span>;
+        }
     }
 
     return (
-        <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit} aria-label={props.formLabel}>
             <Form.Group>
                 <Form.Control
                     id={props.id}
                     as='textarea'
                     rows={5}
-                    bsPrefix='form-control form-control-remaining'
+                    className='form-control-remaining'
                     value={props.value}
                     placeholder={props.placeholder}
                     onChange={(e) => handleChange(e.currentTarget.value)}
                     disabled={props.disabled}
-                    isInvalid={props.isInvalid}
+                    isInvalid={props.validationResult?.isInvalid}
                 />
             </Form.Group>
             {
@@ -312,10 +322,10 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
 interface SingleInputFieldProps {
     id: string;
     value?: string;
+    formLabel: string;
     placeholder: string;
-    buttonType: BootstrapButtonTypes;
     disabled: boolean;
-    onSubmit: (value: string) => void;
+    buttonOptions: ButtonOptions;
     fieldComponent: React.FC<StatelessValidatedInputFormProps>;
     fieldSchema: StringSchema;
     showRemaining?: boolean;
@@ -325,45 +335,31 @@ interface SingleInputFieldProps {
 // Stateful wrapper for one text input field and associated feedback
 export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
     const [value, setValue] = useState(props.value ? props.value : '');
-    const [isInvalid, setIsInvalid] = useState(undefined as undefined | boolean);
-    const [feedbackMessages, setFeedbackMessages] = useState([] as ReadonlyArray<string>);
+    const [validationResult, setValidationResult] = useState(undefined as undefined | ValidationResult);
 
-    const validate = (value: string): boolean => {
-        const { isInvalid, messages } = validateString(value, props.fieldSchema, !!props.showRemaining);
-        setIsInvalid(isInvalid);
-        setFeedbackMessages(messages);
-        return isInvalid;
-    }
-
-    const handleSubmit = (value: string) => {
-        // If it hasn't been validated yet, validate it now.
-        let newIsInvalid = undefined as undefined | boolean;
-        if (isInvalid === undefined) {
-            newIsInvalid = validate(value);
-        }
-        if (isInvalid === false || newIsInvalid === false) {
-            props.onSubmit(value);
-            setIsInvalid(undefined);
-            setFeedbackMessages([]);
+    const handleSubmit = (newValue: string) => {
+        const curValidationResult = !validationResult
+            ? validateAndSetStringResult(newValue, props.fieldSchema, setValidationResult, !!props.showRemaining)
+            : validationResult;
+        if (!curValidationResult.isInvalid) {
+            props.buttonOptions.onSubmit(newValue);
+            setValidationResult(undefined);
             setValue('');
-            if (props.onSuccess) {
-                props.onSuccess();
-            }
+            if (props.onSuccess) props.onSuccess();
         }
     };
 
     const handleChange = (value: string) => {
         setValue(value);
-        validate(value);
+        validateAndSetStringResult(value, props.fieldSchema, setValidationResult, !!props.showRemaining);
     };
 
     return (
         <props.fieldComponent
             {...props}
             value={value}
-            isInvalid={isInvalid}
-            feedbackMessages={feedbackMessages}
-            onSubmit={handleSubmit}
+            validationResult={validationResult}
+            buttonOptions={{ buttonType: props.buttonOptions.buttonType, onSubmit: handleSubmit }}
             onChangeValue={handleChange}
         >
             {props.children}
