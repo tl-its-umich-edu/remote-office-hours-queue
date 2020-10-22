@@ -117,7 +117,7 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
 // Utility wrappers for both validating and updating React state using hook setter functions
 
 type StringValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | ValidationResult>>;
-type MeetingTypesValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | MeetingTypesValidationResult>>
+type MeetingTypesValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | MeetingTypesValidationResult>>;
 
 export function validateAndSetStringResult (
     someValue: string,

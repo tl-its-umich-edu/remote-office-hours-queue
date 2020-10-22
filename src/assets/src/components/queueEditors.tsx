@@ -33,9 +33,9 @@ interface GeneralEditorProps extends QueueEditorProps {
 
 export function GeneralEditor(props: GeneralEditorProps) {
     const correctMessage = 'Please correct the invalid entries below in order to proceed.';
-    const successMessage = 'Your changes were saved successfully!'
+    const successMessage = 'Your changes were saved successfully!';
 
-    const allowedFeedbackMessages = (props.allowedValidationResult && props.allowedValidationResult.isInvalid)
+    const allowedFeedbackMessages = props.allowedValidationResult?.isInvalid
         ? props.allowedValidationResult.messages.map((m, key) => <Alert key={key} variant='danger'>{m}</Alert>)
         : undefined;
 
@@ -118,7 +118,7 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
                 buttonType='success'
                 onSubmit={(username) => {
                     if (!hostUsernames.includes(username)) {
-                        props.onAddHost(username)
+                        props.onAddHost(username);
                     }
                 }}
                 disabled={props.disabled}
