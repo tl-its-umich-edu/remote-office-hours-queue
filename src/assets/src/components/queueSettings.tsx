@@ -11,7 +11,7 @@ import { GeneralEditor, ManageHostsEditor, MultiTabEditorProps } from "./queueEd
 import { usePromise } from "../hooks/usePromise";
 import { QueueAttendee, QueueHost, User, isQueueHost } from "../models";
 import * as api from "../services/api";
-import { useQueueWebSocket } from "../services/sockets"
+import { useQueueWebSocket } from "../services/sockets";
 import { checkIfSetsAreDifferent, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { 
     confirmUserExists, queueDescriptSchema, queueNameSchema, ValidationResult, MeetingTypesValidationResult,
@@ -19,7 +19,7 @@ import {
 } from "../validation";
 
 
-const buttonSpacing = 'mr-3 mb-3'
+const buttonSpacing = 'mr-3 mb-3';
 
 interface QueueSettingsProps extends MultiTabEditorProps {
     // Shared
@@ -199,7 +199,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     };
     const handleAllowedChange = (newAllowedBackends: Set<string>) => {
         setAllowedMeetingTypes(newAllowedBackends);
-        validateAndSetMeetingTypesResult(newAllowedBackends, setAllowedValidationResult, queue)
+        validateAndSetMeetingTypesResult(newAllowedBackends, setAllowedValidationResult, queue);
         if (showSuccessMessage) setShowSuccessMessage(false);
     };
 
