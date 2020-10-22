@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState } from "react";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog } from "./common";
@@ -21,7 +21,7 @@ enum AvailableTabs {
     Hosts = 'hosts'
 }
 
-const buttonSpacing = 'mr-3 mb-3'
+const buttonSpacing = 'mr-3 mb-3';
 
 interface CancelAddButtonProps {
     disabled: boolean;
@@ -164,7 +164,7 @@ export function AddQueuePage(props: PageProps) {
     };
     const handleDescriptionChange = (newDescription: string) => {
         setDescription(newDescription);
-        validateAndSetStringResult(newDescription, queueDescriptSchema, setDescriptValidationResult);
+        validateAndSetStringResult(newDescription, queueDescriptSchema, setDescriptValidationResult, true);
     };
     const handleAllowedChange = (newAllowedBackends: Set<string>) => {
         setAllowedMeetingTypes(newAllowedBackends);
@@ -186,9 +186,9 @@ export function AddQueuePage(props: PageProps) {
             : allowedValidationResult;
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
             setActiveKey(AvailableTabs.Hosts);
-            if (setShowCorrectGeneralMessage) setShowCorrectGeneralMessage(false);
+            setShowCorrectGeneralMessage(false);
         } else {
-            if (!showCorrectGeneralMessage) setShowCorrectGeneralMessage(true);
+            setShowCorrectGeneralMessage(true);
         }
     };
 
