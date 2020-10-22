@@ -193,7 +193,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     <EditToggleField
                         id='agenda'
                         value={agendaText}
-                        formLabel='Meeting agenda'
+                        formLabel='Meeting Agenda'
                         placeholder=''
                         buttonOptions={{ onSubmit: props.onChangeAgenda, buttonType: 'success' }}
                         disabled={props.disabled}

@@ -49,7 +49,7 @@ export function GeneralEditor(props: GeneralEditorProps) {
             <StatelessInputGroupForm
                 id='name'
                 value={props.name}
-                formLabel='Queue name'
+                formLabel='Queue Name'
                 placeholder='Queue name...'
                 disabled={props.disabled}
                 validationResult={props.nameValidationResult}
@@ -59,7 +59,7 @@ export function GeneralEditor(props: GeneralEditorProps) {
             <StatelessTextAreaForm
                 id='description'
                 value={props.description}
-                formLabel='Queue description'
+                formLabel='Queue Description'
                 placeholder='Queue description...'
                 disabled={props.disabled}
                 validationResult={props.descriptValidationResult}
