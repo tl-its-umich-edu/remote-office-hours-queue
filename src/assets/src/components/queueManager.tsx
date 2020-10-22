@@ -186,6 +186,8 @@ interface QueueManagerProps {
 }
 
 function QueueManager(props: QueueManagerProps) {
+    const spacingClass = 'mt-4';
+
     const meetings = props.queue.meeting_set
         .sort((a, b) => a.id - b.id)
         .map((m, i) =>
@@ -239,11 +241,11 @@ function QueueManager(props: QueueManagerProps) {
             </div>
             <h1>Manage: {props.queue.name}</h1>
             <p><Link to={"/queue/" + props.queue.id}>View as visitor</Link></p>
-            <Row noGutters>
+            <Row noGutters className={spacingClass}>
                 <Col md={2}><Form.Label htmlFor='queue-url'>Queue URL</Form.Label></Col>
                 <Col md={6}><CopyField text={absoluteUrl} id="queue-url"/></Col>
             </Row>
-            <Row noGutters className='mt-4'>
+            <Row noGutters className={spacingClass}>
                 <Col md={2}><Form.Label htmlFor='queue-status'>Queue Status</Form.Label></Col>
                 <Col md={6}>
                     <Form.Check
@@ -256,14 +258,12 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
-
-            <Row noGutters className='mt-4'>
+            <Row noGutters className={spacingClass}>
                 <Col md={2}><div id='created-at'>Created At</div></Col>
                 <Col md={6}><div aria-labelledby='created-at'><DateDisplay date={props.queue.created_at}/></div></Col>
             </Row>
-
-            <h2 className='mt-4'>Meetings in Queue</h2>
-            <Row noGutters>
+            <h2 className={spacingClass}>Meetings in Queue</h2>
+            <Row noGutters className={spacingClass}>
                 <Col md={8}>
                     {userLoggedOnWarning}
                     <AddAttendeeForm
@@ -275,10 +275,8 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
-            <Row noGutters className="mt-2">
-                <Col md={12}>
-                    <div className="table-responsive">{meetingsTable}</div>
-                </Col>
+            <Row noGutters className={spacingClass}>
+                <Col md={12}><div className="table-responsive">{meetingsTable}</div></Col>
             </Row>
         </div>
     );
@@ -416,10 +414,11 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         {source: 'Assignee', error: changeAssigneeError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const loadingDisplay = <LoadingDisplay loading={isChanging}/>
-    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
+    const loadingDisplay = <LoadingDisplay loading={isChanging}/>;
+    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>;
     const queueManager = queue
-        && <QueueManager
+        && (
+            <QueueManager
                 queue={queue}
                 disabled={isChanging}
                 user={props.user!}
@@ -431,6 +430,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
             />
+        );
     return (
         <>
             <Dialog ref={dialogRef}/>
