@@ -24,7 +24,10 @@ ENV WEB_CONCURRENCY=5
 
 RUN apt-get update
 RUN apt-get -y install gcc
-RUN pip install gunicorn 'uvicorn[standard]' psycopg2-binary
+RUN pip install \
+    'gunicorn~=20.0.4' \
+    'uvicorn[standard]~=0.12.2' \
+    'psycopg2-binary~=2.8.6'
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
