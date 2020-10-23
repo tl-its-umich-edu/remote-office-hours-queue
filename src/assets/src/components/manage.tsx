@@ -22,8 +22,8 @@ function ManageQueueTable(props: ManageQueueTableProps) {
     return (
         <div>
             {queueResults}
-            <div className="page-content-flow">
-                <Link to="/add_queue">
+            <div className="mt-3">
+                <Link to="/add_queue" tabIndex={-1}>
                     <Button variant='success' aria-label='Add Queue'>+ Add Queue</Button>
                 </Link>
             </div>
