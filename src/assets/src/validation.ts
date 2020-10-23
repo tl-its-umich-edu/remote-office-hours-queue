@@ -112,28 +112,3 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
     }
     return { isInvalid: (noTypesSelected || existingMeetingConflict), messages: messages };
 }
-
-
-// Utility wrappers for both validating and updating React state using hook setter functions
-
-type StringValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | ValidationResult>>;
-type MeetingTypesValidationResultSetter = React.Dispatch<React.SetStateAction<undefined | MeetingTypesValidationResult>>;
-
-export function validateAndSetStringResult (
-    someValue: string,
-    schema: StringSchema,
-    resultSetter: StringValidationResultSetter,
-    showRemaining?: boolean
-): ValidationResult {
-    const validationResult = validateString(someValue, schema, !!showRemaining);
-    resultSetter(validationResult);
-    return validationResult;
-};
-
-export function validateAndSetMeetingTypesResult (
-    allowedBackends: Set<string>, resultSetter: MeetingTypesValidationResultSetter, queue?: QueueHost
-): MeetingTypesValidationResult {
-    const validationResult = validateMeetingTypes(allowedBackends, queue);
-    resultSetter(validationResult);
-    return validationResult;
-};

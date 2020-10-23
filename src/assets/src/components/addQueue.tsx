@@ -7,13 +7,11 @@ import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDispl
 import { PageProps } from "./page";
 import { GeneralEditor, ManageHostsEditor, MultiTabEditorProps } from "./queueEditors";
 import { usePromise } from "../hooks/usePromise";
+import { useMeetingTypesValidation, useStringValidation } from "../hooks/useValidation";
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import {
-    confirmUserExists, MeetingTypesValidationResult, queueDescriptSchema, queueNameSchema, ValidationResult,
-    validateAndSetStringResult, validateAndSetMeetingTypesResult
-} from "../validation";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema } from "../validation";
 
 
 enum AvailableTabs {
@@ -125,12 +123,13 @@ export function AddQueuePage(props: PageProps) {
     // Set up page state
     const [activeKey, setActiveKey] = useState(AvailableTabs.General as AvailableTabs);
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
+
     const [name, setName] = useState('');
-    const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
+    const [nameValidationResult, validateAndSetNameResult] = useStringValidation(queueNameSchema, true);
     const [description, setDescription] = useState('');
-    const [descriptValidationResult, setDescriptValidationResult] = useState(undefined as undefined | ValidationResult);
+    const [descriptValidationResult, validateAndSetDescriptResult] = useStringValidation(queueDescriptSchema, true);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
-    const [allowedValidationResult, setAllowedValidationResult] = useState(undefined as undefined | MeetingTypesValidationResult);
+    const [allowedValidationResult, validateAndSetAllowedResult] = useMeetingTypesValidation();
 
     const [hosts, setHosts] = useState([props.user] as User[]);
 
@@ -160,30 +159,26 @@ export function AddQueuePage(props: PageProps) {
     // On change handlers
     const handleNameChange = (newName: string) => {
         setName(newName);
-        validateAndSetStringResult(newName, queueNameSchema, setNameValidationResult, true);
+        validateAndSetNameResult(newName);
     };
     const handleDescriptionChange = (newDescription: string) => {
         setDescription(newDescription);
-        validateAndSetStringResult(newDescription, queueDescriptSchema, setDescriptValidationResult, true);
+        validateAndSetDescriptResult(newDescription);
     };
     const handleAllowedChange = (newAllowedBackends: Set<string>) => {
         setAllowedMeetingTypes(newAllowedBackends);
-        validateAndSetMeetingTypesResult(newAllowedBackends, setAllowedValidationResult);
+        validateAndSetAllowedResult(newAllowedBackends);
     };
 
     // On click handlers
     const handleHostRemoveClick = (host: User) => setHosts(hosts.filter((user: User) => user.id !== host.id));
 
     const handleGeneralNextClick = () => {
-        const curNameValidationResult = !nameValidationResult
-            ? validateAndSetStringResult(name, queueNameSchema, setNameValidationResult, true)
-            : nameValidationResult;
+        const curNameValidationResult = !nameValidationResult ? validateAndSetNameResult(name) : nameValidationResult;
         const curDescriptValidationResult = !descriptValidationResult
-            ? validateAndSetStringResult(description, queueDescriptSchema, setDescriptValidationResult, true)
-            : descriptValidationResult;
+            ? validateAndSetDescriptResult(description) : descriptValidationResult;
         const curAllowedValidationResult = !allowedValidationResult
-            ? validateAndSetMeetingTypesResult(allowedMeetingTypes, setAllowedValidationResult)
-            : allowedValidationResult;
+            ? validateAndSetAllowedResult(allowedMeetingTypes) : allowedValidationResult;
         if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
             setActiveKey(AvailableTabs.Hosts);
             setShowCorrectGeneralMessage(false);

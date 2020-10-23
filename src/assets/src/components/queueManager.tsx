@@ -14,11 +14,12 @@ import {
 import { BackendSelector as MeetingBackendSelector } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
+import { useStringValidation } from "../hooks/useValidation";
 import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { confirmUserExists, uniqnameSchema, validateAndSetStringResult, ValidationResult } from "../validation";
+import { confirmUserExists, uniqnameSchema } from "../validation";
 
 
 interface MeetingEditorProps {
@@ -98,7 +99,7 @@ interface AddAttendeeFormProps {
 function AddAttendeeForm(props: AddAttendeeFormProps) {
     const [attendee, setAttendee] = useState('');
     const [selectedBackend, setSelectedBackend] = useState(props.defaultBackend);
-    const [attendeeValidationResult, setAttendeeValidationResult] = useState(undefined as ValidationResult | undefined);
+    const [attendeeValidationResult, validateAndSetAttendeeResult, clearAttendeeResult] = useStringValidation(uniqnameSchema);
 
     if (!props.allowedBackends.has(selectedBackend)) {
         setSelectedBackend(Array.from(props.allowedBackends)[0]);
@@ -106,20 +107,18 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const curAttendeeValidationResult = !attendeeValidationResult
-            ? validateAndSetStringResult(attendee, uniqnameSchema, setAttendeeValidationResult)
-            : attendeeValidationResult;
+        const curAttendeeValidationResult = !attendeeValidationResult ? validateAndSetAttendeeResult(attendee) : attendeeValidationResult;
         if (!curAttendeeValidationResult.isInvalid) {
             props.onSubmit(attendee, selectedBackend);
-            setAttendeeValidationResult(undefined);
+            clearAttendeeResult();
             setAttendee(''); // Clear successful input
         }
     }
 
     const handleAttendeeChange = (e: any) => {
-        const attendee = e.currentTarget.value;
-        setAttendee(attendee);
-        validateAndSetStringResult(attendee, uniqnameSchema, setAttendeeValidationResult);
+        const newAttendee = e.currentTarget.value;
+        setAttendee(newAttendee);
+        validateAndSetAttendeeResult(newAttendee);
     }
 
     let feedback;
