@@ -48,7 +48,7 @@ export const validatePhoneNumber = (phone: string, countryDialCode: string): Err
 
 // Schemas
 
-const blankText = 'This field may not be left blank.'
+const blankText = 'This field may not be left blank.';
 
 export const queueNameSchema = string().trim().required(blankText).max(100, createRemainingCharsMessage);
 export const queueDescriptSchema = string().trim().max(1000, createRemainingCharsMessage);
@@ -78,7 +78,7 @@ export function validateString (value: string, schema: StringSchema, showRemaini
             messages.push(createRemainingCharsMessage({'value': transformedValue, 'max': maxLimit}));
         }
     } catch (error) {
-        transformedValue = error.value
+        transformedValue = error.value;
         isInvalid = true;
         messages = error.errors;
     }
