@@ -6,8 +6,10 @@ import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHo
 import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 import { StringSchema } from "yup";
+
+import { useStringValidation } from "../hooks/useValidation";
 import { QueueAttendee, QueueBase, User } from "../models";
-import { validateAndSetStringResult, ValidationResult } from "../validation";
+import { ValidationResult } from "../validation";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -335,15 +337,13 @@ interface SingleInputFieldProps {
 // Stateful wrapper for one text input field and associated feedback
 export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
     const [value, setValue] = useState(props.value ? props.value : '');
-    const [validationResult, setValidationResult] = useState(undefined as undefined | ValidationResult);
+    const [validationResult, validateAndSetResult, clearResult] = useStringValidation(props.fieldSchema, !!props.showRemaining);
 
     const handleSubmit = (newValue: string) => {
-        const curValidationResult = !validationResult
-            ? validateAndSetStringResult(newValue, props.fieldSchema, setValidationResult, !!props.showRemaining)
-            : validationResult;
+        const curValidationResult = !validationResult ? validateAndSetResult(newValue) : validationResult;
         if (!curValidationResult.isInvalid) {
             props.buttonOptions.onSubmit(newValue);
-            setValidationResult(undefined);
+            clearResult();
             setValue('');
             if (props.onSuccess) props.onSuccess();
         }
@@ -351,7 +351,7 @@ export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
 
     const handleChange = (value: string) => {
         setValue(value);
-        validateAndSetStringResult(value, props.fieldSchema, setValidationResult, !!props.showRemaining);
+        validateAndSetResult(value);
     };
 
     return (

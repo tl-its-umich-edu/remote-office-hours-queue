@@ -9,14 +9,12 @@ import {
 import { PageProps } from "./page";
 import { GeneralEditor, ManageHostsEditor, MultiTabEditorProps } from "./queueEditors";
 import { usePromise } from "../hooks/usePromise";
+import { useMeetingTypesValidation, useStringValidation} from "../hooks/useValidation";
 import { QueueAttendee, QueueHost, User, isQueueHost } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { checkIfSetsAreDifferent, recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { 
-    confirmUserExists, queueDescriptSchema, queueNameSchema, ValidationResult, MeetingTypesValidationResult,
-    validateAndSetStringResult, validateAndSetMeetingTypesResult
-} from "../validation";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema } from "../validation";
 
 
 const buttonSpacing = 'mr-3 mb-3';
@@ -122,12 +120,13 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
 
     const [showCorrectGeneralMessage, setShowCorrectGeneralMessage] = useState(false);
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
     const [name, setName] = useState('');
-    const [nameValidationResult, setNameValidationResult] = useState(undefined as undefined | ValidationResult);
+    const [nameValidationResult, validateAndSetNameResult, clearNameResult] = useStringValidation(queueNameSchema, true);
     const [description, setDescription] = useState('');
-    const [descriptValidationResult, setDescriptValidationResult] = useState(undefined as undefined | ValidationResult);
+    const [descriptValidationResult, validateAndSetDescriptResult, clearDescriptResult] = useStringValidation(queueDescriptSchema, true);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
-    const [allowedValidationResult, setAllowedValidationResult] = useState(undefined as undefined | MeetingTypesValidationResult);
+    const [allowedValidationResult, validateAndSetAllowedResult, clearAllowedResult] = useMeetingTypesValidation(queue);
 
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
@@ -149,9 +148,9 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
 
     const resetValidationResults = () => {
         setShowCorrectGeneralMessage(false);
-        setNameValidationResult(undefined);
-        setDescriptValidationResult(undefined);
-        setAllowedValidationResult(undefined);
+        clearNameResult()
+        clearDescriptResult();
+        clearAllowedResult();
     }
 
     // Set up API interactions
@@ -189,33 +188,28 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     // On change handlers
     const handleNameChange = (newName: string) => {
         setName(newName);
-        validateAndSetStringResult(newName, queueNameSchema, setNameValidationResult, true);
-        if (showSuccessMessage) setShowSuccessMessage(false);
+        validateAndSetNameResult(newName);
+        setShowSuccessMessage(false);
     };
     const handleDescriptionChange = (newDescription: string) => {
         setDescription(newDescription);
-        validateAndSetStringResult(newDescription, queueDescriptSchema, setDescriptValidationResult, true);
-        if (showSuccessMessage) setShowSuccessMessage(false);
+        validateAndSetDescriptResult(newDescription);
+        setShowSuccessMessage(false);
     };
     const handleAllowedChange = (newAllowedBackends: Set<string>) => {
         setAllowedMeetingTypes(newAllowedBackends);
-        validateAndSetMeetingTypesResult(newAllowedBackends, setAllowedValidationResult, queue);
-        if (showSuccessMessage) setShowSuccessMessage(false);
+        validateAndSetAllowedResult(newAllowedBackends);
+        setShowSuccessMessage(false);
     };
 
     // On click handlers
     const handleSaveGeneralClick = () => {
-        const curNameValidationResult = !nameValidationResult
-            ? validateAndSetStringResult(name, queueNameSchema, setNameValidationResult, true)
-            : nameValidationResult;
+        const curNameValidationResult = !nameValidationResult ? validateAndSetNameResult(name) : nameValidationResult;
         const curDescriptValidationResult = !descriptValidationResult
-            ? validateAndSetStringResult(description, queueDescriptSchema, setDescriptValidationResult, true)
-            : descriptValidationResult;
+            ? validateAndSetDescriptResult(description) : descriptValidationResult;
         const curAllowedValidationResult = !allowedValidationResult
-            ? validateAndSetMeetingTypesResult(allowedMeetingTypes, setAllowedValidationResult, queue)
-            : allowedValidationResult;
-
-        if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
+            ? validateAndSetAllowedResult(allowedMeetingTypes) : allowedValidationResult;
+        if (!curNameValidationResult.isInvalid && !curDescriptValidationResult.isInvalid && !curAllowedValidationResult.isInvalid) {
             const nameForUpdate = name.trim() !== queue?.name ? name : undefined;
             const descriptForUpdate = description.trim() !== queue?.description ? description : undefined;
             const allowedForUpdate = checkIfSetsAreDifferent(new Set(queue!.allowed_backends), allowedMeetingTypes)
