@@ -212,7 +212,11 @@ function QueueManager(props: QueueManagerProps) {
             </Table>
         )
         : (
-            <Alert variant="dark">No meetings in queue.</Alert>
+            <Alert variant="dark">
+                No meetings in queue. If you have opted in to host notifications in 
+                your <Link to="/preferences">User Preferences</Link>, you will get an 
+                SMS (text) message when someone joins your empty queue.
+            </Alert>
         );
 
     const currentStatus = props.queue.status === 'open';

@@ -175,6 +175,17 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
     const agendaText = props.queue.my_meeting!.agenda
+    const numberInLine = props.queue.my_meeting!.line_place + 1;
+    const notificationBlurb = numberInLine > 1
+        && (
+            <Card.Text>
+                <Alert variant="info">
+                    If you have opted in to attendee notifications in
+                    your <Link to="/preferences">User Preferences</Link>,
+                    you will get an SMS (text) message when it is your turn.
+                </Alert>
+            </Card.Text>
+        );
     return (
         <>
             {closedAlert}
@@ -182,7 +193,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <h3>You are currently in line.</h3>
             <Card className='card-middle card-width center-align'>
                 <Card.Body>
-                    <Card.Text>Your number in line: <strong>{props.queue.my_meeting!.line_place + 1}</strong></Card.Text>
+                    <Card.Text>Your number in line: <strong>{numberInLine}</strong></Card.Text>
+                    {notificationBlurb}
                     <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
                     <Card.Text>
                         Meeting via: <strong>{props.backends[props.queue.my_meeting!.backend_type]}</strong>
