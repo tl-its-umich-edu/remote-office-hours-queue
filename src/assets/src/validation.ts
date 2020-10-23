@@ -25,7 +25,7 @@ function createRemainingCharsMessage (data: { max: number; } & Partial<TestMessa
 const createInvalidUniqnameMessage = (uniqname: string) => (
     uniqname + " is not a valid user. " +
     "Please make sure the uniqname is correct, and that they have logged onto Remote Office Hours Queue at least once."
-)
+);
 
 export const confirmUserExists = async (uniqname: string) => {
     const sanitizedUniqname = uniqname.trim().toLowerCase();
@@ -72,7 +72,7 @@ export function validateString (value: string, schema: StringSchema, showRemaini
     let isInvalid = false;
     let messages = Array();
     try {
-        transformedValue = schema.validateSync(value)
+        transformedValue = schema.validateSync(value);
         const maxLimit = getMaxLimit(schema.describe());
         if (showRemaining && maxLimit) {
             messages.push(createRemainingCharsMessage({'value': transformedValue, 'max': maxLimit}));
