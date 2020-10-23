@@ -9,8 +9,8 @@ import { useUserWebSocket } from "../services/sockets";
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
     return (
-        <form className="form-inline row" method="get" action={"/search/" + lookup}>
-            <div className="input-group page-content-flow col-sm-12 col-md-8 col-lg-6">
+        <form className="form-inline row mt-3" method="get" action={"/search/" + lookup}>
+            <div className="input-group col-sm-12 col-md-8 col-lg-6">
                 <input type="text"
                     required
                     aria-label="Queue name or host uniqname"
