@@ -93,14 +93,19 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
     const hostsSoFar = props.hosts.map((host, key) => (
         <ListGroup.Item key={key}>
             <UserDisplay user={host} />
-            <div className='float-right'>
-                <RemoveButton
-                    onRemove={() => props.onRemoveHost(host)}
-                    size='sm'
-                    disabled={props.disabled || host.id === props.currentUser?.id}
-                    screenReaderLabel='Remove Host'
-                />
-            </div>
+            {
+                (host.id !== props.currentUser?.id)
+                    && (
+                        <div className='float-right'>
+                            <RemoveButton
+                                onRemove={() => props.onRemoveHost(host)}
+                                size='sm'
+                                disabled={props.disabled}
+                                screenReaderLabel='Remove Host'
+                            />
+                        </div>
+                    )
+            }
         </ListGroup.Item>
     ));
 
@@ -128,7 +133,10 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
                 + Add Host
             </SingleInputField>
             <h3>Current Hosts</h3>
-            <p>To remove a host, select the trash icon to the right of the user's name. You cannot remove yourself as a host.</p>
+            <p>
+                To remove a host, select the trash icon to the right of the user's name.
+                <strong>You cannot remove yourself as a host.</strong>
+            </p>
             <ListGroup>{hostsSoFar}</ListGroup>
         </div>
     );
