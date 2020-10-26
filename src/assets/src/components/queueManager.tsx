@@ -247,8 +247,8 @@ function QueueManager(props: QueueManagerProps) {
                 </Col>
             </Row>
             <Row noGutters className={spacingClass}>
-                <Col md={2}><div id='created-at'>Created At</div></Col>
-                <Col md={6}><div aria-labelledby='created-at'><DateDisplay date={props.queue.created_at}/></div></Col>
+                <Col md={2}><div id='created'>Created</div></Col>
+                <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at}/></div></Col>
             </Row>
             <h2 className={spacingClass}>Meetings in Queue</h2>
             <Row noGutters className={spacingClass}>
