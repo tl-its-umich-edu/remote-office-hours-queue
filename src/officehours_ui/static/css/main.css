@@ -322,20 +322,20 @@ a.nav-link.disabled:hover, a.nav-link.disabled:active, a.nav-link.disabled:focus
 }
 
 .btn-success {
-    color: #ffffff;
-    background-color: #00820d;
-    border-color: #00820d;
+	color: #ffffff;
+	background-color: #00820d;
+	border-color: #00820d;
 }
 
 .btn-outline-success {
-    border-color: #00820d;
-    color: #00820d;
+	border-color: #00820d;
+	color: #00820d;
 }
 
 .btn-outline-success:hover, .btn-outline-success:focus, .btn-outline-success:active, .btn-outline-success:not(:disabled):not(.disabled):active, .btn-outline-success.selected {
-    border-color: #00820d;
-    background-color: #00820d;
-    color: #ffffff;
+	border-color: #00820d;
+	background-color: #00820d;
+	color: #ffffff;
 }
 
 .btn-link {
