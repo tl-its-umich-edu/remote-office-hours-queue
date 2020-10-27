@@ -166,7 +166,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
     const confirmRemoveHost = (h: User) => {
-        showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `remove host ${h.username}`);
+        showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `Are you sure you want to remove host ${h.username}?`);
     }
     const addHost = async (uniqname: string) => {
         const user = await confirmUserExists(uniqname);
@@ -182,7 +182,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
     const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue);
     const confirmRemoveQueue = () => {
-        showConfirmation(dialogRef, () => doRemoveQueue(), "Delete Queue?", "permanently delete this queue");
+        showConfirmation(dialogRef, () => doRemoveQueue(), "Delete Queue?", "Are you sure you want to permanently delete this queue?");
     }
 
     // On change handlers

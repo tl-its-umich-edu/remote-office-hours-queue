@@ -86,10 +86,10 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
 }
 
 
-export const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, actionDescription: string) => {
+export const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, description: string) => {
     dialog.current!.show({
         title: title,
-        body: `Are you sure you want to ${actionDescription}?`,
+        body: description,
         actions: [
             Dialog.CancelAction(),
             Dialog.OKAction(action),

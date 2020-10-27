@@ -371,7 +371,12 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
     const confirmRemoveMeeting = (m: Meeting) => {
-        showConfirmation(dialogRef, () => doRemoveMeeting(m), "Remove Meeting?", `remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}`);
+        showConfirmation(
+            dialogRef,
+            () => doRemoveMeeting(m),
+            "Remove Meeting?",
+            `Are you sure you want to remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}?`
+        );
     }
     const addMeeting = async (uniqname: string, backend: string) => {
         const user = await confirmUserExists(uniqname);
