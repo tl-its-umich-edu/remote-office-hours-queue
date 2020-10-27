@@ -5,11 +5,11 @@ import * as ReactGA from "react-ga";
 import { Alert, Button, Card, Modal } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser, Meeting } from "../models";
+import { User, QueueAttendee, BluejeansMetadata, MyUser } from "../models";
 import {
-    checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay,
-    DisabledMessage, EditToggleField, StatelessInputGroupForm, ErrorDisplay, FormError, JoinedQueueAlert,
-    LoadingDisplay, LoginDialog
+    checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DisabledMessage,
+    EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
+    showConfirmation, StatelessInputGroupForm
 } from "./common";
 import { BackendSelector } from "./meetingType";
 import { PageProps } from "./page";
@@ -154,26 +154,36 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const closedAlert = props.queue.status === "closed"
-        && <Alert variant="dark">This queue has been closed by the host, but you are still in line. Please contact the host to ensure the meeting will still happen.</Alert>
+        && (
+            <Alert variant="dark">
+                This queue has been closed by the host, but you are still in line.
+                Please contact the host to ensure the meeting will still happen.
+            </Alert>
+        );
+
     const alert = props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
             ? <TurnSoonAlert/>
             : undefined;
+
+    const buttonBlock = (
+        <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
+            Leave the line
+            {props.disabled && DisabledMessage}
+        </button>
+    );
     const meetingInfo = props.queue.my_meeting!.backend_type === "bluejeans"
-            ? <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}>
-                <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
-                    Leave the line
-                    {props.disabled && DisabledMessage}
-                </button>
+        ? (
+            <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}>
+                {buttonBlock}
             </BlueJeansMeetingInfo>
-            : <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
-                Leave the line
-                {props.disabled && DisabledMessage}
-            </button>;
+        ) : buttonBlock;
+
     const changeMeetingType = props.queue.my_meeting?.assignee 
         ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
+
     const agendaText = props.queue.my_meeting!.agenda
     return (
         <>
@@ -340,17 +350,13 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await api.removeMeeting(queue!.my_meeting!.id);
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
-    const confirmLeaveQueue = () => {
-        dialogRef.current!.show({
-            title: "Leave Queue?",
-            body: "The queue is closed, but you are still in line. If you leave now, you will not be able to rejoin until the queue is reopened.",
-            actions: [
-                Dialog.CancelAction(),
-                Dialog.OKAction(() => {
-                    doLeaveQueue();
-                }),
-            ],
-        });
+    const confirmLeaveQueue = (queueStatus: 'open' | 'closed') => {
+        const description = 'Are you sure you want to leave the queue? ' + (
+            queueStatus === 'open'
+                ? "You will lose your place in line."
+                : "The queue is currently closed. If you leave now, you will not be able to rejoin until the queue is reopened."
+        );
+        showConfirmation(dialogRef, () => doLeaveQueue(), 'Leave Queue?', description);
     }
     const leaveAndJoinQueue = async (backendType: string) => {
         ReactGA.event({
@@ -388,7 +394,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueDisplay = queue && selectedBackend
         && <QueueAttending queue={queue} backends={props.backends} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={queue.status === "closed" ? confirmLeaveQueue : doLeaveQueue}
+            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={() => confirmLeaveQueue(queue.status)}
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}
             onShowDialog={() => setShowMeetingTypeDialog(true)}
             onChangeBackendType={doChangeBackendType}
