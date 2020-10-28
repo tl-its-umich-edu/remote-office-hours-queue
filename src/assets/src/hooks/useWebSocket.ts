@@ -8,13 +8,12 @@ interface OfficeHoursMessage<T> {
 
 export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onDelete?: (setError: (React.Dispatch<React.SetStateAction<Error | undefined>>)) => void) => {
     const [error, setError] = useState(undefined as Error | undefined);
+    const numRetries = 3;
     useEffect(() => {
         const ws = new ReconnectingWebSocket(
             url,
             undefined,
-            {
-                maxRetries: 3,
-            },
+            { maxRetries: numRetries },
         );
         ws.onmessage = (e: MessageEvent) => {
             const m = JSON.parse(e.data) as OfficeHoursMessage<T>;
@@ -57,7 +56,9 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             console.error(e);
             const errorName = e?.error?.name as string | undefined; // On Safari, Event is sometimes emitted instead of ErrorEvent
             const errorText = errorName ? ` (${errorName})` : "";
-            setError(new Error(`An unexpected error occurred${errorText}. Trying to reconnect...`));
+            const errorBeginning = `An unexpected error occurred${errorText}. `;
+            const errorEnding = ws.retryCount < numRetries ? 'Trying to reconnect...' : 'Unable to reconnect; please refresh the page.';
+            setError(new Error(errorBeginning + errorEnding));
         }
         return () => {
             ws.onclose = null;
