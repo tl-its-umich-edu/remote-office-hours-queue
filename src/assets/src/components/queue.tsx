@@ -351,10 +351,11 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
     const confirmLeaveQueue = (queueStatus: 'open' | 'closed') => {
+        const loseMessage = 'By leaving the queue, you will lose your place in line'
         const description = 'Are you sure you want to leave the queue? ' + (
             queueStatus === 'open'
-                ? "You will lose your place in line."
-                : "The queue is currently closed. If you leave now, you will not be able to rejoin until the queue is reopened."
+                ? loseMessage + '.'
+                : `The queue is currently closed. ${loseMessage} and will not be able to rejoin until the queue is reopened.`
         );
         showConfirmation(dialogRef, () => doLeaveQueue(), 'Leave Queue?', description);
     }
