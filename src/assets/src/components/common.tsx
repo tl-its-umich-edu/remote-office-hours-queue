@@ -1,9 +1,9 @@
 import * as React from "react";
-import { createRef, useState } from "react";
+import { createRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
-import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
+import { Alert, Badge, Breadcrumb, Button, Form, FormControl, InputGroup, Modal, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 import { StringSchema } from "yup";
 
@@ -200,6 +200,7 @@ interface SingleInputFormProps {
     placeholder: string;
     disabled: boolean;
     buttonOptions?: ButtonOptions;
+    initFocus?: boolean;
 }
 
 // Stateless Field Components
@@ -211,6 +212,13 @@ interface StatelessValidatedInputFormProps extends SingleInputFormProps {
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
+    const inputRef = createRef<FormControl<"input"> & HTMLInputElement>();
+    useEffect(() => {
+        if (props.initFocus) {
+            inputRef.current!.focus();
+        }
+    }, []);
+
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     let buttonBlock;
@@ -247,6 +255,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
                 <Form.Control
                     id={props.id}
                     as='input'
+                    ref={inputRef}
                     className='form-control-remaining'
                     value={props.value}
                     placeholder={props.placeholder}
@@ -254,7 +263,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
                     disabled={props.disabled}
                     isInvalid={props.validationResult?.isInvalid}
                 />
-            {buttonBlock}
+                {buttonBlock}
             </InputGroup>
             {feedback}
         </Form>
@@ -262,6 +271,13 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 }
 
 export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
+    const inputRef = createRef<FormControl<"textarea"> & HTMLTextAreaElement>();
+    useEffect(() => {
+        if (props.initFocus) {
+            inputRef.current!.focus();
+        }
+    }, []);
+
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     let buttonBlock;
@@ -296,6 +312,7 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
                 <Form.Control
                     id={props.id}
                     as='textarea'
+                    ref={inputRef}
                     rows={5}
                     className='form-control-remaining'
                     value={props.value}
@@ -328,6 +345,7 @@ interface SingleInputFieldProps {
     placeholder: string;
     disabled: boolean;
     buttonOptions: ButtonOptions;
+    initFocus?: boolean;
     fieldComponent: React.FC<StatelessValidatedInputFormProps>;
     fieldSchema: StringSchema;
     showRemaining?: boolean;
@@ -379,7 +397,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     const toggleEditMode = () => setEditing(!editing);
 
     const contents = (editing && !props.disabled)
-        ? <SingleInputField {...props} onSuccess={toggleEditMode}>{props.children}</SingleInputField>
+        ? <SingleInputField {...props} initFocus={true} onSuccess={toggleEditMode}>{props.children}</SingleInputField>
         : (
             <div className="input-group">
                 <span>{props.value}</span>
