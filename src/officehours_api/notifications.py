@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 def notify_next_in_line(next_in_line: Meeting):
-    if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_PHONE_FROM):
+    if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID):
         return
     twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
@@ -28,8 +28,8 @@ def notify_next_in_line(next_in_line: Meeting):
         try:
             logger.info('notify_next_in_line: %s', p)
             twilio.messages.create(
+                messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
-                from_=settings.TWILIO_PHONE_FROM,
                 body=(
                     f"You're next in line! Please visit {queue_url} "
                     f"for instructions to join."
@@ -39,7 +39,7 @@ def notify_next_in_line(next_in_line: Meeting):
             logger.exception(f"Error while sending attendee notification to {p} for queue {next_in_line.queue.id}")
 
 def notify_queue_no_longer_empty(first: Meeting):
-    if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_PHONE_FROM):
+    if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID):
         return
     twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
@@ -53,8 +53,8 @@ def notify_queue_no_longer_empty(first: Meeting):
         try:
             logger.info('notify_queue_no_longer_empty: %s', p)
             twilio.messages.create(
+                messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
-                from_=settings.TWILIO_PHONE_FROM,
                 body=(
                     f"Someone has joined your queue, {first.queue.name}! "
                     f"Please visit {edit_url} to start a meeting."

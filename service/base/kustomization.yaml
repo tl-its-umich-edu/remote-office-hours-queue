@@ -36,7 +36,7 @@ secretGenerator:
   - secret/REDIS_HOST
   - secret/TWILIO_ACCOUNT_SID
   - secret/TWILIO_AUTH_TOKEN
-  - secret/TWILIO_PHONE_FROM
+  - secret/TWILIO_MESSAGING_SERVICE_SID
   type: Opaque
 - name: web-tls
   type: "kubernetes.io/tls"

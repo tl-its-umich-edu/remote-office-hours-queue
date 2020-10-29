@@ -27,7 +27,7 @@ To use or develop with BlueJeans, set `BLUEJEANS_CLIENT_ID` and `BLUEJEANS_CLIEN
 
 SMS notifications for hosts and attendees are provided via [Twilio](https://www.twilio.com/).
 
-To use or develop with SMS notifications, set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_FROM` as environment variables. Twilio provides free trial accounts with limited credit. You can use special [test credentials](https://www.twilio.com/docs/iam/test-credentials) to not be charged. You can also test notifications via unit tests, where Twilio is mocked: 
+To use or develop with SMS notifications, set `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_MESSAGING_SERVICE_SID` as environment variables. Twilio provides free trial accounts with limited credit. You can use special [test credentials](https://www.twilio.com/docs/iam/test-credentials) to not be charged. You can also test notifications via unit tests, where Twilio is mocked: 
 ```
 docker-compose run web python manage.py test officehours_api.tests.NotificationTestCase
 ```
