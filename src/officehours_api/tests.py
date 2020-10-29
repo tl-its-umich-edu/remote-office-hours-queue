@@ -7,7 +7,7 @@ from twilio.base.exceptions import TwilioRestException
 from officehours_api.models import User, Queue, Meeting
 
 
-@override_settings(TWILIO_ACCOUNT_SID='aaa', TWILIO_AUTH_TOKEN='bbb', TWILIO_PHONE_FROM='+15555552323')
+@override_settings(TWILIO_ACCOUNT_SID='aaa', TWILIO_AUTH_TOKEN='bbb', TWILIO_MESSAGING_SERVICE_SID='ccc')
 class NotificationTestCase(TestCase):
     def setUp(self):
         self.foo = User.objects.create(username='foo', email='foo@example.com')
@@ -55,7 +55,7 @@ class NotificationTestCase(TestCase):
         return {c.kwargs['to'] for c in MockTwilio.mock_calls if 'to' in c.kwargs}
 
     def setup_bad_phone_test(self, MockTwilio: mock.MagicMock):
-        def side_effect(to=None, from_=None, body=None):
+        def side_effect(to=None, messaging_service_sid=None, body=None):
             if len(to) < 12:
                 self.exceptions += 1
                 raise TwilioRestException(500, '')
