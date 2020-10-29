@@ -190,9 +190,10 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         && (
             <Card.Text>
                 <Alert variant="info">
-                    If you have opted in to attendee notifications in
-                    your <Link to="/preferences">User Preferences</Link>,
-                    you will get an SMS (text) message when it is your turn.
+                    Did you know? You can receive a SMS (text) message when 
+                    it's your turn by by adding your cell phone number and 
+                    enabling attendee notifications in 
+                    your <Link to="/preferences">User Preferences</Link>.
                 </Alert>
             </Card.Text>
         );
