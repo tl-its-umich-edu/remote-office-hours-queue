@@ -8,6 +8,7 @@ import Dialog from "react-bootstrap-dialog";
 import { StringSchema } from "yup";
 
 import { useStringValidation } from "../hooks/useValidation";
+import { useInitFocusRef } from "../hooks/useInitFocusRef";
 import { QueueAttendee, QueueBase, User } from "../models";
 import { ValidationResult } from "../validation";
 
@@ -212,13 +213,7 @@ interface StatelessValidatedInputFormProps extends SingleInputFormProps {
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
-    const inputRef = createRef<FormControl<"input"> & HTMLInputElement>();
-    useEffect(() => {
-        if (props.initFocus) {
-            inputRef.current!.focus();
-        }
-    }, []);
-
+    const inputRef = useInitFocusRef<FormControl<"input"> & HTMLInputElement>(!!props.initFocus);
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     let buttonBlock;
@@ -271,13 +266,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 }
 
 export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
-    const inputRef = createRef<FormControl<"textarea"> & HTMLTextAreaElement>();
-    useEffect(() => {
-        if (props.initFocus) {
-            inputRef.current!.focus();
-        }
-    }, []);
-
+    const inputRef = useInitFocusRef<FormControl<'textarea'> & HTMLTextAreaElement>(!!props.initFocus);
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     let buttonBlock;
