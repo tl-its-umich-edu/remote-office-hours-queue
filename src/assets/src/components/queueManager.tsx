@@ -213,7 +213,7 @@ function QueueManager(props: QueueManagerProps) {
         : (
             <>
             <hr/>
-            <h5>No meetings in Queue</h5>
+            <h5>No Meetings in Queue</h5>
             <p>
                 Did you know? You can get notified by SMS (text) message when someone joins your empty queue by adding your cell phone number and enabling host notifications in your <Link to="/preferences">User Preferences</Link>. 
             </p>
