@@ -14,8 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 def notify_next_in_line(next_in_line: Meeting):
-    if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID):
-        return
     twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
         u.profile.phone_number for u in
@@ -39,8 +37,6 @@ def notify_next_in_line(next_in_line: Meeting):
             logger.exception(f"Error while sending attendee notification to {p} for queue {next_in_line.queue.id}")
 
 def notify_queue_no_longer_empty(first: Meeting):
-    if not (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID):
-        return
     twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
         h.profile.phone_number for h in
