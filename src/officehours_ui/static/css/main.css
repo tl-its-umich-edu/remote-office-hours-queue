@@ -181,6 +181,14 @@ a:hover {
 	color: #0060ba;
 }
 
+.alert a {
+	text-decoration: underline;
+}
+
+p a {
+	text-decoration: underline;
+}
+
 .bottom-right {
 	position: fixed;
 	bottom: 0;
