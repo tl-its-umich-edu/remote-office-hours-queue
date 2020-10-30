@@ -51,15 +51,15 @@ class NotificationTestCase(TestCase):
         return m
 
     @staticmethod
-    def get_receivers(MockTwilio: mock.MagicMock):
-        return {c.kwargs['to'] for c in MockTwilio.mock_calls if 'to' in c.kwargs}
+    def get_receivers(mock_twilio: mock.MagicMock):
+        return {c.kwargs['to'] for c in mock_twilio.mock_calls if 'to' in c.kwargs}
 
-    def setup_bad_phone_test(self, MockTwilio: mock.MagicMock):
+    def setup_bad_phone_test(self, mock_twilio: mock.MagicMock):
         def side_effect(to=None, messaging_service_sid=None, body=None):
             if len(to) < 12:
                 self.exceptions += 1
                 raise TwilioRestException(500, '')
-        MockTwilio().messages.create.side_effect = side_effect
+        mock_twilio.messages.create.side_effect = side_effect
     
     def assert_twilio_exception_logged(self, do):
         with self.assertLogs(logger='officehours_api.notifications', level='ERROR') as cm:
@@ -67,102 +67,102 @@ class NotificationTestCase(TestCase):
             self.assertIn('Twilio returned the following information', cm.output[0])
             self.assertIn('Traceback', cm.output[0])
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_first_meeting_notifies_hosts(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_first_meeting_notifies_hosts(self, mock_twilio: mock.MagicMock):
         self.create_meeting([self.foo, self.bar, self.baz, self.attendeeoptout])
-        self.assertEqual(MockTwilio().messages.create.call_count, 2)
-        receivers = self.get_receivers(MockTwilio)
+        self.assertEqual(mock_twilio.messages.create.call_count, 2)
+        receivers = self.get_receivers(mock_twilio)
         self.assertTrue(
             receivers >=
             {'+15555551111','+15555552222',}
         )
     
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_first_meeting_bad_phone_logs_exception(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_first_meeting_bad_phone_logs_exception(self, mock_twilio: mock.MagicMock):
         self.queue.hosts.set([self.hostie, self.hostbad, self.hostacular, self.hostoptout])
         self.queue.save()
-        self.setup_bad_phone_test(MockTwilio)
+        self.setup_bad_phone_test(mock_twilio)
         self.assert_twilio_exception_logged(lambda: self.create_meeting([self.foo, self.bar, self.baz, self.attendeeoptout]))
-        self.assertEqual(MockTwilio().messages.create.call_count, 3)
-        receivers = self.get_receivers(MockTwilio)
+        self.assertEqual(mock_twilio.messages.create.call_count, 3)
+        receivers = self.get_receivers(mock_twilio)
         self.assertTrue(
             receivers >=
             {'+15555551111','+15555552222',}
         )
         self.assertEqual(self.exceptions, 1)
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_first_meeting_doesnt_notify_optout_hosts(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_first_meeting_doesnt_notify_optout_hosts(self, mock_twilio: mock.MagicMock):
         self.create_meeting([self.foo, self.bar, self.baz, self.attendeeoptout])
-        self.assertEqual(MockTwilio().messages.create.call_count, 2)
-        receivers = self.get_receivers(MockTwilio)
+        self.assertEqual(mock_twilio.messages.create.call_count, 2)
+        receivers = self.get_receivers(mock_twilio)
         self.assertFalse(
             receivers >=
             {'+15555553333',}
         )
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_first_meeting_doesnt_notify_attendees(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_first_meeting_doesnt_notify_attendees(self, mock_twilio: mock.MagicMock):
         self.create_meeting([self.foo, self.bar, self.baz])
-        receivers = self.get_receivers(MockTwilio)
+        receivers = self.get_receivers(mock_twilio)
         self.assertFalse(
             receivers >=
             {'+15555550000', '+15555550001', '+15555550002',}
         )
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_second_meeting_doesnt_notify_hosts(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_second_meeting_doesnt_notify_hosts(self, mock_twilio: mock.MagicMock):
         self.create_meeting([self.foo,])
-        MockTwilio.reset_mock()
+        mock_twilio.reset_mock()
         self.create_meeting([self.bar, self.baz,])
-        receivers = self.get_receivers(MockTwilio)
+        receivers = self.get_receivers(mock_twilio)
         self.assertFalse(
             receivers >=
             {'+15555551111', '+15555552222',}
         )
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_first_meeting_removal_bad_phone_logs_exception(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_first_meeting_removal_bad_phone_logs_exception(self, mock_twilio: mock.MagicMock):
         m1 = self.create_meeting([self.foo,])
         self.create_meeting([self.bar, self.attendeebad, self.baz])
-        MockTwilio.reset_mock()
-        self.setup_bad_phone_test(MockTwilio)
+        mock_twilio.reset_mock()
+        self.setup_bad_phone_test(mock_twilio)
         self.assert_twilio_exception_logged(lambda: m1.delete())
-        receivers = self.get_receivers(MockTwilio)
+        receivers = self.get_receivers(mock_twilio)
         self.assertTrue(
             receivers >=
             {'+15555550001', '+15555550002',}
         )
         self.assertEqual(self.exceptions, 1)
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_first_meeting_removal_doesnt_notify_optout(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_first_meeting_removal_doesnt_notify_optout(self, mock_twilio: mock.MagicMock):
         m1 = self.create_meeting([self.foo,])
         self.create_meeting([self.bar, self.baz, self.attendeeoptout,])
-        MockTwilio.reset_mock()
+        mock_twilio.reset_mock()
         m1.delete()
-        receivers = self.get_receivers(MockTwilio)
+        receivers = self.get_receivers(mock_twilio)
         self.assertFalse(
             receivers >=
             {'+15555550003',}
         )
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_second_meeting_removal_notifies_none(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_second_meeting_removal_notifies_none(self, mock_twilio: mock.MagicMock):
         self.create_meeting([self.foo,])
         m2 = self.create_meeting([self.bar, self.baz])
-        MockTwilio.reset_mock()
+        mock_twilio.reset_mock()
         m2.delete()
-        receivers = self.get_receivers(MockTwilio)
+        receivers = self.get_receivers(mock_twilio)
         self.assertFalse('+15555550001' in receivers)
         self.assertFalse('+15555550002' in receivers)
 
-    @mock.patch('officehours_api.notifications.TwilioClient')
-    def test_first_meeting_removal_doesnt_notify_second_in_line(self, MockTwilio: mock.MagicMock):
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_first_meeting_removal_doesnt_notify_second_in_line(self, mock_twilio: mock.MagicMock):
         m1 = self.create_meeting([self.foo,])
         self.create_meeting([self.bar,])
         self.create_meeting([self.baz,])
-        MockTwilio.reset_mock()
+        mock_twilio.reset_mock()
         m1.delete()
-        receivers = self.get_receivers(MockTwilio)
+        receivers = self.get_receivers(mock_twilio)
         self.assertFalse('+15555550002' in receivers)
