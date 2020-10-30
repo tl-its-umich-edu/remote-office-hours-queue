@@ -382,11 +382,15 @@ interface EditToggleFieldProps extends SingleInputFieldProps {
 // Wrapper for input fields that can be expanded or hidden with an Edit button
 export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
     const [editing, setEditing] = useState(props.initialState);
+    const [initFocus, setInitFocus] = useState(!props.initialState);
 
-    const toggleEditMode = () => setEditing(!editing);
+    const toggleEditMode = () => {
+        setEditing(!editing);
+        setInitFocus(true);
+    }
 
     const contents = (editing && !props.disabled)
-        ? <SingleInputField {...props} initFocus={true} onSuccess={toggleEditMode}>{props.children}</SingleInputField>
+        ? <SingleInputField {...props} initFocus={initFocus} onSuccess={toggleEditMode}>{props.children}</SingleInputField>
         : (
             <div className="input-group">
                 <span>{props.value}</span>
