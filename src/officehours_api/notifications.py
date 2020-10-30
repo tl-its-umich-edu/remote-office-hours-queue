@@ -12,9 +12,10 @@ from officehours_api.models import Queue, Meeting
 
 logger = logging.getLogger(__name__)
 
+twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+
 
 def notify_next_in_line(next_in_line: Meeting):
-    twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
         u.profile.phone_number for u in
         next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
@@ -37,7 +38,6 @@ def notify_next_in_line(next_in_line: Meeting):
             logger.exception(f"Error while sending attendee notification to {p} for queue {next_in_line.queue.id}")
 
 def notify_queue_no_longer_empty(first: Meeting):
-    twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
     phone_numbers = list(
         h.profile.phone_number for h in
         first.queue.hosts_with_phone_numbers.filter(profile__notify_me_host__exact=True)
