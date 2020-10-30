@@ -173,4 +173,5 @@ def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
         instance.profile = Profile.objects.create(user=instance)
 
 
-import officehours_api.notifications
+if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID:
+    import officehours_api.notifications
