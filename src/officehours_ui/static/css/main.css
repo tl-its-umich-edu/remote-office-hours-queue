@@ -181,6 +181,10 @@ a:hover {
 	color: #0065a3;
 }
 
+.btn-warning:focus {
+	box-shadow: 0 0 0 0.2rem rgba(12, 61, 222, 0.5);
+}
+
 .bottom-right {
 	position: fixed;
 	bottom: 0;
