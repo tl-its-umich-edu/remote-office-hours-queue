@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createRef, useEffect, useState } from "react";
+import { createRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
@@ -163,9 +163,11 @@ interface CopyFieldProps {
 export const CopyField: React.FC<CopyFieldProps> = (props) => {
     const [copied, setCopied] = useState(false);
     const inputRef = createRef<HTMLInputElement>();
-    const copy = () => {
+    const buttonRef = createRef<HTMLButtonElement>();
+    const copy = (focusButton?: boolean) => {
         inputRef.current!.select();
         document.execCommand("copy");
+        if (focusButton) buttonRef.current!.focus();
         setCopied(true);
         setTimeout(() => setCopied(false), 3000);
     }
@@ -177,9 +179,9 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
     return (
         <>
             <div className="input-group">
-                <input readOnly id={props.id} ref={inputRef} onClick={copy} value={props.text} type="text" className="form-control" />
+                <input readOnly id={props.id} ref={inputRef} onClick={() => copy()} value={props.text} type="text" className="form-control" />
                 <div className="input-group-append">
-                    <button type="button" onClick={copy} className="btn btn-secondary">
+                    <button type="button" ref={buttonRef} onClick={() => copy(true)} className="btn btn-secondary">
                         {buttonInner}
                     </button>
                 </div>
