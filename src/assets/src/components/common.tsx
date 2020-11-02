@@ -245,7 +245,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
     }
 
     return (
-        <Form onSubmit={handleSubmit} aria-label={props.formLabel}>
+        <Form onSubmit={handleSubmit}>
             <InputGroup>
                 <Form.Control
                     id={props.id}
@@ -253,6 +253,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
                     ref={inputRef}
                     className='form-control-remaining'
                     value={props.value}
+                    aria-label={props.formLabel}
                     placeholder={props.placeholder}
                     onChange={(e: any) => handleChange(e.currentTarget.value)}
                     disabled={props.disabled}
@@ -296,15 +297,16 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
     }
 
     return (
-        <Form onSubmit={handleSubmit} aria-label={props.formLabel}>
+        <Form onSubmit={handleSubmit}>
             <Form.Group>
                 <Form.Control
                     id={props.id}
                     as='textarea'
-                    ref={inputRef}
                     rows={5}
+                    ref={inputRef}
                     className='form-control-remaining'
                     value={props.value}
+                    aria-label={props.formLabel}
                     placeholder={props.placeholder}
                     onChange={(e) => handleChange(e.currentTarget.value)}
                     disabled={props.disabled}
