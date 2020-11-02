@@ -182,7 +182,7 @@ a:hover {
 }
 
 .btn-warning:focus {
-	box-shadow: 0 0 0 0.2rem rgba(12, 61, 222, 0.5);
+	box-shadow: 0 0 0 0.2rem #0c3dde7f;
 }
 
 .bottom-right {
