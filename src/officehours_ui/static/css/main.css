@@ -181,11 +181,11 @@ a:hover {
 	color: #0060ba;
 }
 
-.alert a {
+.alert a:not(.btn) {
 	text-decoration: underline;
 }
 
-p a {
+p a:not(.btn) {
 	text-decoration: underline;
 }
 
@@ -200,9 +200,13 @@ p a {
 	padding: 1.25rem;
 }
 
+.text-danger {
+	color: #CC0000 !important;
+}
+
 .btn-danger {
 	background-color: #CC0000;
-	border-color: #cc0000;
+	border-color: #CC0000;
 }
 
 .btn-danger:hover.btn-danger:not(:disabled), .btn-danger:focus.btn-danger:not(:disabled) {
@@ -492,8 +496,13 @@ h3.alert-heading {
 	border: 1px solid #cecbc9;
 }
 
-.form-control-remaining.is-invalid {
+.form-control.is-invalid {
+	border-color: #CC0000;
 	background-image: none;
+}
+
+.form-control.is-invalid:focus {
+	border-color: #CC0000;
 }
 
 /* Overrides styling of feedback so it can be used consistently, anywhere */
@@ -667,6 +676,14 @@ div[role=main] {
 	padding-left: 5px
 }
 
-.queue-table-badge {
+.badge {
 	font-size: 90%;
+}
+
+.badge-danger {
+	background-color: #CC0000;
+}
+
+.badge-success {
+	background-color: #00820D;
 }
