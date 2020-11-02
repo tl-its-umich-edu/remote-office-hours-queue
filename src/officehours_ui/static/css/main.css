@@ -2,6 +2,8 @@
 	--dark-blue: #00274C;
 	--med-blue: #40658F;
 	--light-blue: #6189b7;
+	--custom-red: #CC0000;
+	--custom-green: #00820D;
 }
 
 body {
@@ -201,12 +203,12 @@ p a:not(.btn) {
 }
 
 .text-danger {
-	color: #CC0000 !important;
+	color: var(--custom-red) !important;
 }
 
 .btn-danger {
-	background-color: #CC0000;
-	border-color: #CC0000;
+	background-color: var(--custom-red);
+	border-color: var(--custom-red);
 }
 
 .btn-danger:hover.btn-danger:not(:disabled), .btn-danger:focus.btn-danger:not(:disabled) {
@@ -335,18 +337,18 @@ a.nav-link.disabled:hover, a.nav-link.disabled:active, a.nav-link.disabled:focus
 
 .btn-success {
 	color: #ffffff;
-	background-color: #00820d;
-	border-color: #00820d;
+	background-color: var(--custom-green);
+	border-color: var(--custom-green);
 }
 
 .btn-outline-success {
-	border-color: #00820d;
-	color: #00820d;
+	border-color: var(--custom-green);
+	color: var(--custom-green);
 }
 
 .btn-outline-success:hover, .btn-outline-success:focus, .btn-outline-success:active, .btn-outline-success:not(:disabled):not(.disabled):active, .btn-outline-success.selected {
-	border-color: #00820d;
-	background-color: #00820d;
+	border-color: var(--custom-green);
+	background-color: var(--custom-green);
 	color: #ffffff;
 }
 
@@ -497,12 +499,12 @@ h3.alert-heading {
 }
 
 .form-control.is-invalid {
-	border-color: #CC0000;
+	border-color: var(--custom-red);
 	background-image: none;
 }
 
 .form-control.is-invalid:focus {
-	border-color: #CC0000;
+	border-color: var(--custom-red);
 }
 
 /* Overrides styling of feedback so it can be used consistently, anywhere */
@@ -624,7 +626,7 @@ pre {
 }
 
 .card-not-selected {
-	border-color: #cc0000 !important;
+	border-color: var(--custom-red) !important;
 	border-width: 3px !important;
 }
 
@@ -664,7 +666,7 @@ div[role=main] {
 }
 
 .required {
-	color: #cc0000;
+	color: var(--custom-red);
 }
 
 .meeting-type-text-container {
@@ -681,9 +683,9 @@ div[role=main] {
 }
 
 .badge-danger {
-	background-color: #CC0000;
+	background-color: var(--custom-red);
 }
 
 .badge-success {
-	background-color: #00820D;
+	background-color: var(--custom-green);
 }
