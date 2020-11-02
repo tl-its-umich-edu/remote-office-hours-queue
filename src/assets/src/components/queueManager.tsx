@@ -134,7 +134,6 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
                 <Form.Control
                     id='add_attendee'
                     as='input'
-                    className='form-control-remaining'
                     value={attendee}
                     placeholder='Uniqname...'
                     onChange={handleAttendeeChange}

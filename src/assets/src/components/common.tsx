@@ -251,7 +251,6 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
                     id={props.id}
                     as='input'
                     ref={inputRef}
-                    className='form-control-remaining'
                     value={props.value}
                     aria-label={props.formLabel}
                     placeholder={props.placeholder}
@@ -304,7 +303,6 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
                     as='textarea'
                     rows={5}
                     ref={inputRef}
-                    className='form-control-remaining'
                     value={props.value}
                     aria-label={props.formLabel}
                     placeholder={props.placeholder}
@@ -509,13 +507,12 @@ interface QueueTableProps {
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
-    const badgeClass = 'queue-table-badge'
 
     const queueItems = props.queues.map(q => (
         <tr key={q.id}>
             <td aria-label={`Queue ID Number`}>
                 <Link to={`${linkBase}${q.id}`}>
-                    <Badge className={badgeClass} variant='primary' pill={true}>{q.id}</Badge>
+                    <Badge variant='primary' pill={true}>{q.id}</Badge>
                 </Link>
             </td>
             <td aria-label={`Name for Queue ID ${q.id}`}>
@@ -523,7 +520,7 @@ export function QueueTable (props: QueueTableProps) {
             </td>
             <td aria-label={`Status for Queue ID ${q.id}`}>
                 <Link to={`${linkBase}${q.id}`}>
-                    <Badge className={badgeClass} variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
+                    <Badge variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
                         {q.status}
                     </Badge>
                 </Link>
