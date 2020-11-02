@@ -8,7 +8,7 @@ interface OfficeHoursMessage<T> {
 
 export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onDelete?: (setError: (React.Dispatch<React.SetStateAction<Error | undefined>>)) => void) => {
     const [error, setError] = useState(undefined as Error | undefined);
-    const numRetries = 3;
+    const numRetries = 10;
     useEffect(() => {
         const ws = new ReconnectingWebSocket(
             url,
