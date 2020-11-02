@@ -202,6 +202,8 @@ p a:not(.btn) {
 	padding: 1.25rem;
 }
 
+/* !important is needed to override another !important used in the text-emphasis Bootstrap mixin.
+   We should re-evaluate this in the future and potentially customize the danger value using Sass. */
 .text-danger {
 	color: var(--custom-red) !important;
 }
