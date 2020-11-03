@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
 DOMAIN = Site.objects.get_current().domain
+PREF_URL = f"https://{DOMAIN}{reverse('preferences')}"
 
 
 class NotificationType(Enum):
@@ -24,12 +25,10 @@ class NotificationType(Enum):
 
 
 def create_notification_addendum(type: NotificationType) -> str:
-    pref_path = reverse('preferences')
-    pref_url = f"https://{DOMAIN}{pref_path}"
     return (
         f"\n\nThis message was sent by the University of Michigan ITS Remote Office Hours Queue "
         f"because you opted in to receive {type.value} SMS notifications. "
-        f"To opt out or change your preferences, visit {pref_url}"
+        f"To opt out or change your preferences, visit {PREF_URL}"
     )
 
 
