@@ -134,8 +134,7 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
             </SingleInputField>
             <h3>Current Hosts</h3>
             <p>
-                To remove a host, select the trash icon to the right of the user's name.
-                <strong>You cannot remove yourself as a host.</strong>
+                To remove a host, select the trash icon to the right of the user's name. <strong>You cannot remove yourself as a host.</strong>
             </p>
             <ListGroup>{hostsSoFar}</ListGroup>
         </div>
