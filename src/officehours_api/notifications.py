@@ -37,7 +37,8 @@ def notify_next_in_line(next_in_line: Meeting):
         u.profile.phone_number for u in
         next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
     )
-    queue_path = reverse('queue', kwargs={'queue_id': next_in_line.queue.id})
+    queue_waited_in: Queue = next_in_line.queue
+    queue_path = reverse('queue', kwargs={'queue_id': queue_waited_in.id})
     queue_url = f"https://{DOMAIN}{queue_path}"
     for p in phone_numbers:
         try:
@@ -46,7 +47,7 @@ def notify_next_in_line(next_in_line: Meeting):
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
                 body=(
-                    f"You're next in line! Please visit {queue_url} "
+                    f"You're next in line for queue {queue_waited_in.name}! Please visit {queue_url} "
                     f"for instructions to join."
                     f"{create_notification_addendum(NotificationType.ATTENDEE)}"
                 ),
