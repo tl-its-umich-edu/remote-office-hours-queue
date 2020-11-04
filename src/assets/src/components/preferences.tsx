@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { Alert, Button, Form } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
-import 'react-phone-input-2/lib/style.css'
+import 'react-phone-input-2/lib/bootstrap.css'
 
 import * as api from "../services/api";
 import { MyUser } from "../models";
@@ -36,6 +36,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     const phoneInput = (
         <PhoneInput
             country={'us'}
+            onlyCountries={['us', 'ca']}
+            countryCodeEditable={false}
             value={props.user.phone_number}
             onChange={(value: any, data: any) => {
                 setPhoneField(value);
