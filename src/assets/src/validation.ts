@@ -41,7 +41,10 @@ export const confirmUserExists = async (uniqname: string) => {
 export const validatePhoneNumber = (phone: string, countryDialCode: string): Error[] => {
     return [
         (countryDialCode === '1' && phone.length !== 11)
-            && new Error("The phone number entered was invalid; USA phone numbers must have 11 digits."),
+            && new Error(
+                'Please enter a valid US/Canada phone number with area code ' +
+                '(11 digits including +1 country code) that can receive SMS messages.'
+            ),
     ].filter(e => e) as Error[];
 }
 
