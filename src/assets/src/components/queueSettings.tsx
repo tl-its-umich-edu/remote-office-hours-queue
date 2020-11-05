@@ -1,5 +1,8 @@
 import * as React from "react";
 import { createRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
@@ -35,7 +38,12 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
         <Tab.Container id='add-queue-editor' defaultActiveKey='general'>
             <Row>
                 <Col md={3} sm={3}>
-                    <Nav variant='pills' className='flex-column mt-5'>
+                    <div className='mt-4'>
+                        <Link to={`/manage/${props.queue.id}/`}>
+                            <FontAwesomeIcon icon={faChevronLeft} /> Back to Queue
+                        </Link>
+                    </div>
+                    <Nav variant='pills' className='flex-column mt-4'>
                         <Nav.Item>
                             <Nav.Link eventKey='general' role='tab-custom' tabIndex={0} aria-label='General Tab'>
                                 General
