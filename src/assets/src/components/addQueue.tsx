@@ -212,7 +212,10 @@ export function AddQueuePage(props: PageProps) {
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
-            <Breadcrumbs currentPageTitle='Add Queue' />
+            <Breadcrumbs
+                intermediatePages={[{ title: 'Manage', href: '/manage/' }]}
+                currentPageTitle='Add Queue'
+            />
             <LoadingDisplay loading={isChanging} />
             <ErrorDisplay formErrors={globalErrors} />
             <AddQueueEditor
