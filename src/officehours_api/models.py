@@ -56,7 +56,7 @@ def get_default_allowed_backends():
 def get_backend_types():
     return [
         [key, value.friendly_name]
-        for key, value in settings.BACKENDS.items()
+        for key, value in backend_instances.items()
     ]
 
 class Queue(SafeDeleteModel):
