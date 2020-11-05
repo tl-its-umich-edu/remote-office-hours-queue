@@ -1,5 +1,4 @@
 import logging
-from enum import Enum
 
 from django.conf import settings
 from django.dispatch import receiver
@@ -16,20 +15,11 @@ logger = logging.getLogger(__name__)
 twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
 DOMAIN = Site.objects.get_current().domain
-PREF_URL = f"https://{DOMAIN}{reverse('preferences')}"
-
-
-class NotificationType(Enum):
-    HOST = 'host'
-    ATTENDEE = 'attendee'
-
-
-def create_notification_addendum(type: NotificationType) -> str:
-    return (
-        f"\n\nThis message was sent by the University of Michigan ITS Remote Office Hours Queue "
-        f"because you opted in to receive {type.value} SMS notifications. "
-        f"To opt out or change your preferences, visit {PREF_URL}"
-    )
+PREF_URL = f"{DOMAIN}{reverse('preferences')}"
+ADDENDUM = (
+    f"\n\nYou opted in to receive these messages from U-M. "
+    f"Opt out at {PREF_URL}"
+)
 
 
 def notify_next_in_line(next_in_line: Meeting):
@@ -39,7 +29,7 @@ def notify_next_in_line(next_in_line: Meeting):
     )
     queue_waited_in: Queue = next_in_line.queue
     queue_path = reverse('queue', kwargs={'queue_id': queue_waited_in.id})
-    queue_url = f"https://{DOMAIN}{queue_path}"
+    queue_url = f"{DOMAIN}{queue_path}"
     for p in phone_numbers:
         try:
             logger.info('notify_next_in_line: %s', p)
@@ -47,9 +37,8 @@ def notify_next_in_line(next_in_line: Meeting):
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
                 body=(
-                    f"You're next in line for queue {queue_waited_in.name}! Please visit {queue_url} "
-                    f"for instructions to join."
-                    f"{create_notification_addendum(NotificationType.ATTENDEE)}"
+                    f"It's your turn in queue {queue_url}"
+                    f"{ADDENDUM}"
                 ),
             )
         except:
@@ -62,8 +51,7 @@ def notify_queue_no_longer_empty(first: Meeting):
         first.queue.hosts_with_phone_numbers.filter(profile__notify_me_host__exact=True)
     )
     edit_path = reverse('edit', kwargs={'queue_id': first.queue.id})
-    edit_url = f"https://{DOMAIN}{edit_path}"
-
+    edit_url = f"{DOMAIN}{edit_path}"
     for p in phone_numbers:
         try:
             logger.info('notify_queue_no_longer_empty: %s', p)
@@ -71,9 +59,8 @@ def notify_queue_no_longer_empty(first: Meeting):
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
                 body=(
-                    f"Someone has joined your queue, {first.queue.name}! "
-                    f"Please visit {edit_url} to see who joined and, if applicable, start the meeting."
-                    f"{create_notification_addendum(NotificationType.HOST)}"
+                    f"Someone joined your queue {edit_url}"
+                    f"{ADDENDUM}"
                 ),
             )
         except:
