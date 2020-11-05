@@ -27,8 +27,7 @@ def notify_next_in_line(next_in_line: Meeting):
         u.profile.phone_number for u in
         next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
     )
-    queue_waited_in: Queue = next_in_line.queue
-    queue_path = reverse('queue', kwargs={'queue_id': queue_waited_in.id})
+    queue_path = reverse('queue', kwargs={'queue_id': next_in_line.queue.id})
     queue_url = f"{DOMAIN}{queue_path}"
     for p in phone_numbers:
         try:
