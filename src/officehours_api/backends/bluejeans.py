@@ -135,7 +135,7 @@ class Backend:
             client_secret or settings.BLUEJEANS_CLIENT_SECRET
         )
 
-    def save_user_meeting(self, backend_metadata={}):
+    def save_user_meeting(self, backend_metadata, assignee):
         if backend_metadata.get('meeting_id'):
             return backend_metadata
 
