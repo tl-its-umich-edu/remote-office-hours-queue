@@ -17,7 +17,7 @@ twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 DOMAIN = Site.objects.get_current().domain
 PREF_URL = f"{DOMAIN}{reverse('preferences')}"
 ADDENDUM = (
-    f"\n\nYou opted in to receive these messages from U-M. "
+    f"\n\nYou opted in to receive these texts from U-M. "
     f"Opt out at {PREF_URL}"
 )
 
