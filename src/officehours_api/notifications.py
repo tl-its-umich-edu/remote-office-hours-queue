@@ -15,11 +15,14 @@ logger = logging.getLogger(__name__)
 twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
 DOMAIN = Site.objects.get_current().domain
-PREF_URL = f"{DOMAIN}{reverse('preferences')}"
-ADDENDUM = (
-    f"\n\nYou opted in to receive these texts from U-M. "
-    f"Opt out at {PREF_URL}"
-)
+
+
+def build_addendum():
+    pref_url = f"{DOMAIN}{reverse('preferences')}"
+    return (
+        f"\n\nYou opted in to receive these texts from U-M. "
+        f"Opt out at {pref_url}"
+    )
 
 
 def notify_next_in_line(next_in_line: Meeting):
@@ -37,7 +40,7 @@ def notify_next_in_line(next_in_line: Meeting):
                 to=p,
                 body=(
                     f"It's your turn in queue {queue_url}"
-                    f"{ADDENDUM}"
+                    f"{build_addendum()}"
                 ),
             )
         except:
@@ -59,7 +62,7 @@ def notify_queue_no_longer_empty(first: Meeting):
                 to=p,
                 body=(
                     f"Someone joined your queue {edit_url}"
-                    f"{ADDENDUM}"
+                    f"{build_addendum()}"
                 ),
             )
         except:
