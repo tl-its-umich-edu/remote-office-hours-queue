@@ -222,7 +222,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             const descriptForUpdate = description.trim() !== queue?.description ? description : undefined;
             const allowedForUpdate = checkIfSetsAreDifferent(new Set(queue!.allowed_backends), allowedMeetingTypes)
                 ? allowedMeetingTypes : undefined;
-            if (nameForUpdate || descriptForUpdate || allowedForUpdate) {
+            if (nameForUpdate !== undefined || descriptForUpdate !== undefined || allowedForUpdate) {
                 doUpdateQueue(nameForUpdate, descriptForUpdate, allowedForUpdate);
                 setShowSuccessMessage(true);
             }
