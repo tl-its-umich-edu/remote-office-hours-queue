@@ -17,6 +17,7 @@ twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 DOMAIN = Site.objects.get_current().domain
 
 
+# `reverse()` at the module level breaks `/admin`, so defer it by wrapping it in a function.
 def build_addendum():
     pref_url = f"{DOMAIN}{reverse('preferences')}"
     return (
