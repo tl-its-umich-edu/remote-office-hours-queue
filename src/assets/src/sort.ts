@@ -21,5 +21,5 @@ const compareQueueIDDesc: CompareQueueFunc = (a, b) => {
 }
 
 export const sortQueues = (queues: QueueBase[]): QueueBase[] => {
-    return queues.sort(compareQueueIDDesc).sort(compareQueueStatus)
+    return queues.sort(compareQueueIDDesc).sort(compareQueueStatus);
 }
