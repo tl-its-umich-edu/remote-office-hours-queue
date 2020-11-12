@@ -503,7 +503,7 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
 }
 
 interface QueueTableProps {
-    queues: ReadonlyArray<QueueBase>;
+    queues: QueueBase[];
     manageLink?: boolean | undefined;
 }
 

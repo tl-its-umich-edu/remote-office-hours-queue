@@ -6,6 +6,7 @@ import { usePromise } from "../hooks/usePromise";
 import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs, QueueTable } from "./common";
 import { redirectToLogin } from "../utils";
+import { sortQueues } from "../sort";
 import { PageProps } from "./page";
 
 
@@ -39,7 +40,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
                     No results were found for "{term}".
                 </p>
             )
-            : <QueueTable queues={searchResults} />
+            : <QueueTable queues={sortQueues(searchResults.slice())} />
     const redirectAlert = props.location.search.includes("redirected=true") && !/^\d+$/.exec(term)
         && (
             <p className="alert alert-warning">
