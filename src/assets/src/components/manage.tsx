@@ -8,7 +8,6 @@ import { PageProps } from "./page";
 import { QueueBase } from "../models";
 import { useUserWebSocket } from "../services/sockets";
 import { redirectToLogin } from "../utils";
-import { sortQueues } from "../sort";
 
 
 interface ManageQueueTableProps {
@@ -18,7 +17,7 @@ interface ManageQueueTableProps {
 
 function ManageQueueTable(props: ManageQueueTableProps) {
     const queueResults = props.queues.length
-        ? <QueueTable queues={sortQueues(props.queues.slice())} manageLink={true} />
+        ? <QueueTable queues={props.queues} manageLink={true} />
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>;
     return (
         <div>
