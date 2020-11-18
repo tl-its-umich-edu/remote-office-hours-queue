@@ -10,6 +10,7 @@ import { StringSchema } from "yup";
 import { useStringValidation } from "../hooks/useValidation";
 import { useInitFocusRef } from "../hooks/useInitFocusRef";
 import { QueueAttendee, QueueBase, User } from "../models";
+import { sortQueues } from "../sort";
 import { ValidationResult } from "../validation";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
@@ -503,14 +504,15 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
 }
 
 interface QueueTableProps {
-    queues: QueueBase[];
+    queues: readonly QueueBase[];
     manageLink?: boolean | undefined;
 }
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
 
-    const queueItems = props.queues.map(q => (
+    const sortedQueues = sortQueues(props.queues.slice());
+    const queueItems = sortedQueues.map(q => (
         <tr key={q.id}>
             <td aria-label={`Queue ID Number`}>
                 <Link to={`${linkBase}${q.id}`}>
