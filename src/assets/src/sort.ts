@@ -1,5 +1,6 @@
 import { QueueBase } from "./models";
 
+
 type CompareQueueFunc = (a: QueueBase, b: QueueBase) => number;
 
 const compareQueueStatus: CompareQueueFunc = (a, b) => {
@@ -7,9 +8,8 @@ const compareQueueStatus: CompareQueueFunc = (a, b) => {
         return -1;
     } else if (a.status === 'closed' && b.status === 'open') {
         return 1;
-    } else {
-        return 0;
     }
+    return 0;
 }
 
 const compareQueueIDDesc: CompareQueueFunc = (a, b) => {
