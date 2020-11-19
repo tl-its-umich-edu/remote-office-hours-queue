@@ -1,17 +1,17 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 
 import { ChangeLog } from "./changeLog";
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoginDialog, QueueTable } from "./common";
 import { PageProps } from "./page";
+import { EntityType } from "../changes";
 import { useEntityChanges } from "../hooks/useEntityChanges";
 import { usePreviousState } from "../hooks/usePreviousState";
 import { QueueBase } from "../models";
 import { useUserWebSocket } from "../services/sockets";
 import { redirectToLogin } from "../utils";
-import { EntityType } from "../changes";
 
 
 interface ManageQueueTableProps {
@@ -55,7 +55,7 @@ export function ManagePage(props: PageProps) {
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const errorDisplay = <ErrorDisplay formErrors={errorSources} />;
     const queueTable = queues !== undefined
-        && <ManageQueueTable queues={queues} disabled={false }/>;
+        && <ManageQueueTable queues={queues} disabled={false} />;
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
