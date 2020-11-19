@@ -117,6 +117,13 @@ interface BlueJeansMeetingInfoProps {
 }
 
 const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
+    if (!props.metadata.meeting_url) {
+        return (
+            <p>
+                Please wait. The meeting is being started.
+            </p>
+        );
+    }
     const meetingNumber = props.metadata.numeric_meeting_id;
     const joinLink = 
         <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
@@ -157,6 +164,13 @@ interface ZoomMeetingInfoProps {
 }
 
 const ZoomMeetingInfo: React.FC<ZoomMeetingInfoProps> = (props) => {
+    if (!props.metadata.meeting_url) {
+        return (
+            <p>
+                Please wait. The meeting is being started.
+            </p>
+        );
+    }
     const meetingNumber = props.metadata.numeric_meeting_id;
     const joinLink = 
         <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
