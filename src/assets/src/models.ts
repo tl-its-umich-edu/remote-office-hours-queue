@@ -10,8 +10,11 @@ export interface MeetingBackend {
     intl_telephone_url: string | null;
 }
 
-export interface User {
+export interface Base {
     id: number;
+}
+
+export interface User extends Base {
     username: string;
     first_name: string;
     last_name: string;
@@ -44,8 +47,7 @@ export enum MeetingStatus {
     STARTED = 2
 }
 
-export interface Meeting {
-    id: number;
+export interface Meeting extends Base {
     line_place: number | null;
     attendees: User[];
     agenda: string;
@@ -56,8 +58,7 @@ export interface Meeting {
     status: MeetingStatus;
 }
 
-export interface QueueBase {
-    id: number;
+export interface QueueBase extends Base {
     name: string;
     status: "open" | "closed";
 }

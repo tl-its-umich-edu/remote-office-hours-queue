@@ -1,13 +1,17 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 
+import { ChangeLog } from "./changeLog";
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoginDialog, QueueTable } from "./common";
 import { PageProps } from "./page";
+import { useEntityChanges } from "../hooks/useEntityChanges";
+import { usePreviousState } from "../hooks/usePreviousState";
 import { QueueBase } from "../models";
 import { useUserWebSocket } from "../services/sockets";
 import { redirectToLogin } from "../utils";
+import { EntityType } from "../changes";
 
 
 interface ManageQueueTableProps {
@@ -35,16 +39,23 @@ export function ManagePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
+
     const [queues, setQueues] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
+    const oldQueues = usePreviousState(queues);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
-    
+
+    const [changeEventMap, compareAndSetEventMap, popChangeEvent] = useEntityChanges<QueueBase>(EntityType.queue);
+    useEffect(() => {
+        if (queues && oldQueues) compareAndSetEventMap(oldQueues, queues);
+    }, [queues])
+
     const errorSources = [
         {source: 'User Connection', error: userWebSocketError}
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
-    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources} />;
     const queueTable = queues !== undefined
-        && <ManageQueueTable queues={queues} disabled={false}/>
+        && <ManageQueueTable queues={queues} disabled={false }/>;
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
@@ -52,6 +63,7 @@ export function ManagePage(props: PageProps) {
             {errorDisplay}
             <h1>My Meeting Queues</h1>
             <p>These are all the queues you are a host of. Select a queue to manage it or add a queue below.</p>
+            <ChangeLog changeEventMap={changeEventMap} popChangeEvent={popChangeEvent} />
             {queueTable}
             <hr/>
             <a target="_blank" href="https://documentation.its.umich.edu/node/1830">
