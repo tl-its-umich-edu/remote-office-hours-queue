@@ -14,6 +14,7 @@ urlpatterns = [
     path('queues_search/', views.QueueListSearch.as_view(), name='queue-search'),
     path('meetings/', views.MeetingList.as_view(), name='meeting-list'),
     path('meetings/<int:pk>/', views.MeetingDetail.as_view(), name='meeting-detail'),
+    path('meetings/<int:pk>/start', views.MeetingStart.as_view(), name='meeting-start'),
     path('attendees/', views.AttendeeList.as_view(), name='attendee-list'),
     path('attendees/<int:pk>/', views.AttendeeDetail.as_view(), name='attendee-detail'),
 ]

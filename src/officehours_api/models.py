@@ -1,3 +1,6 @@
+
+from enum import Enum
+
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
@@ -94,6 +97,13 @@ def get_default_backend():
     return settings.DEFAULT_BACKEND
 
 
+
+class MeetingStatus(Enum):
+    UNASSIGNED = 0
+    ASSIGNED = 1
+    STARTED = 2
+
+
 class Meeting(SafeDeleteModel):
     _safedelete_policy = HARD_DELETE
     queue = models.ForeignKey(
@@ -125,23 +135,39 @@ class Meeting(SafeDeleteModel):
         self._original_backend_type = self.backend_type
         self._original_assignee = self.assignee
 
+    @property
+    def status(self):
+        return (
+            MeetingStatus.UNASSIGNED
+            if not self.assignee
+            else MeetingStatus.ASSIGNED
+            if not self.backend_metadata
+            else MeetingStatus.STARTED
+        )
+
+    def start(self, assignee=None):
+        if assignee:
+            self.assignee = assignee
+        if not self.assignee:
+            raise Exception("Can't start meeting before assignee is set!")
+        backend = backend_instances[self.backend_type]
+        user_email = self.queue.hosts.first().email
+        self.backend_metadata['user_email'] = user_email
+        try:
+            self.backend_metadata = backend.save_user_meeting(
+                self.backend_metadata,
+                self.assignee,
+            )
+        except RequestException as ex:
+            raise BackendException(self.backend_type) from ex
+
     def save(self, *args, **kwargs):
         if self.backend_type != self._original_backend_type:
-            self.backend_metadata = {}
+            if self.status == MeetingStatus.STARTED:
+                raise Exception("Can't change backend_type once meeting is started!")
         if self.assignee != self._original_assignee:
-            if not self.assignee:
-                self.backend_metadata = {}
-            else:
-                backend = backend_instances[self.backend_type]
-                user_email = self.queue.hosts.first().email
-                self.backend_metadata['user_email'] = user_email
-                try:
-                    self.backend_metadata = backend.save_user_meeting(
-                        self.backend_metadata,
-                        self.assignee,
-                    )
-                except RequestException as ex:
-                    raise BackendException(self.backend_type) from ex
+            if self.status == MeetingStatus.STARTED:
+                raise Exception("Can't change assignee once meeting is started!")
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

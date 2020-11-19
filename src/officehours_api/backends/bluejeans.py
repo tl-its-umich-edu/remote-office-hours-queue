@@ -139,10 +139,8 @@ class Backend:
         if backend_metadata.get('meeting_id'):
             return backend_metadata
 
-        user_email = backend_metadata['user_email']
-
-        user = self._client.get_user(user_email=user_email)
-        if not user:
+        bj_user = self._client.get_user(user_email=assignee.email)
+        if not bj_user:
             raise ValidationError(
                 f'There is no BlueJeans account associated with {user_email}. '
                 f'Please log into umich.bluejeans.com, then try again.'
@@ -150,7 +148,7 @@ class Backend:
 
         now = round(time.time()) * 1000
         meeting = self._client.create_meeting(
-            user['id'],
+            bj_user['id'],
             meeting_settings={
                 'title': (
                     'Remote Office Hours'),
@@ -169,7 +167,7 @@ class Backend:
             }
         )
         backend_metadata.update({
-            'user_id': user['id'],
+            'user_id': bj_user['id'],
             'meeting_id': meeting['id'],
             'numeric_meeting_id': meeting['numericMeetingId'],
             'meeting_url': f'https://bluejeans.com/{meeting["numericMeetingId"]}',

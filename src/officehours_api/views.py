@@ -173,6 +173,15 @@ class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdate
     permission_classes = (IsAuthenticated, IsHostOrAttendee,)
 
 
+class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
+    def post(self, request, pk):
+        m = Meeting.objects.get(pk=pk)
+        m.start()
+        m.save()
+        serializer = MeetingSerializer(m)
+        return Response(serializer.data)
+
+
 class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
     serializer_class = AttendeeSerializer
 

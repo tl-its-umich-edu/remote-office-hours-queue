@@ -31,20 +31,28 @@ interface MeetingEditorProps {
     onRemove: (m: Meeting) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined) => void;
+    onStartMeeting: (m: Meeting) => void;
 }
 
 function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0];
+    const backendBadge = (
+        <span className="badge badge-secondary mr-2">{props.backends[props.meeting.backend_type]}</span>
+    );
+    const readyButton = props.meeting.assignee
+        && (
+            <button onClick={() => props.onStartMeeting(props.meeting)} disabled={props.disabled} className="btn btn-success btn-sm mr-2">
+                Ready for Attendee
+            </button>
+        );
     const joinUrl = props.meeting.backend_metadata?.meeting_url;
     const joinLink = joinUrl
-        ? (
+        && (
             <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
-                Start Meeting
+                Join Meeting
             </a>
-        )
-        : (
-            <span className="badge badge-secondary mr-2">{props.backends[props.meeting.backend_type]}</span>
         );
+    const progressWorkflow = <Col md={3}>{joinLink || readyButton}</Col>;
     const infoButton = (
         <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="link" size="sm" className="mr-2">
             Join Info
@@ -67,14 +75,16 @@ function MeetingEditor(props: MeetingEditorProps) {
                 <select className="form-control assign"
                     value={props.meeting.assignee?.id ?? ""}
                     onChange={onChangeAssignee}
+                    disabled={props.meeting.backend_metadata && !!Object.keys(props.meeting.backend_metadata).length}
                 >
                     {assigneeOptions}
                 </select>
             </td>
             <td>
                 <Row>
-                    <Col md={5}>{joinLink}</Col>
-                    <Col md={4}>{infoButton}</Col>
+                    <Col md={3}>{backendBadge}</Col>
+                    {progressWorkflow}
+                    <Col md={3}>{infoButton}</Col>
                     <Col md={3}>
                         <RemoveButton
                             onRemove={() => props.onRemove(props.meeting)}
@@ -170,6 +180,7 @@ interface QueueManagerProps {
     onSetStatus: (open: boolean) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
+    onStartMeeting: (m: Meeting) => void;
 }
 
 function QueueManager(props: QueueManagerProps) {
@@ -190,6 +201,7 @@ function QueueManager(props: QueueManagerProps) {
                     onRemove={props.onRemoveMeeting}
                     onShowMeetingInfo={props.onShowMeetingInfo}
                     onChangeAssignee={(a: User | undefined) => props.onChangeAssignee(a, m)}
+                    onStartMeeting={() => props.onStartMeeting(m)}
                 />
             </tr>
         );
@@ -325,7 +337,7 @@ const MeetingInfoDialog = (props: MeetingInfoProps) => {
     return (
         <Modal show={!!props.meeting} onHide={props.onClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Join Info</Modal.Title>
+                <Modal.Title data-id={props.meeting?.id}>Join Info</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {generalInfo}
@@ -395,21 +407,29 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         return await api.setStatus(queue!.id, open);
     }
     const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueueChecked);
+    
     const changeAssignee = async (assignee: User | undefined, meeting: Meeting) => {
         recordQueueManagementEvent("Changed Assignee");
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
     
+    const startMeeting = async (meeting: Meeting) => {
+        recordQueueManagementEvent("Started Meeting");
+        await api.startMeeting(meeting.id);
+    }
+    const [doStartMeeting, startMeetingLoading, startMeetingError] = usePromise(startMeeting);
+
     // Render
-    const isChanging = removeMeetingLoading || addMeetingLoading || setStatusLoading || changeAssigneeLoading;
+    const isChanging = removeMeetingLoading || addMeetingLoading || setStatusLoading || changeAssigneeLoading || startMeetingLoading;
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
         {source: 'Remove Meeting', error: removeMeetingError},
         {source: 'Add Meeting', error: addMeetingError},
         {source: 'Queue Status', error: setStatusError},
-        {source: 'Assignee', error: changeAssigneeError}
+        {source: 'Assignee', error: changeAssigneeError},
+        {source: 'Start Meeting', error: startMeetingError},
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>;
@@ -427,6 +447,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
                 onSetStatus={doSetStatus}
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
+                onStartMeeting={doStartMeeting}
             />
         );
     return (
