@@ -1,12 +1,13 @@
 import * as React from "react";
-import { useState, createRef, ChangeEvent } from "react";
+import { useEffect, useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { Alert, Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import {
+import { ChangeLog } from "./changeLog";
+import { 
     UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
     CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, userLoggedOnWarning
 } from "./common";
@@ -14,6 +15,9 @@ import { DialInContent } from './dialIn';
 import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
+import { EntityType } from "../changes";
+import { useEntityChanges } from "../hooks/useEntityChanges";
+import { usePreviousState } from "../hooks/usePreviousState";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
 import {
@@ -111,7 +115,7 @@ interface QueueManagerProps {
     onStartMeeting: (m: Meeting) => void;
 }
 
-function QueueManager(props: QueueManagerProps) {
+function QueueManager (props: React.PropsWithChildren<QueueManagerProps>) {
     const spacingClass = 'mt-4';
 
     let startedMeetings = [];
@@ -186,7 +190,10 @@ function QueueManager(props: QueueManagerProps) {
                 </Col>
             </Row>
             <Row noGutters className={spacingClass}>
-                <Col md={12}><MeetingsInQueueTable meetings={unstartedMeetings} {...props} /></Col>
+                <Col md={12}>
+                    {props.children}
+                    <MeetingsInQueueTable meetings={unstartedMeetings} {...props} />
+                </Col>
             </Row>
         </div>
     );
@@ -260,6 +267,8 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
 
     // Set up basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
+    const oldQueue = usePreviousState(queue);
+
     const [authError, setAuthError] = useState(undefined as Error | undefined);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
@@ -273,6 +282,12 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         }
     }
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
+
+    const [meetingChangeEventMap, compareAndSetMeetingChangeEventMap, popMeetingChangeEvent] = useEntityChanges<Meeting>(EntityType.meeting);
+    useEffect(() => {
+        if (queue && oldQueue) compareAndSetMeetingChangeEventMap(oldQueue.meeting_set, queue.meeting_set);
+    }, [queue])
+
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
@@ -336,6 +351,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>;
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>;
+    const meetingChangeLog = <ChangeLog changeEventMap={meetingChangeEventMap} popChangeEvent={popMeetingChangeEvent} />
     const queueManager = queue
         && (
             <QueueManager
@@ -350,7 +366,9 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
                 onStartMeeting={doStartMeeting}
-            />
+            >
+                {meetingChangeLog}
+            </QueueManager>
         );
     return (
         <>
