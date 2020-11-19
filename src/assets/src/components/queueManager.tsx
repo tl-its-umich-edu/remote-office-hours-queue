@@ -15,7 +15,6 @@ import { DialInContent } from './dialIn';
 import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
-import { EntityType } from "../changes";
 import { useEntityChanges } from "../hooks/useEntityChanges";
 import { usePreviousState } from "../hooks/usePreviousState";
 import { usePromise } from "../hooks/usePromise";
@@ -283,7 +282,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     }
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
 
-    const [meetingChangeEventMap, compareAndSetMeetingChangeEventMap, popMeetingChangeEvent] = useEntityChanges<Meeting>(EntityType.meeting);
+    const [meetingChangeEventMap, compareAndSetMeetingChangeEventMap, popMeetingChangeEvent] = useEntityChanges<Meeting>();
     useEffect(() => {
         if (queue && oldQueue) compareAndSetMeetingChangeEventMap(oldQueue.meeting_set, queue.meeting_set);
     }, [queue])

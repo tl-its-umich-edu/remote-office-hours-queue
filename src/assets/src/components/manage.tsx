@@ -6,7 +6,6 @@ import { Button } from "react-bootstrap";
 import { ChangeLog } from "./changeLog";
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoginDialog, QueueTable } from "./common";
 import { PageProps } from "./page";
-import { EntityType } from "../changes";
 import { useEntityChanges } from "../hooks/useEntityChanges";
 import { usePreviousState } from "../hooks/usePreviousState";
 import { QueueBase } from "../models";
@@ -44,7 +43,7 @@ export function ManagePage(props: PageProps) {
     const oldQueues = usePreviousState(queues);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
 
-    const [changeEventMap, compareAndSetEventMap, popChangeEvent] = useEntityChanges<QueueBase>(EntityType.queue);
+    const [changeEventMap, compareAndSetEventMap, popChangeEvent] = useEntityChanges<QueueBase>();
     useEffect(() => {
         if (queues && oldQueues) compareAndSetEventMap(oldQueues, queues);
     }, [queues])

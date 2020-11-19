@@ -1,13 +1,8 @@
 import xorWith from "lodash.xorwith";
 import isEqual from "lodash.isequal";
 
-import { Base } from "./models"
+import { Base, isQueueBase, isMeeting } from "./models"
 
-
-export enum EntityType {
-    queue = 'queue',
-    meeting = 'meeting'
-}
 
 export interface ChangeEvent {
     entityID: number;
@@ -20,12 +15,23 @@ export interface ChangeEventMap {
 
 // https://lodash.com/docs/4.17.15#xorWith
 
-export function compareEntities<T extends Base> (entityType: EntityType, oldOnes: T[], newOnes: T[]):
+export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]):
     ChangeEvent | undefined
 {
     const symDiff = xorWith(oldOnes, newOnes, isEqual);
     if (symDiff.length === 0) return;
     const firstEntity = symDiff[0];
+
+    let entityType;
+    if (isMeeting(firstEntity)) {
+        entityType = 'meeting';
+    } else if (isQueueBase(firstEntity)) {
+        entityType = 'queue';
+    } else {
+        console.error(`compareEntities was used with an unsupported type: ${firstEntity}`)
+        return;
+    }
+
     let message;
     if (oldOnes.length < newOnes.length) {
         message = `A new ${entityType} with ID number ${firstEntity.id} was added.`;

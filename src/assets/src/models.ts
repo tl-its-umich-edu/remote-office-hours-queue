@@ -58,9 +58,18 @@ export interface Meeting extends Base {
     status: MeetingStatus;
 }
 
+export const isMeeting = (entity: object): entity is Meeting => {
+    return 'attendees' in entity;
+}
+
+
 export interface QueueBase extends Base {
     name: string;
     status: "open" | "closed";
+}
+
+export const isQueueBase = (entity: object): entity is QueueBase => {
+    return 'name' in entity && 'status' in entity;
 }
 
 export interface QueueFull extends QueueBase {
