@@ -102,14 +102,19 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
     );
 }
 
-const TurnNowAlert = () =>
+const MeetingReadyAlert = () =>
     <div className="alert alert-success" role="alert">
-        <strong>It's your turn!</strong> If you haven't already joined the meeting, follow the directions to join it now!
+        <strong>Your meeting is ready!</strong> Please view the instructions below to join the meeting!
+    </div>
+
+const TurnNowAlert = () =>
+    <div className="alert alert-warning" role="alert">
+        <strong>You're next in line,</strong> but your meeting is still being started. When the host is ready, you'll be able to click Join Meeting below.
     </div>
 
 const TurnSoonAlert = () =>
     <div className="alert alert-warning" role="alert">
-        <strong>Your turn is coming up!</strong> Follow the directions to join the meeting now so you are ready when it's your turn.
+        <strong>Your turn is coming up!</strong> The line may move quickly, so don't go far!
     </div>
 
 interface BlueJeansMeetingInfoProps {
@@ -117,18 +122,18 @@ interface BlueJeansMeetingInfoProps {
 }
 
 const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
-    if (!props.metadata.meeting_url) {
-        return (
+    const meetingNumber = props.metadata.numeric_meeting_id;
+    const joinLink = props.metadata.meeting_url
+        ? (
+            <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
+                Join Meeting
+            </a>
+        )
+        : (
             <p>
-                Please wait. The meeting is being started.
+                <strong>Please wait. The meeting is being started...</strong>
             </p>
         );
-    }
-    const meetingNumber = props.metadata.numeric_meeting_id;
-    const joinLink = 
-        <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
-            Join Meeting
-        </a>
     const docLink = 'https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started'
     const docLinkTag = <a href={docLink} target='_blank' className='card-link'>How to use BlueJeans at U-M</a>
 
@@ -139,10 +144,9 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
         <div className="row bottom-content">
             <div className="col-sm">
                 <div className="card card-body">
-                    <h5 className="card-title mt-0">Joining the Meeting</h5>
+                    <h5 className="card-title mt-0">Using BlueJeans</h5>
                     <p className="card-text">
-                        You can join the meeting now to make sure you are set up and ready. Download the app and test your
-                        audio before it is your turn. Refer to {docLinkTag} for additional help getting started.
+                        Refer to {docLinkTag} for help using BlueJeans.
                     </p>
                 </div>
             </div>
@@ -172,10 +176,17 @@ const ZoomMeetingInfo: React.FC<ZoomMeetingInfoProps> = (props) => {
         );
     }
     const meetingNumber = props.metadata.numeric_meeting_id;
-    const joinLink = 
-        <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
-            Join Meeting
-        </a>
+    const joinLink = props.metadata.meeting_url
+        ? (
+            <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
+                Join Meeting
+            </a>
+        )
+        : (
+            <p>
+                <strong>Please wait. The meeting is being started...</strong>
+            </p>
+        );
 
     return (
         <>
@@ -184,15 +195,14 @@ const ZoomMeetingInfo: React.FC<ZoomMeetingInfoProps> = (props) => {
         <div className="row bottom-content">
             <div className="col-sm">
                 <div className="card card-body">
-                    <h5 className="card-title mt-0">Joining the Meeting</h5>
+                    <h5 className="card-title mt-0">Using Zoom</h5>
                     <p className="card-text">
-                        You can join the meeting now to make sure you are set up and ready. Download the app and test your
-                        audio before it is your turn. See 
+                        See 
                         <a href="https://its.umich.edu/communication/videoconferencing/zoom" 
                         target="_blank" 
                         className="card-link">
                             How to use Zoom at U-M
-                        </a> for additional help getting started.
+                        </a> for help getting started with Zoom.
                     </p>
                 </div>
             </div>
@@ -210,11 +220,13 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             </Alert>
         );
 
-    const alert = props.queue.my_meeting!.line_place === 0
+    const alert = (props.queue.my_meeting!.backend_metadata && Object.keys(props.queue.my_meeting!.backend_metadata).length)
+        ? <MeetingReadyAlert/>
+        : props.queue.my_meeting!.line_place === 0
         ? <TurnNowAlert/>
         : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
-            ? <TurnSoonAlert/>
-            : undefined;
+        ? <TurnSoonAlert/>
+        : undefined;
     const leave = (
         <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
             Leave the line
