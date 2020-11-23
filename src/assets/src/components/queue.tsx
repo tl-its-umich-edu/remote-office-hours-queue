@@ -1,8 +1,8 @@
 import * as React from "react";
-import { useState, useEffect, createRef } from "react";
+import { useState, createRef } from "react";
 import { Link } from "react-router-dom";
 import * as ReactGA from "react-ga";
-import { Alert, Button, Card, Modal } from "react-bootstrap";
+import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
 import { User, QueueAttendee, BluejeansMetadata, MyUser, ZoomMetadata } from "../models";
@@ -11,7 +11,7 @@ import {
     EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
     showConfirmation, StatelessInputGroupForm
 } from "./common";
-import { BackendSelector } from "./meetingType";
+import { BackendSelector, MeetingType } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import * as api from "../services/api";
@@ -117,99 +117,61 @@ const TurnSoonAlert = () =>
         <strong>Your turn is coming up!</strong> The line may move quickly, so don't go far!
     </div>
 
-interface BlueJeansMeetingInfoProps {
-    metadata: BluejeansMetadata;
+
+interface VideoMeetingInfoProps {
+    meetingType: MeetingType.bluejeans | MeetingType.zoom;
+    metadata: BluejeansMetadata | ZoomMetadata;
+    docLink: string;
 }
 
-const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
-    const meetingNumber = props.metadata.numeric_meeting_id;
+const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
     const joinLink = props.metadata.meeting_url
         ? (
-            <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
+            <Button as='a' href={props.metadata.meeting_url} target='_blank' variant='warning' className='mr-3'>
                 Join Meeting
-            </a>
+            </Button>
         )
-        : (
-            <p>
-                <strong>Please wait. The meeting is being started...</strong>
-            </p>
-        );
-    const docLink = 'https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started'
-    const docLinkTag = <a href={docLink} target='_blank' className='card-link'>How to use BlueJeans at U-M</a>
+        : <p><strong>Please wait. The meeting is being started...</strong></p>;
+
+    const docLinkTag = <a href={props.docLink} target='_blank' className='card-link'>How to use {props.meetingType} at U-M</a>;
+
+    const extraDetails = props.meetingType === MeetingType.bluejeans && (
+        <Col sm={true}>
+            <Card>
+                <Card.Body>
+                    <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
+                    <Card.Text>
+                        <BlueJeansDialInMessage meetingNumber={props.metadata.numeric_meeting_id} />
+                        You are not a moderator, so you do not need a moderator passcode.
+                    </Card.Text>
+                </Card.Body>
+            </Card>
+        </Col>
+    );
 
     return (
         <>
-        {joinLink}
-        {props.children}     
-        <div className="row bottom-content">
-            <div className="col-sm">
-                <div className="card card-body">
-                    <h5 className="card-title mt-0">Using BlueJeans</h5>
-                    <p className="card-text">
-                        Refer to {docLinkTag} for help using BlueJeans.
-                    </p>
-                </div>
-            </div>
-            <div className="col-sm">
-                <div className="card card-body">
-                    <h5 className="card-title mt-0">Having Trouble with Video?</h5>
-                    <p className="card-text">
-                    <BlueJeansDialInMessage meetingNumber={meetingNumber} /> You are not a moderator, so you do not need a moderator passcode.
-                    </p>
-                </div>
-            </div>
-        </div>
+        <Row className='mb-3'>
+            <Col>
+                {joinLink}
+                {props.children}
+            </Col>
+        </Row>
+        <Row>
+            <Col sm={true}>
+                <Card>
+                    <Card.Body>
+                        <Card.Title as='h5' className='mt-0'>Using {props.meetingType}</Card.Title>
+                        <Card.Text>Refer to {docLinkTag} for help using {props.meetingType}.</Card.Text>
+                    </Card.Body>
+                </Card>
+            </Col>
+            {extraDetails}
+        </Row>
         </>
     );
 }
 
-interface ZoomMeetingInfoProps {
-    metadata: ZoomMetadata;
-}
-
-const ZoomMeetingInfo: React.FC<ZoomMeetingInfoProps> = (props) => {
-    if (!props.metadata.meeting_url) {
-        return (
-            <p>
-                Please wait. The meeting is being started.
-            </p>
-        );
-    }
-    const meetingNumber = props.metadata.numeric_meeting_id;
-    const joinLink = props.metadata.meeting_url
-        ? (
-            <a href={props.metadata.meeting_url} target="_blank" className="btn btn-warning">
-                Join Meeting
-            </a>
-        )
-        : (
-            <p>
-                <strong>Please wait. The meeting is being started...</strong>
-            </p>
-        );
-
-    return (
-        <>
-        {joinLink}
-        {props.children}     
-        <div className="row bottom-content">
-            <div className="col-sm">
-                <div className="card card-body">
-                    <h5 className="card-title mt-0">Using Zoom</h5>
-                    <p className="card-text">
-                        See 
-                        <a href="https://its.umich.edu/communication/videoconferencing/zoom" 
-                        target="_blank" 
-                        className="card-link">
-                            How to use Zoom at U-M
-                        </a> for help getting started with Zoom.
-                    </p>
-                </div>
-            </div>
-        </div>
-        </>
-    );
-}
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const closedAlert = props.queue.status === "closed"
@@ -228,22 +190,35 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <TurnSoonAlert/>
         : undefined;
     const leave = (
-        <button disabled={props.disabled} onClick={() => props.onLeaveQueue()} type="button" className="btn btn-link">
+        <Button
+            variant='link'
+            type='button'
+            disabled={props.disabled}
+            onClick={() => props.onLeaveQueue()}
+        >
             Leave the line
             {props.disabled && DisabledMessage}
-        </button>
+        </Button>
     );
     const meetingInfo = props.queue.my_meeting!.backend_type === "bluejeans"
             ? (
-                <BlueJeansMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}>
+                <VideoMeetingInfo
+                    meetingType={MeetingType.bluejeans}
+                    metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}
+                    docLink='https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started'
+                >
                     {leave}
-                </BlueJeansMeetingInfo>
+                </VideoMeetingInfo>
             )
             : props.queue.my_meeting!.backend_type === "zoom"
                 ? (
-                    <ZoomMeetingInfo metadata={props.queue.my_meeting!.backend_metadata as ZoomMetadata}>
+                    <VideoMeetingInfo
+                        meetingType={MeetingType.zoom}
+                        metadata={props.queue.my_meeting!.backend_metadata as ZoomMetadata}
+                        docLink='https://its.umich.edu/communication/videoconferencing/zoom'
+                    >
                         {leave}
-                    </ZoomMeetingInfo>
+                    </VideoMeetingInfo>
                 )
                 : leave
     const changeMeetingType = props.queue.my_meeting?.assignee 
