@@ -9,5 +9,5 @@ Login with `oc login ...` before running them from the `src` directory. For exam
 ```
 oc login ...
 cd src
-../scripts/push.sh
+../scripts/push-dev.sh
 ```
