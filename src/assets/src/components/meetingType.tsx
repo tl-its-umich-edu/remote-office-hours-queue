@@ -2,6 +2,13 @@ import * as React from "react";
 import { Form } from "react-bootstrap";
 
 
+export enum MeetingType {
+    inperson = "In Person",
+    bluejeans = "BlueJeans",
+    zoom = "Zoom"
+}
+
+
 interface AllowedMeetingBackendsFormProps {
     backends: {[backend_type: string]: string};
     allowed: Set<string>;
