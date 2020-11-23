@@ -136,7 +136,7 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
     const docLinkTag = <a href={props.docLink} target='_blank' className='card-link'>How to use {props.meetingType} at U-M</a>;
 
     const extraDetails = props.meetingType === MeetingType.bluejeans && (
-        <Col sm={true}>
+        <Col md={6} sm={true}>
             <Card>
                 <Card.Body>
                     <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
@@ -158,7 +158,7 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
             </Col>
         </Row>
         <Row>
-            <Col sm={true}>
+            <Col md={6} sm={true}>
                 <Card>
                     <Card.Body>
                         <Card.Title as='h5' className='mt-0'>Using {props.meetingType}</Card.Title>
