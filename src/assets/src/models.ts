@@ -22,6 +22,11 @@ export interface User extends Base {
     hosted_queues?: ReadonlyArray<QueueBase>;
 }
 
+export const isUser = (value: any): value is User => {
+    if (!value || typeof value !== 'object') return false;
+    return 'username' in value && 'first_name' in value && 'last_name' in value;
+}
+
 export interface MyUser extends User {
     my_queue: QueueAttendee | null;
     phone_number: string;
