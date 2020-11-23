@@ -52,7 +52,7 @@ function MeetingEditor(props: MeetingEditorProps) {
                 Join Meeting
             </a>
         );
-    const progressWorkflow = <Col md={3}>{joinLink || readyButton}</Col>;
+    const progressWorkflow = joinLink || readyButton;
     const infoButton = (
         <Button onClick={() => props.onShowMeetingInfo(props.meeting)} variant="link" size="sm" className="mr-2">
             Join Info
@@ -82,10 +82,14 @@ function MeetingEditor(props: MeetingEditorProps) {
             </td>
             <td>
                 <Row>
-                    <Col md={3}>{backendBadge}</Col>
-                    {progressWorkflow}
-                    <Col md={3}>{infoButton}</Col>
-                    <Col md={3}>
+                    <Col md={6}>{backendBadge}</Col>
+                    <Col md={6}>{infoButton}</Col>
+                </Row>
+            </td>
+            <td>
+                <Row>
+                    <Col md={8} className='mb-1'>{progressWorkflow}</Col>
+                    <Col md={4}>
                         <RemoveButton
                             onRemove={() => props.onRemove(props.meeting)}
                             size="sm" disabled={props.disabled}
@@ -207,12 +211,13 @@ function QueueManager(props: QueueManagerProps) {
         );
     const meetingsTable = props.queue.meeting_set.length
         ? (
-            <Table bordered>
+            <Table bordered responsive>
                 <thead>
                     <tr>
                         <th scope="col" className="d-none d-sm-table-cell">Queue #</th>
                         <th scope="col">Attendee</th>
                         <th scope="col">Host</th>
+                        <th scope="col">Details</th>
                         <th scope="col">Meeting Actions</th>
                     </tr>
                 </thead>
