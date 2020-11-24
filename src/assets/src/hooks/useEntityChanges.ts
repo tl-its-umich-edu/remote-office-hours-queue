@@ -17,12 +17,12 @@ export function useEntityChanges<T extends Base>():
             setChangeEvents([...changeEvents, newChangeEvent]);
             setNextID(nextID + 1);
         }
-    }
-
-    const popChangeEvent = (id: number) => {
-        const newArray = changeEvents.filter((e) => id !== e.eventID);
-        setChangeEvents(newArray);
     };
 
-    return [changeEvents, compareAndSetEventMap, popChangeEvent];
+    // https://reactjs.org/docs/hooks-reference.html#functional-updates
+    const deleteChangeEvent = (id: number) => {
+        setChangeEvents((prevChangeEvents) => prevChangeEvents.filter((e) => id !== e.eventID));
+    };
+
+    return [changeEvents, compareAndSetEventMap, deleteChangeEvent];
 }
