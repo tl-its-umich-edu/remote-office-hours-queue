@@ -282,10 +282,10 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     }
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
 
-    const [meetingChangeEventMap, compareAndSetMeetingChangeEventMap, popMeetingChangeEvent] = useEntityChanges<Meeting>();
+    const [meetingChangeEvents, compareAndSetMeetingChangeEvents, popMeetingChangeEvent] = useEntityChanges<Meeting>();
     useEffect(() => {
-        if (queue && oldQueue) compareAndSetMeetingChangeEventMap(oldQueue.meeting_set, queue.meeting_set);
-    }, [queue])
+        if (queue && oldQueue) compareAndSetMeetingChangeEvents(oldQueue.meeting_set, queue.meeting_set);
+    }, [queue]);
 
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
@@ -350,7 +350,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>;
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>;
-    const meetingChangeLog = <ChangeLog changeEventMap={meetingChangeEventMap} popChangeEvent={popMeetingChangeEvent} />
+    const meetingChangeLog = <ChangeLog changeEvents={meetingChangeEvents} popChangeEvent={popMeetingChangeEvent} />;
     const queueManager = queue
         && (
             <QueueManager

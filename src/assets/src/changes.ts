@@ -5,12 +5,8 @@ import { Base, isMeeting, isQueueBase, isUser, Meeting, QueueBase } from "./mode
 
 
 export interface ChangeEvent {
-    entityID: number;
-    message: string;
-}
-
-export interface ChangeEventMap {
-    [id: number]: ChangeEvent;
+    eventID: number;
+    text: string;
 }
 
 const queueBasePropsToWatch: (keyof QueueBase)[] = ['status', 'name'];
@@ -44,8 +40,7 @@ function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (ke
 
 // https://lodash.com/docs/4.17.15#xorWith
 
-export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]):
-    ChangeEvent | undefined
+export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]): string | undefined
 {
     const symDiff = xorWith(oldOnes, newOnes, isEqual);
     if (symDiff.length === 0) return;
@@ -85,5 +80,5 @@ export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]):
             message = message + ' ' + changeDetected;
         }
     }
-    return { entityID: firstEntity.id, message: message };
+    return message;
 }

@@ -1,30 +1,28 @@
 import { useState } from "react";
 
 import { Base } from "../models"; 
-import { compareEntities, ChangeEventMap } from "../changes";
+import { ChangeEvent, compareEntities } from "../changes";
 
 
 export function useEntityChanges<T extends Base>():
-    [ChangeEventMap, (oldEntities: readonly T[], newEntities: readonly T[]) => void, (key: number) => void]
+    [ChangeEvent[], (oldEntities: readonly T[], newEntities: readonly T[]) => void, (key: number) => void]
 {
-    const [changeEventMap, setChangeEventMap] = useState({} as ChangeEventMap);
-    const numEvents = Object.keys(changeEventMap).length;
-    const nextKey = numEvents > 0 ? Number(Object.keys(changeEventMap)[numEvents - 1]) + 1 : 0;
+    const [changeEvents, setChangeEvents] = useState([] as ChangeEvent[]);
+    const [nextID, setNextID] = useState(0);
 
     const compareAndSetEventMap = (oldEntities: readonly T[], newEntities: readonly T[]): void => {
-        const newChangeEvent = compareEntities<T>(oldEntities.slice(), newEntities.slice());
-        if (newChangeEvent !== undefined) {
-            const newMap = {} as ChangeEventMap;
-            newMap[nextKey] = newChangeEvent;
-            setChangeEventMap(Object.assign({...changeEventMap}, newMap));
+        const changeText = compareEntities<T>(oldEntities.slice(), newEntities.slice());
+        if (changeText !== undefined) {
+            const newChangeEvent = { eventID: nextID, text: changeText } as ChangeEvent;
+            setChangeEvents([...changeEvents, newChangeEvent]);
+            setNextID(nextID + 1);
         }
     }
 
-    const popChangeEvent = (key: number) => {
-        const newEventMap = {...changeEventMap};
-        delete newEventMap[Number(key)];
-        setChangeEventMap(newEventMap);
+    const popChangeEvent = (id: number) => {
+        const newArray = changeEvents.filter((e) => id !== e.eventID);
+        setChangeEvents(newArray);
     };
 
-    return [changeEventMap, compareAndSetEventMap, popChangeEvent];
+    return [changeEvents, compareAndSetEventMap, popChangeEvent];
 }

@@ -43,10 +43,10 @@ export function ManagePage(props: PageProps) {
     const oldQueues = usePreviousState(queues);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
 
-    const [queueChangeEventMap, compareAndSetQueueChangeEventMap, popQueueChangeEvent] = useEntityChanges<QueueBase>();
+    const [queueChangeEvents, compareAndSetChangeEvents, popQueueChangeEvent] = useEntityChanges<QueueBase>();
     useEffect(() => {
-        if (queues && oldQueues) compareAndSetQueueChangeEventMap(oldQueues, queues);
-    }, [queues])
+        if (queues && oldQueues) compareAndSetChangeEvents(oldQueues, queues);
+    }, [queues]);
 
     const errorSources = [
         {source: 'User Connection', error: userWebSocketError}
@@ -62,7 +62,7 @@ export function ManagePage(props: PageProps) {
             {errorDisplay}
             <h1>My Meeting Queues</h1>
             <p>These are all the queues you are a host of. Select a queue to manage it or add a queue below.</p>
-            <ChangeLog changeEventMap={queueChangeEventMap} popChangeEvent={popQueueChangeEvent} />
+            <ChangeLog changeEvents={queueChangeEvents} popChangeEvent={popQueueChangeEvent} />
             {queueTable}
             <hr/>
             <a target="_blank" href="https://documentation.its.umich.edu/node/1830">

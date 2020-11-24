@@ -1,26 +1,25 @@
 import * as React from "react";
 import { Alert } from "react-bootstrap";
 
-import { ChangeEvent, ChangeEventMap } from "../changes";
+import { ChangeEvent } from "../changes";
 
 
 interface ChangeLogProps {
-    changeEventMap: ChangeEventMap;
+    changeEvents: ChangeEvent[];
     popChangeEvent: (key: number) => void;
 }
 
 export function ChangeLog (props: ChangeLogProps) {
-    const changeAlerts = Object.keys(props.changeEventMap).map(
-        (key) => {
-            const changeEvent: ChangeEvent = props.changeEventMap[Number(key)];
+    const changeAlerts = props.changeEvents.map(
+        (e) => {
             return (
                 <Alert
                     variant='info'
-                    key={key}
+                    key={e.eventID}
                     dismissible={true}
-                    onClose={() => props.popChangeEvent(Number(key))}
+                    onClose={() => props.popChangeEvent(e.eventID)}
                 >
-                    {changeEvent.message}
+                    {e.text}
                 </Alert>
             )
         }
