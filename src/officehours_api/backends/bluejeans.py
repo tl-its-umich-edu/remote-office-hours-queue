@@ -4,6 +4,7 @@ from typing import Optional, TypedDict
 import requests
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
+from django.contrib.auth.models import User
 
 
 class BluejeansUserExtraFields(TypedDict):
@@ -135,7 +136,7 @@ class Backend:
             client_secret or settings.BLUEJEANS_CLIENT_SECRET
         )
 
-    def save_user_meeting(self, backend_metadata, assignee):
+    def save_user_meeting(self, backend_metadata: dict, assignee: User):
         if backend_metadata.get('meeting_id'):
             return backend_metadata
 
