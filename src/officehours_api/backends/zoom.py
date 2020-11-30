@@ -7,6 +7,7 @@ import json
 import requests
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
+from django.contrib.sites.models import Site
 from django.conf import settings
 from django.urls import reverse
 
@@ -44,8 +45,8 @@ class ZoomUser(TypedDict):
     last_login_time: str
     last_client_version: str
     pic_url: str
-    host_key: str
     jid: str
+    host_key: str
     group_ids: List[str]
     im_group_ids: List[str]
     account_id: str
@@ -78,13 +79,13 @@ class Backend:
         }
 
     @classmethod
-    def _spend_authorization_code(cls, code: str) -> ZoomAccessToken:
+    def _spend_authorization_code(cls, code: str, request) -> ZoomAccessToken:
         resp = requests.post(
             f'{cls.base_url}/oauth/token',
             params={
                 'grant_type': 'authorization_code',
                 'code': code,
-                'redirect_uri': 'http://localhost:8003/callback/zoom/',
+                'redirect_uri': request.build_absolute_uri('/callback/zoom/'),
             },
             headers=cls._get_client_auth_headers(),
         )
@@ -176,7 +177,7 @@ class Backend:
         print('auth_callback')
         code = request.GET.get('code')
         print(code)
-        token = Backend._spend_authorization_code(code)
+        token = Backend._spend_authorization_code(code, request)
         zoom_meta = request.user.profile.backend_metadata.get('zoom', {})
         zoom_meta.update({
             'refresh_token': token['refresh_token'],
