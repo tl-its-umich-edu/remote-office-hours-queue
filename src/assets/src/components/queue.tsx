@@ -195,11 +195,10 @@ const ZoomMeetingInfo: React.FC<ZoomMeetingInfoProps> = (props) => {
                 <div className="card card-body">
                     <h5 className="card-title mt-0">Using Zoom</h5>
                     <p className="card-text">
-                        See 
-                        <a href="https://its.umich.edu/communication/videoconferencing/zoom" 
-                        target="_blank" 
-                        className="card-link">
-                            How to use Zoom at U-M
+                        See <a href="https://its.umich.edu/communication/videoconferencing/zoom" 
+                            target="_blank" 
+                            className="card-link">
+                                How to use Zoom at U-M
                         </a> for help getting started with Zoom.
                     </p>
                 </div>
