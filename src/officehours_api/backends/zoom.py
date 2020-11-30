@@ -67,6 +67,7 @@ class ZoomAccessToken(TypedDict):
 class Backend:
     friendly_name = "Zoom"
     base_url = 'https://zoom.us'
+    expiry_buffer_seconds = 60
     client_id = settings.ZOOM_CLIENT_ID
     client_secret = settings.ZOOM_CLIENT_SECRET
 
@@ -115,7 +116,7 @@ class Backend:
             zoom_meta.update({
                 'refresh_token': token['refresh_token'],
                 'access_token': token['access_token'],
-                'access_token_expires': time() - token['expires_in'] - 60,
+                'access_token_expires': time() - token['expires_in'] - cls.expiry_buffer_seconds,
             })
             user.profile.save()
         return zoom_meta['access_token']
