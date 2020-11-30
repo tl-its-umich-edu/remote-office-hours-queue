@@ -144,5 +144,5 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
 type CombinedEditorProps = GeneralEditorProps & ManageHostsEditorProps;
 
 export interface MultiTabEditorProps extends CombinedEditorProps {
-    onTabSelect?: (eventKey: string) => void;
+    onTabSelect?: (eventKey: string | null, e: React.SyntheticEvent<unknown>) => void;
 }

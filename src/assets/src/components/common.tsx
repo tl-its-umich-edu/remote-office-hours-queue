@@ -216,7 +216,7 @@ interface StatelessValidatedInputFormProps extends SingleInputFormProps {
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
-    const inputRef = useInitFocusRef<FormControl<"input"> & HTMLInputElement>(!!props.initFocus);
+    const inputRef = useInitFocusRef<HTMLInputElement>(!!props.initFocus);
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     let buttonBlock;
@@ -269,7 +269,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 }
 
 export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
-    const inputRef = useInitFocusRef<FormControl<'textarea'> & HTMLTextAreaElement>(!!props.initFocus);
+    const inputRef = useInitFocusRef<HTMLTextAreaElement>(!!props.initFocus);
     const handleChange = (newValue: string) => props.onChangeValue(newValue);
 
     let buttonBlock;
