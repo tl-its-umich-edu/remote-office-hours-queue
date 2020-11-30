@@ -153,7 +153,7 @@ class Backend:
         return resp.json()
 
     @classmethod
-    def save_user_meeting(cls, backend_metadata, assignee):
+    def save_user_meeting(cls, backend_metadata: dict, assignee: User):
         if not backend_metadata:
             backend_metadata = {}
         if backend_metadata.get('meeting_id'):
