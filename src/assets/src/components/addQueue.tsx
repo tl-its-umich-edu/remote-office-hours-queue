@@ -187,7 +187,7 @@ export function AddQueuePage(props: PageProps) {
         }
     };
 
-    const handleTabSelect = (eventKey: string) => {
+    const handleTabSelect = (eventKey: string | null, e: React.SyntheticEvent<unknown>) => {
         if (eventKey === AvailableTabs.General) {
             setActiveKey(AvailableTabs.General);
         } else if (eventKey === AvailableTabs.Hosts) {
