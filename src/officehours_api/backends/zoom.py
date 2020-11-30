@@ -141,7 +141,6 @@ class Backend:
                 'topic': 'Remote Office Hours Queue Meeting',
                 'start_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'timezone': 'America/Detroit',
-                'agenda': 'Meeting agenda goes here',
             },
         )
         print(resp.json())
