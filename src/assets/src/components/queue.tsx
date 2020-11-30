@@ -103,19 +103,19 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
 }
 
 const MeetingReadyAlert = () =>
-    <div className="alert alert-success" role="alert">
+    <Alert variant="success" role="alert">
         <strong>Your meeting is ready!</strong> Please view the instructions below to join the meeting!
-    </div>
+    </Alert>
 
 const TurnNowAlert = () =>
-    <div className="alert alert-warning" role="alert">
+    <Alert variant="warning" role="alert">
         <strong>You're next in line,</strong> but your meeting is still being started. When the host is ready, you'll be able to click Join Meeting below.
-    </div>
+    </Alert>
 
 const TurnSoonAlert = () =>
-    <div className="alert alert-warning" role="alert">
+    <Alert variant="warning" role="alert">
         <strong>Your turn is coming up!</strong> The line may move quickly, so don't go far!
-    </div>
+    </Alert>
 
 interface BlueJeansMeetingInfoProps {
     metadata: BluejeansMetadata;
@@ -130,9 +130,7 @@ const BlueJeansMeetingInfo: React.FC<BlueJeansMeetingInfoProps> = (props) => {
             </a>
         )
         : (
-            <p>
-                <strong>Please wait. The meeting is being started...</strong>
-            </p>
+            <p><strong>Please wait. The meeting is being started...</strong></p>
         );
     const docLink = 'https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started'
     const docLinkTag = <a href={docLink} target='_blank' className='card-link'>How to use BlueJeans at U-M</a>
