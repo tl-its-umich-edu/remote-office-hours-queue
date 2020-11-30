@@ -23,7 +23,7 @@ class AuthPromptView(TemplateView):
         backend_name = kwargs['backend_name']
         try:
             redirect_uri = self.request.build_absolute_uri(
-                reverse('auth_callback', kwargs={'backend_name': 'zoom'})
+                reverse('auth_callback', kwargs={'backend_name': backend_name})
             )
             context['auth_url'] = backend_classes[backend_name].get_auth_url(redirect_uri)
         except KeyError:
