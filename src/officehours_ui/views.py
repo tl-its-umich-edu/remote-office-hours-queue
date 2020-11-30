@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from officehours_api import backends
 
-backend_classes = {
+BACKEND_CLASSES = {
     backend_name: getattr(getattr(backends, backend_name), 'Backend')
     for backend_name in settings.ENABLED_BACKENDS
 }
@@ -25,7 +25,7 @@ class AuthPromptView(TemplateView):
             redirect_uri = self.request.build_absolute_uri(
                 reverse('auth_callback', kwargs={'backend_name': backend_name})
             )
-            context['auth_url'] = backend_classes[backend_name].get_auth_url(redirect_uri)
+            context['auth_url'] = BACKEND_CLASSES[backend_name].get_auth_url(redirect_uri)
         except KeyError:
             raise Http404(f"Backend {backend_name} does not exist.")
         except AttributeError:
@@ -36,7 +36,7 @@ class AuthPromptView(TemplateView):
 
 def auth_callback_view(request, backend_name: str):
     try:
-        auth_callback = backend_classes[backend_name].auth_callback
+        auth_callback = BACKEND_CLASSES[backend_name].auth_callback
     except KeyError:
         raise Http404(f"Backend {backend_name} does not exist.")
     except AttributeError:
