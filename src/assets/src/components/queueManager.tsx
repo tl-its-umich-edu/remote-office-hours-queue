@@ -3,7 +3,7 @@ import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
-import { Alert, Button, Col, Form, InputGroup, Modal, Row, Table } from "react-bootstrap";
+import { Alert, Badge, Button, Col, Form, InputGroup, Modal, Row, Table } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
 import { 
@@ -37,20 +37,20 @@ interface MeetingEditorProps {
 function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0];
     const backendBadge = (
-        <span className="badge badge-secondary mr-2">{props.backends[props.meeting.backend_type]}</span>
+        <Badge variant="secondary" className="mr-2">{props.backends[props.meeting.backend_type]}</Badge>
     );
     const readyButton = props.meeting.assignee
         && (
-            <button onClick={() => props.onStartMeeting(props.meeting)} disabled={props.disabled} className="btn btn-success btn-sm mr-2">
+            <Button onClick={() => props.onStartMeeting(props.meeting)} disabled={props.disabled} variant="success" size="sm" className="mr-2">
                 Ready for Attendee
-            </button>
+            </Button>
         );
     const joinUrl = props.meeting.backend_metadata?.meeting_url;
     const joinLink = joinUrl
         && (
-            <a href={joinUrl} target="_blank" className="btn btn-primary btn-sm mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
+            <Button href={joinUrl} target="_blank" variant="primary" size="sm" className="mr-2" aria-label={`Start Meeting with ${user.first_name} ${user.last_name}`}>
                 Join Meeting
-            </a>
+            </Button>
         );
     const progressWorkflow = <Col md={3}>{joinLink || readyButton}</Col>;
     const infoButton = (
