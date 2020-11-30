@@ -172,20 +172,20 @@ class Backend:
         })
         return backend_metadata
 
-    @staticmethod
-    def auth_callback(request):
+    @classmethod
+    def auth_callback(cls, request):
         print('auth_callback')
         code = request.GET.get('code')
         print(code)
-        token = Backend._spend_authorization_code(code, request)
+        token = cls._spend_authorization_code(code, request)
         zoom_meta = request.user.profile.backend_metadata.get('zoom', {})
         zoom_meta.update({
             'refresh_token': token['refresh_token'],
             'access_token': token['access_token'],
-            'access_token_expires': time() - token['expires_in'] - 60,
+            'access_token_expires': time() - token['expires_in'] - cls.expiry_buffer_seconds,
         })
         request.user.profile.backend_metadata['zoom'] = zoom_meta
-        me = Backend._get_me(request.user)
+        me = cls._get_me(request.user)
         print(me)
         zoom_meta.update({
             'user_id': me['id'],
