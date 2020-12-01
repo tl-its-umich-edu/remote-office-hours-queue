@@ -22,13 +22,7 @@ export interface BluejeansMetadata {
     numeric_meeting_id: string;  // Number for dial-in / URL
 }
 
-export interface ZoomMetadata {
-    user_email: string;
-    user_id: number;
-    meeting_id: number;
-    meeting_url: string;
-    numeric_meeting_id: string;  // Number for dial-in / URL
-}
+export interface ZoomMetadata extends BluejeansMetadata {}
 
 export interface Meeting {
     id: number;
@@ -37,7 +31,7 @@ export interface Meeting {
     agenda: string;
     assignee?: User;
     backend_type: "bluejeans"|"zoom"|"inperson";
-    backend_metadata?: BluejeansMetadata;
+    backend_metadata?: BluejeansMetadata|ZoomMetadata;
     created_at: string;
 }
 
