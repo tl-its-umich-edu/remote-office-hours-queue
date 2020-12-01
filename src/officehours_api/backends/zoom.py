@@ -3,6 +3,7 @@ from base64 import b64encode
 from time import time
 from datetime import datetime
 import json
+import logging
 
 import requests
 from django.shortcuts import redirect
@@ -10,6 +11,8 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.urls import reverse
+
+logger = logging.getLogger(__name__)
 
 
 class ZoomMeeting(TypedDict):
@@ -90,13 +93,8 @@ class Backend:
             },
             headers=cls._get_client_auth_headers(),
         )
-        print(resp.request.url)
-        print(resp.json())
         resp.raise_for_status()
-        # print(repr(resp.request.url))
-        # print(repr(resp.request.headers))
-        # print(resp)
-        # print(resp.text)
+        logger.debug("Received authorization code from Zoom")
         return resp.json()
 
     @classmethod
@@ -143,8 +141,8 @@ class Backend:
                 'timezone': 'America/Detroit',
             },
         )
-        print(resp.json())
         resp.raise_for_status()
+        logger.debug("Created meeting: %s", resp.json())
         return resp.json()
 
     @classmethod
@@ -163,7 +161,6 @@ class Backend:
         user_email = backend_metadata['user_email']
         user = User.objects.get(email=user_email)
         meeting = cls._create_meeting(user)
-        print(meeting)
         backend_metadata.update({
             'user_id': meeting['host_id'],
             'meeting_id': meeting['id'],
@@ -174,9 +171,8 @@ class Backend:
 
     @classmethod
     def auth_callback(cls, request):
-        print('auth_callback')
+        logger.debug("Triggered Zoom auth callback for %s", request.user.username)
         code = request.GET.get('code')
-        print(code)
         token = cls._spend_authorization_code(code, request)
         zoom_meta = request.user.profile.backend_metadata.get('zoom', {})
         zoom_meta.update({
@@ -186,13 +182,12 @@ class Backend:
         })
         request.user.profile.backend_metadata['zoom'] = zoom_meta
         me = cls._get_me(request.user)
-        print(me)
         zoom_meta.update({
             'user_id': me['id'],
         })
         request.user.profile.backend_metadata['zoom'] = zoom_meta
         request.user.profile.save()
-        print(json.dumps(request.user.profile.backend_metadata))
+        logger.debug("Updated Zoom backend_metadata for %s", request.user.username)
         return redirect('/')
 
     @classmethod
@@ -209,18 +204,13 @@ class Backend:
 def ensure_auth(get_response):
     def middleware(request):
         if not request.user.is_authenticated:
-            print("User not authenticated; skip middleware")
             return get_response(request)
         if request.user.profile.backend_metadata.get('zoom', None):
-            print("Already have zoom meta; skip middleware")
             return get_response(request)
         auth_prompt_path = reverse('auth_prompt', kwargs={'backend_name': 'zoom'})
         auth_callback_path = reverse('auth_callback', kwargs={'backend_name': 'zoom'})
-        print("Checking", request.path, auth_callback_path)
-        print("Checking", request.path, auth_prompt_path)
         if request.path in (auth_prompt_path, auth_callback_path):
-            print("User requested auth URI; skip middleware")
             return get_response(request)
-        print("Redirect to zoom auth prompt")
+        logger.debug("Redirecting %s from %s to %s", request.user.username, request.path, auth_prompt_path)
         return redirect(auth_prompt_path)
     return middleware
