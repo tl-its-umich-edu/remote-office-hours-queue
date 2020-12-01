@@ -12,3 +12,5 @@ secretGenerator:
     type: Opaque
     files:
     - secret/EMAIL_SUBJECT_PREFIX
+    - secret/ZOOM_CLIENT_ID
+    - secret/ZOOM_CLIENT_SECRET
