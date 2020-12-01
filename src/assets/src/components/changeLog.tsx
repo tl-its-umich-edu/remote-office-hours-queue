@@ -21,7 +21,7 @@ function TimedChangeAlert (props: TimedChangeAlertProps) {
     }, []);
 
     return (
-        <Alert variant='info' dismissible={true} onClose={deleteEvent}>
+        <Alert variant='info' aria-live='polite' dismissible={true} onClose={deleteEvent}>
             {props.changeEvent.text}
         </Alert>
     );
