@@ -103,17 +103,17 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
 }
 
 const MeetingReadyAlert = () =>
-    <Alert variant="success" role="alert">
+    <Alert variant="success">
         <strong>Your meeting is ready!</strong> Please view the instructions below to join the meeting!
     </Alert>
 
 const TurnNowAlert = () =>
-    <Alert variant="warning" role="alert">
+    <Alert variant="warning">
         <strong>You're next in line,</strong> but your meeting is still being started. When the host is ready, you'll be able to click Join Meeting below.
     </Alert>
 
 const TurnSoonAlert = () =>
-    <Alert variant="warning" role="alert">
+    <Alert variant="warning">
         <strong>Your turn is coming up!</strong> The line may move quickly, so don't go far!
     </Alert>
 
