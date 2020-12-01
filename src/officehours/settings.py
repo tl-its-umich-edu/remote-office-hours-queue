@@ -211,6 +211,11 @@ USE_L10N = True
 USE_TZ = True
 
 
+def skip_auth_callback_requests(record):
+    if record.getMessage().startswith('HTTP GET /callback/'):
+        return False
+    return True
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -224,10 +229,15 @@ LOGGING = {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse',
         },
+        'skip_auth_callback_requests': {
+            '()': 'django.utils.log.CallbackFilter',
+            'callback': skip_auth_callback_requests,
+        }
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
+            'filters': ['skip_auth_callback_requests'],
             'formatter': 'verbose',
         },
         'mail_admins': {
@@ -248,7 +258,7 @@ LOGGING = {
         },
         **{
             app.split('.')[0]: {
-                'level': 'INFO',
+                'level': 'DEBUG' if DEBUG else 'INFO',
                 'handlers': ['console', 'mail_admins'],
                 'propagate': False
             } for app in EXTRA_APPS
