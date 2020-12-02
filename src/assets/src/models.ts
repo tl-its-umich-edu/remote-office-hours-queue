@@ -1,3 +1,10 @@
+export interface MeetingBackend {
+    name: string;
+    friendly_name: string;
+    docs_url: string | null;
+    telephone_num: string | null;
+}
+
 export interface User {
     id: number;
     username: string;
