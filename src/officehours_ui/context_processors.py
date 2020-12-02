@@ -6,9 +6,6 @@ from officehours_api import backends
 from officehours_api.backends.backend_dict import BackendDict
 
 
-
-
-
 def feedback(request):
     return {'FEEDBACK_EMAIL': getattr(settings, 'FEEDBACK_EMAIL', None)}
 
