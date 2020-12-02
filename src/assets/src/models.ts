@@ -1,5 +1,7 @@
+export type EnabledBackendName = 'zoom' | 'bluejeans' | 'inperson';
+
 export interface MeetingBackend {
-    name: string;
+    name: EnabledBackendName;
     friendly_name: string;
     docs_url: string | null;
     telephone_num: string | null;
@@ -37,7 +39,7 @@ export interface Meeting {
     attendees: User[];
     agenda: string;
     assignee?: User;
-    backend_type: "bluejeans"|"zoom"|"inperson";
+    backend_type: EnabledBackendName;
     backend_metadata?: BluejeansMetadata|ZoomMetadata;
     created_at: string;
 }

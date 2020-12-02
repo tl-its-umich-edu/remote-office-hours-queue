@@ -1,10 +1,8 @@
 import * as React from "react";
 import { Form } from "react-bootstrap";
 
-import { MeetingBackend } from "../models";
+import { EnabledBackendName, MeetingBackend } from "../models";
 
-
-type EnabledBackendName = 'zoom' | 'bluejeans' | 'inperson';
 
 export const getBackendByName = (name: EnabledBackendName, backends: MeetingBackend[]) => {
     return backends.find(b => b.name === name) as MeetingBackend;
