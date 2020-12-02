@@ -1,4 +1,4 @@
-from typing import TypedDict, Union
+from typing import List, TypedDict, Union
 
 from django.conf import settings
 
@@ -9,6 +9,7 @@ class BackendDict(TypedDict):
     name: str
     friendly_name: str
     docs_url: Union[str, None]
+    telephone_num: str
 
 
 def feedback(request):
@@ -31,7 +32,7 @@ def spa_globals(request):
         'last_name': request.user.last_name,
     } if request.user.is_authenticated else None
 
-    backend_dicts = []
+    backend_dicts: List[BackendDict] = []
     for backend_name in settings.ENABLED_BACKENDS:
         backend_class = getattr(getattr(backends, backend_name), 'Backend')
         backend_settings = settings.VC_BACKEND_SETTINGS.get(backend_name)
