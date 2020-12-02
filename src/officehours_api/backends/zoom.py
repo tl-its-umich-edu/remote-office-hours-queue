@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Literal
+from typing import TypedDict, List, Literal, Union
 from base64 import b64encode
 from time import time
 from datetime import datetime
@@ -11,6 +11,9 @@ from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.urls import reverse
+
+from officehours_api.backends.backend_dict import BackendDict
+
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +71,11 @@ class ZoomAccessToken(TypedDict):
 
 
 class Backend:
-    friendly_name = "Zoom"
+    name: str = 'zoom'
+    friendly_name: str = 'Zoom'
+    docs_url: Union[str, None] = settings.ZOOM_DOCS_URL
+    telephone_num: Union[str, None] = settings.ZOOM_TELE_NUM
+
     base_url = 'https://zoom.us'
     expiry_buffer_seconds = 60
     client_id = settings.ZOOM_CLIENT_ID
@@ -199,6 +206,15 @@ class Backend:
             f"&scope=meeting:read%20meeting:write"
             f"&redirect_uri={redirect_uri}"
         )
+
+    @classmethod
+    def get_public_data(self) -> BackendDict:
+        return {
+            'name': self.name,
+            'friendly_name': self.friendly_name,
+            'docs_url': self.docs_url,
+            'telephone_num': self.telephone_num
+        }
 
 
 def ensure_auth(get_response):
