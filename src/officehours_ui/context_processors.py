@@ -9,7 +9,7 @@ class BackendDict(TypedDict):
     name: str
     friendly_name: str
     docs_url: Union[str, None]
-    telephone_num: str
+    telephone_num: Union[str, None]
 
 
 def feedback(request):
