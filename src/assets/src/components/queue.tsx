@@ -189,7 +189,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             </Alert>
         );
 
-    const meetingBackend = getBackendByName(props.queue.my_meeting!.backend_type, props.backends)
+    const meetingBackend = getBackendByName(props.queue.my_meeting!.backend_type, props.backends);
 
     const alert = (props.queue.my_meeting!.backend_metadata && Object.keys(props.queue.my_meeting!.backend_metadata).length)
         ? <MeetingReadyAlert/>

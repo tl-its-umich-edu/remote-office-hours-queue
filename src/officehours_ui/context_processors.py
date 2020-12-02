@@ -31,8 +31,6 @@ def spa_globals(request):
         for backend_name in settings.ENABLED_BACKENDS
     ]
 
-    print(backend_dicts)
-
     return {
         'spa_globals': {
             'user': user_data,
