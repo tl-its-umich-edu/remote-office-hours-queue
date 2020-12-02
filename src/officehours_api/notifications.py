@@ -14,12 +14,10 @@ logger = logging.getLogger(__name__)
 
 twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
 
-DOMAIN = Site.objects.get_current().domain
-
 
 # `reverse()` at the module level breaks `/admin`, so defer it by wrapping it in a function.
-def build_addendum():
-    pref_url = f"{DOMAIN}{reverse('preferences')}"
+def build_addendum(domain: str):
+    pref_url = f"{domain}{reverse('preferences')}"
     return (
         f"\n\nYou opted in to receive these texts from U-M. "
         f"Opt out at {pref_url}"
@@ -32,7 +30,8 @@ def notify_next_in_line(next_in_line: Meeting):
         next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
     )
     queue_path = reverse('queue', kwargs={'queue_id': next_in_line.queue.id})
-    queue_url = f"{DOMAIN}{queue_path}"
+    domain = Site.objects.get_current().domain
+    queue_url = f"{domain}{queue_path}"
     for p in phone_numbers:
         try:
             logger.info('notify_next_in_line: %s', p)
@@ -41,7 +40,7 @@ def notify_next_in_line(next_in_line: Meeting):
                 to=p,
                 body=(
                     f"It's your turn in queue {queue_url}"
-                    f"{build_addendum()}"
+                    f"{build_addendum(domain)}"
                 ),
             )
         except:
@@ -54,7 +53,8 @@ def notify_queue_no_longer_empty(first: Meeting):
         first.queue.hosts_with_phone_numbers.filter(profile__notify_me_host__exact=True)
     )
     edit_path = reverse('edit', kwargs={'queue_id': first.queue.id})
-    edit_url = f"{DOMAIN}{edit_path}"
+    domain = Site.objects.get_current().domain
+    edit_url = f"{domain}{edit_path}"
     for p in phone_numbers:
         try:
             logger.info('notify_queue_no_longer_empty: %s', p)
@@ -63,7 +63,7 @@ def notify_queue_no_longer_empty(first: Meeting):
                 to=p,
                 body=(
                     f"Someone joined your queue {edit_url}"
-                    f"{build_addendum()}"
+                    f"{build_addendum(domain)}"
                 ),
             )
         except:
