@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from typing import Dict
 
 import dj_database_url
 
@@ -321,6 +322,18 @@ TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
 
 # Backends
+DOCS_BASE_URL = 'https://its.umich.edu/communication/videoconferencing/'
+VC_BACKEND_SETTINGS: Dict[str, Dict[str, str]] = {
+    'zoom': {
+        'docs_url': os.getenv('ZOOM_DOCS_URL', DOCS_BASE_URL + 'zoom'),
+        'telephone_num': os.getenv('ZOOM_TELE_NUM')
+    },
+    'bluejeans': {
+        'docs_url': os.getenv('BLUEJEANS_DOCS_URL', DOCS_BASE_URL + 'blue-jeans/getting-started'),
+        'telephone_num': os.getenv('BLUEJEANS_TELE_NUM', '1.312.216.0325')
+    }
+}
+
 ENABLED_BACKENDS = {'inperson'}
 DEFAULT_BACKEND = "inperson"
 

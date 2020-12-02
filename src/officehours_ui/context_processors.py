@@ -1,6 +1,14 @@
+from typing import TypedDict, Union
+
 from django.conf import settings
 
 from officehours_api import backends
+
+
+class BackendDict(TypedDict):
+    name: str
+    friendly_name: str
+    docs_url: Union[str, None]
 
 
 def feedback(request):
@@ -22,10 +30,20 @@ def spa_globals(request):
         'first_name': request.user.first_name,
         'last_name': request.user.last_name,
     } if request.user.is_authenticated else None
-    backend_classes = {
-        backend_name: getattr(getattr(backends, backend_name), 'Backend')
-        for backend_name in settings.ENABLED_BACKENDS
-    }
+
+    backend_dicts = []
+    for backend_name in settings.ENABLED_BACKENDS:
+        backend_class = getattr(getattr(backends, backend_name), 'Backend')
+        backend_settings = settings.VC_BACKEND_SETTINGS.get(backend_name)
+        backend_dicts.append({
+            'name': backend_name,
+            'friendly_name': backend_class.friendly_name,
+            'docs_url': backend_settings and backend_settings.get('docs_url'),
+            'telephone_num': backend_settings and backend_settings.get('telephone_num')
+        })
+
+    print(backend_dicts)
+
     return {
         'spa_globals': {
             'user': user_data,
@@ -33,10 +51,7 @@ def spa_globals(request):
             'debug': settings.DEBUG,
             'ga_tracking_id': settings.GA_TRACKING_ID,
             'login_url': settings.LOGIN_URL,
-            'backends': {
-                k: v.friendly_name
-                for k, v in backend_classes.items()
-            },
+            'backends': backend_dicts,
             'default_backend': settings.DEFAULT_BACKEND,
         }
     }
