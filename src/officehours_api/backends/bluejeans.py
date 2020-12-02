@@ -1,10 +1,12 @@
 import time
-from typing import Optional, TypedDict
+from typing import Optional, TypedDict, Union
 
 import requests
 from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import User
+
+from officehours_api.backends.backend_dict import BackendDict
 
 
 class BluejeansUserExtraFields(TypedDict):
@@ -127,7 +129,11 @@ class BluejeansClient:
 
 
 class Backend:
-    friendly_name = 'BlueJeans'
+    name: str = 'bluejeans'
+    friendly_name: str = 'BlueJeans'
+    docs_url: Union[str, None] = settings.BLUEJEANS_DOCS_URL
+    telephone_num: Union[str, None] = settings.BLUEJEANS_TELE_NUM
+
     _client: BluejeansClient
 
     def __init__(self, client_id=None, client_secret=None):
@@ -174,3 +180,12 @@ class Backend:
             'meeting_url': f'https://bluejeans.com/{meeting["numericMeetingId"]}',
         })
         return backend_metadata
+
+    @classmethod
+    def get_public_data(self) -> BackendDict:
+        return {
+            'name': self.name,
+            'friendly_name': self.friendly_name,
+            'docs_url': self.docs_url,
+            'telephone_num': self.telephone_num
+        }

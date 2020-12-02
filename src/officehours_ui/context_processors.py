@@ -3,13 +3,10 @@ from typing import List, TypedDict, Union
 from django.conf import settings
 
 from officehours_api import backends
+from officehours_api.backends.backend_dict import BackendDict
 
 
-class BackendDict(TypedDict):
-    name: str
-    friendly_name: str
-    docs_url: Union[str, None]
-    telephone_num: Union[str, None]
+
 
 
 def feedback(request):
@@ -32,16 +29,10 @@ def spa_globals(request):
         'last_name': request.user.last_name,
     } if request.user.is_authenticated else None
 
-    backend_dicts: List[BackendDict] = []
-    for backend_name in settings.ENABLED_BACKENDS:
-        backend_class = getattr(getattr(backends, backend_name), 'Backend')
-        backend_settings = settings.VC_BACKEND_SETTINGS.get(backend_name)
-        backend_dicts.append({
-            'name': backend_name,
-            'friendly_name': backend_class.friendly_name,
-            'docs_url': backend_settings and backend_settings.get('docs_url'),
-            'telephone_num': backend_settings and backend_settings.get('telephone_num')
-        })
+    backend_dicts: List[BackendDict] = [
+        getattr(getattr(backends, backend_name), 'Backend').get_public_data()
+        for backend_name in settings.ENABLED_BACKENDS
+    ]
 
     print(backend_dicts)
 
