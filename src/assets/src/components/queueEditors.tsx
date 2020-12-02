@@ -6,7 +6,7 @@ import {
     UserDisplay, userLoggedOnWarning
 } from "./common";
 import { AllowedBackendsForm } from "./meetingType";
-import { User } from "../models";
+import { MeetingBackend, User } from "../models";
 import { MeetingTypesValidationResult, uniqnameSchema, ValidationResult } from "../validation";
 
 
@@ -23,7 +23,7 @@ interface GeneralEditorProps extends QueueEditorProps {
     description: string;
     descriptValidationResult?: ValidationResult;
     onChangeDescription: (value: string) => void;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     allowedMeetingTypes: Set<string>;
     allowedValidationResult?: MeetingTypesValidationResult;
     onChangeAllowed: (allowed: Set<string>) => void;

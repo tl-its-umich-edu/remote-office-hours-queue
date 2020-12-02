@@ -1,16 +1,17 @@
 import * as React from "react";
 import { Form } from "react-bootstrap";
 
+import { MeetingBackend } from "../models";
 
-export enum MeetingType {
-    inperson = "In Person",
-    bluejeans = "BlueJeans",
-    zoom = "Zoom"
+
+type EnabledBackendName = 'zoom' | 'bluejeans' | 'inperson';
+
+export const getBackendByName = (name: EnabledBackendName, backends: MeetingBackend[]) => {
+    return backends.find(b => b.name === name) as MeetingBackend;
 }
 
-
 interface AllowedMeetingBackendsFormProps {
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     allowed: Set<string>;
     onChange: (allowedBackends: Set<string>) => void;
     disabled: boolean;
@@ -26,14 +27,14 @@ export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
         }
         props.onChange(newAllowed);
     }
-    const allowedMeetingTypeEditors = Object.keys(props.backends)
+    const allowedMeetingTypeEditors = props.backends
         .map((b) =>
-            <Form.Group key={b} controlId={b}>
+            <Form.Group key={b.name} controlId={b.name}>
                 <Form.Check
                     type="checkbox"
-                    label={props.backends[b]}
-                    checked={props.allowed.has(b)}
-                    onChange={() => toggleAllowed(b)}
+                    label={b.friendly_name}
+                    checked={props.allowed.has(b.name)}
+                    onChange={() => toggleAllowed(b.name)}
                 />
             </Form.Group>
         );
@@ -47,14 +48,20 @@ export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
 
 interface BackendSelectorProps {
     allowedBackends: Set<string>;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     selectedBackend: string;
     onChange: (backend: string) => void;
 }
 
 export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {  
     const options = Array.from(props.allowedBackends)
-        .map(a => <option key={a} value={a}>{props.backends[a]}</option>);
+        .map(
+            a => (
+                <option key={a} value={a}>
+                    {getBackendByName(a as EnabledBackendName, props.backends).friendly_name}
+                </option>
+            )
+    );
     const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
         props.onChange(event.currentTarget.value);
     }
