@@ -1,4 +1,4 @@
-from typing import TypedDict, List, Literal, Union
+from typing import List, Literal, Optional, TypedDict
 from base64 import b64encode
 from time import time
 from datetime import datetime
@@ -73,8 +73,8 @@ class ZoomAccessToken(TypedDict):
 class Backend:
     name: str = 'zoom'
     friendly_name: str = 'Zoom'
-    docs_url: Union[str, None] = settings.ZOOM_DOCS_URL
-    telephone_num: Union[str, None] = settings.ZOOM_TELE_NUM
+    docs_url: Optional[str] = settings.ZOOM_DOCS_URL
+    telephone_num: Optional[str] = settings.ZOOM_TELE_NUM
 
     base_url = 'https://zoom.us'
     expiry_buffer_seconds = 60
