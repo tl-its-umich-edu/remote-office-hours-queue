@@ -11,11 +11,11 @@ import {
     CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage,
     userLoggedOnWarning
 } from "./common";
-import { BackendSelector as MeetingBackendSelector } from "./meetingType";
+import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
-import { User, QueueHost, Meeting, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
+import { User, QueueHost, Meeting, MeetingBackend, BluejeansMetadata, isQueueHost, QueueAttendee } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
@@ -27,7 +27,7 @@ interface MeetingEditorProps {
     disabled: boolean;
     potentialAssignees: User[];
     user: User;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     onRemove: (m: Meeting) => void;
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined) => void;
@@ -36,7 +36,11 @@ interface MeetingEditorProps {
 
 function MeetingEditor(props: MeetingEditorProps) {
     const user = props.meeting.attendees[0];
-    const backendBadge = <Badge variant='secondary' className='mb-1'>{props.backends[props.meeting.backend_type]}</Badge>;
+    const backendBadge = (
+        <Badge variant='secondary' className='mb-1'>
+            {getBackendByName(props.meeting.backend_type, props.backends).friendly_name}
+        </Badge>
+    );
     const userString = `${user.first_name} ${user.last_name}`;
 
     const readyButton = props.meeting.assignee
@@ -118,7 +122,7 @@ function MeetingEditor(props: MeetingEditorProps) {
 
 interface AddAttendeeFormProps {
     allowedBackends: Set<string>;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     defaultBackend: string;
     disabled: boolean;
     onSubmit: (value: string, backend: string) => void;
@@ -191,7 +195,7 @@ interface QueueManagerProps {
     queue: QueueHost;
     user: User;
     disabled: boolean;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     defaultBackend: string;
     onAddMeeting: (uniqname: string, backend: string) => void;
     onRemoveMeeting: (m: Meeting) => void;

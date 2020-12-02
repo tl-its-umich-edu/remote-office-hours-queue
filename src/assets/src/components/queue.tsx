@@ -5,13 +5,13 @@ import * as ReactGA from "react-ga";
 import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser, ZoomMetadata } from "../models";
+import { User, QueueAttendee, BluejeansMetadata, MyUser, ZoomMetadata, MeetingBackend } from "../models";
 import {
     checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DisabledMessage,
     EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
     showConfirmation, StatelessInputGroupForm
 } from "./common";
-import { BackendSelector, MeetingType } from "./meetingType";
+import { BackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import * as api from "../services/api";
@@ -22,7 +22,7 @@ import { meetingAgendaSchema } from "../validation";
 
 interface JoinQueueProps {
     queue: QueueAttendee;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     onJoinQueue: (backend: string) => void;
     disabled: boolean;
     selectedBackend: string;
@@ -51,7 +51,7 @@ const JoinQueue: React.FC<JoinQueueProps> = (props) => {
 
 interface QueueAttendingProps {
     queue: QueueAttendee;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     user: User;
     joinedQueue?: QueueAttendee | null;
     disabled: boolean;
@@ -119,9 +119,8 @@ const TurnSoonAlert = () =>
 
 
 interface VideoMeetingInfoProps {
-    meetingType: MeetingType.bluejeans | MeetingType.zoom;
+    meetingBackend: MeetingBackend;
     metadata: BluejeansMetadata | ZoomMetadata;
-    docLink: string;
 }
 
 const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
@@ -133,9 +132,17 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
         )
         : <p><strong>Please wait. The meeting is being started...</strong></p>;
 
-    const docLinkTag = <a href={props.docLink} target='_blank' className='card-link'>How to use {props.meetingType} at U-M</a>;
+    const docLinkTag = (
+        <a
+            href={props.meetingBackend.docs_url === null ? undefined : props.meetingBackend.docs_url} 
+            target='_blank'
+            className='card-link'
+        >
+            How to use {props.meetingBackend.friendly_name} at U-M
+        </a>
+    );
 
-    const extraDetails = props.meetingType === MeetingType.bluejeans && (
+    const extraDetails = props.meetingBackend.name === 'bluejeans' && (
         <Col md={6} sm={true}>
             <Card>
                 <Card.Body>
@@ -161,8 +168,8 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
             <Col md={6} sm={true}>
                 <Card>
                     <Card.Body>
-                        <Card.Title as='h5' className='mt-0'>Using {props.meetingType}</Card.Title>
-                        <Card.Text>Refer to {docLinkTag} for help using {props.meetingType}.</Card.Text>
+                        <Card.Title as='h5' className='mt-0'>Using {props.meetingBackend.friendly_name}</Card.Title>
+                        <Card.Text>Refer to {docLinkTag} for help using {props.meetingBackend.friendly_name}.</Card.Text>
                     </Card.Body>
                 </Card>
             </Col>
@@ -182,6 +189,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             </Alert>
         );
 
+    const meetingBackend = getBackendByName(props.queue.my_meeting!.backend_type, props.backends)
+
     const alert = (props.queue.my_meeting!.backend_metadata && Object.keys(props.queue.my_meeting!.backend_metadata).length)
         ? <MeetingReadyAlert/>
         : props.queue.my_meeting!.line_place === 0
@@ -200,27 +209,17 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             {props.disabled && DisabledMessage}
         </Button>
     );
-    const meetingInfo = props.queue.my_meeting!.backend_type === "bluejeans"
-            ? (
-                <VideoMeetingInfo
-                    meetingType={MeetingType.bluejeans}
-                    metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata}
-                    docLink='https://its.umich.edu/communication/videoconferencing/blue-jeans/getting-started'
-                >
-                    {leave}
-                </VideoMeetingInfo>
-            )
-            : props.queue.my_meeting!.backend_type === "zoom"
-                ? (
-                    <VideoMeetingInfo
-                        meetingType={MeetingType.zoom}
-                        metadata={props.queue.my_meeting!.backend_metadata as ZoomMetadata}
-                        docLink='https://its.umich.edu/communication/videoconferencing/zoom'
-                    >
-                        {leave}
-                    </VideoMeetingInfo>
-                )
-                : leave
+    const meetingInfo = ['bluejeans', 'zoom'].includes(meetingBackend.name)
+        ? (
+            <VideoMeetingInfo
+                meetingBackend={meetingBackend}
+                metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata | ZoomMetadata}
+            >
+                {leave}
+            </VideoMeetingInfo>
+        )
+        : leave;
+
     const changeMeetingType = props.queue.my_meeting?.assignee 
         ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
@@ -251,7 +250,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     {notificationBlurb}
                     <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
                     <Card.Text>
-                        Meeting via: <strong>{props.backends[props.queue.my_meeting!.backend_type]}</strong>
+                        Meeting via: <strong>{meetingBackend.friendly_name}</strong>
                         {changeMeetingType}
                     </Card.Text>
                     <Card.Text>Meeting Agenda (Optional)</Card.Text>
@@ -315,7 +314,7 @@ function QueueAttending(props: QueueAttendingProps) {
 
 interface ChangeMeetingTypeDialogProps {
     queue: QueueAttendee;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     selectedBackend: string;
     show: boolean;
     onClose: () => void;

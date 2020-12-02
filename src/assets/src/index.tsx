@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AppRouter as App } from './containers/app';
-import { User } from './models';
+import { MeetingBackend, User } from './models';
 
 export interface Globals {
     user?: User;
@@ -12,7 +12,7 @@ export interface Globals {
     debug: boolean;
     ga_tracking_id?: string;
     login_url: string;
-    backends: {[backend_type: string]: string};
+    backends: MeetingBackend[];
     default_backend: string;
 }
 
