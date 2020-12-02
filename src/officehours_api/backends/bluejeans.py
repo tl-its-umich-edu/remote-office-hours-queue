@@ -1,5 +1,5 @@
 import time
-from typing import Optional, TypedDict, Union
+from typing import Optional, TypedDict
 
 import requests
 from rest_framework.exceptions import ValidationError
@@ -131,8 +131,8 @@ class BluejeansClient:
 class Backend:
     name: str = 'bluejeans'
     friendly_name: str = 'BlueJeans'
-    docs_url: Union[str, None] = settings.BLUEJEANS_DOCS_URL
-    telephone_num: Union[str, None] = settings.BLUEJEANS_TELE_NUM
+    docs_url: Optional[str] = settings.BLUEJEANS_DOCS_URL
+    telephone_num: Optional[str] = settings.BLUEJEANS_TELE_NUM
 
     _client: BluejeansClient
 
