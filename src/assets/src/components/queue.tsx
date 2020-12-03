@@ -203,12 +203,12 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const meeting = props.queue.my_meeting!;
     const meetingBackend = getBackendByName(meeting.backend_type, props.backends);
-    const numberInLine = meeting.line_place + 1;
+    const numberInLine = meeting.line_place ? meeting.line_place + 1 : null;
     const inProgress = meeting.status === MeetingStatus.STARTED;
 
-    const turnAlert = (meeting.status === 2)
+    const turnAlert = (numberInLine !== null && meeting.status === MeetingStatus.STARTED)
         ? <MeetingReadyAlert meetingType={meetingBackend.name} />
-        : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={meeting.line_place}/>;
+        : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={numberInLine!}/>;
 
     const leave = (
         <Button
@@ -236,7 +236,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
 
-    const notificationBlurb = numberInLine > 1
+    const notificationBlurb = (numberInLine && numberInLine > 1)
         && (
             <Card.Text>
                 <Alert variant="info">

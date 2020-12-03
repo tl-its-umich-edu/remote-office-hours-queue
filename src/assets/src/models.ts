@@ -42,7 +42,7 @@ export enum MeetingStatus {
 
 export interface Meeting {
     id: number;
-    line_place: number;
+    line_place: number | null;
     attendees: User[];
     agenda: string;
     assignee?: User;
@@ -51,7 +51,6 @@ export interface Meeting {
     created_at: string;
     status: MeetingStatus;
 }
-
 
 export interface QueueBase {
     id: number;

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 from django.conf import settings
 from django.db import models
@@ -187,8 +188,13 @@ class Meeting(SafeDeleteModel):
         if not self.queue:
             return None
         meetings = self.queue.meeting_set.order_by('id')
-        for i in range(0, len(meetings)):
-            m = meetings[i]
+        unstarted_meetings: List[Meeting] = [
+            meeting for meeting in meetings if meeting.status != MeetingStatus.STARTED
+        ]
+        if self not in unstarted_meetings:
+            return None
+        for i in range(0, len(unstarted_meetings)):
+            m = unstarted_meetings[i]
             if m == self:
                 return i
 
