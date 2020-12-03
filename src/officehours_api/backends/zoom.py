@@ -215,18 +215,3 @@ class Backend:
             'docs_url': self.docs_url,
             'telephone_num': self.telephone_num
         }
-
-
-def ensure_auth(get_response):
-    def middleware(request):
-        if not request.user.is_authenticated:
-            return get_response(request)
-        if request.user.profile.backend_metadata.get('zoom', None):
-            return get_response(request)
-        auth_prompt_path = reverse('auth_prompt', kwargs={'backend_name': 'zoom'})
-        auth_callback_path = reverse('auth_callback', kwargs={'backend_name': 'zoom'})
-        if request.path in (auth_prompt_path, auth_callback_path):
-            return get_response(request)
-        logger.debug("Redirecting %s from %s to %s", request.user.username, request.path, auth_prompt_path)
-        return redirect(auth_prompt_path)
-    return middleware
