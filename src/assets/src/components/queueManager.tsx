@@ -3,7 +3,7 @@ import { useState, createRef, ChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
-import { Alert, Badge, Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
+import { Alert, Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
 import {
