@@ -6,7 +6,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { Alert, Badge, Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import { 
+import {
     UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
     CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage,
     userLoggedOnWarning
@@ -16,7 +16,9 @@ import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./m
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
-import { User, QueueHost, Meeting, MeetingBackend, BluejeansMetadata, isQueueHost, QueueAttendee, ZoomMetadata } from "../models";
+import {
+    BluejeansMetadata, isQueueHost, Meeting, MeetingBackend, MeetingStatus, QueueAttendee, QueueHost, User, ZoomMetadata
+} from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
@@ -114,7 +116,7 @@ function QueueManager(props: QueueManagerProps) {
     let startedMeetings = [];
     let unstartedMeetings = [];
     for (const meeting of props.queue.meeting_set) {
-        if (meeting.status === 2) {
+        if (meeting.status ===  MeetingStatus.STARTED) {
             startedMeetings.push(meeting);
         } else {
             unstartedMeetings.push(meeting);

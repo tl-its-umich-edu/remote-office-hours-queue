@@ -33,6 +33,12 @@ export interface BluejeansMetadata {
 
 export interface ZoomMetadata extends BluejeansMetadata {}
 
+export enum MeetingStatus {
+    UNASSIGNED = 0,
+    ASSIGNED = 1,
+    STARTED = 2
+}
+
 export interface Meeting {
     id: number;
     line_place: number;
@@ -42,7 +48,7 @@ export interface Meeting {
     backend_type: EnabledBackendName;
     backend_metadata?: BluejeansMetadata|ZoomMetadata;
     created_at: string;
-    status: 0 | 1 | 2;  // 0 is UNASSIGNED, 1 is ASSIGNED, 2 is STARTED
+    status: MeetingStatus
 }
 
 
