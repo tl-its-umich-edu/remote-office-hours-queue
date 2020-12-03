@@ -18,6 +18,15 @@ export const redirectToSearch = (term: string) => {
     location.href = `/search/${term}/?redirected=true`;
 }
 
+export const redirectToBackendAuth = (backend: string) => {
+    ReactGA.event({
+        category: "Auth",
+        action: `Redirected to ${backend} Auth`,
+        nonInteraction: true,
+    });
+    location.href = `/auth/${backend}/`;
+}
+
 export const recordQueueManagementEvent = (action: string) => {
     ReactGA.event({
         category: "Queue Management",

@@ -21,6 +21,7 @@ export interface MyUser extends User {
     phone_number: string;
     notify_me_attendee: boolean;
     notify_me_host: boolean;
+    authorized_backends: {[backend: string]: boolean};
 }
 
 export interface BluejeansMetadata {
