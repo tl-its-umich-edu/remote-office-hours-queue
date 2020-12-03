@@ -41,6 +41,13 @@ class Profile(models.Model):
     notify_me_host = models.BooleanField(default=False)
     backend_metadata = JSONField(null=True, default=dict)
 
+    @property
+    def authorized_backends(self):
+        return {
+            backend.name: backend.is_authorized(self.user)
+            for backend in backend_instances.values()
+        }
+
     def __str__(self):
         return f'user={self.user.username}'
 
