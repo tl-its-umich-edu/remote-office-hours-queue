@@ -203,8 +203,6 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const meeting = props.queue.my_meeting!;
     const meetingBackend = getBackendByName(meeting.backend_type, props.backends);
-
-    const agendaText = meeting.agenda
     const numberInLine = meeting.line_place + 1;
     const inProgress = meeting.status === MeetingStatus.STARTED;
 
@@ -267,7 +265,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
             <EditToggleField
                 id='agenda'
-                value={agendaText}
+                value={meeting.agenda}
                 formLabel='Meeting Agenda'
                 placeholder=''
                 buttonOptions={{ onSubmit: props.onChangeAgenda, buttonType: 'success' }}
@@ -275,13 +273,13 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 fieldComponent={StatelessInputGroupForm}
                 fieldSchema={meetingAgendaSchema}
                 showRemaining={true}
-                initialState={!agendaText}
+                initialState={!meeting.agenda}
             >
                 Update
             </EditToggleField>
             </>
         )
-        : <Card.Text><strong>Meeting Agenda</strong>: {agendaText ? agendaText : 'None'}</Card.Text>;
+        : <Card.Text><strong>Meeting Agenda</strong>: {meeting.agenda ? meeting.agenda : 'None'}</Card.Text>;
 
     const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.';
 
