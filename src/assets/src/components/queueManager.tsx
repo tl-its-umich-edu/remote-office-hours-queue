@@ -21,7 +21,7 @@ import {
 } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
-import { recordQueueManagementEvent, redirectToBackendAuth, redirectToLogin } from "../utils";
+import { checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
 
 
@@ -257,15 +257,6 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
     );
 }
 
-const backendAuthCheck = (user: MyUser, queue: QueueHost) => {
-    for (const backend of queue.allowed_backends) {
-        const authorized = user.authorized_backends[backend];
-        if (authorized === false) {
-            redirectToBackendAuth(backend);
-        }
-    }
-}
-
 interface QueueManagerPageParams {
     queue_id: string;
 }
@@ -301,7 +292,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
 
     if (myUser && queue) {
-        backendAuthCheck(myUser, queue);
+        checkBackendAuth(myUser, queue);
     }
 
     // Set up API interactions
