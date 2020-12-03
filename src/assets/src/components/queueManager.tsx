@@ -261,7 +261,7 @@ const backendAuthCheck = (user: MyUser, queue: QueueHost) => {
     for (const backend of queue.allowed_backends) {
         const authorized = user.authorized_backends[backend];
         if (authorized === false) {
-            redirectToBackendAuth(backend)
+            redirectToBackendAuth(backend);
         }
     }
 }
@@ -287,9 +287,6 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         if (!q) {
             setQueue(q);
         } else if (isQueueHost(q)) {
-            if (myUser) {
-                backendAuthCheck(myUser, q);
-            }
             setQueue(q);
             setAuthError(undefined);
         } else {
@@ -301,15 +298,11 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
-    const setMyUserChecked = (u: MyUser | undefined) => {
-        if (u) {
-            if (queue) {
-                backendAuthCheck(u, queue);
-            }
-            setMyUser(u);
-        }
+    const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
+
+    if (myUser && queue) {
+        backendAuthCheck(myUser, queue);
     }
-    const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUserChecked(u as MyUser));
 
     // Set up API interactions
     const removeMeeting = async (m: Meeting) => {
