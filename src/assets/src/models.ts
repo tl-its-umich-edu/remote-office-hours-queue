@@ -48,7 +48,7 @@ export interface Meeting {
     backend_type: EnabledBackendName;
     backend_metadata?: BluejeansMetadata|ZoomMetadata;
     created_at: string;
-    status: MeetingStatus
+    status: MeetingStatus;
 }
 
 
