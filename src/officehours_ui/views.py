@@ -21,11 +21,12 @@ class AuthPromptView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         backend_name = kwargs['backend_name']
+        state = self.request.GET.get('state', '/')
         try:
             redirect_uri = self.request.build_absolute_uri(
                 reverse('auth_callback', kwargs={'backend_name': backend_name})
             )
-            context['auth_url'] = BACKEND_CLASSES[backend_name].get_auth_url(redirect_uri)
+            context['auth_url'] = BACKEND_CLASSES[backend_name].get_auth_url(redirect_uri, state)
         except KeyError:
             raise Http404(f"Backend {backend_name} does not exist.")
         except AttributeError:

@@ -6,11 +6,11 @@ import json
 import logging
 
 import requests
-from django.shortcuts import redirect
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.conf import settings
 from django.urls import reverse
+from django.shortcuts import redirect
 
 from officehours_api.backends.backend_dict import BackendDict
 
@@ -91,12 +91,13 @@ class Backend:
 
     @classmethod
     def _spend_authorization_code(cls, code: str, request) -> ZoomAccessToken:
+        redirect_uri = request.build_absolute_uri('/callback/zoom/')
         resp = requests.post(
             f'{cls.base_url}/oauth/token',
             params={
                 'grant_type': 'authorization_code',
                 'code': code,
-                'redirect_uri': request.build_absolute_uri('/callback/zoom/'),
+                'redirect_uri': redirect_uri,
             },
             headers=cls._get_client_auth_headers(),
         )
@@ -195,15 +196,17 @@ class Backend:
         request.user.profile.backend_metadata['zoom'] = zoom_meta
         request.user.profile.save()
         logger.debug("Updated Zoom backend_metadata for %s", request.user.username)
-        return redirect('/')
+        state = request.GET.get('state')
+        return redirect(state)
 
     @classmethod
-    def get_auth_url(cls, redirect_uri: str):
+    def get_auth_url(cls, redirect_uri: str, state: str):
         return (
             f"{Backend.base_url}/oauth/authorize"
             f"?response_type=code"
             f"&client_id={cls.client_id}"
             f"&scope=meeting:read%20meeting:write"
+            f"&state={state}"
             f"&redirect_uri={redirect_uri}"
         )
 

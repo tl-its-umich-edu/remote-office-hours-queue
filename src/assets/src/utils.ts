@@ -25,7 +25,7 @@ export const redirectToBackendAuth = (backend: string) => {
         action: `Redirected to ${backend} Auth`,
         nonInteraction: true,
     });
-    location.href = `/auth/${backend}/`;
+    location.href = `/auth/${backend}/?state=${location.pathname}`;
 }
 
 export const checkBackendAuth = (user: MyUser, queue: QueueHost) => {
