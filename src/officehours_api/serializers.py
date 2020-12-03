@@ -44,10 +44,17 @@ class NestedMeetingSerializer(serializers.ModelSerializer):
 
 class NestedMyMeetingSerializer(serializers.ModelSerializer):
     backend_metadata = serializers.JSONField(read_only=True)
+    status = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Meeting
-        fields = ['id', 'line_place', 'agenda', 'assignee', 'backend_type', 'backend_metadata', 'created_at']
+        fields = [
+            'id', 'line_place', 'agenda', 'assignee', 'backend_type', 'backend_metadata', 'created_at',
+            'status'
+        ]
+
+    def get_status(self, obj):
+        return obj.status.value
 
 
 class NestedMeetingSetSerializer(serializers.ModelSerializer):
