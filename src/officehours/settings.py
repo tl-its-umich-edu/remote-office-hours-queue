@@ -342,7 +342,6 @@ ZOOM_CLIENT_ID = os.getenv('ZOOM_CLIENT_ID', '').strip()
 ZOOM_CLIENT_SECRET = os.getenv('ZOOM_CLIENT_SECRET', '').strip()
 if ZOOM_CLIENT_ID and ZOOM_CLIENT_SECRET:
     ENABLED_BACKENDS.add("zoom")
-    MIDDLEWARE += ['officehours_api.backends.zoom.ensure_auth']
     DEFAULT_BACKEND = "zoom"
 
 DEFAULT_ALLOWED_BACKENDS = (
