@@ -30,11 +30,17 @@ class NestedMeetingSerializer(serializers.ModelSerializer):
     attendees = NestedUserSerializer(many=True, read_only=True)
     assignee = NestedUserSerializer(read_only=True)
     backend_metadata = serializers.JSONField(read_only=True)
+    status = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Meeting
-        fields = ['id', 'attendees', 'agenda', 'assignee', 'backend_type', 'backend_metadata', 'created_at']
+        fields = [
+            'id', 'attendees', 'agenda', 'assignee', 'backend_type', 'backend_metadata', 'created_at',
+            'status'
+        ]
 
+    def get_status(self, obj):
+        return obj.status.value
 
 class NestedMyMeetingSerializer(serializers.ModelSerializer):
     backend_metadata = serializers.JSONField(read_only=True)

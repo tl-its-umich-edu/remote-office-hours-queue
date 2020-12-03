@@ -42,6 +42,7 @@ export interface Meeting {
     backend_type: EnabledBackendName;
     backend_metadata?: BluejeansMetadata|ZoomMetadata;
     created_at: string;
+    status: 0 | 1 | 2;  // 0 is UNASSIGNED, 1 is ASSIGNED, 2 is STARTED
 }
 
 
