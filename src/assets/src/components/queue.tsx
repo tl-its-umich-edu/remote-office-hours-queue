@@ -5,7 +5,9 @@ import * as ReactGA from "react-ga";
 import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import { User, QueueAttendee, BluejeansMetadata, MyUser, ZoomMetadata, MeetingBackend } from "../models";
+import {
+    BluejeansMetadata, EnabledBackendName, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, User, ZoomMetadata
+} from "../models";
 import {
     checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DisabledMessage,
     EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
@@ -102,20 +104,38 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
     );
 }
 
-const MeetingReadyAlert = () =>
-    <Alert variant="success">
-        <strong>Your meeting is ready!</strong> Please view the instructions below to join the meeting!
-    </Alert>
 
-const TurnNowAlert = () =>
-    <Alert variant="warning">
-        <strong>You're next in line,</strong> but your meeting is still being started. When the host is ready, you'll be able to click Join Meeting below.
-    </Alert>
+interface TurnAlertProps {
+    meetingType: EnabledBackendName;
+}
 
-const TurnSoonAlert = () =>
-    <Alert variant="warning">
-        <strong>Your turn is coming up!</strong> The line may move quickly, so don't go far!
-    </Alert>
+const MeetingReadyAlert = (props: TurnAlertProps) => {
+    const typeEnding = props.meetingType === 'inperson'
+        ? 'go to the in-person meeting location to meet with the host'
+        : 'follow the directions to join the meeting now';
+
+    return <Alert variant="success">The host is ready for you! If you haven't already, {typeEnding}.</Alert>;
+}
+
+interface WaitingTurnAlertProps extends TurnAlertProps {
+    placeInLine: number;
+}
+
+const WaitingTurnAlert = (props: WaitingTurnAlertProps) => {
+    const inPersonEnding = '-- we will tell you when the host is ready. Make sure you are nearby the in-person meeting location.';
+    const videoMessageEnding = 'so you can join the meeting once it is created.';
+
+    const typeEnding = props.meetingType === 'inperson' ? inPersonEnding : videoMessageEnding;
+
+    const placeBeginning = props.placeInLine > 0
+        ? "It's not your turn yet, but the host may be ready for you at any time."
+        : "You're up next, but the host isn't quite ready for you.";
+    return (
+        <Alert variant={props.placeInLine > 0 ? 'warning' : 'success'}>
+            {placeBeginning} Pay attention to this page {typeEnding}
+        </Alert>
+    );
+}
 
 
 interface VideoMeetingInfoProps {
@@ -181,23 +201,17 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
 
 
 function QueueAttendingJoined(props: QueueAttendingProps) {
-    const closedAlert = props.queue.status === "closed"
-        && (
-            <Alert variant="dark">
-                This queue has been closed by the host, but you are still in line.
-                Please contact the host to ensure the meeting will still happen.
-            </Alert>
-        );
+    const meeting = props.queue.my_meeting!;
+    const meetingBackend = getBackendByName(meeting.backend_type, props.backends);
 
-    const meetingBackend = getBackendByName(props.queue.my_meeting!.backend_type, props.backends);
+    const agendaText = meeting.agenda
+    const numberInLine = meeting.line_place + 1;
+    const inProgress = meeting.status === MeetingStatus.STARTED;
 
-    const alert = (props.queue.my_meeting!.backend_metadata && Object.keys(props.queue.my_meeting!.backend_metadata).length)
-        ? <MeetingReadyAlert/>
-        : props.queue.my_meeting!.line_place === 0
-        ? <TurnNowAlert/>
-        : props.queue.my_meeting!.line_place && props.queue.my_meeting!.line_place <= 5
-        ? <TurnSoonAlert/>
-        : undefined;
+    const turnAlert = (meeting.status === 2)
+        ? <MeetingReadyAlert meetingType={meetingBackend.name} />
+        : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={meeting.line_place}/>;
+
     const leave = (
         <Button
             variant='link'
@@ -224,8 +238,6 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
 
-    const agendaText = props.queue.my_meeting!.agenda
-    const numberInLine = props.queue.my_meeting!.line_place + 1;
     const notificationBlurb = numberInLine > 1
         && (
             <Card.Text>
@@ -239,43 +251,62 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 </Alert>
             </Card.Text>
         );
+
+    const closedAlert = props.queue.status === "closed"
+        && (
+            <Alert variant="dark">
+                This queue has been closed by the host, but you are still in line.
+                Please contact the host to ensure the meeting will still happen.
+            </Alert>
+        );
+
+    const agendaBlock = !inProgress
+        ? (
+            <>
+            <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
+            <EditToggleField
+                id='agenda'
+                value={agendaText}
+                formLabel='Meeting Agenda'
+                placeholder=''
+                buttonOptions={{ onSubmit: props.onChangeAgenda, buttonType: 'success' }}
+                disabled={props.disabled}
+                fieldComponent={StatelessInputGroupForm}
+                fieldSchema={meetingAgendaSchema}
+                showRemaining={true}
+                initialState={!agendaText}
+            >
+                Update
+            </EditToggleField>
+            </>
+        )
+        : <span>{agendaText ? agendaText : 'None'}</span>;
+
+    const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.'
+
     return (
         <>
-            {closedAlert}
-            {alert}
-            <h3>You are currently in line.</h3>
-            <Card className='card-middle card-width center-align'>
-                <Card.Body>
-                    <Card.Text>Your number in line: <strong>{numberInLine}</strong></Card.Text>
-                    {notificationBlurb}
-                    <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
-                    <Card.Text>
-                        Meeting via: <strong>{meetingBackend.friendly_name}</strong>
-                        {changeMeetingType}
-                    </Card.Text>
-                    <Card.Text>Meeting Agenda (Optional)</Card.Text>
-                    <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
-                    <EditToggleField
-                        id='agenda'
-                        value={agendaText}
-                        formLabel='Meeting Agenda'
-                        placeholder=''
-                        buttonOptions={{ onSubmit: props.onChangeAgenda, buttonType: 'success' }}
-                        disabled={props.disabled}
-                        fieldComponent={StatelessInputGroupForm}
-                        fieldSchema={meetingAgendaSchema}
-                        showRemaining={true}
-                        initialState={!agendaText}
-                    >
-                        Update
-                    </EditToggleField>
-                </Card.Body>
-            </Card>
-            <p>
-                The host will join the meeting when it is your turn.
-                We'll show a message in this window when your turn is coming up -- keep an eye on the window so you don't miss it!
-            </p>
-            {meetingInfo}
+        {closedAlert}
+        {turnAlert}
+        <h3>{headText}</h3>
+        <Card className='card-middle card-width center-align'>
+            <Card.Body>
+                {!inProgress && <Card.Text>Your number in line: <strong>{numberInLine}</strong></Card.Text>}
+                {notificationBlurb}
+                <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
+                <Card.Text>
+                    Meeting via: <strong>{meetingBackend.friendly_name}</strong>
+                    {!inProgress && changeMeetingType}
+                </Card.Text>
+                <Card.Text>Meeting Agenda (Optional): </Card.Text>
+                {agendaBlock}
+            </Card.Body>
+        </Card>
+        <p>
+            The host will join the meeting when it is your turn.
+            We'll show a message in this window when your turn is coming up -- keep an eye on the window so you don't miss it!
+        </p>
+        {meetingInfo}
         </>
     );
 }
