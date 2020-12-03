@@ -263,6 +263,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const agendaBlock = !inProgress
         ? (
             <>
+            <Card.Text><strong>Meeting Agenda</strong> (Optional):</Card.Text>
             <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
             <EditToggleField
                 id='agenda'
@@ -280,9 +281,9 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             </EditToggleField>
             </>
         )
-        : <span>{agendaText ? agendaText : 'None'}</span>;
+        : <Card.Text><strong>Meeting Agenda</strong>: {agendaText ? agendaText : 'None'}</Card.Text>;
 
-    const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.'
+    const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.';
 
     return (
         <>
@@ -291,14 +292,12 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         <h3>{headText}</h3>
         <Card className='card-middle card-width center-align'>
             <Card.Body>
-                {!inProgress && <Card.Text>Your number in line: <strong>{numberInLine}</strong></Card.Text>}
+                {!inProgress && <Card.Text><strong>Your Number in Line</strong>: {numberInLine}</Card.Text>}
                 {notificationBlurb}
-                <Card.Text>Time Joined: <strong><DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></strong></Card.Text>
+                <Card.Text><strong>Time Joined</strong>: <DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></Card.Text>
                 <Card.Text>
-                    Meeting via: <strong>{meetingBackend.friendly_name}</strong>
-                    {!inProgress && changeMeetingType}
+                    <strong>Meeting Via</strong>: {meetingBackend.friendly_name} {!inProgress && changeMeetingType}
                 </Card.Text>
-                <Card.Text>Meeting Agenda (Optional): </Card.Text>
                 {agendaBlock}
             </Card.Body>
         </Card>
