@@ -1,4 +1,5 @@
 import * as ReactGA from "react-ga";
+import { MyUser, QueueHost } from "./models";
 
 export const redirectToLogin = (loginUrl: string) => {
     ReactGA.event({
@@ -25,6 +26,15 @@ export const redirectToBackendAuth = (backend: string) => {
         nonInteraction: true,
     });
     location.href = `/auth/${backend}/`;
+}
+
+export const checkBackendAuth = (user: MyUser, queue: QueueHost) => {
+    for (const backend of queue.allowed_backends) {
+        const authorized = user.authorized_backends[backend];
+        if (authorized === false) {
+            redirectToBackendAuth(backend);
+        }
+    }
 }
 
 export const recordQueueManagementEvent = (action: string) => {
