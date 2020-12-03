@@ -20,3 +20,7 @@ class Backend:
             'docs_url': self.docs_url,
             'telephone_num': self.telephone_num
         }
+
+    @classmethod
+    def is_authorized(cls, user: User) -> bool:
+        return True

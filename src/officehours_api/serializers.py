@@ -86,12 +86,13 @@ class MyUserSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(source='profile.phone_number', allow_blank=True)
     notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
     notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
+    authorized_backends = serializers.DictField(source='profile.authorized_backends')
 
     class Meta:
         model = User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name', 'my_queue',
-            'hosted_queues', 'phone_number', 'notify_me_attendee', 'notify_me_host'
+            'id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues',
+            'phone_number', 'notify_me_attendee', 'notify_me_host', 'authorized_backends',
         ]
 
     def get_my_queue(self, obj):
