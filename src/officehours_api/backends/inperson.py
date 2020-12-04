@@ -13,12 +13,12 @@ class Backend:
         return {'started': True}
 
     @classmethod
-    def get_public_data(self) -> BackendDict:
+    def get_public_data(cls) -> BackendDict:
         return {
-            'name': self.name,
-            'friendly_name': self.friendly_name,
-            'docs_url': self.docs_url,
-            'telephone_num': self.telephone_num
+            'name': cls.name,
+            'friendly_name': cls.friendly_name,
+            'docs_url': cls.docs_url,
+            'telephone_num': cls.telephone_num
         }
 
     @classmethod
