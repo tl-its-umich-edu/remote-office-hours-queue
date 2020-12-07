@@ -20,7 +20,7 @@ class Backend:
             'friendly_name': cls.friendly_name,
             'docs_url': cls.docs_url,
             'telephone_num': cls.telephone_num,
-            'intl_telephone_num': cls.intl_telephone_url
+            'intl_telephone_url': cls.intl_telephone_url
         }
 
     @classmethod
