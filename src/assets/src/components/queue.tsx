@@ -9,9 +9,9 @@ import {
     BluejeansMetadata, EnabledBackendName, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, User, ZoomMetadata
 } from "../models";
 import {
-    checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DisabledMessage,
-    EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
-    showConfirmation, StatelessInputGroupForm
+    checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DialInMessageProps,
+    DisabledMessage, EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
+    showConfirmation, StatelessInputGroupForm, ZoomDialInMessage
 } from "./common";
 import { BackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
@@ -139,61 +139,63 @@ const WaitingTurnAlert = (props: WaitingTurnAlertProps) => {
 
 
 interface VideoMeetingInfoProps {
-    meetingBackend: MeetingBackend;
     metadata: BluejeansMetadata | ZoomMetadata;
+    backend: MeetingBackend;
 }
 
 const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
-    const joinLink = props.metadata.meeting_url
-        ? (
-            <Button as='a' href={props.metadata.meeting_url} target='_blank' variant='warning' className='mr-3'>
-                Join Meeting
-            </Button>
-        )
-        : <p><strong>Please wait. The meeting is being started...</strong></p>;
-
     const docLinkTag = (
         <a
-            href={props.meetingBackend.docs_url === null ? undefined : props.meetingBackend.docs_url} 
+            href={props.backend.docs_url === null ? undefined : props.backend.docs_url}
             target='_blank'
             className='card-link'
         >
-            How to use {props.meetingBackend.friendly_name} at U-M
+            How to use {props.backend.friendly_name} at U-M
         </a>
     );
 
-    const extraDetails = props.meetingBackend.name === 'bluejeans' && (
-        <Col md={6} sm={true}>
-            <Card>
-                <Card.Body>
-                    <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
-                    <Card.Text>
-                        <BlueJeansDialInMessage meetingNumber={props.metadata.numeric_meeting_id} />
-                        You are not a moderator, so you do not need a moderator passcode.
-                    </Card.Text>
-                </Card.Body>
-            </Card>
-        </Col>
-    );
+    const dialInProps = {
+        phone: props.backend.telephone_num,
+        meetingNumber: props.metadata.numeric_meeting_id,
+        intlNumbersURL: props.backend.intl_telephone_url
+    } as DialInMessageProps;
+
+    const dialInMessage = props.backend.name === 'zoom'
+        ? <ZoomDialInMessage {...dialInProps} />
+        : props.backend.name === 'bluejeans'
+            ? <BlueJeansDialInMessage {...dialInProps} />
+            : null;
 
     return (
         <>
-        <Row className='mb-3'>
-            <Col>
-                {joinLink}
-                {props.children}
-            </Col>
-        </Row>
         <Row>
             <Col md={6} sm={true}>
                 <Card>
                     <Card.Body>
-                        <Card.Title as='h5' className='mt-0'>Using {props.meetingBackend.friendly_name}</Card.Title>
-                        <Card.Text>Refer to {docLinkTag} for help using {props.meetingBackend.friendly_name}.</Card.Text>
+                        <Card.Title as='h5' className='mt-0'>Join the Meeting</Card.Title>
+                        <Card.Text>
+                            Once the meeting is created, click Join Meeting to join the meeting and wait for the host.
+                            Download the app and test your audio now.
+                            Refer to {docLinkTag} for additional help getting started.
+                        </Card.Text>
                     </Card.Body>
                 </Card>
             </Col>
-            {extraDetails}
+            {
+                dialInMessage && (
+                    <Col md={6} sm={true}>
+                        <Card>
+                            <Card.Body>
+                                <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
+                                <Card.Text>
+                                    {dialInMessage}
+                                    You are not a moderator, so you do not need a moderator passcode.
+                                </Card.Text>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+                )
+            }
         </Row>
         </>
     );
@@ -210,6 +212,9 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <MeetingReadyAlert meetingType={meetingBackend.name} />
         : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={numberInLine!}/>;
 
+    const meetingInfo = (['bluejeans', 'zoom'].includes(meetingBackend.name) && inProgress)
+        && <VideoMeetingInfo metadata={meeting.backend_metadata!} backend={meetingBackend} />;
+
     const leave = (
         <Button
             variant='link'
@@ -221,16 +226,14 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             {props.disabled && DisabledMessage}
         </Button>
     );
-    const meetingInfo = ['bluejeans', 'zoom'].includes(meetingBackend.name)
+
+    const joinLink = meeting.backend_metadata!.meeting_url
         ? (
-            <VideoMeetingInfo
-                meetingBackend={meetingBackend}
-                metadata={props.queue.my_meeting!.backend_metadata as BluejeansMetadata | ZoomMetadata}
-            >
-                {leave}
-            </VideoMeetingInfo>
+            <Button as='a' href={meeting.backend_metadata!.meeting_url} target='_blank' variant='warning' className='mr-3'>
+                Join Meeting
+            </Button>
         )
-        : leave;
+        : <p><strong>Please wait. The meeting is being started...</strong></p>;
 
     const changeMeetingType = props.queue.my_meeting?.assignee
         ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
@@ -303,6 +306,12 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             The host will join the meeting when it is your turn.
             We'll show a message in this window when your turn is coming up -- keep an eye on the window so you don't miss it!
         </p>
+        <Row className='mb-3'>
+            <Col>
+                {joinLink}
+                {leave}
+            </Col>
+        </Row>
         {meetingInfo}
         </>
     );

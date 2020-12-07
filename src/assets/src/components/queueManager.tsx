@@ -9,7 +9,7 @@ import Dialog from "react-bootstrap-dialog";
 import {
     UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
     CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage,
-    userLoggedOnWarning
+    userLoggedOnWarning, DialInMessageProps, ZoomDialInMessage
 } from "./common";
 import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
@@ -192,17 +192,28 @@ function QueueManager(props: QueueManagerProps) {
 }
 
 interface HostVideoMeetingInfoProps {
-    meetingBackend: MeetingBackend;
     metadata: BluejeansMetadata | ZoomMetadata;
+    backend: MeetingBackend;
 }
 
  // Zoom Dial-in info will be added here soon.
 const HostVideoMeetingInfo = (props: HostVideoMeetingInfoProps) => {
-    const meetingNumber = props.metadata.numeric_meeting_id;
+    const dialInProps = {
+        phone: props.backend.telephone_num,
+        meetingNumber: props.metadata.numeric_meeting_id,
+        intlNumbersURL: props.backend.intl_telephone_url
+    } as DialInMessageProps;
+
+    const dialInMessage = props.backend.name === 'zoom'
+        ? <ZoomDialInMessage {...dialInProps} />
+        : props.backend.name === 'bluejeans'
+            ? <BlueJeansDialInMessage {...dialInProps} />
+            : null;
+
     return (
         <>
-        <p>This meeting will be via <strong>{props.meetingBackend.friendly_name}</strong>.</p>
-        {props.meetingBackend.name === 'bluejeans' && <p><BlueJeansDialInMessage meetingNumber={meetingNumber} /></p>}
+        <p>This meeting will be via <strong>{props.backend.friendly_name}</strong>.</p>
+        {dialInMessage}
         </>
     );
 }
@@ -235,7 +246,7 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
             ['bluejeans', 'zoom'].includes(meetingType)
                 ? (
                     <HostVideoMeetingInfo
-                        meetingBackend={getBackendByName(meetingType, props.backends)}
+                        backend={getBackendByName(meetingType, props.backends)}
                         metadata={props.meeting!.backend_metadata!}
                     />
                 ) : <div><p>This meeting will be <strong>In Person</strong>.</p></div>
