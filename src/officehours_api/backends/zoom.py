@@ -73,8 +73,9 @@ class ZoomAccessToken(TypedDict):
 class Backend:
     name: str = 'zoom'
     friendly_name: str = 'Zoom'
-    docs_url: Optional[str] = settings.ZOOM_DOCS_URL
-    telephone_num: Optional[str] = settings.ZOOM_TELE_NUM
+    docs_url: str = settings.ZOOM_DOCS_URL
+    telephone_num: str = settings.ZOOM_TELE_NUM
+    intl_telephone_url: str = settings.ZOOM_INTL_URL
 
     base_url = 'https://zoom.us'
     expiry_buffer_seconds = 60
@@ -216,7 +217,8 @@ class Backend:
             'name': cls.name,
             'friendly_name': cls.friendly_name,
             'docs_url': cls.docs_url,
-            'telephone_num': cls.telephone_num
+            'telephone_num': cls.telephone_num,
+            'intl_telephone_url': cls.intl_telephone_url
         }
     
     @classmethod

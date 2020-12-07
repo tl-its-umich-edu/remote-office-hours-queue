@@ -8,6 +8,7 @@ class Backend:
     friendly_name = "In Person"
     docs_url = None
     telephone_num = None
+    intl_telephone_num = None
 
     def save_user_meeting(self, backend_metadata: dict, assignee: User):
         return {'started': True}
@@ -18,7 +19,8 @@ class Backend:
             'name': cls.name,
             'friendly_name': cls.friendly_name,
             'docs_url': cls.docs_url,
-            'telephone_num': cls.telephone_num
+            'telephone_num': cls.telephone_num,
+            'intl_telephone_num': cls.intl_telephone_num
         }
 
     @classmethod
