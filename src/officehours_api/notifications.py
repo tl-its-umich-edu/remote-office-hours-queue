@@ -24,12 +24,12 @@ def build_addendum(domain: str):
     )
 
 
-def notify_meeting_started(next_in_line: Meeting):
+def notify_meeting_started(started: Meeting):
     phone_numbers = list(
         u.profile.phone_number for u in
-        next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
+        started.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
     )
-    queue_path = reverse('queue', kwargs={'queue_id': next_in_line.queue.id})
+    queue_path = reverse('queue', kwargs={'queue_id': started.queue.id})
     domain = Site.objects.get_current().domain
     queue_url = f"{domain}{queue_path}"
     for p in phone_numbers:
@@ -44,7 +44,7 @@ def notify_meeting_started(next_in_line: Meeting):
                 ),
             )
         except:
-            logger.exception(f"Error while sending attendee notification to {p} for queue {next_in_line.queue.id}")
+            logger.exception(f"Error while sending attendee notification to {p} for queue {started.queue.id}")
 
 
 def notify_queue_no_longer_empty(first: Meeting):
