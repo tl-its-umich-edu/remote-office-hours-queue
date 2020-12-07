@@ -191,12 +191,11 @@ class Meeting(SafeDeleteModel):
         unstarted_meetings: List[Meeting] = [
             meeting for meeting in meetings if meeting.status != MeetingStatus.STARTED
         ]
-        if self not in unstarted_meetings:
-            return None
         for i in range(0, len(unstarted_meetings)):
             m = unstarted_meetings[i]
             if m == self:
                 return i
+        return None
 
     def __str__(self):
         return f'{self.id}: {self.backend_type} {self.backend_metadata}'
