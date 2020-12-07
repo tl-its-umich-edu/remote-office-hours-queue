@@ -203,10 +203,10 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const meeting = props.queue.my_meeting!;
     const meetingBackend = getBackendByName(meeting.backend_type, props.backends);
-    const numberInLine = meeting.line_place ? meeting.line_place + 1 : null;
+    const numberInLine = meeting.line_place !== null ? meeting.line_place + 1 : null;
     const inProgress = meeting.status === MeetingStatus.STARTED;
 
-    const turnAlert = (numberInLine !== null && meeting.status === MeetingStatus.STARTED)
+    const turnAlert = (inProgress && numberInLine === null)
         ? <MeetingReadyAlert meetingType={meetingBackend.name} />
         : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={numberInLine!}/>;
 
