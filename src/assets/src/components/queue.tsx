@@ -231,7 +231,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 Join Meeting
             </Button>
         )
-        : <p><strong>Please wait. The meeting is being started...</strong></p>;
+        : <span><strong>Please wait. A Join Meeting button will appear here.</strong></span>;
 
     const changeMeetingType = props.queue.my_meeting?.assignee
         ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
