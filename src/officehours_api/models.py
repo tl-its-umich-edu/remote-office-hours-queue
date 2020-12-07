@@ -141,6 +141,7 @@ class Meeting(SafeDeleteModel):
         super(Meeting, self).__init__(*args, **kwargs)
         self._original_backend_type = self.backend_type
         self._original_assignee = self.assignee
+        self._original_status = self.status
 
     @property
     def status(self):
