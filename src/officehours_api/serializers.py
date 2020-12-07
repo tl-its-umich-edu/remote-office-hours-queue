@@ -93,7 +93,7 @@ class MyUserSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(source='profile.phone_number', allow_blank=True)
     notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
     notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
-    authorized_backends = serializers.DictField(source='profile.authorized_backends')
+    authorized_backends = serializers.DictField(source='profile.authorized_backends', read_only=True)
 
     class Meta:
         model = User
