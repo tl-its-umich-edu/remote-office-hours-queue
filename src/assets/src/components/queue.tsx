@@ -236,7 +236,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
 
-    const notificationBlurb = (numberInLine && numberInLine > 1)
+    const notificationBlurb = (numberInLine !== null && numberInLine > 1)
         && (
             <Card.Text>
                 <Alert variant="info">
