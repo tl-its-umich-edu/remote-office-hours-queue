@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from django.conf import settings
 from django.db import models
@@ -184,7 +184,7 @@ class Meeting(SafeDeleteModel):
         super().delete(*args, **kwargs)
 
     @property
-    def line_place(self):
+    def line_place(self) -> Optional[int]:
         if not self.queue:
             return None
         meetings = self.queue.meeting_set.order_by('id')
