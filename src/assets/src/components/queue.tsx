@@ -232,8 +232,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         )
         : leave;
 
-    const changeMeetingType = props.queue.my_meeting?.assignee 
-        ? <small className="card-text-spacing meeting-type-message">A Host has been assigned to this meeting. Meeting Type can no longer be changed.</small>
+    const changeMeetingType = props.queue.my_meeting?.assignee
+        ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
 
     const notificationBlurb = numberInLine > 1
