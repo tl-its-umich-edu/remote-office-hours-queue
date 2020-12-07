@@ -6,7 +6,8 @@ import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
 import {
-    BluejeansMetadata, EnabledBackendName, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, User, ZoomMetadata
+    BluejeansMetadata, EnabledBackendName, MeetingBackend, MeetingStatus, MyUser, QueueAttendee,
+    User, VideoBackendNames, ZoomMetadata
 } from "../models";
 import {
     checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DialInMessageProps,
@@ -187,10 +188,7 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
                         <Card>
                             <Card.Body>
                                 <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
-                                <Card.Text>
-                                    {dialInMessage}
-                                    You are not a moderator, so you do not need a moderator passcode.
-                                </Card.Text>
+                                <Card.Text>{dialInMessage}</Card.Text>
                             </Card.Body>
                         </Card>
                     </Col>
@@ -212,7 +210,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <MeetingReadyAlert meetingType={meetingBackend.name} />
         : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={numberInLine!}/>;
 
-    const meetingInfo = (['bluejeans', 'zoom'].includes(meetingBackend.name) && inProgress)
+    const meetingInfo = (VideoBackendNames.includes(meetingBackend.name) && inProgress)
         && <VideoMeetingInfo metadata={meeting.backend_metadata!} backend={meetingBackend} />;
 
     const leave = (

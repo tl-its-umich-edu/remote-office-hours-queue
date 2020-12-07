@@ -17,7 +17,8 @@ import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
 import {
-    BluejeansMetadata, isQueueHost, Meeting, MeetingBackend, MeetingStatus, QueueAttendee, QueueHost, User, MyUser, ZoomMetadata
+    BluejeansMetadata, isQueueHost, Meeting, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, QueueHost,
+    User, VideoBackendNames, ZoomMetadata
 } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
@@ -196,7 +197,7 @@ interface HostVideoMeetingInfoProps {
     backend: MeetingBackend;
 }
 
- // Zoom Dial-in info will be added here soon.
+
 const HostVideoMeetingInfo = (props: HostVideoMeetingInfoProps) => {
     const dialInProps = {
         phone: props.backend.telephone_num,
@@ -243,7 +244,7 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
     const meetingType = props.meeting?.backend_type
     const metadataInfo = meetingType
         && (
-            ['bluejeans', 'zoom'].includes(meetingType)
+            VideoBackendNames.includes(meetingType)
                 ? (
                     <HostVideoMeetingInfo
                         backend={getBackendByName(meetingType, props.backends)}

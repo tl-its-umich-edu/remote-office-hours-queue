@@ -1,5 +1,7 @@
 export type EnabledBackendName = 'zoom' | 'bluejeans' | 'inperson';
 
+export const VideoBackendNames: EnabledBackendName[] = ['zoom', 'bluejeans'];
+
 export interface MeetingBackend {
     name: EnabledBackendName;
     friendly_name: string;
