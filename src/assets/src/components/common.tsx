@@ -441,29 +441,52 @@ export const LoginDialog = (props: LoginDialogProps) =>
     </Modal>
 
 
-interface BlueJeansOneTouchDialLinkProps {
+interface OneTouchDialLinkProps {
     phone: string; // "." delimited
     meetingNumber: string;
 }
 
-export const BlueJeansOneTouchDialLink = (props: BlueJeansOneTouchDialLinkProps) => 
+const OneTouchDialLink = (props: OneTouchDialLinkProps) => (
     <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
         {props.phone}
     </a>
+);
 
-interface BlueJeansDialInMessageProps {
-    meetingNumber: string;
+interface IntlTelephoneLinkProps {
+    intlNumbersURL: string;
 }
 
-export const BlueJeansDialInMessage = (props: BlueJeansDialInMessageProps) => {
-    const phoneLinkUsa = <BlueJeansOneTouchDialLink phone="1.312.216.0325" meetingNumber={props.meetingNumber} />
+const IntlTelephoneLink = (props: IntlTelephoneLinkProps) =>  {
+    return (
+        <a target="_blank" href={props.intlNumbersURL}>
+            find your international number to call in from outside the USA
+        </a>
+    );
+}
+
+export type DialInMessageProps = OneTouchDialLinkProps & IntlTelephoneLinkProps;
+
+export const BlueJeansDialInMessage = (props: DialInMessageProps) => {
+    const phoneLinkUsa = <OneTouchDialLink {...props} />;
     return (
         <span>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA 
-            (or <a target="_blank" href="https://www.bluejeans.com/premium-numbers"> find your international number to call in from outside the USA</a>) 
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
+            (or <IntlTelephoneLink {...props} />)
             from any phone and enter {props.meetingNumber}#.
         </span>
-    )
+    );
+}
+
+export const ZoomDialInMessage = (props: DialInMessageProps) => {
+    const phoneLinkUsa = <OneTouchDialLink {...props} />;
+    return (
+        <span>
+            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
+            (or <IntlTelephoneLink {...props} /> - click See All Numbers under Toll Call to see all countries)
+            from any phone and enter {props.meetingNumber}#.
+            You do not need a host key or participant ID.
+        </span>
+    );
 }
 
 interface BreadcrumbsProps {

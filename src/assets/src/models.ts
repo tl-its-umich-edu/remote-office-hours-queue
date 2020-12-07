@@ -5,6 +5,7 @@ export interface MeetingBackend {
     friendly_name: string;
     docs_url: string | null;
     telephone_num: string | null;
+    intl_telephone_url: string | null;
 }
 
 export interface User {
