@@ -8,7 +8,7 @@ from django.urls import reverse
 
 from twilio.rest import Client as TwilioClient
 
-from officehours_api.models import Queue, Meeting
+from officehours_api.models import Queue, Meeting, MeetingStatus
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def build_addendum(domain: str):
     )
 
 
-def notify_next_in_line(next_in_line: Meeting):
+def notify_meeting_started(next_in_line: Meeting):
     phone_numbers = list(
         u.profile.phone_number for u in
         next_in_line.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True)
@@ -34,7 +34,7 @@ def notify_next_in_line(next_in_line: Meeting):
     queue_url = f"{domain}{queue_path}"
     for p in phone_numbers:
         try:
-            logger.info('notify_next_in_line: %s', p)
+            logger.info('notify_meeting_started: %s', p)
             twilio.messages.create(
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
@@ -70,18 +70,15 @@ def notify_queue_no_longer_empty(first: Meeting):
             logger.exception(f"Error while sending host notification to {p} for queue {first.queue.id}")
 
 
-@receiver(pre_delete, sender=Meeting)
-def trigger_notification_delete(sender, instance: Meeting, **kwargs):
-    if instance.line_place == 0:
-        if instance.queue.meeting_set.count() <= 1:
-            return
-        next_in_line = instance.queue.meeting_set.order_by('id')[1]
-        notify_next_in_line(next_in_line)
-
-
 @receiver(post_save, sender=Meeting)
 def trigger_notification_create(sender, instance: Meeting, created, **kwargs):
-    if instance.deleted or not created:
+    if instance.deleted:
         return
-    if instance.line_place == 0:
+    elif created and instance.line_place == 0:
         notify_queue_no_longer_empty(instance)
+    elif (
+        not created
+        and instance._original_status.value < MeetingStatus.STARTED.value
+        and instance.status.value >= MeetingStatus.STARTED.value
+    ):
+        notify_meeting_started(instance)
