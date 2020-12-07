@@ -14,7 +14,7 @@ from jsonfield import JSONField
 from requests.exceptions import RequestException
 from officehours_api import backends
 
-backend_instances = {
+BACKEND_INSTANCES = {
     backend_name: getattr(getattr(backends, backend_name), 'Backend')()
     for backend_name in settings.ENABLED_BACKENDS
 }
@@ -65,7 +65,7 @@ def get_default_allowed_backends():
 def get_backend_types():
     return [
         [key, value.friendly_name]
-        for key, value in backend_instances.items()
+        for key, value in BACKEND_INSTANCES.items()
     ]
 
 class Queue(SafeDeleteModel):
@@ -156,7 +156,7 @@ class Meeting(SafeDeleteModel):
             self.assignee = assignee
         if not self.assignee:
             raise Exception("Can't start meeting before assignee is set!")
-        backend = backend_instances[self.backend_type]
+        backend = BACKEND_INSTANCES[self.backend_type]
         user_email = self.queue.hosts.first().email
         self.backend_metadata['user_email'] = user_email
         try:
