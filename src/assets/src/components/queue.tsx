@@ -220,7 +220,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             disabled={props.disabled}
             onClick={() => props.onLeaveQueue()}
         >
-            Leave the line
+            {inProgress ? 'Cancel My Meeting' : 'Leave the Line'}
             {props.disabled && DisabledMessage}
         </Button>
     );
