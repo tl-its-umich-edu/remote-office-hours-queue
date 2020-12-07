@@ -324,10 +324,12 @@ TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
 DOCS_BASE_URL = 'https://its.umich.edu/communication/videoconferencing/'
 
 ZOOM_DOCS_URL = os.getenv('ZOOM_DOCS_URL', DOCS_BASE_URL + 'zoom')
-ZOOM_TELE_NUM = os.getenv('ZOOM_TELE_NUM')
+ZOOM_TELE_NUM = os.getenv('ZOOM_TELE_NUM', '1.312.626.6799')
+ZOOM_INTL_URL = os.getenv('ZOOM_INTL_URL', 'https://umich.zoom.us/profile/setting?tab=telephony')
 
 BLUEJEANS_DOCS_URL = os.getenv('BLUEJEANS_DOCS_URL', DOCS_BASE_URL + 'blue-jeans/getting-started')
 BLUEJEANS_TELE_NUM = os.getenv('BLUEJEANS_TELE_NUM', '1.312.216.0325')
+BLUEJEANS_INTL_URL = os.getenv('BLUEJEANS_INTL_URL', 'https://www.bluejeans.com/premium-numbers')
 
 ENABLED_BACKENDS = {'inperson'}
 DEFAULT_BACKEND = "inperson"

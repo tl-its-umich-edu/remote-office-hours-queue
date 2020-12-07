@@ -131,8 +131,9 @@ class BluejeansClient:
 class Backend:
     name: str = 'bluejeans'
     friendly_name: str = 'BlueJeans'
-    docs_url: Optional[str] = settings.BLUEJEANS_DOCS_URL
-    telephone_num: Optional[str] = settings.BLUEJEANS_TELE_NUM
+    docs_url: str = settings.BLUEJEANS_DOCS_URL
+    telephone_num: str = settings.BLUEJEANS_TELE_NUM
+    intl_telephone_url: str = settings.BLUEJEANS_INTL_URL
 
     _client: BluejeansClient
 
@@ -187,7 +188,8 @@ class Backend:
             'name': cls.name,
             'friendly_name': cls.friendly_name,
             'docs_url': cls.docs_url,
-            'telephone_num': cls.telephone_num
+            'telephone_num': cls.telephone_num,
+            'intl_telephone_url': cls.intl_telephone_url
         }
     
     @classmethod
