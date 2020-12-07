@@ -45,7 +45,7 @@ class Profile(models.Model):
     def authorized_backends(self):
         return {
             backend.name: backend.is_authorized(self.user)
-            for backend in backend_instances.values()
+            for backend in BACKEND_INSTANCES.values()
         }
 
     def __str__(self):
