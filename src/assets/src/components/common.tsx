@@ -456,7 +456,7 @@ interface IntlTelephoneLinkProps {
     intlNumbersURL: string;
 }
 
-const IntlTelephoneLink = (props: IntlTelephoneLinkProps) =>  {
+const IntlTelephoneLink = (props: IntlTelephoneLinkProps) => {
     return (
         <a target="_blank" href={props.intlNumbersURL}>
             find your international number to call in from outside the USA
@@ -483,7 +483,7 @@ export const ZoomDialInMessage = (props: DialInMessageProps) => {
     return (
         <span>
             Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
-            (or <IntlTelephoneLink {...props} /> - click See All Numbers under Toll Call to see all countries)
+            (or <IntlTelephoneLink {...props} /> -- click See All Numbers under Toll Call to see all countries)
             from any phone and enter {props.meetingNumber}#.
             You do not need a host key or participant ID.
         </span>
