@@ -173,7 +173,7 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
             <Col md={6} sm={true}>
                 <Card>
                     <Card.Body>
-                        <Card.Title as='h5' className='mt-0'>Join the Meeting</Card.Title>
+                        <Card.Title as='h5' className='mt-0'>Joining the Meeting</Card.Title>
                         <Card.Text>
                             Once the meeting is created, click Join Meeting to join the meeting and wait for the host.
                             Download the app and test your audio now.
