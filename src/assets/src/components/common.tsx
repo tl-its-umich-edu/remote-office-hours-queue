@@ -473,7 +473,7 @@ export const BlueJeansDialInMessage = (props: DialInMessageProps) => {
             Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
             (or <IntlTelephoneLink {...props} />)
             from any phone and enter {props.meetingNumber}#.
-            You are not a moderator, so you do not need a moderator passcode.
+            You do not need a passcode to join the meeting.
         </span>
     );
 }
