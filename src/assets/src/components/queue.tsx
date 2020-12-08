@@ -203,36 +203,26 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
 function QueueAttendingJoined(props: QueueAttendingProps) {
     const meeting = props.queue.my_meeting!;
     const meetingBackend = getBackendByName(meeting.backend_type, props.backends);
+    const isVideoMeeting = VideoBackendNames.includes(meetingBackend.name);
     const numberInLine = meeting.line_place !== null ? meeting.line_place + 1 : null;
     const inProgress = meeting.status === MeetingStatus.STARTED;
+
+    // Alerts and head
+    const closedAlert = props.queue.status === "closed"
+        && (
+            <Alert variant="dark">
+                This queue has been closed by the host, but you are still in line.
+                Please contact the host to ensure the meeting will still happen.
+            </Alert>
+        );
 
     const turnAlert = (inProgress && numberInLine === null)
         ? <MeetingReadyAlert meetingType={meetingBackend.name} />
         : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={numberInLine!}/>;
 
-    const meetingInfo = (VideoBackendNames.includes(meetingBackend.name) && inProgress)
-        && <VideoMeetingInfo metadata={meeting.backend_metadata!} backend={meetingBackend} />;
+    const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.';
 
-    const leave = (
-        <Button
-            variant='link'
-            type='button'
-            disabled={props.disabled}
-            onClick={() => props.onLeaveQueue()}
-        >
-            {inProgress ? 'Cancel My Meeting' : 'Leave the Line'}
-            {props.disabled && DisabledMessage}
-        </Button>
-    );
-
-    const joinLink = meeting.backend_metadata!.meeting_url
-        ? (
-            <Button as='a' href={meeting.backend_metadata!.meeting_url} target='_blank' variant='warning' className='mr-3'>
-                Join Meeting
-            </Button>
-        )
-        : <span><strong>Please wait. A Join Meeting button will appear here.</strong></span>;
-
+    // Card content
     const changeMeetingType = props.queue.my_meeting?.assignee
         ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
         : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
@@ -249,14 +239,6 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     </small>
                 </Alert>
             </Card.Text>
-        );
-
-    const closedAlert = props.queue.status === "closed"
-        && (
-            <Alert variant="dark">
-                This queue has been closed by the host, but you are still in line.
-                Please contact the host to ensure the meeting will still happen.
-            </Alert>
         );
 
     const agendaBlock = !inProgress
@@ -282,7 +264,40 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         )
         : <Card.Text><strong>Meeting Agenda</strong>: {meeting.agenda ? meeting.agenda : 'None'}</Card.Text>;
 
-    const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.';
+    // Meeting actions and info
+    const leave = (
+        <Button
+            variant='link'
+            type='button'
+            disabled={props.disabled}
+            onClick={() => props.onLeaveQueue()}
+        >
+            {inProgress ? 'Cancel My Meeting' : 'Leave the Line'}
+            {props.disabled && DisabledMessage}
+        </Button>
+    );
+
+    const joinText = isVideoMeeting && (
+        !inProgress
+            ? (
+                'The host has not created the meeting yet. You will be able to join the meeting once it is created. ' +
+                "We'll show a message in this window when it is created -- pay attention to the window so you don't miss it."
+            )
+            : 'The host has created the meeting. Join it now! The host will join when they are ready for you.'
+    );
+
+    const joinLink = isVideoMeeting && (
+        meeting.backend_metadata!.meeting_url
+            ? (
+                <Button as='a' href={meeting.backend_metadata!.meeting_url} target='_blank' variant='warning' className='mr-3'>
+                    Join Meeting
+                </Button>
+            )
+            : <span><strong>Please wait. A Join Meeting button will appear here.</strong></span>
+    );
+
+    const meetingInfo = (isVideoMeeting && inProgress)
+        && <VideoMeetingInfo metadata={meeting.backend_metadata!} backend={meetingBackend} />;
 
     return (
         <>
@@ -300,10 +315,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 {agendaBlock}
             </Card.Body>
         </Card>
-        <p>
-            The host will join the meeting when it is your turn.
-            We'll show a message in this window when your turn is coming up -- keep an eye on the window so you don't miss it!
-        </p>
+        {joinText && <p>{joinText}</p>}
         <Row className='mb-3'>
             <Col>
                 {joinLink}
