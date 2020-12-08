@@ -235,7 +235,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             <Alert variant="info">
                 <small>
                     Did you know? You can receive an SMS (text) message when
-                    it's your turn by by adding your cell phone number and
+                    it's your turn by adding your cell phone number and
                     enabling attendee notifications in
                     your <Link to="/preferences">User Preferences</Link>.
                 </small>
