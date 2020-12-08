@@ -19,7 +19,7 @@ import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
-import { redirectToLogin } from "../utils";
+import { addMeetingAutoAssigned, redirectToLogin } from "../utils";
 import { meetingAgendaSchema } from "../validation";
 
 
@@ -445,7 +445,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             category: "Attending",
             action: "Joined Queue",
         });
-        await api.addMeeting(queueIdParsed, props.user!.id, backendType);
+        await addMeetingAutoAssigned(queue!, props.user!.id, backendType);
     }
     const [doJoinQueue, joinQueueLoading, joinQueueError] = usePromise(joinQueue);
     const leaveQueue = async () => {
@@ -476,7 +476,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             action: "Left Previous Queue and Joined New Queue",
         });
         await api.removeMeeting(myUser!.my_queue!.my_meeting!.id);
-        await api.addMeeting(queueIdParsed, props.user!.id, backendType);
+        await addMeetingAutoAssigned(queue!, props.user!.id, backendType);
     }
     const [doLeaveAndJoinQueue, leaveAndJoinQueueLoading, leaveAndJoinQueueError] = usePromise(leaveAndJoinQueue);
     const changeAgenda = async (agenda: string) => {
