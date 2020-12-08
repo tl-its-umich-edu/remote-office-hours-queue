@@ -155,17 +155,20 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
         </a>
     );
 
-    const dialInProps = {
-        phone: props.backend.telephone_num,
-        meetingNumber: props.metadata.numeric_meeting_id,
-        intlNumbersURL: props.backend.intl_telephone_url
-    } as DialInMessageProps;
+    let dialInMessage;
+    if (props.metadata.numeric_meeting_id) {
+        const dialInProps = {
+            phone: props.backend.telephone_num,
+            meetingNumber: props.metadata.numeric_meeting_id,
+            intlNumbersURL: props.backend.intl_telephone_url
+        } as DialInMessageProps;
 
-    const dialInMessage = props.backend.name === 'zoom'
-        ? <ZoomDialInMessage {...dialInProps} />
-        : props.backend.name === 'bluejeans'
-            ? <BlueJeansDialInMessage {...dialInProps} />
-            : null;
+        dialInMessage = props.backend.name === 'zoom'
+            ? <ZoomDialInMessage {...dialInProps} />
+            : props.backend.name === 'bluejeans'
+                ? <BlueJeansDialInMessage {...dialInProps} />
+                : null;
+    }
 
     return (
         <>
