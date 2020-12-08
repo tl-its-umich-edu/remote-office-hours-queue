@@ -228,7 +228,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     // Card content
     const changeMeetingType = props.queue.my_meeting?.assignee
         ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
-        : <button disabled={props.disabled} onClick={props.onShowDialog} type="button" className="btn btn-link">Change</button>;
+        : <Button variant='link' onClick={props.onShowDialog} aria-label='Change Meeting Type' disabled={props.disabled}>Change</Button>;
 
     const notificationBlurb = (numberInLine !== null && numberInLine > 1)
         && (
@@ -266,14 +266,16 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         : <Card.Text><strong>Meeting Agenda</strong>: {meeting.agenda ? meeting.agenda : 'None'}</Card.Text>;
 
     // Meeting actions and info
+    const leaveButtonText = inProgress ? 'Cancel My Meeting' : 'Leave the Line';
     const leave = (
         <Button
             variant='link'
             type='button'
-            disabled={props.disabled}
             onClick={() => props.onLeaveQueue()}
+            disabled={props.disabled}
+            aria-label={leaveButtonText}
         >
-            {inProgress ? 'Cancel My Meeting' : 'Leave the Line'}
+            {leaveButtonText}
             {props.disabled && DisabledMessage}
         </Button>
     );
@@ -290,7 +292,14 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const joinLink = isVideoMeeting && (
         meeting.backend_metadata!.meeting_url
             ? (
-                <Button as='a' href={meeting.backend_metadata!.meeting_url} target='_blank' variant='warning' className='mr-3'>
+                <Button
+                    href={meeting.backend_metadata!.meeting_url}
+                    target='_blank'
+                    variant='warning'
+                    className='mr-3'
+                    aria-label='Join Meeting'
+                    disabled={props.disabled}
+                >
                     Join Meeting
                 </Button>
             )
