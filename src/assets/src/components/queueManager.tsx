@@ -326,7 +326,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const addMeeting = async (uniqname: string, backend: string) => {
         const user = await confirmUserExists(uniqname);
         recordQueueManagementEvent("Added Meeting");
-        await addMeetingAutoAssigned(queue!, props.user!.id, backend);
+        await addMeetingAutoAssigned(queue!, user.id, backend);
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
 
