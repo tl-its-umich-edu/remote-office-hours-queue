@@ -353,6 +353,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const errorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
+        {source: 'User Connection', error: userWebSocketError},
         {source: 'Remove Meeting', error: removeMeetingError},
         {source: 'Add Meeting', error: addMeetingError},
         {source: 'Queue Status', error: setStatusError},
