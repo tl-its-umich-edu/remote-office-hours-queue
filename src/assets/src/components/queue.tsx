@@ -296,8 +296,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             : <span><strong>Please wait. A Join Meeting button will appear here.</strong></span>
     );
 
-    const meetingInfo = (isVideoMeeting && inProgress)
-        && <VideoMeetingInfo metadata={meeting.backend_metadata!} backend={meetingBackend} />;
+    const meetingInfo = isVideoMeeting && <VideoMeetingInfo metadata={meeting.backend_metadata!} backend={meetingBackend} />;
 
     return (
         <>
