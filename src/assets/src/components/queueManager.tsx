@@ -197,7 +197,6 @@ interface HostVideoMeetingInfoProps {
     backend: MeetingBackend;
 }
 
-
 const HostVideoMeetingInfo = (props: HostVideoMeetingInfoProps) => {
     const dialInProps = {
         phone: props.backend.telephone_num,
