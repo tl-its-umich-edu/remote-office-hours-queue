@@ -61,8 +61,8 @@ export function checkIfSetsAreDifferent(setA: Set<any>, setB: Set<any>) {
 }
 
 export const addMeetingAutoAssigned = async (queue: QueueFull, userId: number, backendType: string) => {
-    const assignee = queue!.hosts.length === 1
-            ? queue!.hosts[0].id
+    const assignee = queue.hosts.length === 1
+            ? queue.hosts[0].id
             : undefined;
     await api.addMeeting(queue.id, userId, backendType, assignee);
 }
