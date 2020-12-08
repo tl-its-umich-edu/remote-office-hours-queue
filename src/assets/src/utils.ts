@@ -1,5 +1,6 @@
 import * as ReactGA from "react-ga";
-import { MyUser, QueueHost } from "./models";
+import { MyUser, QueueFull, QueueHost } from "./models";
+import * as api from "./services/api";
 
 export const redirectToLogin = (loginUrl: string) => {
     ReactGA.event({
@@ -57,4 +58,11 @@ export function checkIfSetsAreDifferent(setA: Set<any>, setB: Set<any>) {
         }
     }
     return !!difference.size;
+}
+
+export const addMeetingAutoAssigned = async (queue: QueueFull, userId: number, backendType: string) => {
+    const assignee = queue!.hosts.length === 1
+            ? queue!.hosts[0].id
+            : undefined;
+    await api.addMeeting(queue.id, userId, backendType, assignee);
 }

@@ -21,7 +21,7 @@ import {
 } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
-import { checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
+import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
 
 
@@ -312,7 +312,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const addMeeting = async (uniqname: string, backend: string) => {
         const user = await confirmUserExists(uniqname);
         recordQueueManagementEvent("Added Meeting");
-        await api.addMeeting(queue!.id, user.id, backend);
+        await addMeetingAutoAssigned(queue!, props.user!.id, backend);
     }
     const [doAddMeeting, addMeetingLoading, addMeetingError] = usePromise(addMeeting);
 
