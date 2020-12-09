@@ -25,9 +25,11 @@ function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (ke
     for (const property of propsToWatch) {
         let valueOne = versOne[property] as T[keyof T] | string;
         let valueTwo = versTwo[property] as T[keyof T] | string;
-        // Check for nested user objects
+        // Check for nested user objects and falsy values
         if (isUser(valueOne)) valueOne = valueOne.username;
+        if (!valueOne) valueOne = 'None';
         if (isUser(valueTwo)) valueTwo = valueTwo.username;
+        if (!valueTwo) valueTwo = 'None';
         if (valueOne !== valueTwo) {
             // Make some property strings more human readable
             const propName = (property in propertyMap) ? propertyMap[property as string] : property;
