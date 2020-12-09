@@ -73,6 +73,9 @@ export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]): st
         if (secondEntity) {
             if (isMeeting(firstEntity) && isMeeting(secondEntity)) {
                 changeDetected = detectChanges<Meeting>(firstEntity, secondEntity, meetingPropsToWatch);
+                if (!changeDetected && firstEntity.status !== secondEntity.status && secondEntity.status === MeetingStatus.STARTED) {
+                    changeDetected = 'The status indicates the meeting is now in progress.';
+                }
             } else if (isQueueBase(firstEntity) && isQueueBase(secondEntity)) {
                 changeDetected = detectChanges<QueueBase>(firstEntity, secondEntity, queueBasePropsToWatch);
             }
