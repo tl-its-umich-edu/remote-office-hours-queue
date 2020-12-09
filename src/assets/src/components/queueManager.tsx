@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState, createRef, ChangeEvent } from "react";
+import { useEffect, useState, createRef, ChangeEvent as ReactChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -15,6 +15,7 @@ import { DialInContent } from './dialIn';
 import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
+import { ChangeEvent as EntityChangeEvent } from "../changes";
 import { useEntityChanges } from "../hooks/useEntityChanges";
 import { usePreviousState } from "../hooks/usePreviousState";
 import { usePromise } from "../hooks/usePromise";
@@ -112,6 +113,8 @@ interface QueueManagerProps {
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     onStartMeeting: (m: Meeting) => void;
+    meetingChangeEvents: EntityChangeEvent[];
+    deleteMeetingChangeEvent: (key: number) => void;
 }
 
 function QueueManager (props: React.PropsWithChildren<QueueManagerProps>) {
@@ -162,7 +165,7 @@ function QueueManager (props: React.PropsWithChildren<QueueManagerProps>) {
                         type='switch'
                         label={currentStatus ? 'Open' : 'Closed'}
                         checked={props.queue.status === 'open'}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => props.onSetStatus(!currentStatus)}
+                        onChange={(e: ReactChangeEvent<HTMLInputElement>) => props.onSetStatus(!currentStatus)}
                     />
                 </Col>
             </Row>
@@ -170,7 +173,11 @@ function QueueManager (props: React.PropsWithChildren<QueueManagerProps>) {
                 <Col md={2}><div id='created'>Created</div></Col>
                 <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
             </Row>
-            <Row noGutters className={spacingClass}><Col md={12}>{props.children}</Col></Row>
+            <Row noGutters className={spacingClass}>
+                <Col md={12}>
+                    <ChangeLog changeEvents={props.meetingChangeEvents} deleteChangeEvent={props.deleteMeetingChangeEvent} />
+                </Col>
+            </Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
             <Row noGutters className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
             <Row noGutters className={spacingClass}>
@@ -348,7 +355,6 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>;
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>;
-    const meetingChangeLog = <ChangeLog changeEvents={meetingChangeEvents} deleteChangeEvent={deleteMeetingChangeEvent} />;
     const queueManager = queue
         && (
             <QueueManager
@@ -363,9 +369,9 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
                 onStartMeeting={doStartMeeting}
-            >
-                {meetingChangeLog}
-            </QueueManager>
+                meetingChangeEvents={meetingChangeEvents}
+                deleteMeetingChangeEvent={deleteMeetingChangeEvent}
+            />
         );
     return (
         <>
