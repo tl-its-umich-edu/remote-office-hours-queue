@@ -1,7 +1,7 @@
 import xorWith from "lodash.xorwith";
 import isEqual from "lodash.isequal";
 
-import { Base, isMeeting, isQueueBase, isUser, Meeting, QueueBase } from "./models"
+import { Base, isMeeting, isQueueBase, isUser, Meeting, MeetingStatus, QueueBase } from "./models"
 
 
 export interface ChangeEvent {
@@ -23,12 +23,12 @@ const propertyMap: HumanReadableMap = {
 
 function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (keyof T)[]): string {
     for (const property of propsToWatch) {
-        if (versOne[property] !== versTwo[property]) {
-            let valueOne = versOne[property] as T[keyof T] | string;
-            let valueTwo = versTwo[property] as T[keyof T] | string;
-            // Check for nested user objects
-            if (isUser(valueOne)) valueOne = valueOne.username;
-            if (isUser(valueTwo)) valueTwo = valueTwo.username;
+        let valueOne = versOne[property] as T[keyof T] | string;
+        let valueTwo = versTwo[property] as T[keyof T] | string;
+        // Check for nested user objects
+        if (isUser(valueOne)) valueOne = valueOne.username;
+        if (isUser(valueTwo)) valueTwo = valueTwo.username;
+        if (valueOne !== valueTwo) {
             // Make some property strings more human readable
             const propName = (property in propertyMap) ? propertyMap[property as string] : property;
             return `The ${propName} changed from "${valueOne}" to "${valueTwo}".`;
@@ -63,9 +63,9 @@ export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]): st
 
     let message;
     if (oldOnes.length < newOnes.length) {
-        message = `A new ${entityType} with ${permIdentifier} was added.`;
+        return `A new ${entityType} with ${permIdentifier} was added.`;
     } else if (oldOnes.length > newOnes.length) {
-        message = `The ${entityType} with ${permIdentifier} was deleted.`;
+        return `The ${entityType} with ${permIdentifier} was deleted.`;
     } else {
         let changeDetected;
         if (secondEntity) {
@@ -78,7 +78,8 @@ export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]): st
         message = `The ${entityType} with ${permIdentifier} was changed.`;
         if (changeDetected) {
             message = message + ' ' + changeDetected;
+            return message;
         }
     }
-    return message;
+    return;
 }
