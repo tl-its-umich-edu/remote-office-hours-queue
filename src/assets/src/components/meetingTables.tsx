@@ -20,10 +20,10 @@ interface MeetingDetailsProps extends MeetingEditorComponentProps {
 const MeetingDetails = (props: MeetingDetailsProps) => {
     return (
         <Row>
-            <Col md={4} className='mb-1'>
+            <Col md={6} className='mb-1'>
                 <Badge variant='secondary' aria-label='Meeting Type'>{props.readableMeetingType}</Badge>
             </Col>
-            <Col md={8}>
+            <Col md={6}>
                 <Button
                     variant='link'
                     size='sm'
