@@ -170,6 +170,7 @@ function QueueManager (props: React.PropsWithChildren<QueueManagerProps>) {
                 <Col md={2}><div id='created'>Created</div></Col>
                 <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
             </Row>
+            <Row noGutters className={spacingClass}><Col md={12}>{props.children}</Col></Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
             <Row noGutters className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
             <Row noGutters className={spacingClass}>
@@ -189,10 +190,7 @@ function QueueManager (props: React.PropsWithChildren<QueueManagerProps>) {
                 </Col>
             </Row>
             <Row noGutters className={spacingClass}>
-                <Col md={12}>
-                    {props.children}
-                    <MeetingsInQueueTable meetings={unstartedMeetings} {...props} />
-                </Col>
+                <Col md={12}><MeetingsInQueueTable meetings={unstartedMeetings} {...props} /></Col>
             </Row>
         </div>
     );
