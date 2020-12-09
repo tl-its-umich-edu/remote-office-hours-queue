@@ -21,7 +21,7 @@ const propertyMap: HumanReadableMap = {
     'assignee': 'host'
 }
 
-function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (keyof T)[]): string {
+function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (keyof T)[]): string | undefined {
     for (const property of propsToWatch) {
         let valueOne = versOne[property] as T[keyof T] | string;
         let valueTwo = versTwo[property] as T[keyof T] | string;
@@ -36,7 +36,7 @@ function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (ke
             return `The ${propName} changed from "${valueOne}" to "${valueTwo}".`;
         }
     }
-    return '';
+    return;
 }
 
 
