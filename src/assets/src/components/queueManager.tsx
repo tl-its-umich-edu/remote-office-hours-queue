@@ -117,7 +117,7 @@ interface QueueManagerProps {
     deleteMeetingChangeEvent: (key: number) => void;
 }
 
-function QueueManager (props: React.PropsWithChildren<QueueManagerProps>) {
+function QueueManager (props: QueueManagerProps) {
     const spacingClass = 'mt-4';
 
     let startedMeetings = [];

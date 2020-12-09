@@ -67,7 +67,6 @@ export const isMeeting = (entity: object): entity is Meeting => {
     return 'attendees' in entity;
 }
 
-
 export interface QueueBase extends Base {
     name: string;
     status: "open" | "closed";
