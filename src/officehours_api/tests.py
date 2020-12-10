@@ -42,12 +42,15 @@ class NotificationTestCase(TestCase):
         user.profile.notify_me_host = not opt_out
         user.profile.save()
 
-    def create_meeting(self, attendees):
+    def create_meeting(self, attendees, start=False):
         m = Meeting.objects.create(
             queue=self.queue,
             backend_type='inperson',
         )
         m.attendees.set(attendees)
+        if start:
+            m.start(self.hostie)
+            m.save()
         return m
 
     @staticmethod
@@ -122,12 +125,9 @@ class NotificationTestCase(TestCase):
         )
 
     @mock.patch('officehours_api.notifications.twilio')
-    def test_first_meeting_removal_bad_phone_logs_exception(self, mock_twilio: mock.MagicMock):
-        m1 = self.create_meeting([self.foo,])
-        self.create_meeting([self.bar, self.attendeebad, self.baz])
-        mock_twilio.reset_mock()
+    def test_meeting_start_bad_phone_logs_exception(self, mock_twilio: mock.MagicMock):
         self.setup_bad_phone_test(mock_twilio)
-        self.assert_twilio_exception_logged(lambda: m1.delete())
+        self.assert_twilio_exception_logged(lambda: self.create_meeting([self.attendeebad, self.bar, self.baz], True))
         receivers = self.get_receivers(mock_twilio)
         self.assertTrue(
             receivers >=
@@ -136,11 +136,8 @@ class NotificationTestCase(TestCase):
         self.assertEqual(self.exceptions, 1)
 
     @mock.patch('officehours_api.notifications.twilio')
-    def test_first_meeting_removal_doesnt_notify_optout(self, mock_twilio: mock.MagicMock):
-        m1 = self.create_meeting([self.foo,])
-        self.create_meeting([self.bar, self.baz, self.attendeeoptout,])
-        mock_twilio.reset_mock()
-        m1.delete()
+    def test_meeting_start_doesnt_notify_optout(self, mock_twilio: mock.MagicMock):
+        self.create_meeting([self.bar, self.baz, self.attendeeoptout,], True)
         receivers = self.get_receivers(mock_twilio)
         self.assertFalse(
             receivers >=
@@ -148,21 +145,19 @@ class NotificationTestCase(TestCase):
         )
 
     @mock.patch('officehours_api.notifications.twilio')
-    def test_second_meeting_removal_notifies_none(self, mock_twilio: mock.MagicMock):
-        self.create_meeting([self.foo,])
-        m2 = self.create_meeting([self.bar, self.baz])
-        mock_twilio.reset_mock()
-        m2.delete()
+    def test_meeting_start_doesnt_notify_other(self, mock_twilio: mock.MagicMock):
+        m1 = self.create_meeting([self.foo,])
+        self.create_meeting([self.baz,])
+        m1.start(self.hostie)
+        m1.save()
         receivers = self.get_receivers(mock_twilio)
-        self.assertFalse('+15555550001' in receivers)
         self.assertFalse('+15555550002' in receivers)
 
     @mock.patch('officehours_api.notifications.twilio')
-    def test_first_meeting_removal_doesnt_notify_second_in_line(self, mock_twilio: mock.MagicMock):
-        m1 = self.create_meeting([self.foo,])
-        self.create_meeting([self.bar,])
-        self.create_meeting([self.baz,])
-        mock_twilio.reset_mock()
-        m1.delete()
+    def test_meeting_start_notifies_attendees(self, mock_twilio: mock.MagicMock):
+        self.create_meeting([self.foo, self.bar,], True)
         receivers = self.get_receivers(mock_twilio)
-        self.assertFalse('+15555550002' in receivers)
+        self.assertTrue(
+            receivers >=
+            {'+15555550000', '+15555550001'}
+        )

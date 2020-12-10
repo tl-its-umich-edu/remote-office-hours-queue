@@ -170,13 +170,15 @@ class Meeting(SafeDeleteModel):
             raise BackendException(self.backend_type) from ex
 
     def save(self, *args, **kwargs):
-        if self.backend_type != self._original_backend_type:
-            if self.status == MeetingStatus.STARTED:
+        if self._original_status.value >= MeetingStatus.STARTED.value:
+            if self.backend_type != self._original_backend_type:
                 raise Exception("Can't change backend_type once meeting is started!")
-        if self.assignee != self._original_assignee:
-            if self.status == MeetingStatus.STARTED:
+            if self.assignee != self._original_assignee:
                 raise Exception("Can't change assignee once meeting is started!")
         super().save(*args, **kwargs)
+        self._original_status = self.status
+        self._original_backend_type = self.backend_type
+        self._original_assignee = self.assignee
 
     def delete(self, *args, **kwargs):
         # Trigger m2m "remove" signals for attendees

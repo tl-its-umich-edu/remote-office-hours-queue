@@ -74,11 +74,10 @@ def notify_queue_no_longer_empty(first: Meeting):
 def trigger_notification_create(sender, instance: Meeting, created, **kwargs):
     if instance.deleted:
         return
-    elif created and instance.line_place == 0:
+    if created and instance.line_place == 0:
         notify_queue_no_longer_empty(instance)
-    elif (
-        not created
-        and instance._original_status.value < MeetingStatus.STARTED.value
+    if (
+        instance._original_status.value < MeetingStatus.STARTED.value
         and instance.status.value >= MeetingStatus.STARTED.value
     ):
         notify_meeting_started(instance)
