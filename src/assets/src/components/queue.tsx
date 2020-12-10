@@ -207,8 +207,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const meeting = props.queue.my_meeting!;
     const meetingBackend = getBackendByName(meeting.backend_type, props.backends);
     const isVideoMeeting = VideoBackendNames.includes(meetingBackend.name);
-    const numberInLine = meeting.line_place !== null ? meeting.line_place + 1 : null;
     const inProgress = meeting.status === MeetingStatus.STARTED;
+    const stillInLine = !inProgress && meeting.line_place !== null;
 
     // Alerts and head
     const closedAlert = props.queue.status === "closed"
@@ -219,9 +219,9 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             </Alert>
         );
 
-    const turnAlert = (inProgress && numberInLine === null)
-        ? <MeetingReadyAlert meetingType={meetingBackend.name} />
-        : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={numberInLine!}/>;
+    const turnAlert = stillInLine
+        ? <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={meeting.line_place!} />
+        : <MeetingReadyAlert meetingType={meetingBackend.name} />;
 
     const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.';
 
@@ -230,7 +230,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
         : <Button variant='link' onClick={props.onShowDialog} aria-label='Change Meeting Type' disabled={props.disabled}>Change</Button>;
 
-    const notificationBlurb = (numberInLine !== null && numberInLine > 1)
+    const notificationBlurb = (meeting.line_place !== null && meeting.line_place > 0)
         && (
             <Alert variant="info">
                 <small>
@@ -315,7 +315,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         <h3>{headText}</h3>
         <Card className='card-middle card-width center-align'>
             <Card.Body>
-                {!inProgress && <Card.Text><strong>Your Number in Line</strong>: {numberInLine}</Card.Text>}
+                {stillInLine && <Card.Text><strong>Your Number in Line</strong>: {meeting.line_place! + 1}</Card.Text>}
                 {notificationBlurb}
                 <Card.Text><strong>Time Joined</strong>: <DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></Card.Text>
                 <Card.Text>
