@@ -118,6 +118,14 @@ class Backend:
                 },
                 headers=cls._get_client_auth_headers(),
             )
+            if resp.status_code == 401:
+                print("access token 401")
+                # The refresh_token was invalidated somehow.
+                # Maybe the user removed our Zoom app's auth.
+                # Force them to be prompted again.
+                zoom_meta = {}
+                user.profile.backend_metadata['zoom'] = zoom_meta
+                user.profile.save()
             resp.raise_for_status()
             token = resp.json()
             zoom_meta.update({
@@ -167,9 +175,7 @@ class Backend:
         if backend_metadata.get('meeting_id'):
             return backend_metadata
 
-        user_email = backend_metadata['user_email']
-        user = User.objects.get(email=user_email)
-        meeting = cls._create_meeting(user)
+        meeting = cls._create_meeting(assignee)
         backend_metadata.update({
             'user_id': meeting['host_id'],
             'meeting_id': meeting['id'],
