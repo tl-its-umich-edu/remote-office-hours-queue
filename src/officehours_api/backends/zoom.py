@@ -31,6 +31,7 @@ class ZoomMeeting(TypedDict):
     created_at: str
     agenda: str
     start_url: str
+    join_url: str
 
 
 class ZoomUser(TypedDict):
@@ -148,6 +149,9 @@ class Backend:
                 'topic': 'Remote Office Hours Queue Meeting',
                 'start_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'timezone': 'America/Detroit',
+                "settings": {
+                    "join_before_host": False,
+                },
             },
         )
         resp.raise_for_status()
@@ -175,6 +179,7 @@ class Backend:
             'meeting_id': meeting['id'],
             'numeric_meeting_id': meeting['id'],
             'meeting_url': meeting['join_url'],
+            'host_meeting_url': meeting['start_url'],
         })
         return backend_metadata
 

@@ -122,8 +122,11 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
 function StartedMeetingEditor (props: MeetingEditorProps) {
     const attendee = props.meeting.attendees[0];
     const attendeeString = `${attendee.first_name} ${attendee.last_name}`;
-    const joinUrl = props.meeting.backend_metadata?.meeting_url;
-    const role = props.user.id === props.meeting.assignee!.id ? 'Host' : 'Guest';
+    const isHost = props.user.id === props.meeting.assignee!.id;
+    const joinUrl = isHost
+        ? props.meeting.backend_metadata?.host_meeting_url || props.meeting.backend_metadata?.meeting_url
+        : props.meeting.backend_metadata?.meeting_url;
+    const roleText = isHost ? 'Host' : 'Guest';
     const joinLink = joinUrl
         && (
             <Button
@@ -132,10 +135,10 @@ function StartedMeetingEditor (props: MeetingEditorProps) {
                 as='a'
                 href={joinUrl}
                 target="_blank"
-                aria-label={`Join Meeting as ${role} with ${attendeeString}`}
+                aria-label={`Join Meeting as ${roleText} with ${attendeeString}`}
                 disabled={props.disabled}
             >
-                Join Meeting as {role}
+                Join Meeting as {roleText}
             </Button>
         );
 
