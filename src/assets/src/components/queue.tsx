@@ -207,7 +207,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const meeting = props.queue.my_meeting!;
     const meetingBackend = getBackendByName(meeting.backend_type, props.backends);
     const isVideoMeeting = VideoBackendNames.includes(meetingBackend.name);
-    const inProgress = meeting.status === MeetingStatus.STARTED && meeting.line_place === null;
+    const inProgress = meeting.status === MeetingStatus.STARTED;
 
     // Alerts and head
     const closedAlert = props.queue.status === "closed"
