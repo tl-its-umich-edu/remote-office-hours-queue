@@ -77,7 +77,7 @@ def trigger_notification_create(sender, instance: Meeting, created, **kwargs):
     if created and instance.line_place == 0:
         notify_queue_no_longer_empty(instance)
     if (
-        instance._original_status.value < MeetingStatus.STARTED.value
+        instance.saved_status.value < MeetingStatus.STARTED.value
         and instance.status.value >= MeetingStatus.STARTED.value
     ):
         notify_meeting_started(instance)
