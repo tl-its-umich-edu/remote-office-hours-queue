@@ -119,7 +119,6 @@ class Backend:
                 headers=cls._get_client_auth_headers(),
             )
             if resp.status_code == 401:
-                print("access token 401")
                 # The refresh_token was invalidated somehow.
                 # Maybe the user removed our Zoom app's auth.
                 # Force them to be prompted again.
