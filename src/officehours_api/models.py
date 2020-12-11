@@ -159,7 +159,6 @@ class Meeting(SafeDeleteModel):
         if not self.assignee:
             raise Exception("Can't start meeting before assignee is set!")
         backend = BACKEND_INSTANCES[self.backend_type]
-        self.backend_metadata['user_email'] = self.assignee.email
         try:
             self.backend_metadata = backend.save_user_meeting(
                 self.backend_metadata,
