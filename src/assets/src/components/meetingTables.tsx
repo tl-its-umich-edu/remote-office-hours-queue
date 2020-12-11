@@ -82,39 +82,50 @@ interface UnstartedMeetingEditorProps extends MeetingEditorProps, AssigneeSelect
 function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
     const attendee = props.meeting.attendees[0];
     const attendeeString = `${attendee.first_name} ${attendee.last_name}`;
+    const assignee = props.meeting.assignee;
 
-    const readyButton = props.meeting.assignee
-        && (
-            <Button
-                variant='success'
-                size='sm'
-                onClick={() => props.onStartMeeting(props.meeting)}
-                aria-label={`${props.meeting.backend_type === 'inperson' ? 'Ready for Attendee' : 'Create Meeting with'} ${attendeeString}`}
-                disabled={props.disabled}
-            >
-                {props.meeting.backend_type === 'inperson' ? 'Ready for Attendee' : 'Create Meeting'}
-            </Button>
-        );
-    const progressWorkflow = readyButton || <span>Please Assign Host</span>;
+    const removeButton = (
+        <RemoveButton
+            onRemove={() => props.onRemoveMeeting(props.meeting)}
+            size="sm"
+            screenReaderLabel={`Remove Meeting with ${attendeeString}`}
+            disabled={props.disabled}
+        />
+    );
+
+    const meetingActions = assignee?.id === props.user.id
+        ? (
+            <>
+            <Col lg={7} className='mb-1'>
+                <Button
+                    variant='success'
+                    size='sm'
+                    onClick={() => props.onStartMeeting(props.meeting)}
+                    aria-label={`${props.meeting.backend_type === 'inperson' ? 'Ready for Attendee' : 'Create Meeting with'} ${attendeeString}`}
+                    disabled={props.disabled}
+                >
+                    {props.meeting.backend_type === 'inperson' ? 'Ready for Attendee' : 'Create Meeting'}
+                </Button>
+                {}
+            </Col>
+            <Col lg={5}>{removeButton}</Col>
+            </>
+        )
+        : assignee
+            ? <Col><span>Only the assigned host can use meeting actions.</span></Col>
+            : (
+                <>
+                <Col lg={7} className='mb-1'><span>Please assign host.</span></Col>
+                <Col lg={5}>{removeButton}</Col>
+                </>
+            );
 
     return (
         <>
         <td><UserDisplay user={attendee}/></td>
         <td><AssigneeSelector {...props} /></td>
         <td><MeetingDetails {...props} /></td>
-        <td>
-            <Row>
-                {progressWorkflow && <Col lg={7} className='mb-1'>{progressWorkflow}</Col>}
-                <Col lg={4}>
-                    <RemoveButton
-                        onRemove={() => props.onRemoveMeeting(props.meeting)}
-                        size="sm"
-                        screenReaderLabel={`Remove Meeting with ${attendeeString}`}
-                        disabled={props.disabled}
-                    />
-                </Col>
-            </Row>
-        </td>
+        <td><Row>{meetingActions}</Row></td>
         </>
     );
 }
