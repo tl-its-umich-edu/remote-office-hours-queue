@@ -150,7 +150,7 @@ class Backend:
         bj_user = self._client.get_user(user_email=assignee.email)
         if not bj_user:
             raise ValidationError(
-                f'There is no BlueJeans account associated with {user_email}. '
+                f'There is no BlueJeans account associated with {assignee.email}. '
                 f'Please log into umich.bluejeans.com, then try again.'
             )
 
