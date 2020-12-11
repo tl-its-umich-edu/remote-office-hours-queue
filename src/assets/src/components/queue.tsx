@@ -10,10 +10,10 @@ import {
     User, VideoBackendNames, ZoomMetadata
 } from "../models";
 import {
-    checkForbiddenError, BlueJeansDialInMessage, Breadcrumbs, DateTimeDisplay, DialInMessageProps,
-    DisabledMessage, EditToggleField, ErrorDisplay, FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog,
-    showConfirmation, StatelessInputGroupForm, ZoomDialInMessage
+    checkForbiddenError, Breadcrumbs, DateTimeDisplay, DisabledMessage, EditToggleField, ErrorDisplay,
+    FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog, showConfirmation, StatelessInputGroupForm
 } from "./common";
+import { DialInContent } from "./dialIn";
 import { BackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
@@ -155,21 +155,6 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
         </a>
     );
 
-    let dialInMessage;
-    if (props.metadata.numeric_meeting_id) {
-        const dialInProps = {
-            phone: props.backend.telephone_num,
-            meetingNumber: props.metadata.numeric_meeting_id,
-            intlNumbersURL: props.backend.intl_telephone_url
-        } as DialInMessageProps;
-
-        dialInMessage = props.backend.name === 'zoom'
-            ? <ZoomDialInMessage {...dialInProps} />
-            : props.backend.name === 'bluejeans'
-                ? <BlueJeansDialInMessage {...dialInProps} />
-                : null;
-    }
-
     return (
         <>
         <Row>
@@ -185,18 +170,14 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
                     </Card.Body>
                 </Card>
             </Col>
-            {
-                dialInMessage && (
-                    <Col md={6} sm={true}>
-                        <Card>
-                            <Card.Body>
-                                <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
-                                <Card.Text>{dialInMessage}</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                )
-            }
+            <Col md={6} sm={true}>
+                <Card>
+                    <Card.Body>
+                        <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
+                        <Card.Text><DialInContent {...props} /></Card.Text>
+                    </Card.Body>
+                </Card>
+            </Col>
         </Row>
         </>
     );

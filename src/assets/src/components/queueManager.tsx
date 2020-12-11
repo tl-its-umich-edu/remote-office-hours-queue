@@ -8,17 +8,17 @@ import Dialog from "react-bootstrap-dialog";
 
 import {
     UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
-    CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, BlueJeansDialInMessage,
-    userLoggedOnWarning, DialInMessageProps, ZoomDialInMessage
+    CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, userLoggedOnWarning
 } from "./common";
+import { DialInContent } from './dialIn';
 import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
 import {
-    BluejeansMetadata, isQueueHost, Meeting, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, QueueHost,
-    User, VideoBackendNames, ZoomMetadata
+    isQueueHost, Meeting, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, QueueHost,
+    User, VideoBackendNames
 } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
@@ -192,35 +192,6 @@ function QueueManager(props: QueueManagerProps) {
     );
 }
 
-interface HostVideoMeetingInfoProps {
-    metadata: BluejeansMetadata | ZoomMetadata;
-    backend: MeetingBackend;
-}
-
-const HostVideoMeetingInfo = (props: HostVideoMeetingInfoProps) => {
-    let dialInMessage;
-    if (props.metadata.numeric_meeting_id) {
-        const dialInProps = {
-            phone: props.backend.telephone_num,
-            meetingNumber: props.metadata.numeric_meeting_id,
-            intlNumbersURL: props.backend.intl_telephone_url
-        } as DialInMessageProps;
-
-        dialInMessage = props.backend.name === 'zoom'
-            ? <ZoomDialInMessage {...dialInProps} />
-            : props.backend.name === 'bluejeans'
-                ? <BlueJeansDialInMessage {...dialInProps} />
-                : null;
-    }
-
-    return (
-        <>
-        <p>This meeting will be via <strong>{props.backend.friendly_name}</strong>.</p>
-        {dialInMessage}
-        </>
-    );
-}
-
 interface MeetingInfoDialogProps {
     backends: MeetingBackend[];
     meeting?: Meeting;  // Hide if undefined
@@ -243,17 +214,19 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
             </>
         );
 
-    const meetingType = props.meeting?.backend_type
-    const metadataInfo = meetingType
-        && (
-            VideoBackendNames.includes(meetingType)
-                ? (
-                    <HostVideoMeetingInfo
-                        backend={getBackendByName(meetingType, props.backends)}
-                        metadata={props.meeting!.backend_metadata!}
-                    />
-                ) : <div><p>This meeting will be <strong>In Person</strong>.</p></div>
-        );
+    const meetingType = props.meeting?.backend_type;
+    let metadataInfo;
+    if (props.meeting && meetingType && props.meeting.backend_metadata) {
+        const meetingBackend = getBackendByName(meetingType, props.backends);
+        metadataInfo = VideoBackendNames.includes(meetingType)
+            ? (
+                <>
+                <p>This meeting will be via <strong>{meetingBackend.friendly_name}</strong>.</p>
+                <DialInContent metadata={props.meeting.backend_metadata} backend={meetingBackend} />
+                </>
+            )
+            : <div><p>This meeting will be <strong>In Person</strong>.</p></div>;
+    }
 
     return (
         <Modal show={!!props.meeting} onHide={props.onClose}>

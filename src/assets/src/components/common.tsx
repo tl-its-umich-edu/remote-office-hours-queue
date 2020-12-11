@@ -441,55 +441,6 @@ export const LoginDialog = (props: LoginDialogProps) =>
     </Modal>
 
 
-interface OneTouchDialLinkProps {
-    phone: string; // "." delimited
-    meetingNumber: string;
-}
-
-const OneTouchDialLink = (props: OneTouchDialLinkProps) => (
-    <a href={`tel:${props.phone.replace(".", "")},,,${props.meetingNumber},%23,%23`}>
-        {props.phone}
-    </a>
-);
-
-interface IntlTelephoneLinkProps {
-    intlNumbersURL: string;
-}
-
-const IntlTelephoneLink = (props: IntlTelephoneLinkProps) => {
-    return (
-        <a target="_blank" href={props.intlNumbersURL}>
-            find your international number to call in from outside the USA
-        </a>
-    );
-}
-
-export type DialInMessageProps = OneTouchDialLinkProps & IntlTelephoneLinkProps;
-
-export const BlueJeansDialInMessage = (props: DialInMessageProps) => {
-    const phoneLinkUsa = <OneTouchDialLink {...props} />;
-    return (
-        <span>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
-            (or <IntlTelephoneLink {...props} />)
-            from any phone and enter {props.meetingNumber}#.
-            You do not need a passcode to join the meeting.
-        </span>
-    );
-}
-
-export const ZoomDialInMessage = (props: DialInMessageProps) => {
-    const phoneLinkUsa = <OneTouchDialLink {...props} />;
-    return (
-        <span>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
-            (or <IntlTelephoneLink {...props} /> -- click See All Numbers under Toll Call to see all countries)
-            from any phone and enter {props.meetingNumber}#.
-            You do not need a host key or participant ID.
-        </span>
-    );
-}
-
 interface BreadcrumbsProps {
     intermediatePages?: {title: string, href: string}[];
     currentPageTitle: string;
