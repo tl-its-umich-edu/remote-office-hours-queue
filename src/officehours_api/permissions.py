@@ -17,6 +17,10 @@ def is_attendee(user: User, meeting: Meeting):
     )
 
 
+def is_host_assignee(user: User, meeting: Meeting):
+    return user == meeting.assignee
+
+
 class IsHostOrReadOnly(permissions.BasePermission):
     '''
     Custom permission to only allow hosts to edit queues
@@ -41,4 +45,16 @@ class IsHostOrAttendee(permissions.BasePermission):
         return (
             is_attendee(request.user, obj)
             or (hasattr(obj, 'queue') and is_host(request.user, obj.queue))
+        )
+
+
+class IsHostAssignee(permissions.BasePermission):
+    '''
+    Custom permission to only allow hosts assigned to a meeting
+    to start the meeting.
+    '''
+
+    def has_object_permission(self, request, view, obj: Meeting):
+        return (
+            is_host_assignee(request.user, obj)
         )
