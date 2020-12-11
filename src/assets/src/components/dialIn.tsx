@@ -25,9 +25,9 @@ const IntlTelephoneLink = (props: IntlTelephoneLinkProps) => {
     );
 }
 
-export type DialInMessageProps = OneTouchDialLinkProps & IntlTelephoneLinkProps;
+type DialInMessageProps = OneTouchDialLinkProps & IntlTelephoneLinkProps;
 
-export const BlueJeansDialInMessage = (props: DialInMessageProps) => {
+const BlueJeansDialInMessage = (props: DialInMessageProps) => {
     const phoneLinkUsa = <OneTouchDialLink {...props} />;
     return (
         <span>
@@ -39,7 +39,7 @@ export const BlueJeansDialInMessage = (props: DialInMessageProps) => {
     );
 }
 
-export const ZoomDialInMessage = (props: DialInMessageProps) => {
+const ZoomDialInMessage = (props: DialInMessageProps) => {
     const phoneLinkUsa = <OneTouchDialLink {...props} />;
     return (
         <span>
@@ -71,7 +71,7 @@ export const DialInContent = (props: DialInContentProps) => {
                 ? <BlueJeansDialInMessage {...dialInProps} />
                 : null;
     } else {
-        dialInMessage = <span>Once the meeting is created, instructions for calling in to the meeting on a phone will appear here.</span>
+        dialInMessage = <span>Once the meeting is created, instructions for calling in to the meeting on a phone will appear here.</span>;
     }
     return dialInMessage;
 }
