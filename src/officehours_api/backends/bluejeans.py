@@ -174,11 +174,13 @@ class Backend:
                 'endPointVersion': '2.10',
             }
         )
+        meeting_url = f'https://bluejeans.com/{meeting["numericMeetingId"]}'
         backend_metadata.update({
             'user_id': bj_user['id'],
             'meeting_id': meeting['id'],
             'numeric_meeting_id': meeting['numericMeetingId'],
-            'meeting_url': f'https://bluejeans.com/{meeting["numericMeetingId"]}',
+            'meeting_url': meeting_url,
+            'host_meeting_url': meeting_url,
         })
         return backend_metadata
 
