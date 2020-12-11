@@ -218,9 +218,9 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             </Alert>
         );
 
-    const turnAlert = inProgress
-        ? <MeetingReadyAlert meetingType={meetingBackend.name} />
-        : <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={meeting.line_place!} />;
+    const turnAlert = meeting.line_place !== null
+        ? <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={meeting.line_place} />
+        : <MeetingReadyAlert meetingType={meetingBackend.name} />;
 
     const headText = inProgress ? 'Your meeting is in progress.' : 'You are currently in line.';
 
@@ -314,7 +314,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         <h3>{headText}</h3>
         <Card className='card-middle card-width center-align'>
             <Card.Body>
-                {!inProgress && <Card.Text><strong>Your Number in Line</strong>: {meeting.line_place! + 1}</Card.Text>}
+                {meeting.line_place !== null && <Card.Text><strong>Your Number in Line</strong>: {meeting.line_place + 1}</Card.Text>}
                 {notificationBlurb}
                 <Card.Text><strong>Time Joined</strong>: <DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></Card.Text>
                 <Card.Text>
