@@ -81,6 +81,14 @@ interface UnstartedMeetingEditorProps extends MeetingEditorProps, AssigneeSelect
 
 function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
     const attendee = props.meeting.attendees[0];
+    if (!attendee) return (
+        <>
+        <td>No attendee</td>
+        <td></td>
+        <td>Invalid meeting ID: {props.meeting.id}</td>
+        <td></td>
+        </>
+    );
     const attendeeString = `${attendee.first_name} ${attendee.last_name}`;
 
     const readyButton = props.meeting.assignee
