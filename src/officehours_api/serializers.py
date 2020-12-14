@@ -154,7 +154,7 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
                   'allowed_backends']
 
     def get_line_length(self, obj):
-        return len([obj for obj in obj.meeting_set.all() if obj.status != MeetingStatus.STARTED])
+        return len([meeting for meeting in obj.meeting_set.all() if meeting.status != MeetingStatus.STARTED])
 
     def get_my_meeting(self, obj):
         user = self.context['user']
