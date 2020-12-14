@@ -49,7 +49,8 @@ class NotificationTestCase(TestCase):
         )
         m.attendees.set(attendees)
         if start:
-            m.start(self.hostie)
+            m.assignee = self.hostie
+            m.start()
             m.save()
         return m
 
@@ -148,7 +149,8 @@ class NotificationTestCase(TestCase):
     def test_meeting_start_doesnt_notify_other(self, mock_twilio: mock.MagicMock):
         m1 = self.create_meeting([self.foo,])
         self.create_meeting([self.baz,])
-        m1.start(self.hostie)
+        m1.assignee = self.hostie
+        m1.start()
         m1.save()
         receivers = self.get_receivers(mock_twilio)
         self.assertFalse('+15555550002' in receivers)
