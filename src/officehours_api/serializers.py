@@ -264,6 +264,6 @@ class MeetingSerializer(serializers.ModelSerializer):
         '''
         queue = self.instance.queue if self.instance else attrs["queue"]
         hosts = queue.hosts.all()
-        if attrs["assignee"] and attrs["assignee"] not in hosts:
+        if attrs.get("assignee") and attrs["assignee"] not in hosts:
             raise serializers.ValidationError("Assignee must be a host!")
         return attrs
