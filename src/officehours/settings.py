@@ -323,7 +323,7 @@ TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
 # Backends
 DOCS_BASE_URL = 'https://its.umich.edu/communication/videoconferencing/'
 
-ZOOM_DOCS_URL = os.getenv('ZOOM_DOCS_URL', DOCS_BASE_URL + 'zoom')
+ZOOM_DOCS_URL = os.getenv('ZOOM_DOCS_URL', DOCS_BASE_URL + 'zoom/getting-started')
 ZOOM_TELE_NUM = os.getenv('ZOOM_TELE_NUM', '1.312.626.6799')
 ZOOM_INTL_URL = os.getenv('ZOOM_INTL_URL', 'https://umich.zoom.us/profile/setting?tab=telephony')
 

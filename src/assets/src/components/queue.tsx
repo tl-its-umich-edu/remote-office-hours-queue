@@ -151,7 +151,7 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
             target='_blank'
             className='card-link'
         >
-            How to use {props.backend.friendly_name} at U-M
+            Getting Started with {props.backend.friendly_name} at U-M
         </a>
     );
 
