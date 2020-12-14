@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { StringSchema } from "yup";
 
-import { QueueHost } from "../models";
+import { MeetingBackend, QueueHost } from "../models";
 import { 
     MeetingTypesValidationResult, validateMeetingTypes, validateString, ValidationResult
 } from "../validation";
@@ -20,12 +20,12 @@ export function useStringValidation (schema: StringSchema, showRemaining?: boole
     return [validationResult, validateAndSetResult, clearResult];
 }
 
-export function useMeetingTypesValidation (queue?: QueueHost):
+export function useMeetingTypesValidation (backends: MeetingBackend[], queue?: QueueHost):
     [undefined | MeetingTypesValidationResult, (value: Set<string>) => MeetingTypesValidationResult, () => void]
 {
     const [validationResult, setValidationResult] = useState(undefined as undefined | MeetingTypesValidationResult);
     const validateAndSetResult = (newValue: Set<string>) => {
-        const result = validateMeetingTypes(newValue, queue);
+        const result = validateMeetingTypes(newValue, backends, queue);
         setValidationResult(result);
         return result;
     }

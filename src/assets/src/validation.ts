@@ -1,5 +1,5 @@
 import { string, StringSchema, SchemaDescription, TestMessageParams } from 'yup';
-import { QueueHost } from "./models";
+import { MeetingBackend, QueueHost } from "./models";
 import { getUser } from "./services/api";
 
 // Yup: https://github.com/jquense/yup
@@ -94,7 +94,7 @@ export interface MeetingTypesValidationResult {
     messages: ReadonlyArray<string>;
 }
 
-export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): MeetingTypesValidationResult {
+export function validateMeetingTypes (value: Set<string>, backends: MeetingBackend[], queue?: QueueHost): MeetingTypesValidationResult {
     let messages = [];
 
     const noTypesSelected = value.size === 0;
@@ -103,13 +103,16 @@ export function validateMeetingTypes (value: Set<string>, queue?: QueueHost): Me
     let existingMeetingConflict = false;
     if (queue) {
         const uniqueMeetingTypes = new Set(queue!.meeting_set.map(m => m.backend_type));
-        const conflictingTypes = new Set([...uniqueMeetingTypes].filter(uniqueMeetingType => !value.has(uniqueMeetingType)));
-        if (conflictingTypes.size > 0) {
+        const conflictingTypes = [...uniqueMeetingTypes]
+            .filter(uniqueMeetingType => !value.has(uniqueMeetingType));
+        const conflictingTypeNames = conflictingTypes
+            .map(ct => backends.find(b => b.name === ct)?.friendly_name ?? ct);
+        if (conflictingTypes.length > 0) {
             existingMeetingConflict = true;
             messages.push(
                 'You cannot disallow the following meeting types until the meetings ' +
                 'using them have been removed from the queue: ' +
-                [...conflictingTypes].join(', ')
+                conflictingTypeNames.join(', ')
             );
         }
     }

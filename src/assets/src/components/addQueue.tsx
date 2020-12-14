@@ -129,7 +129,7 @@ export function AddQueuePage(props: PageProps) {
     const [description, setDescription] = useState('');
     const [descriptValidationResult, validateAndSetDescriptResult] = useStringValidation(queueDescriptSchema, true);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
-    const [allowedValidationResult, validateAndSetAllowedResult] = useMeetingTypesValidation();
+    const [allowedValidationResult, validateAndSetAllowedResult] = useMeetingTypesValidation(props.backends);
 
     const [hosts, setHosts] = useState([props.user] as User[]);
 
