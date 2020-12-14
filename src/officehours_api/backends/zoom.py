@@ -79,6 +79,7 @@ class Backend:
     intl_telephone_url: str = settings.ZOOM_INTL_URL
 
     base_url = 'https://zoom.us'
+    base_domain_url = settings.ZOOM_BASE_DOMAIN_URL
     expiry_buffer_seconds = 60
     client_id = settings.ZOOM_CLIENT_ID
     client_secret = settings.ZOOM_CLIENT_SECRET
@@ -184,7 +185,7 @@ class Backend:
             'meeting_id': meeting['id'],
             'numeric_meeting_id': meeting['id'],
             'meeting_url': meeting['join_url'],
-            'host_meeting_url': meeting['start_url'],
+            'host_meeting_url': f"{cls.base_domain_url}/s/{meeting['id']}",
         })
         return backend_metadata
 
