@@ -106,7 +106,6 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
                 >
                     {props.meeting.backend_type === 'inperson' ? 'Ready for Attendee' : 'Create Meeting'}
                 </Button>
-                {}
             </Col>
             <Col lg={5}>{removeButton}</Col>
             </>
