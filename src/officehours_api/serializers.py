@@ -257,3 +257,8 @@ class MeetingSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError(f'Queue {queue} is closed.')
         return queue
+
+    def validate(self, attrs):
+        if attrs["assignee"] and attrs["assignee"] not in attrs["queue"].hosts.all():
+            raise serializers.ValidationError("Assignee must be a host!")
+        return attrs
