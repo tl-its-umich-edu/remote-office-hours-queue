@@ -153,9 +153,7 @@ class Meeting(SafeDeleteModel):
             else MeetingStatus.STARTED
         )
 
-    def start(self, assignee=None):
-        if assignee:
-            self.assignee = assignee
+    def start(self):
         if not self.assignee:
             raise Exception("Can't start meeting before assignee is set!")
         backend = BACKEND_INSTANCES[self.backend_type]
