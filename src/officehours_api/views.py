@@ -17,7 +17,7 @@ from officehours_api.serializers import (
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
 )
 from officehours_api.permissions import (
-    IsHostAssignee, IsHostOrReadOnly, IsHostOrAttendee, is_host
+    IsAssignee, IsHostOrReadOnly, IsHostOrAttendee, is_host
 )
 
 
@@ -174,7 +174,7 @@ class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdate
 
 
 class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
-    permission_classes = (IsAuthenticated, IsHostAssignee,)
+    permission_classes = (IsAuthenticated, IsAssignee,)
 
     def post(self, request, pk):
         m = Meeting.objects.get(pk=pk)

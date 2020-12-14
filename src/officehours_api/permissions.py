@@ -17,7 +17,7 @@ def is_attendee(user: User, meeting: Meeting):
     )
 
 
-def is_host_assignee(user: User, meeting: Meeting):
+def is_assignee(user: User, meeting: Meeting):
     return user == meeting.assignee
 
 
@@ -48,7 +48,7 @@ class IsHostOrAttendee(permissions.BasePermission):
         )
 
 
-class IsHostAssignee(permissions.BasePermission):
+class IsAssignee(permissions.BasePermission):
     '''
     Custom permission to only allow hosts assigned to a meeting
     to start the meeting.
@@ -56,5 +56,5 @@ class IsHostAssignee(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj: Meeting):
         return (
-            is_host_assignee(request.user, obj)
+            is_assignee(request.user, obj)
         )
