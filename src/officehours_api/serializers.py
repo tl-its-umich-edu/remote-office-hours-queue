@@ -259,6 +259,9 @@ class MeetingSerializer(serializers.ModelSerializer):
         return queue
 
     def validate(self, attrs):
+        '''
+        Ensure the assignee is a host.
+        '''
         queue = self.instance.queue if self.instance else attrs["queue"]
         hosts = queue.hosts.all()
         if attrs["assignee"] and attrs["assignee"] not in hosts:
