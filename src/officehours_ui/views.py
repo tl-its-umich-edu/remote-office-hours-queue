@@ -31,7 +31,7 @@ class AuthPromptView(TemplateView):
             raise Http404(f"Backend {backend_name} does not exist.")
         except AttributeError:
             raise Http404(f"Backend {backend_name} does not use three-legged OAuth2.")
-        context['backend_name'] = backend_name
+        context['backend_friendly_name'] = BACKEND_CLASSES[backend_name].friendly_name
         return context
 
 
