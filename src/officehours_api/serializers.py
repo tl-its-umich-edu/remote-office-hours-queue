@@ -3,7 +3,7 @@ from typing import TypedDict, Literal
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
-from officehours_api.models import Queue, Meeting, Attendee, Profile
+from officehours_api.models import Queue, Meeting, MeetingStatus, Attendee
 
 
 class UserContext(TypedDict):
@@ -154,7 +154,7 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
                   'allowed_backends']
 
     def get_line_length(self, obj):
-        return obj.meeting_set.count()
+        return len([obj for obj in obj.meeting_set.all() if obj.status != MeetingStatus.STARTED])
 
     def get_my_meeting(self, obj):
         user = self.context['user']
