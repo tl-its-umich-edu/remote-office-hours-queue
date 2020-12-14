@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BluejeansMetadata, MeetingBackend, ZoomMetadata} from "../models";
+import { BluejeansMetadata, MeetingBackend, ZoomMetadata } from "../models";
 
 
 interface OneTouchDialLinkProps {
