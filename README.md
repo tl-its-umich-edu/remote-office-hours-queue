@@ -2,7 +2,7 @@
 
 The Remote Office Hours Queue application helps users to manage and participate in drop-in office hours virtually or in-person.
 The application can schedule and link to Zoom and BlueJeans video-conferencing meetings.
-More information about it works is available on the [U-M ITS documentation site](https://documentation.its.umich.edu/office-hours).
+More information about how the tool works is available on the [U-M ITS documentation site](https://documentation.its.umich.edu/office-hours).
 
 ## Getting Started
 
