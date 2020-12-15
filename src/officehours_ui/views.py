@@ -32,6 +32,7 @@ class AuthPromptView(TemplateView):
         except AttributeError:
             raise Http404(f"Backend {backend_name} does not use three-legged OAuth2.")
         context['backend_friendly_name'] = BACKEND_CLASSES[backend_name].friendly_name
+        context['backend_sign_in_help'] = getattr(BACKEND_CLASSES[backend_name], "sign_in_help") or ""
         return context
 
 

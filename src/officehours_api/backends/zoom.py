@@ -77,6 +77,7 @@ class Backend:
     docs_url: str = settings.ZOOM_DOCS_URL
     telephone_num: str = settings.ZOOM_TELE_NUM
     intl_telephone_url: str = settings.ZOOM_INTL_URL
+    sign_in_help: str = settings.ZOOM_SIGN_IN_HELP
 
     base_url = 'https://zoom.us'
     base_domain_url = settings.ZOOM_BASE_DOMAIN_URL
