@@ -327,6 +327,7 @@ ZOOM_DOCS_URL = os.getenv('ZOOM_DOCS_URL', DOCS_BASE_URL + 'zoom/getting-started
 ZOOM_TELE_NUM = os.getenv('ZOOM_TELE_NUM', '1.312.626.6799')
 ZOOM_INTL_URL = os.getenv('ZOOM_INTL_URL', 'https://umich.zoom.us/profile/setting?tab=telephony')
 ZOOM_BASE_DOMAIN_URL = os.getenv('ZOOM_BASE_DOMAIN_URL', 'https://umich.zoom.us')
+ZOOM_SIGN_IN_HELP = os.getenv('ZOOM_SIGN_IN_HELP')
 
 BLUEJEANS_DOCS_URL = os.getenv('BLUEJEANS_DOCS_URL', DOCS_BASE_URL + 'blue-jeans/getting-started')
 BLUEJEANS_TELE_NUM = os.getenv('BLUEJEANS_TELE_NUM', '1.312.216.0325')
