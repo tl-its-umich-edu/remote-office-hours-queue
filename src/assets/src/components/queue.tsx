@@ -132,7 +132,7 @@ const WaitingTurnAlert = (props: WaitingTurnAlertProps) => {
         ? "It's not your turn yet, but the host may be ready for you at any time."
         : "You're up next, but the host isn't quite ready for you.";
     return (
-        <Alert variant={props.placeInLine > 0 ? 'warning' : 'success'}>
+        <Alert variant="warning">
             {placeBeginning} Pay attention to this page {typeEnding}
         </Alert>
     );
