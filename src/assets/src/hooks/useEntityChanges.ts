@@ -1,10 +1,9 @@
 import { useState } from "react";
 
-import { Base } from "../models"; 
-import { ChangeEvent, compareEntities } from "../changes";
+import { ChangeEvent, compareEntities, ComparableEntity } from "../changes";
 
 
-export function useEntityChanges<T extends Base>():
+export function useEntityChanges<T extends ComparableEntity>():
     [ChangeEvent[], (oldEntities: readonly T[], newEntities: readonly T[]) => void, (key: number) => void]
 {
     const [changeEvents, setChangeEvents] = useState([] as ChangeEvent[]);

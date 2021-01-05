@@ -10,7 +10,7 @@ export interface MeetingBackend {
     intl_telephone_url: string | null;
 }
 
-export interface Base {
+interface Base {
     id: number;
 }
 

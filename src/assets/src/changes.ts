@@ -1,8 +1,9 @@
 import xorWith from "lodash.xorwith";
 import isEqual from "lodash.isequal";
 
-import { Base, isMeeting, isQueueBase, isUser, Meeting, MeetingStatus, QueueBase } from "./models"
+import { isMeeting, isQueueBase, isUser, Meeting, MeetingStatus, QueueBase } from "./models"
 
+export type ComparableEntity = QueueBase | Meeting;
 
 export interface ChangeEvent {
     eventID: number;
@@ -21,7 +22,7 @@ const propertyMap: HumanReadableMap = {
     'assignee': 'host'
 }
 
-function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (keyof T)[]): string | undefined {
+function detectChanges<T extends ComparableEntity>(versOne: T, versTwo: T, propsToWatch: (keyof T)[]): string | undefined {
     for (const property of propsToWatch) {
         let valueOne = versOne[property] as T[keyof T] | string;
         let valueTwo = versTwo[property] as T[keyof T] | string;
@@ -42,7 +43,7 @@ function detectChanges<T extends Base>(versOne: T, versTwo: T, propsToWatch: (ke
 
 // https://lodash.com/docs/4.17.15#xorWith
 
-export function compareEntities<T extends Base> (oldOnes: T[], newOnes: T[]): string | undefined
+export function compareEntities<T extends ComparableEntity> (oldOnes: T[], newOnes: T[]): string | undefined
 {
     const symDiff = xorWith(oldOnes, newOnes, isEqual);
     if (symDiff.length === 0) return;
