@@ -92,7 +92,7 @@ class Queue(SafeDeleteModel):
     def hosts_with_phone_numbers(self):
         return get_users_with_emails(self.hosts)
 
-    def remove_allowed_backend(self, old_backend: str):
+    def remove_allowed_backend(self, old_backend: settings.IMPLEMENTED_BACKEND):
         new_allowed_backends = list(filter(lambda x: x != old_backend, self.allowed_backends))
         if len(new_allowed_backends) == 0:
             new_allowed_backends.append(get_default_backend())
@@ -135,7 +135,7 @@ class Meeting(SafeDeleteModel):
     def attendees_with_phone_numbers(self):
         return get_users_with_emails(self.attendees)
 
-    def change_backend_type(self, new_backend: Optional[str] = None):
+    def change_backend_type(self, new_backend: Optional[settings.IMPLEMENTED_BACKEND] = None):
         self.backend_type = new_backend if new_backend else get_default_backend()
         self.save()
 
