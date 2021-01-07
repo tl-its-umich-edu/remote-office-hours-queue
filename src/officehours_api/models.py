@@ -13,6 +13,8 @@ from safedelete.models import (
 )
 from jsonfield import JSONField
 from requests.exceptions import RequestException
+
+from officehours_api.exceptions import BackendException, DisabledBackendException
 from officehours_api import backends
 
 BACKEND_INSTANCES = {
@@ -21,15 +23,19 @@ BACKEND_INSTANCES = {
 }
 
 
-class BackendException(Exception):
-    def __init__(self, backend_type):
-        self.backend_type = backend_type
-        self.message = (
-            f'An unexpected error occurred in {self.backend_type.capitalize()}. '
-            f'You can check the ITS Status page (https://status.its.umich.edu/) '
-            f'to see if there is a known issue with {self.backend_type.capitalize()}, '
-            f'or contact the ITS Service Center (https://its.umich.edu/help) for help.'
-        )
+def get_default_backend():
+    return settings.DEFAULT_BACKEND
+
+
+def get_default_allowed_backends():
+    return settings.DEFAULT_ALLOWED_BACKENDS
+
+
+def get_backend_types():
+    return [
+        [key, value.friendly_name]
+        for key, value in BACKEND_INSTANCES.items()
+    ]
 
 
 class Profile(models.Model):
@@ -59,16 +65,6 @@ def get_users_with_emails(manager: models.Manager):
         .exclude(profile__phone_number__exact='')
 
 
-def get_default_allowed_backends():
-    return settings.DEFAULT_ALLOWED_BACKENDS
-
-
-def get_backend_types():
-    return [
-        [key, value.friendly_name]
-        for key, value in BACKEND_INSTANCES.items()
-    ]
-
 class Queue(SafeDeleteModel):
     _safedelete_policy = SOFT_DELETE_CASCADE
     name = models.CharField(max_length=100)
@@ -96,13 +92,15 @@ class Queue(SafeDeleteModel):
     def hosts_with_phone_numbers(self):
         return get_users_with_emails(self.hosts)
 
+    def remove_allowed_backend(self, old_backend: str):
+        new_allowed_backends = list(filter(lambda x: x != old_backend, self.allowed_backends))
+        if len(new_allowed_backends) == 0:
+            new_allowed_backends.append(get_default_backend())
+        self.allowed_backends = new_allowed_backends
+        self.save()
+
     def __str__(self):
         return self.name
-
-
-def get_default_backend():
-    return settings.DEFAULT_BACKEND
-
 
 
 class MeetingStatus(Enum):
@@ -137,6 +135,10 @@ class Meeting(SafeDeleteModel):
     def attendees_with_phone_numbers(self):
         return get_users_with_emails(self.attendees)
 
+    def change_backend_type(self, new_backend: Optional[str] = None):
+        self.backend_type = new_backend if new_backend else get_default_backend()
+        self.save()
+
     def __init__(self, *args, **kwargs):
         super(Meeting, self).__init__(*args, **kwargs)
         self._saved_backend_type = self.backend_type
@@ -156,7 +158,9 @@ class Meeting(SafeDeleteModel):
     def start(self):
         if not self.assignee:
             raise Exception("Can't start meeting before assignee is set!")
-        backend = BACKEND_INSTANCES[self.backend_type]
+        backend = BACKEND_INSTANCES.get(self.backend_type)
+        if not backend:
+            raise DisabledBackendException(self.backend_type)
         try:
             self.backend_metadata = backend.save_user_meeting(
                 self.backend_metadata,

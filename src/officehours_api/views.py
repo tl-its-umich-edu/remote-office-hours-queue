@@ -11,7 +11,8 @@ from rest_framework_tracking.mixins import LoggingMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 
-from officehours_api.models import Queue, Meeting, Attendee, Profile
+from officehours_api.exceptions import DisabledBackendException
+from officehours_api.models import Attendee, Meeting, Queue
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
@@ -179,7 +180,10 @@ class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
     def post(self, request, pk):
         m = Meeting.objects.get(pk=pk)
         self.check_object_permissions(request, m)
-        m.start()
+        try:
+            m.start()
+        except DisabledBackendException as e:
+            return Response({'Start Meeting': e.message}, status=status.HTTP_400_BAD_REQUEST)
         m.save()
         serializer = MeetingSerializer(m)
         return Response(serializer.data)
