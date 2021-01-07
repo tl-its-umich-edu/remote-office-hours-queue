@@ -6,6 +6,8 @@ from officehours_api.backends.backend_dict import BackendDict
 class Backend:
     name = 'inperson'
     friendly_name = "In Person"
+    enabled = True
+
     docs_url = None
     telephone_num = None
     intl_telephone_url = None
@@ -18,6 +20,7 @@ class Backend:
         return {
             'name': cls.name,
             'friendly_name': cls.friendly_name,
+            'enabled': cls.enabled,
             'docs_url': cls.docs_url,
             'telephone_num': cls.telephone_num,
             'intl_telephone_url': cls.intl_telephone_url

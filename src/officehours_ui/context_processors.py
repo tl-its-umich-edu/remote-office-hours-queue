@@ -28,7 +28,7 @@ def spa_globals(request):
 
     backend_dicts: List[BackendDict] = [
         getattr(getattr(backends, backend_name), 'Backend').get_public_data()
-        for backend_name in settings.ENABLED_BACKENDS
+        for backend_name in settings.IMPLEMENTED_BACKENDS
     ]
 
     return {

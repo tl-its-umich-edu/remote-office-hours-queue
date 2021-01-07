@@ -5,6 +5,7 @@ export const VideoBackendNames: EnabledBackendName[] = ['zoom', 'bluejeans'];
 export interface MeetingBackend {
     name: EnabledBackendName;
     friendly_name: string;
+    enabled: boolean;
     docs_url: string | null;
     telephone_num: string | null;
     intl_telephone_url: string | null;

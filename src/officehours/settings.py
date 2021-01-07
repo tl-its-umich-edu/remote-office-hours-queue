@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from typing import Literal, Set
 
 import dj_database_url
 
@@ -333,8 +334,10 @@ BLUEJEANS_DOCS_URL = os.getenv('BLUEJEANS_DOCS_URL', DOCS_BASE_URL + 'blue-jeans
 BLUEJEANS_TELE_NUM = os.getenv('BLUEJEANS_TELE_NUM', '1.312.216.0325')
 BLUEJEANS_INTL_URL = os.getenv('BLUEJEANS_INTL_URL', 'https://www.bluejeans.com/premium-numbers')
 
-ENABLED_BACKENDS = {'inperson'}
-DEFAULT_BACKEND = "inperson"
+IMPLEMENTED_BACKEND = Literal['inperson', 'zoom', 'bluejeans']
+IMPLEMENTED_BACKENDS: Set[IMPLEMENTED_BACKEND] = {'inperson', 'zoom', 'bluejeans'}
+ENABLED_BACKENDS: Set[str] = {'inperson'}
+DEFAULT_BACKEND: IMPLEMENTED_BACKEND = "inperson"
 
 BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
 BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()
