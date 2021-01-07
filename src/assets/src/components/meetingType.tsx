@@ -16,6 +16,8 @@ interface AllowedMeetingBackendsFormProps {
 }
 
 export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
+    const enabledBackends = props.backends.filter((value) => value.enabled)
+
     const toggleAllowed = (backend_type: string) => {
         const newAllowed = new Set(props.allowed);
         if (newAllowed.has(backend_type)) {
@@ -25,7 +27,7 @@ export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
         }
         props.onChange(newAllowed);
     }
-    const allowedMeetingTypeEditors = props.backends
+    const allowedMeetingTypeEditors = enabledBackends
         .map((b) =>
             <Form.Group key={b.name} controlId={b.name}>
                 <Form.Check

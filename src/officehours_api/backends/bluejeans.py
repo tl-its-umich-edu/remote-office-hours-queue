@@ -131,6 +131,8 @@ class BluejeansClient:
 class Backend:
     name: str = 'bluejeans'
     friendly_name: str = 'BlueJeans'
+    enabled: bool = name in settings.ENABLED_BACKENDS
+
     docs_url: str = settings.BLUEJEANS_DOCS_URL
     telephone_num: str = settings.BLUEJEANS_TELE_NUM
     intl_telephone_url: str = settings.BLUEJEANS_INTL_URL
@@ -189,11 +191,12 @@ class Backend:
         return {
             'name': cls.name,
             'friendly_name': cls.friendly_name,
+            'enabled': cls.enabled,
             'docs_url': cls.docs_url,
             'telephone_num': cls.telephone_num,
             'intl_telephone_url': cls.intl_telephone_url
         }
-    
+
     @classmethod
     def is_authorized(cls, user: User) -> bool:
         return True
