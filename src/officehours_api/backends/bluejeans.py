@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import User
 
-from officehours_api.backends.backend_dict import BackendDict
+from officehours_api.backends.types import BackendDict, IMPLEMENTED_BACKEND_NAME
 
 
 class BluejeansUserExtraFields(TypedDict):
@@ -129,7 +129,7 @@ class BluejeansClient:
 
 
 class Backend:
-    name: str = 'bluejeans'
+    name: IMPLEMENTED_BACKEND_NAME = 'bluejeans'
     friendly_name: str = 'BlueJeans'
     enabled: bool = name in settings.ENABLED_BACKENDS
 

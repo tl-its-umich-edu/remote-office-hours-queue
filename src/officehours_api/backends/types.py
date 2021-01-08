@@ -1,8 +1,11 @@
-from typing import Optional, TypedDict
+from typing import Literal, Optional, TypedDict
+
+
+IMPLEMENTED_BACKEND_NAME = Literal['zoom', 'bluejeans', 'inperson']
 
 
 class BackendDict(TypedDict):
-    name: str
+    name: IMPLEMENTED_BACKEND_NAME
     friendly_name: str
     enabled: bool
     docs_url: Optional[str]

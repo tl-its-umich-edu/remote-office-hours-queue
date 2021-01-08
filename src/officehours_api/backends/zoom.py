@@ -1,18 +1,15 @@
-from typing import List, Literal, Optional, TypedDict
+from typing import List, Literal, TypedDict
 from base64 import b64encode
 from time import time
 from datetime import datetime
-import json
 import logging
 
 import requests
 from django.contrib.auth.models import User
-from django.contrib.sites.models import Site
 from django.conf import settings
-from django.urls import reverse
 from django.shortcuts import redirect
 
-from officehours_api.backends.backend_dict import BackendDict
+from officehours_api.backends.types import BackendDict, IMPLEMENTED_BACKEND_NAME
 
 
 logger = logging.getLogger(__name__)
@@ -72,7 +69,7 @@ class ZoomAccessToken(TypedDict):
 
 
 class Backend:
-    name: str = 'zoom'
+    name: IMPLEMENTED_BACKEND_NAME = 'zoom'
     friendly_name: str = 'Zoom'
     enabled: bool = name in settings.ENABLED_BACKENDS
 

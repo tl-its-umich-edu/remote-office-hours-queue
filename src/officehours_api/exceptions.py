@@ -1,15 +1,15 @@
 import logging
 
-from django.conf import settings
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 
+from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 logger = logging.getLogger(__name__)
 
 
 class BackendException(Exception):
-    def __init__(self, backend_type):
+    def __init__(self, backend_type: IMPLEMENTED_BACKEND_NAME):
         self.backend_type = backend_type
         self.message = (
             f'An unexpected error occurred in {self.backend_type.capitalize()}. '
@@ -20,7 +20,7 @@ class BackendException(Exception):
 
 
 class DisabledBackendException(Exception):
-    def __init__(self, backend_type):
+    def __init__(self, backend_type: IMPLEMENTED_BACKEND_NAME):
         self.backend_type = backend_type
         self.message = (
             f"Backend type {self.backend_type} is no longer a supported meeting type; "

@@ -3,7 +3,9 @@ from typing import Set
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from officehours_api.backends import __all__ as IMPLEMENTED_BACKEND_NAMES
 from officehours_api.backends.backend_phaser import BackendPhaser
+from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 
 class Command(BaseCommand):
@@ -35,11 +37,11 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        old_backends: Set[settings.IMPLEMENTED_BACKEND] = settings.IMPLEMENTED_BACKENDS - settings.ENABLED_BACKENDS
-        self.stdout.write('Identified one or more old backends: ' + ', '.join(list(old_backends)))
+        old_backend_names: Set[IMPLEMENTED_BACKEND_NAME] = set(IMPLEMENTED_BACKEND_NAMES) - settings.ENABLED_BACKENDS
+        self.stdout.write('Identified one or more old backends: ' + ', '.join(list(old_backend_names)))
 
-        for old_backend in old_backends:
-            phaser = BackendPhaser(old_backend)
+        for old_backend_name in old_backend_names:
+            phaser = BackendPhaser(old_backend_name)
             phaser.phase_out(
                 options['remove_as_allowed'],
                 options['set_unstarted_to_default'],

@@ -16,6 +16,7 @@ from requests.exceptions import RequestException
 
 from officehours_api.exceptions import BackendException, DisabledBackendException
 from officehours_api import backends
+from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 BACKEND_INSTANCES = {
     backend_name: getattr(getattr(backends, backend_name), 'Backend')()
@@ -92,8 +93,8 @@ class Queue(SafeDeleteModel):
     def hosts_with_phone_numbers(self):
         return get_users_with_emails(self.hosts)
 
-    def remove_allowed_backend(self, old_backend: settings.IMPLEMENTED_BACKEND):
-        new_allowed_backends = list(filter(lambda x: x != old_backend, self.allowed_backends))
+    def remove_allowed_backend(self, backend_name: IMPLEMENTED_BACKEND_NAME):
+        new_allowed_backends = list(filter(lambda x: x != backend_name, self.allowed_backends))
         if len(new_allowed_backends) == 0:
             new_allowed_backends.append(get_default_backend())
         self.allowed_backends = new_allowed_backends
@@ -135,8 +136,8 @@ class Meeting(SafeDeleteModel):
     def attendees_with_phone_numbers(self):
         return get_users_with_emails(self.attendees)
 
-    def change_backend_type(self, new_backend: Optional[settings.IMPLEMENTED_BACKEND] = None):
-        self.backend_type = new_backend if new_backend else get_default_backend()
+    def change_backend_type(self, new_backend_name: Optional[IMPLEMENTED_BACKEND_NAME] = None):
+        self.backend_type = new_backend_name if new_backend_name else get_default_backend()
         self.save()
 
     def __init__(self, *args, **kwargs):
