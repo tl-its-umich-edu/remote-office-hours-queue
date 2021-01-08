@@ -98,7 +98,6 @@ class Queue(SafeDeleteModel):
         if len(new_allowed_backends) == 0:
             new_allowed_backends.append(get_default_backend())
         self.allowed_backends = new_allowed_backends
-        self.save()
 
     def __str__(self):
         return self.name
@@ -138,7 +137,6 @@ class Meeting(SafeDeleteModel):
 
     def change_backend_type(self, new_backend_name: Optional[IMPLEMENTED_BACKEND_NAME] = None):
         self.backend_type = new_backend_name if new_backend_name else get_default_backend()
-        self.save()
 
     def __init__(self, *args, **kwargs):
         super(Meeting, self).__init__(*args, **kwargs)
