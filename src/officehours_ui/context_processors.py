@@ -1,9 +1,10 @@
-from typing import List, TypedDict, Union
+from typing import List
 
 from django.conf import settings
 
 from officehours_api import backends
-from officehours_api.backends.backend_dict import BackendDict
+from officehours_api.backends import __all__ as IMPLEMENTED_BACKEND_NAMES
+from officehours_api.backends.types import BackendDict
 
 
 def feedback(request):
@@ -28,7 +29,7 @@ def spa_globals(request):
 
     backend_dicts: List[BackendDict] = [
         getattr(getattr(backends, backend_name), 'Backend').get_public_data()
-        for backend_name in settings.IMPLEMENTED_BACKENDS
+        for backend_name in IMPLEMENTED_BACKEND_NAMES
     ]
 
     return {

@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
 
-from officehours_api.backends.backend_dict import BackendDict
+from officehours_api.backends.types import BackendDict, IMPLEMENTED_BACKEND_NAME
 
 
 class Backend:
-    name = 'inperson'
+    name: IMPLEMENTED_BACKEND_NAME = 'inperson'
     friendly_name = "In Person"
     enabled = True
 

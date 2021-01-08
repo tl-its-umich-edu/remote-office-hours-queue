@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-from typing import Literal, Set
 
 import dj_database_url
 
@@ -217,6 +216,7 @@ def skip_auth_callback_requests(record):
         return False
     return True
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -334,10 +334,8 @@ BLUEJEANS_DOCS_URL = os.getenv('BLUEJEANS_DOCS_URL', DOCS_BASE_URL + 'blue-jeans
 BLUEJEANS_TELE_NUM = os.getenv('BLUEJEANS_TELE_NUM', '1.312.216.0325')
 BLUEJEANS_INTL_URL = os.getenv('BLUEJEANS_INTL_URL', 'https://www.bluejeans.com/premium-numbers')
 
-IMPLEMENTED_BACKEND = Literal['inperson', 'zoom', 'bluejeans']
-IMPLEMENTED_BACKENDS: Set[IMPLEMENTED_BACKEND] = {'inperson', 'zoom', 'bluejeans'}
-ENABLED_BACKENDS: Set[str] = {'inperson'}
-DEFAULT_BACKEND: IMPLEMENTED_BACKEND = "inperson"
+ENABLED_BACKENDS = {'inperson'}
+DEFAULT_BACKEND = "inperson"
 
 BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
 BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()

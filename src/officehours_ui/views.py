@@ -4,6 +4,7 @@ from django.http import Http404
 from django.urls import reverse
 
 from officehours_api import backends
+from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 BACKEND_CLASSES = {
     backend_name: getattr(getattr(backends, backend_name), 'Backend')
@@ -36,7 +37,7 @@ class AuthPromptView(TemplateView):
         return context
 
 
-def auth_callback_view(request, backend_name: str):
+def auth_callback_view(request, backend_name: IMPLEMENTED_BACKEND_NAME):
     try:
         auth_callback = BACKEND_CLASSES[backend_name].auth_callback
     except KeyError:
