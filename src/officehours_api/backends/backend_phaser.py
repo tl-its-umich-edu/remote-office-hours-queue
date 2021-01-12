@@ -3,8 +3,8 @@ from typing import List
 
 from django.conf import settings
 
-from officehours_api.models import Meeting, MeetingStatus, Queue
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
+from officehours_api.models import Meeting, MeetingStatus, Queue
 
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class BackendPhaser:
             meeting for meeting in meetings_with_backend if meeting.status != MeetingStatus.STARTED
         ]
         for meeting in unstarted_meetings_with_backend:
-            meeting.change_backend_type()
+            meeting.change_backend_type()  # Set to default
         Meeting.objects.bulk_update(unstarted_meetings_with_backend, fields=['backend_type'])
         return unstarted_meetings_with_backend
 
@@ -57,7 +57,7 @@ class BackendPhaser:
             modified_queues = self.remove_backend_from_queue_allowed_backends()
             logger.info(
                 f'Removed {self.backend_name} as an allowed backend '
-                f'from {len(modified_queues)} queues.'
+                f'from {len(modified_queues)} queue(s).'
             )
 
         if set_unstarted_to_default:
