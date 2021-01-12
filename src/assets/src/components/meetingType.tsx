@@ -16,7 +16,7 @@ interface AllowedMeetingBackendsFormProps {
 }
 
 export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
-    const enabledBackends = props.backends.filter((value) => value.enabled)
+    const enabledBackends = props.backends.filter((value) => value.enabled);
 
     const toggleAllowed = (backend_type: string) => {
         const newAllowed = new Set(props.allowed);
@@ -54,14 +54,14 @@ interface BackendSelectorProps {
 }
 
 export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {  
-    const options = Array.from(props.allowedBackends)
-        .map(
-            a => (
-                <option key={a} value={a}>
-                    {getBackendByName(a as EnabledBackendName, props.backends).friendly_name}
-                </option>
-            )
+    const enabledAllowedBackends = props.backends.filter(
+        (b) => b.enabled && props.allowedBackends.has(b.name)
     );
+
+    const options = enabledAllowedBackends.map(
+        (a) => <option key={a.name} value={a.name}>{a.friendly_name}</option>
+    );
+
     const handleChange = (event: React.FormEvent<HTMLSelectElement>) => {
         props.onChange(event.currentTarget.value);
     }
