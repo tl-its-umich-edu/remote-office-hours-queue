@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List
 
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 from officehours_api.models import Meeting, MeetingStatus, Queue
@@ -18,6 +18,9 @@ class BackendPhaser:
 
     def get_queues_allowing_backend(self) -> List[Queue]:
         return list(Queue.objects.filter(allowed_backends__contains=[self.backend_name]))
+
+    def get_all_meetings_with_backend(self) -> List[Meeting]:
+        return list(Meeting.objects.filter(backend_type=self.backend_name))
 
     def get_meetings_with_backend_through_queues(self, queues: List[Queue]) -> List[Meeting]:
         meetings_with_backend = []
@@ -44,13 +47,12 @@ class BackendPhaser:
         ]
         return started_meetings_with_backend
 
-    def phase_out(self, remove_as_allowed: bool, set_unstarted_to_other: bool, delete_started: bool, dry_run: bool):
+    def phase_out(self, remove_as_allowed_and_replace_unstarted: bool, delete_started: bool, dry_run: bool):
         logger.info(f'Old backend: {self.backend_name}')
-        queues_allowing_backend = self.get_queues_allowing_backend()
-        modified_queues: Optional[List[Queue]] = None
-        meetings_with_backend: List[Meeting] = self.get_meetings_with_backend_through_queues(queues_allowing_backend)
 
-        if remove_as_allowed:
+        if remove_as_allowed_and_replace_unstarted:
+            queues_allowing_backend = self.get_queues_allowing_backend()
+
             logger.info(f'Removing {self.backend_name} from allowed_backends when present in queues...')
             modified_queues = self.remove_backend_from_queue_allowed_backends(queues_allowing_backend)
             logger.info(
@@ -59,13 +61,10 @@ class BackendPhaser:
             )
             if not dry_run:
                 Queue.objects.bulk_update(modified_queues, fields=['allowed_backends'])
-                logger.info('Persisted allowed_backends queue changes to the database.')
+                logger.info('Persisted changes to queues to the database.')
 
-        if set_unstarted_to_other:
-            logger.info('Setting backend_type of unstarted meetings to use another backend...')
-            if modified_queues:
-                meetings_with_backend = self.get_meetings_with_backend_through_queues(modified_queues)
-
+            logger.info('Setting backend_type of unstarted meetings in modified queues to use another backend...')
+            meetings_with_backend = self.get_meetings_with_backend_through_queues(modified_queues)
             modified_meetings = self.set_unstarted_meetings_to_other_backend(meetings_with_backend)
             logger.info(
                 f'Set the backend_type for {len(modified_meetings)} meeting(s) '
@@ -73,10 +72,11 @@ class BackendPhaser:
             )
             if not dry_run:
                 Meeting.objects.bulk_update(modified_meetings, fields=['backend_type'])
-                logger.info('Persisted backend_type changes to the database.')
+                logger.info('Persisted changes to unstarted meetings to the database.')
 
         if delete_started:
             logger.info(f'Finding started meetings with {self.backend_name} as backend_type...')
+            meetings_with_backend = self.get_all_meetings_with_backend()
             started_meetings_to_delete = self.get_started_meetings_to_delete(meetings_with_backend)
             logger.info(
                 f'Will delete {len(started_meetings_to_delete)} '
