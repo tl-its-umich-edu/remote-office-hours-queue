@@ -20,11 +20,20 @@ class BackendException(Exception):
 
 
 class DisabledBackendException(Exception):
+
     def __init__(self, backend_type: IMPLEMENTED_BACKEND_NAME):
         self.backend_type = backend_type
         self.message = (
-            f"Backend type {self.backend_type} is no longer a supported meeting type; "
-            f"the meeting cannot be started."
+            f"Backend type {self.backend_type} is no longer a supported meeting type."
+        )
+
+
+class NotAllowedBackendException(Exception):
+
+    def __init__(self, backend_type: IMPLEMENTED_BACKEND_NAME):
+        self.backend_type = backend_type
+        self.message = (
+            f"Backend type {self.backend_type} is not an allowed backend for the queue."
         )
 
 

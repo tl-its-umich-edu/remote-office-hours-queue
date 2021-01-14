@@ -1,8 +1,6 @@
 import logging
 from typing import List
 
-from django.conf import settings
-
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 from officehours_api.models import Meeting, MeetingStatus, Queue
 
@@ -31,13 +29,13 @@ class BackendPhaser:
         Queue.objects.bulk_update(queues_allowing_backend, fields=['allowed_backends'])
         return queues_allowing_backend
 
-    def set_unstarted_meetings_to_default_backend(self) -> List[Meeting]:
+    def set_unstarted_meetings_to_other_backend(self) -> List[Meeting]:
         meetings_with_backend = self.get_meetings_with_backend()
         unstarted_meetings_with_backend: List[Meeting] = [
             meeting for meeting in meetings_with_backend if meeting.status != MeetingStatus.STARTED
         ]
         for meeting in unstarted_meetings_with_backend:
-            meeting.change_backend_type()  # Set to default
+            meeting.change_backend_type()  # Set to default backend or other enabled backend if applicable
         Meeting.objects.bulk_update(unstarted_meetings_with_backend, fields=['backend_type'])
         return unstarted_meetings_with_backend
 
@@ -50,7 +48,7 @@ class BackendPhaser:
             started_meeting.delete()
         return started_meetings_with_backend
 
-    def phase_out(self, remove_as_allowed: bool, set_unstarted_to_default: bool, delete_started: bool):
+    def phase_out(self, remove_as_allowed: bool, set_unstarted_to_other: bool, delete_started: bool):
         logger.info(f'Old backend: {self.backend_name}')
         if remove_as_allowed:
             logger.info(f'Removing {self.backend_name} from allowed_backends when present in queues...')
@@ -60,12 +58,12 @@ class BackendPhaser:
                 f'from {len(modified_queues)} queue(s).'
             )
 
-        if set_unstarted_to_default:
-            logger.info('Setting backend_type of unstarted meetings to use the default backend...')
-            modified_meetings = self.set_unstarted_meetings_to_default_backend()
+        if set_unstarted_to_other:
+            logger.info('Setting backend_type of unstarted meetings to use another backend...')
+            modified_meetings = self.set_unstarted_meetings_to_other_backend()
             logger.info(
                 f'Set the backend_type for {len(modified_meetings)} meeting(s) '
-                f'to the default {settings.DEFAULT_BACKEND}.'
+                f'to other allowed backends.'
             )
 
         if delete_started:
