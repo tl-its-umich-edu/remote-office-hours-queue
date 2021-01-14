@@ -35,6 +35,12 @@ class Command(BaseCommand):
             action='store_true',
             help='Delete started meetings with disabled backends.'
         )
+        parser.add_argument(
+            '--dry-run',
+            dest='dry_run',
+            action='store_true',
+            help='Do not save changes made (helps to assess impact of operations).'
+        )
 
     def handle(self, *args, **options):
         old_backend_names: Set[IMPLEMENTED_BACKEND_NAME] = set(IMPLEMENTED_BACKEND_NAMES) - settings.ENABLED_BACKENDS
@@ -45,5 +51,6 @@ class Command(BaseCommand):
             phaser.phase_out(
                 options['remove_as_allowed'],
                 options['set_unstarted_to_other'],
-                options['delete_started']
+                options['delete_started'],
+                options['dry_run']
             )
