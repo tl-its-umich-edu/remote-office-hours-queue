@@ -18,16 +18,13 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--remove-as-allowed',
-            dest='remove_as_allowed',
+            '--remove-as-allowed-and-replace-unstarted',
+            dest='remove_as_allowed_and_replace_unstarted',
             action='store_true',
-            help='Remove disabled backends as allowed backends for queues.'
-        )
-        parser.add_argument(
-            '--set-unstarted-to-other',
-            dest='set_unstarted_to_other',
-            action='store_true',
-            help='Change meetings using disabled backends to use another allowed backend type.'
+            help=(
+                'Remove disabled backends as allowed backends for queues'
+                'and change meetings using disabled backends to use another allowed backend type.'
+            )
         )
         parser.add_argument(
             '--delete-started',
@@ -49,8 +46,7 @@ class Command(BaseCommand):
         for old_backend_name in old_backend_names:
             phaser = BackendPhaser(old_backend_name)
             phaser.phase_out(
-                options['remove_as_allowed'],
-                options['set_unstarted_to_other'],
+                options['remove_as_allowed_and_replace_unstarted'],
                 options['delete_started'],
                 options['dry_run']
             )
