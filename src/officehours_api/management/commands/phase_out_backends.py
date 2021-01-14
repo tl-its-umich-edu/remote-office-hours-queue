@@ -24,10 +24,10 @@ class Command(BaseCommand):
             help='Remove disabled backends as allowed backends for queues.'
         )
         parser.add_argument(
-            '--set-unstarted-to-default',
-            dest='set_unstarted_to_default',
+            '--set-unstarted-to-other',
+            dest='set_unstarted_to_other',
             action='store_true',
-            help='Change meetings using disabled backends to use the default backend type.'
+            help='Change meetings using disabled backends to use another allowed backend type.'
         )
         parser.add_argument(
             '--delete-started',
@@ -44,6 +44,6 @@ class Command(BaseCommand):
             phaser = BackendPhaser(old_backend_name)
             phaser.phase_out(
                 options['remove_as_allowed'],
-                options['set_unstarted_to_default'],
+                options['set_unstarted_to_other'],
                 options['delete_started']
             )

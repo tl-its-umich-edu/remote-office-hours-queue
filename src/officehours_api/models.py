@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from django.conf import settings
 from django.db import models
@@ -14,7 +14,9 @@ from safedelete.models import (
 from jsonfield import JSONField
 from requests.exceptions import RequestException
 
-from officehours_api.exceptions import BackendException, DisabledBackendException
+from officehours_api.exceptions import (
+    BackendException, DisabledBackendException, NotAllowedBackendException
+)
 from officehours_api import backends
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
@@ -37,6 +39,10 @@ def get_backend_types():
         [key, value.friendly_name]
         for key, value in BACKEND_INSTANCES.items()
     ]
+
+
+def get_enabled_backends() -> Set[IMPLEMENTED_BACKEND_NAME]:
+    return settings.ENABLED_BACKENDS
 
 
 class Profile(models.Model):
@@ -136,7 +142,22 @@ class Meeting(SafeDeleteModel):
         return get_users_with_emails(self.attendees)
 
     def change_backend_type(self, new_backend_name: Optional[IMPLEMENTED_BACKEND_NAME] = None):
-        self.backend_type = new_backend_name if new_backend_name else get_default_backend()
+        if new_backend_name:
+            if new_backend_name not in get_enabled_backends():
+                raise DisabledBackendException(new_backend_name)
+            if new_backend_name not in self.queue.allowed_backend:
+                raise NotAllowedBackendException(new_backend_name)
+            self.backend_type = new_backend_name
+            return
+
+        default_backend = get_default_backend()
+        # Prefer default if it's allowed
+        if default_backend in self.queue.allowed_backends:
+            self.backend_type = default_backend
+        else:
+            # Otherwise use first of queue.allowed_backends
+            # Dependent on queue.allowed_backends remaining not nullable.
+            self.backend_type = self.queue.allowed_backends[0]
 
     def __init__(self, *args, **kwargs):
         super(Meeting, self).__init__(*args, **kwargs)
