@@ -22,7 +22,7 @@ class Command(BaseCommand):
             dest='remove_as_allowed_and_replace_unstarted',
             action='store_true',
             help=(
-                'Remove disabled backends as allowed backends for queues'
+                'Remove disabled backends as allowed backends for queues '
                 'and change meetings using disabled backends to use another allowed backend type.'
             )
         )
@@ -40,11 +40,11 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        old_backend_names: Set[IMPLEMENTED_BACKEND_NAME] = set(IMPLEMENTED_BACKEND_NAMES) - settings.ENABLED_BACKENDS
-        self.stdout.write('Identified one or more old backends: ' + ', '.join(list(old_backend_names)))
+        disabled_backend_names: Set[IMPLEMENTED_BACKEND_NAME] = set(IMPLEMENTED_BACKEND_NAMES) - settings.ENABLED_BACKENDS
+        self.stdout.write('Identified one or more disabled backends: ' + ', '.join(list(disabled_backend_names)))
 
-        for old_backend_name in old_backend_names:
-            phaser = BackendPhaser(old_backend_name)
+        for disabled_backend_name in disabled_backend_names:
+            phaser = BackendPhaser(disabled_backend_name)
             phaser.phase_out(
                 options['remove_as_allowed_and_replace_unstarted'],
                 options['delete_started'],
