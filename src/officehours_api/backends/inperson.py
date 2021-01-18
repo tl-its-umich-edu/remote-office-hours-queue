@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 
 from officehours_api.backends.types import BackendDict, IMPLEMENTED_BACKEND_NAME
@@ -5,8 +6,8 @@ from officehours_api.backends.types import BackendDict, IMPLEMENTED_BACKEND_NAME
 
 class Backend:
     name: IMPLEMENTED_BACKEND_NAME = 'inperson'
-    friendly_name = "In Person"
-    enabled = True
+    friendly_name = 'In Person'
+    enabled = name in settings.ENABLED_BACKENDS
 
     docs_url = None
     telephone_num = None
