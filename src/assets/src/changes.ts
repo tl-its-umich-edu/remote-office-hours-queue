@@ -1,7 +1,7 @@
 import xorWith from "lodash.xorwith";
 import isEqual from "lodash.isequal";
 
-import { isMeeting, isQueueBase, isUser, Meeting, MeetingStatus, QueueBase } from "./models"
+import { isMeeting, isQueueBase, isUser, Meeting, MeetingStatus, QueueBase } from "./models";
 
 export type ComparableEntity = QueueBase | Meeting;
 
@@ -13,79 +13,119 @@ export interface ChangeEvent {
 const queueBasePropsToWatch: (keyof QueueBase)[] = ['status', 'name'];
 const meetingPropsToWatch: (keyof Meeting)[] = ['backend_type', 'assignee'];
 
-interface HumanReadableMap {
-    [key: string]: string;
+
+// Value Transformations
+
+type ValueTransform = (value: any) => any;
+
+const transformUserToUsername: ValueTransform = (value) => {
+    return isUser(value) ? value.username : value
+};
+
+const transformFalsyToNone: ValueTransform = (value) => {
+    return value === null || value === undefined || value === '' ? 'None' : value;
 }
 
-const propertyMap: HumanReadableMap = {
+function transformValue (value: any, transforms: ValueTransform[]): any {
+    let newValue = value;
+    for (const transform of transforms) {
+        newValue = transform(newValue);
+    }
+    return newValue;
+}
+
+const standardTransforms = [transformUserToUsername, transformFalsyToNone];
+
+
+// Property Transformations
+
+interface HumanReadableMap { [key: string]: string; }
+
+const humanReadablePropertyMap: HumanReadableMap = {
     'backend_type': 'meeting type',
     'assignee': 'host'
 }
 
-function detectChanges<T extends ComparableEntity>(versOne: T, versTwo: T, propsToWatch: (keyof T)[]): string | undefined {
+const transformProperty = (value: string, propertyMap: HumanReadableMap) => {
+    return (value in propertyMap) ? propertyMap[value] : value;
+}
+
+
+// Core functions
+
+function detectChanges<T extends ComparableEntity> (
+    versOne: T, versTwo: T, propsToWatch: (keyof T)[], transforms: ValueTransform[]): string[] | undefined
+{
+    let changedPropMessages = [];
     for (const property of propsToWatch) {
         let valueOne = versOne[property] as T[keyof T] | string;
         let valueTwo = versTwo[property] as T[keyof T] | string;
-        // Check for nested user objects and falsy values
-        if (isUser(valueOne)) valueOne = valueOne.username;
-        if (!valueOne) valueOne = 'None';
-        if (isUser(valueTwo)) valueTwo = valueTwo.username;
-        if (!valueTwo) valueTwo = 'None';
+        valueOne = transformValue(valueOne, transforms);
+        valueTwo = transformValue(valueTwo, transforms);
         if (valueOne !== valueTwo) {
-            // Make some property strings more human readable
-            const propName = (property in propertyMap) ? propertyMap[property as string] : property;
-            return `The ${propName} changed from "${valueOne}" to "${valueTwo}".`;
+            const propName = transformProperty(property as string, humanReadablePropertyMap);
+            changedPropMessages.push(`The ${propName} changed from "${valueOne}" to "${valueTwo}".`);
         }
     }
-    return;
+    if (changedPropMessages.length > 0) return changedPropMessages;
+}
+
+
+// Any new types added to ComparableEntity need to be supported in this function.
+function describeEntity (entity: ComparableEntity): string[] {
+    let entityType;
+    let permIdent;
+    if (isMeeting(entity)) {
+        entityType = 'meeting';
+        permIdent = `attendee ${entity.attendees[0].username}`;
+    } else {
+        // Don't need to check if it's a QueueBase because it's the only other option
+        entityType = 'queue';
+        permIdent = `ID number ${entity.id}`;
+    }
+    return [entityType, permIdent];
 }
 
 
 // https://lodash.com/docs/4.17.15#xorWith
 
-export function compareEntities<T extends ComparableEntity> (oldOnes: T[], newOnes: T[]): string | undefined
+export function compareEntities<T extends ComparableEntity> (oldOnes: T[], newOnes: T[]): string[] | undefined
 {
     const symDiff = xorWith(oldOnes, newOnes, isEqual);
     if (symDiff.length === 0) return;
-    const firstEntity = symDiff[0];
-    const secondEntity = symDiff.length > 1 ? symDiff[1] : undefined;
 
-    let entityType;
-    let permIdentifier;
-    if (isMeeting(firstEntity)) {
-        entityType = 'meeting';
-        // meeting.attendees may change in the future?
-        permIdentifier = `attendee ${firstEntity.attendees[0].username}`;
-    } else if (isQueueBase(firstEntity)) {
-        entityType = 'queue';
-        permIdentifier = `ID number ${firstEntity.id}`;
-    } else {
-        console.error(`compareEntities was used with an unsupported type: ${firstEntity}`)
-        return;
-    }
+    const oldIDs = oldOnes.map((value) => value.id);
+    const newIDs = newOnes.map((value) => value.id);
 
-    let message;
-    if (oldOnes.length < newOnes.length) {
-        return `A new ${entityType} with ${permIdentifier} was added.`;
-    } else if (oldOnes.length > newOnes.length) {
-        return `The ${entityType} with ${permIdentifier} was deleted.`;
-    } else {
-        let changeDetected;
-        if (secondEntity) {
+    let changeMessages: string[] = [];
+    let changedIDsProcessed: number[] = [];
+    for (const entity of symDiff) {
+        if (changedIDsProcessed.includes(entity.id)) continue;
+        const [entityType, permIdent] = describeEntity(entity);
+        if (oldIDs.includes(entity.id) && !newIDs.includes(entity.id)) {
+            changeMessages.push(`The ${entityType} with ${permIdent} was deleted.`);
+        } else if (!oldIDs.includes(entity.id) && newIDs.includes(entity.id)) {
+            changeMessages.push(`A new ${entityType} with ${permIdent} was added.`);
+        } else {
+            // Assuming based on context that symDiff.length === 2
+            const [firstEntity, secondEntity] = symDiff.filter(value => value.id === entity.id);
+            let changesDetected: string[] = [];
             if (isMeeting(firstEntity) && isMeeting(secondEntity)) {
-                changeDetected = detectChanges<Meeting>(firstEntity, secondEntity, meetingPropsToWatch);
-                if (!changeDetected && firstEntity.status !== secondEntity.status && secondEntity.status === MeetingStatus.STARTED) {
-                    changeDetected = 'The status indicates the meeting is now in progress.';
+                const detectResult = detectChanges<Meeting>(firstEntity, secondEntity, meetingPropsToWatch, standardTransforms);
+                if (detectResult) changesDetected.push(...detectResult);
+                // Custom check for Meeting.status, since only some status changes are relevant here.
+                if (firstEntity.status !== secondEntity.status && secondEntity.status === MeetingStatus.STARTED) {
+                    changesDetected.push('The meeting is now in progress.');
                 }
             } else if (isQueueBase(firstEntity) && isQueueBase(secondEntity)) {
-                changeDetected = detectChanges<QueueBase>(firstEntity, secondEntity, queueBasePropsToWatch);
+                const detectResult = detectChanges<QueueBase>(firstEntity, secondEntity, queueBasePropsToWatch, standardTransforms);
+                if (detectResult) changesDetected.push(...detectResult);
             }
-        }
-        message = `The ${entityType} with ${permIdentifier} was changed.`;
-        if (changeDetected) {
-            message = message + ' ' + changeDetected;
-            return message;
+            if (changesDetected.length > 0) {
+                changeMessages.push(`The ${entityType} with ${permIdent} was changed. ` + changesDetected.join(' '));
+            }
+            changedIDsProcessed.push(entity.id)
         }
     }
-    return;
+    if (changeMessages.length > 0) return changeMessages;
 }

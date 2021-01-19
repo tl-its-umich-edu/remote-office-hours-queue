@@ -10,11 +10,18 @@ export function useEntityChanges<T extends ComparableEntity>():
     const [nextID, setNextID] = useState(0);
 
     const compareAndSetChangeEvents = (oldEntities: readonly T[], newEntities: readonly T[]): void => {
-        const changeText = compareEntities<T>(oldEntities.slice(), newEntities.slice());
-        if (changeText !== undefined) {
-            const newChangeEvent = { eventID: nextID, text: changeText } as ChangeEvent;
-            setChangeEvents([...changeEvents, newChangeEvent]);
-            setNextID(nextID + 1);
+        const changeMessages = compareEntities<T>(oldEntities.slice(), newEntities.slice());
+        if (changeMessages !== undefined) {
+            let eventID = nextID
+            const newChangeEvents = changeMessages.map(
+                (m) => {
+                    const newEvent = { eventID: eventID, text: m } as ChangeEvent
+                    eventID++
+                    return newEvent
+                }
+            )
+            setChangeEvents([...changeEvents].concat(newChangeEvents));
+            setNextID(eventID);
         }
     };
 
