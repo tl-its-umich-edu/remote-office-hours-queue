@@ -104,6 +104,7 @@ interface QueueManagerProps {
     backends: MeetingBackend[];
     defaultBackend: string;
     onAddMeeting: (uniqname: string, backend: string) => void;
+    addMeetingError: FormError | undefined;
     onRemoveMeeting: (m: Meeting) => void;
     onSetStatus: (open: boolean) => void;
     onShowMeetingInfo: (m: Meeting) => void;
@@ -176,6 +177,7 @@ function QueueManager(props: QueueManagerProps) {
             <Row noGutters className={spacingClass}>
                 <Col md={8}>
                     {userLoggedOnWarning}
+                    {props.addMeetingError && <ErrorDisplay formErrors={[props.addMeetingError]} />}
                     <AddAttendeeForm
                         allowedBackends={new Set(props.queue.allowed_backends)}
                         backends={props.backends}
@@ -323,19 +325,18 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
 
     // Render
     const isChanging = removeMeetingLoading || addMeetingLoading || setStatusLoading || changeAssigneeLoading || startMeetingLoading;
-    const errorSources = [
+    const globalErrorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},
         {source: 'User Connection', error: userWebSocketError},
         {source: 'Remove Meeting', error: removeMeetingError},
-        {source: 'Add Meeting', error: addMeetingError},
         {source: 'Queue Status', error: setStatusError},
-        {source: 'Assignee', error: changeAssigneeError},
         {source: 'Start Meeting', error: startMeetingError},
     ].filter(e => e.error) as FormError[];
-    const loginDialogVisible = errorSources.some(checkForbiddenError);
+    const addMeetingErrorSource = addMeetingError && { source: 'Add Meeting', error: addMeetingError } as FormError;
+    const loginDialogVisible = globalErrorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>;
-    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>;
+    const errorDisplay = <ErrorDisplay formErrors={globalErrorSources}/>;
     const queueManager = queue
         && (
             <QueueManager
@@ -345,6 +346,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
                 backends={props.backends}
                 defaultBackend={props.defaultBackend}
                 onAddMeeting={doAddMeeting}
+                addMeetingError={addMeetingErrorSource}
                 onRemoveMeeting={confirmRemoveMeeting}
                 onSetStatus={doSetStatus}
                 onShowMeetingInfo={setVisibleMeetingDialog}
