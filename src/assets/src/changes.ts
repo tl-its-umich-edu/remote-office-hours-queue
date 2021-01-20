@@ -54,7 +54,7 @@ const transformProperty = (value: string, propertyMap: HumanReadableMap) => {
 // Core functions
 
 function detectChanges<T extends ComparableEntity> (
-    versOne: T, versTwo: T, propsToWatch: (keyof T)[], transforms: ValueTransform[]): string[] | undefined
+    versOne: T, versTwo: T, propsToWatch: (keyof T)[], transforms: ValueTransform[]): string[]
 {
     let changedPropMessages = [];
     for (const property of propsToWatch) {
@@ -67,11 +67,12 @@ function detectChanges<T extends ComparableEntity> (
             changedPropMessages.push(`The ${propName} changed from "${valueOne}" to "${valueTwo}".`);
         }
     }
-    if (changedPropMessages.length > 0) return changedPropMessages;
+    return changedPropMessages;
 }
 
 
 // Any new types added to ComparableEntity need to be supported in this function.
+
 function describeEntity (entity: ComparableEntity): string[] {
     let entityType;
     let permIdent;
@@ -89,18 +90,18 @@ function describeEntity (entity: ComparableEntity): string[] {
 
 // https://lodash.com/docs/4.17.15#xorWith
 
-export function compareEntities<T extends ComparableEntity> (oldOnes: T[], newOnes: T[]): string[] | undefined
+export function compareEntities<T extends ComparableEntity> (oldOnes: T[], newOnes: T[]): string[]
 {
     const symDiff = xorWith(oldOnes, newOnes, isEqual);
-    if (symDiff.length === 0) return;
+        if (symDiff.length === 0) return [];
 
     const oldIDs = oldOnes.map((value) => value.id);
     const newIDs = newOnes.map((value) => value.id);
 
     let changeMessages: string[] = [];
-    let changedIDsProcessed: number[] = [];
+    let processedChangedObjectIDs: number[] = [];
     for (const entity of symDiff) {
-        if (changedIDsProcessed.includes(entity.id)) continue;
+        if (processedChangedObjectIDs.includes(entity.id)) continue;
         const [entityType, permIdent] = describeEntity(entity);
         if (oldIDs.includes(entity.id) && !newIDs.includes(entity.id)) {
             changeMessages.push(`The ${entityType} with ${permIdent} was deleted.`);
@@ -111,21 +112,21 @@ export function compareEntities<T extends ComparableEntity> (oldOnes: T[], newOn
             const [firstEntity, secondEntity] = symDiff.filter(value => value.id === entity.id);
             let changesDetected: string[] = [];
             if (isMeeting(firstEntity) && isMeeting(secondEntity)) {
-                const detectResult = detectChanges<Meeting>(firstEntity, secondEntity, meetingPropsToWatch, standardTransforms);
-                if (detectResult) changesDetected.push(...detectResult);
+                const changes = detectChanges<Meeting>(firstEntity, secondEntity, meetingPropsToWatch, standardTransforms);
+                if (changes.length > 0) changesDetected.push(...changes);
                 // Custom check for Meeting.status, since only some status changes are relevant here.
                 if (firstEntity.status !== secondEntity.status && secondEntity.status === MeetingStatus.STARTED) {
                     changesDetected.push('The meeting is now in progress.');
                 }
             } else if (isQueueBase(firstEntity) && isQueueBase(secondEntity)) {
-                const detectResult = detectChanges<QueueBase>(firstEntity, secondEntity, queueBasePropsToWatch, standardTransforms);
-                if (detectResult) changesDetected.push(...detectResult);
+                const changes = detectChanges<QueueBase>(firstEntity, secondEntity, queueBasePropsToWatch, standardTransforms);
+                if (changes.length > 0) changesDetected.push(...changes);
             }
             if (changesDetected.length > 0) {
                 changeMessages.push(`The ${entityType} with ${permIdent} was changed. ` + changesDetected.join(' '));
             }
-            changedIDsProcessed.push(entity.id)
+            processedChangedObjectIDs.push(entity.id)
         }
     }
-    if (changeMessages.length > 0) return changeMessages;
+    return changeMessages;
 }
