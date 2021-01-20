@@ -19,7 +19,7 @@ const meetingPropsToWatch: (keyof Meeting)[] = ['backend_type', 'assignee'];
 type ValueTransform = (value: any) => any;
 
 const transformUserToUsername: ValueTransform = (value) => {
-    return isUser(value) ? value.username : value
+    return isUser(value) ? value.username : value;
 };
 
 const transformFalsyToNone: ValueTransform = (value) => {
@@ -44,7 +44,7 @@ interface HumanReadableMap { [key: string]: string; }
 const humanReadablePropertyMap: HumanReadableMap = {
     'backend_type': 'meeting type',
     'assignee': 'host'
-}
+};
 
 const transformProperty = (value: string, propertyMap: HumanReadableMap) => {
     return (value in propertyMap) ? propertyMap[value] : value;

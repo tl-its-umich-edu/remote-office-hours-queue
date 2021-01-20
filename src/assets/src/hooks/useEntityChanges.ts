@@ -12,12 +12,12 @@ export function useEntityChanges<T extends ComparableEntity>():
     const compareAndSetChangeEvents = (oldEntities: readonly T[], newEntities: readonly T[]): void => {
         const changeMessages = compareEntities<T>(oldEntities.slice(), newEntities.slice());
         if (changeMessages !== undefined) {
-            let eventID = nextID
+            let eventID = nextID;
             const newChangeEvents = changeMessages.map(
                 (m) => {
-                    const newEvent = { eventID: eventID, text: m } as ChangeEvent
-                    eventID++
-                    return newEvent
+                    const newEvent = { eventID: eventID, text: m } as ChangeEvent;
+                    eventID++;
+                    return newEvent;
                 }
             )
             setChangeEvents([...changeEvents].concat(newChangeEvents));
