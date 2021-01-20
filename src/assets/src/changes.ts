@@ -93,7 +93,7 @@ function describeEntity (entity: ComparableEntity): string[] {
 export function compareEntities<T extends ComparableEntity> (oldOnes: T[], newOnes: T[]): string[]
 {
     const symDiff = xorWith(oldOnes, newOnes, isEqual);
-        if (symDiff.length === 0) return [];
+    if (symDiff.length === 0) return [];
 
     const oldIDs = oldOnes.map((value) => value.id);
     const newIDs = newOnes.map((value) => value.id);
