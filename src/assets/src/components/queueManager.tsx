@@ -104,7 +104,7 @@ interface QueueManagerProps {
     backends: MeetingBackend[];
     defaultBackend: string;
     onAddMeeting: (uniqname: string, backend: string) => void;
-    addMeetingError: FormError | undefined;
+    addMeetingError?: FormError;
     onRemoveMeeting: (m: Meeting) => void;
     onSetStatus: (open: boolean) => void;
     onShowMeetingInfo: (m: Meeting) => void;
@@ -331,6 +331,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         {source: 'User Connection', error: userWebSocketError},
         {source: 'Remove Meeting', error: removeMeetingError},
         {source: 'Queue Status', error: setStatusError},
+        {source: 'Assignee', error: changeAssigneeError},
         {source: 'Start Meeting', error: startMeetingError},
     ].filter(e => e.error) as FormError[];
     const addMeetingErrorSource = addMeetingError && { source: 'Add Meeting', error: addMeetingError } as FormError;
