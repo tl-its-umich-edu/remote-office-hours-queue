@@ -9,5 +9,6 @@ class BackendDict(TypedDict):
     friendly_name: str
     enabled: bool
     docs_url: Optional[str]
+    profile_url: Optional[str]
     telephone_num: Optional[str]
     intl_telephone_url: Optional[str]

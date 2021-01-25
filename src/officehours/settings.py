@@ -325,9 +325,10 @@ TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
 DOCS_BASE_URL = 'https://its.umich.edu/communication/videoconferencing/'
 
 ZOOM_DOCS_URL = os.getenv('ZOOM_DOCS_URL', DOCS_BASE_URL + 'zoom/getting-started')
-ZOOM_TELE_NUM = os.getenv('ZOOM_TELE_NUM', '1.312.626.6799')
-ZOOM_INTL_URL = os.getenv('ZOOM_INTL_URL', 'https://umich.zoom.us/profile/setting?tab=telephony')
 ZOOM_BASE_DOMAIN_URL = os.getenv('ZOOM_BASE_DOMAIN_URL', 'https://umich.zoom.us')
+ZOOM_PROFILE_URL = os.getenv('ZOOM_PROFILE_URL', ZOOM_BASE_DOMAIN_URL + '/profile')
+ZOOM_INTL_URL = os.getenv('ZOOM_INTL_URL', ZOOM_PROFILE_URL + '/setting?tab=telephony')
+ZOOM_TELE_NUM = os.getenv('ZOOM_TELE_NUM', '1.312.626.6799')
 ZOOM_SIGN_IN_HELP = os.getenv('ZOOM_SIGN_IN_HELP')
 
 BLUEJEANS_DOCS_URL = os.getenv('BLUEJEANS_DOCS_URL', DOCS_BASE_URL + 'blue-jeans/getting-started')
