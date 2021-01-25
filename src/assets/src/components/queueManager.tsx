@@ -224,7 +224,7 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
             ? (
                 <>
                 <p>This meeting will be via <strong>{meetingBackend.friendly_name}</strong>.</p>
-                <DialInContent metadata={props.meeting.backend_metadata} backend={meetingBackend} />
+                <DialInContent metadata={props.meeting.backend_metadata} backend={meetingBackend} isHost />
                 </>
             )
             : <div><p>This meeting will be <strong>In Person</strong>.</p></div>;

@@ -74,6 +74,7 @@ class Backend:
     enabled: bool = name in settings.ENABLED_BACKENDS
 
     docs_url: str = settings.ZOOM_DOCS_URL
+    profile_url: str = settings.ZOOM_PROFILE_URL
     telephone_num: str = settings.ZOOM_TELE_NUM
     intl_telephone_url: str = settings.ZOOM_INTL_URL
     sign_in_help: str = settings.ZOOM_SIGN_IN_HELP
@@ -229,6 +230,7 @@ class Backend:
             'friendly_name': cls.friendly_name,
             'enabled': cls.enabled,
             'docs_url': cls.docs_url,
+            'profile_url': cls.profile_url,
             'telephone_num': cls.telephone_num,
             'intl_telephone_url': cls.intl_telephone_url
         }

@@ -25,7 +25,10 @@ const IntlTelephoneLink = (props: IntlTelephoneLinkProps) => {
     );
 }
 
-type DialInMessageProps = OneTouchDialLinkProps & IntlTelephoneLinkProps;
+interface DialInMessageProps extends OneTouchDialLinkProps, IntlTelephoneLinkProps {
+    isHost?: boolean;
+    profileURL?: string;
+}
 
 const BlueJeansDialInMessage = (props: DialInMessageProps) => {
     const phoneLinkUsa = <OneTouchDialLink {...props} />;
@@ -41,19 +44,31 @@ const BlueJeansDialInMessage = (props: DialInMessageProps) => {
 
 const ZoomDialInMessage = (props: DialInMessageProps) => {
     const phoneLinkUsa = <OneTouchDialLink {...props} />;
+
+    const hostMessage = (props.isHost && props.profileURL) && (
+        <p>
+            When calling in by phone, you will need to enter a host key to start the meeting.
+            Find your host key at the bottom of <a href={props.profileURL}>your Zoom profile</a>.
+            DO NOT share your host key with anyone!
+        </p>
+    )
+
     return (
-        <span>
+        <>
+        <p>
             Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
             (or <IntlTelephoneLink {...props} /> -- click See All Numbers under Toll Call to see all countries)
-            from any phone and enter {props.meetingNumber}#.
-            You do not need a host key or participant ID.
-        </span>
+            from any phone and enter {props.meetingNumber}#. You do not need a participant ID.
+        </p>
+        {hostMessage}
+        </>
     );
 }
 
 interface DialInContentProps {
     metadata: BluejeansMetadata | ZoomMetadata;
     backend: MeetingBackend;
+    isHost?: boolean;
 }
 
 export const DialInContent = (props: DialInContentProps) => {
@@ -62,7 +77,9 @@ export const DialInContent = (props: DialInContentProps) => {
         const dialInProps = {
             phone: props.backend.telephone_num,
             meetingNumber: props.metadata.numeric_meeting_id,
-            intlNumbersURL: props.backend.intl_telephone_url
+            intlNumbersURL: props.backend.intl_telephone_url,
+            isHost: props.isHost,
+            profileURL: props.backend.profile_url
         } as DialInMessageProps;
 
         dialInMessage = props.backend.name === 'zoom'
