@@ -169,15 +169,12 @@ function StartedMeetingEditor (props: MeetingEditorProps) {
             <Row>
                 {joinLink && <Col lg={6} className='mb-1'>{joinLink}</Col>}
                 <Col lg={6}>
-                    <Button
-                        variant='danger'
-                        size='sm'
-                        onClick={() => props.onRemoveMeeting(props.meeting)}
-                        aria-label={`End Meeting with ${attendeeString}`}
+                    <RemoveButton
+                        onRemove={() => props.onRemoveMeeting(props.meeting)}
+                        size="sm"
+                        screenReaderLabel={`Remove Meeting with ${attendeeString}`}
                         disabled={props.disabled}
-                    >
-                        End Meeting
-                    </Button>
+                    />
                 </Col>
             </Row>
         </td>
