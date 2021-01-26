@@ -134,6 +134,7 @@ class Backend:
     enabled: bool = name in settings.ENABLED_BACKENDS
 
     docs_url: str = settings.BLUEJEANS_DOCS_URL
+    profile_url = None
     telephone_num: str = settings.BLUEJEANS_TELE_NUM
     intl_telephone_url: str = settings.BLUEJEANS_INTL_URL
 
@@ -193,6 +194,7 @@ class Backend:
             'friendly_name': cls.friendly_name,
             'enabled': cls.enabled,
             'docs_url': cls.docs_url,
+            'profile_url': cls.profile_url,
             'telephone_num': cls.telephone_num,
             'intl_telephone_url': cls.intl_telephone_url
         }
