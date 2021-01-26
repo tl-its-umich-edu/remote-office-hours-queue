@@ -10,6 +10,7 @@ class Backend:
     enabled = name in settings.ENABLED_BACKENDS
 
     docs_url = None
+    profile_url = None
     telephone_num = None
     intl_telephone_url = None
 
@@ -23,6 +24,7 @@ class Backend:
             'friendly_name': cls.friendly_name,
             'enabled': cls.enabled,
             'docs_url': cls.docs_url,
+            'profile_url': cls.profile_url,
             'telephone_num': cls.telephone_num,
             'intl_telephone_url': cls.intl_telephone_url
         }

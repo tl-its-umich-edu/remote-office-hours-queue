@@ -7,7 +7,7 @@ export interface MeetingBackend {
     friendly_name: string;
     enabled: boolean;
     docs_url: string | null;
-    profile_url: string;
+    profile_url?: string;
     telephone_num: string | null;
     intl_telephone_url: string | null;
 }
