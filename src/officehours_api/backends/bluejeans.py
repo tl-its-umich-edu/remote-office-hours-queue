@@ -6,7 +6,8 @@ from rest_framework.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth.models import User
 
-from officehours_api.backends.types import BackendDict, IMPLEMENTED_BACKEND_NAME
+from officehours_api.backends.backend_base import BackendBase
+from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 
 class BluejeansUserExtraFields(TypedDict):
@@ -128,7 +129,7 @@ class BluejeansClient:
         return resp.json()
 
 
-class Backend:
+class Backend(BackendBase):
     name: IMPLEMENTED_BACKEND_NAME = 'bluejeans'
     friendly_name: str = 'BlueJeans'
     enabled: bool = name in settings.ENABLED_BACKENDS
@@ -186,18 +187,6 @@ class Backend:
             'host_meeting_url': meeting_url,
         })
         return backend_metadata
-
-    @classmethod
-    def get_public_data(cls) -> BackendDict:
-        return {
-            'name': cls.name,
-            'friendly_name': cls.friendly_name,
-            'enabled': cls.enabled,
-            'docs_url': cls.docs_url,
-            'profile_url': cls.profile_url,
-            'telephone_num': cls.telephone_num,
-            'intl_telephone_url': cls.intl_telephone_url
-        }
 
     @classmethod
     def is_authorized(cls, user: User) -> bool:
