@@ -9,7 +9,8 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.shortcuts import redirect
 
-from officehours_api.backends.types import BackendDict, IMPLEMENTED_BACKEND_NAME
+from officehours_api.backends.backend_base import BackendBase
+from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 
 logger = logging.getLogger(__name__)
@@ -68,7 +69,7 @@ class ZoomAccessToken(TypedDict):
     scope: str
 
 
-class Backend:
+class Backend(BackendBase):
     name: IMPLEMENTED_BACKEND_NAME = 'zoom'
     friendly_name: str = 'Zoom'
     enabled: bool = name in settings.ENABLED_BACKENDS
@@ -222,18 +223,6 @@ class Backend:
             f"&state={state}"
             f"&redirect_uri={redirect_uri}"
         )
-
-    @classmethod
-    def get_public_data(cls) -> BackendDict:
-        return {
-            'name': cls.name,
-            'friendly_name': cls.friendly_name,
-            'enabled': cls.enabled,
-            'docs_url': cls.docs_url,
-            'profile_url': cls.profile_url,
-            'telephone_num': cls.telephone_num,
-            'intl_telephone_url': cls.intl_telephone_url
-        }
     
     @classmethod
     def is_authorized(cls, user: User) -> bool:
