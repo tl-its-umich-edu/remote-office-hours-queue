@@ -145,7 +145,7 @@ const JoinedClosedAlert = (props: JoinedClosedAlertProps) => {
     return (
         <Alert variant="dark">
             This queue has been closed by the host, but {statusClause}.
-            Please contact the host to ensure the meeting will still happen.
+            If you are unsure if your meeting will still happen, please contact the host.
         </Alert>
     );
 }
