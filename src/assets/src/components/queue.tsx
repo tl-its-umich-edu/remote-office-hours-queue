@@ -138,6 +138,17 @@ const WaitingTurnAlert = (props: WaitingTurnAlertProps) => {
     );
 }
 
+interface JoinedClosedAlertProps { meetingStatus: MeetingStatus }
+
+const JoinedClosedAlert = (props: JoinedClosedAlertProps) => {
+    const statusClause = props.meetingStatus === MeetingStatus.STARTED ? 'your meeting is still in progress' : 'you are still in line';
+    return (
+        <Alert variant="dark">
+            This queue has been closed by the host, but {statusClause}.
+            Please contact the host to ensure the meeting will still happen.
+        </Alert>
+    );
+}
 
 interface VideoMeetingInfoProps {
     metadata: BluejeansMetadata | ZoomMetadata;
@@ -191,13 +202,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const inProgress = meeting.status === MeetingStatus.STARTED;
 
     // Alerts and head
-    const closedAlert = props.queue.status === "closed"
-        && (
-            <Alert variant="dark">
-                This queue has been closed by the host, but you are still in line.
-                Please contact the host to ensure the meeting will still happen.
-            </Alert>
-        );
+    const closedAlert = props.queue.status === 'closed' && <JoinedClosedAlert meetingStatus={meeting.status} />;
 
     const turnAlert = meeting.line_place !== null
         ? <WaitingTurnAlert meetingType={meetingBackend.name} placeInLine={meeting.line_place} />
