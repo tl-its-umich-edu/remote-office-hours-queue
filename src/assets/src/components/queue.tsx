@@ -446,14 +446,27 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await api.removeMeeting(queue!.my_meeting!.id);
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
-    const confirmLeaveQueue = (queueStatus: 'open' | 'closed') => {
-        const loseMessage = 'By leaving the queue, you will lose your place in line'
-        const description = 'Are you sure you want to leave the queue? ' + (
-            queueStatus === 'open'
-                ? loseMessage + '.'
-                : `The queue is currently closed. ${loseMessage} and will not be able to rejoin until the queue is reopened.`
+    const confirmLeaveQueue = (queueStatus: 'open' | 'closed', meetingStatus: MeetingStatus | undefined) => {
+        const dialogParts = (meetingStatus !== undefined && meetingStatus === MeetingStatus.STARTED)
+            ? {
+                title: 'Cancel Meeting?',
+                action: 'cancel the meeting',
+                gerund: 'cancelling the meeting',
+                consequences: 'you will no longer meet with the queue host(s)'
+            } : {
+                title: 'Leave Queue?',
+                action: 'leave the queue',
+                gerund: 'leaving the queue',
+                consequences: 'you will lose your place in line'
+            };
+
+        const description = (
+            `Are you sure you want to ${dialogParts.action}? ` +
+            `By ${dialogParts.gerund}, ${dialogParts.consequences}. ` +
+            'If you change your mind, you will have to re-join at the end of the line.' +
+            (queueStatus === 'closed' ? ' The queue is currently closed. You will not be able to re-join until the queue is re-opened.' : '')
         );
-        showConfirmation(dialogRef, () => doLeaveQueue(), 'Leave Queue?', description);
+        showConfirmation(dialogRef, () => doLeaveQueue(), dialogParts.title, description);
     }
     const leaveAndJoinQueue = async (backendType: string) => {
         ReactGA.event({
@@ -491,7 +504,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueDisplay = queue && selectedBackend
         && <QueueAttending queue={queue} backends={props.backends} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={() => confirmLeaveQueue(queue.status)}
+            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={() => confirmLeaveQueue(queue.status, queue.my_meeting?.status)}
             onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}
             onShowDialog={() => setShowMeetingTypeDialog(true)}
             onChangeBackendType={doChangeBackendType}
