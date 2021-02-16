@@ -99,10 +99,11 @@ class Queue(SafeDeleteModel):
     def hosts_with_phone_numbers(self):
         return get_users_with_emails(self.hosts)
 
-    def remove_allowed_backend(self, backend_name: IMPLEMENTED_BACKEND_NAME):
+    def replace_allowed_backend_with_default(self, backend_name: IMPLEMENTED_BACKEND_NAME):
         new_allowed_backends = list(filter(lambda x: x != backend_name, self.allowed_backends))
-        if len(new_allowed_backends) == 0:
-            new_allowed_backends.append(get_default_backend())
+        default_backend = get_default_backend()
+        if default_backend not in new_allowed_backends:
+            new_allowed_backends.append(default_backend)
         self.allowed_backends = new_allowed_backends
 
     def __str__(self):

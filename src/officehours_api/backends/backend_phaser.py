@@ -28,9 +28,9 @@ class BackendPhaser:
             meetings_with_backend += list(queue.meeting_set.filter(backend_type=self.backend_name))
         return meetings_with_backend
 
-    def remove_backend_from_queue_allowed_backends(self, queues_allowing_backend: List[Queue]) -> List[Queue]:
+    def replace_backend_in_queue_allowed_backends(self, queues_allowing_backend: List[Queue]) -> List[Queue]:
         for queue in queues_allowing_backend:
-            queue.remove_allowed_backend(self.backend_name)
+            queue.replace_allowed_backend_with_default(self.backend_name)
         return queues_allowing_backend
 
     @staticmethod
@@ -49,36 +49,36 @@ class BackendPhaser:
         ]
         return started_meetings_with_backend
 
-    def phase_out(self, remove_as_allowed_and_replace_unstarted: bool, delete_started: bool, dry_run: bool):
+    def phase_out(self, replace_allowed_and_unstarted: bool, delete_started: bool, dry_run: bool):
         logger.info(f'Disabled backend: {self.backend_name}')
         if dry_run:
             logger.info('This is a dry run. No changes will be saved, and no records will be deleted.')
 
-        if remove_as_allowed_and_replace_unstarted:
+        if replace_allowed_and_unstarted:
             queues_allowing_backend = self.get_queues_allowing_backend()
 
-            logger.info(f'Removing {self.backend_name} from allowed_backends when present in queues...')
-            modified_queues = self.remove_backend_from_queue_allowed_backends(queues_allowing_backend)
+            logger.info(f"Replacing {self.backend_name} when present in queues' allowed_backends with the default...")
+            modified_queues = self.replace_backend_in_queue_allowed_backends(queues_allowing_backend)
             logger.info(
-                f'Removed {self.backend_name} as an allowed backend '
-                f'from {len(modified_queues)} queue(s).'
+                f'Replaced {self.backend_name} as an allowed backend with the default '
+                f'in {len(modified_queues)} queue(s).'
             )
             logger.info(f'Modified queue ID(s): {[queue.id for queue in modified_queues]}')
             if not dry_run:
                 Queue.objects.bulk_update(modified_queues, fields=['allowed_backends'])
-                logger.info('Persisted changes to queues to the database.')
+                logger.info('Persisted changes to queue(s) to the database.')
 
             logger.info('Replacing backend_type of unstarted meetings from the modified queues with another backend...')
             meetings_with_backend = self.get_meetings_with_backend_through_queues(modified_queues)
             modified_meetings = self.set_unstarted_meetings_to_other_backend(meetings_with_backend)
             logger.info(
                 f'Set the backend_type for {len(modified_meetings)} meeting(s) '
-                f'to other allowed backends.'
+                f'to another allowed backend.'
             )
             logger.info(f'Modified meeting ID(s): {[meeting.id for meeting in modified_meetings]}')
             if not dry_run:
                 Meeting.objects.bulk_update(modified_meetings, fields=['backend_type'])
-                logger.info('Persisted changes to unstarted meetings to the database.')
+                logger.info('Persisted changes to unstarted meeting(s) to the database.')
 
         if delete_started:
             logger.info(f'Finding started meetings with {self.backend_name} as backend_type...')
