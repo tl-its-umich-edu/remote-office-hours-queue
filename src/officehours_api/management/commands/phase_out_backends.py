@@ -18,8 +18,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--remove-as-allowed-and-replace-unstarted',
-            dest='remove_as_allowed_and_replace_unstarted',
+            '--replace-allowed-and-unstarted',
+            dest='replace_allowed_and_unstarted',
             action='store_true',
             help=(
                 'Remove disabled backends as allowed backends for queues '
@@ -46,7 +46,7 @@ class Command(BaseCommand):
         for disabled_backend_name in disabled_backend_names:
             phaser = BackendPhaser(disabled_backend_name)
             phaser.phase_out(
-                options['remove_as_allowed_and_replace_unstarted'],
+                options['replace_allowed_and_unstarted'],
                 options['delete_started'],
                 options['dry_run']
             )
