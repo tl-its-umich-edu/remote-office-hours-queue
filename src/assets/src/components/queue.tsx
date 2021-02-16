@@ -464,7 +464,11 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             `Are you sure you want to ${dialogParts.action}? ` +
             `By ${dialogParts.gerund}, ${dialogParts.consequences}. ` +
             'If you change your mind, you will have to re-join at the end of the line.' +
-            (queueStatus === 'closed' ? ' The queue is currently closed. You will not be able to re-join until the queue is re-opened.' : '')
+            (
+                queueStatus === 'closed'
+                    ? ' Note: The queue is currently closed. You will not be able to re-join until the queue is re-opened.'
+                    : ''
+            )
         );
         showConfirmation(dialogRef, () => doLeaveQueue(), dialogParts.title, description);
     }
