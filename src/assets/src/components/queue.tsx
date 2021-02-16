@@ -6,8 +6,8 @@ import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
 import {
-    BluejeansMetadata, EnabledBackendName, MeetingBackend, MeetingStatus, MyUser, QueueAttendee,
-    User, VideoBackendNames, ZoomMetadata
+    BluejeansMetadata, EnabledBackendName, Meeting, MeetingBackend, MeetingStatus, MyUser,
+    QueueAttendee, User, VideoBackendNames, ZoomMetadata
 } from "../models";
 import {
     checkForbiddenError, Breadcrumbs, DateTimeDisplay, DisabledMessage, EditToggleField, ErrorDisplay,
@@ -59,7 +59,7 @@ interface QueueAttendingProps {
     joinedQueue?: QueueAttendee | null;
     disabled: boolean;
     onJoinQueue: (backend: string) => void;
-    onLeaveQueue: () => void;
+    onLeaveQueue: (myMeeting: Meeting) => void;
     onLeaveAndJoinQueue: (backend: string) => void;
     onChangeAgenda: (agenda: string) => void;
     onShowDialog: () => void;
@@ -256,7 +256,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         <Button
             variant='link'
             type='button'
-            onClick={() => props.onLeaveQueue()}
+            onClick={() => props.onLeaveQueue(meeting)}
             disabled={props.disabled}
             aria-label={leaveButtonText}
         >
@@ -446,8 +446,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
         await api.removeMeeting(queue!.my_meeting!.id);
     }
     const [doLeaveQueue, leaveQueueLoading, leaveQueueError] = usePromise(leaveQueue);
-    const confirmLeaveQueue = (queueStatus: 'open' | 'closed', meetingStatus: MeetingStatus | undefined) => {
-        const dialogParts = (meetingStatus !== undefined && meetingStatus === MeetingStatus.STARTED)
+    const confirmLeaveQueue = (queueStatus: 'open' | 'closed', meetingStatus: MeetingStatus) => {
+        const dialogParts = (meetingStatus === MeetingStatus.STARTED)
             ? {
                 title: 'Cancel Meeting?',
                 action: 'cancel the meeting',
@@ -507,12 +507,23 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueDisplay = queue && selectedBackend
-        && <QueueAttending queue={queue} backends={props.backends} user={props.user} joinedQueue={myUser?.my_queue} 
-            disabled={isChanging} onJoinQueue={doJoinQueue} onLeaveQueue={() => confirmLeaveQueue(queue.status, queue.my_meeting?.status)}
-            onLeaveAndJoinQueue={doLeaveAndJoinQueue} onChangeAgenda={doChangeAgenda}
-            onShowDialog={() => setShowMeetingTypeDialog(true)}
-            onChangeBackendType={doChangeBackendType}
-            selectedBackend={selectedBackend} onChangeBackend={setSelectedBackend}/>
+        && (
+            <QueueAttending
+                queue={queue}
+                backends={props.backends}
+                user={props.user}
+                joinedQueue={myUser?.my_queue}
+                disabled={isChanging}
+                onJoinQueue={doJoinQueue}
+                onLeaveQueue={(myMeeting: Meeting) => confirmLeaveQueue(queue.status, myMeeting.status)}
+                onLeaveAndJoinQueue={doLeaveAndJoinQueue}
+                onChangeAgenda={doChangeAgenda}
+                onShowDialog={() => setShowMeetingTypeDialog(true)}
+                onChangeBackendType={doChangeBackendType}
+                selectedBackend={selectedBackend}
+                onChangeBackend={setSelectedBackend}
+            />
+        );
     const meetingTypeDialog = queue && selectedBackend
         && <ChangeMeetingTypeDialog queue={queue} backends={props.backends} show={showMeetingTypeDialog} 
             onClose={() => setShowMeetingTypeDialog(false)} 
