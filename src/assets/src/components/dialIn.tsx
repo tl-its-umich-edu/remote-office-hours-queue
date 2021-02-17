@@ -48,7 +48,7 @@ const ZoomDialInMessage = (props: DialInMessageProps) => {
     const hostMessage = (props.isHost && props.profileURL) && (
         <p>
             When calling in by phone, you will need to enter a host key to start the meeting.
-            Find your host key at the bottom of <a href={props.profileURL}>your Zoom profile</a>.
+            Find your host key at the bottom of <a href={props.profileURL} target='_blank'>your Zoom profile</a>.
             DO NOT share your host key with anyone!
         </p>
     )
