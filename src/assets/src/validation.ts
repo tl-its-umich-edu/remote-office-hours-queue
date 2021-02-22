@@ -1,5 +1,5 @@
 import { string, StringSchema, SchemaDescription, TestMessageParams } from 'yup';
-import { MeetingBackend, QueueHost } from "./models";
+import { MeetingBackend, MeetingStatus, QueueHost } from "./models";
 import { getUser } from "./services/api";
 
 // Yup: https://github.com/jquense/yup
@@ -102,8 +102,9 @@ export function validateMeetingTypes (value: Set<string>, backends: MeetingBacke
 
     let existingMeetingConflict = false;
     if (queue) {
-        const uniqueMeetingTypes = new Set(queue!.meeting_set.map(m => m.backend_type));
-        const conflictingTypes = [...uniqueMeetingTypes]
+        const unstartedMeetings = queue!.meeting_set.filter(m => m.status !== MeetingStatus.STARTED);
+        const uniqueUnstartedMeetingTypes = new Set(unstartedMeetings.map(m => m.backend_type));
+        const conflictingTypes = [...uniqueUnstartedMeetingTypes]
             .filter(uniqueMeetingType => !value.has(uniqueMeetingType));
         const conflictingTypeNames = conflictingTypes
             .map(ct => backends.find(b => b.name === ct)?.friendly_name ?? ct);
