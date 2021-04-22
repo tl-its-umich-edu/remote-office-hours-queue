@@ -98,7 +98,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
             <ul>
                 <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
                 <li>You are not in the meeting queue yet</li>
-                <li>In-person meetings will take place at: <strong>{props.queue.name}</strong></li>
+                <li>In-person meetings will take place at: <strong>{props.queue.queueLocation}</strong></li>
             </ul>
         </div>
         {controls}
