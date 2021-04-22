@@ -135,6 +135,8 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     const [descriptValidationResult, validateAndSetDescriptResult, clearDescriptResult] = useStringValidation(queueDescriptSchema, true);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
     const [allowedValidationResult, validateAndSetAllowedResult, clearAllowedResult] = useMeetingTypesValidation(props.backends, queue);
+    const [queueLocation, setQueueLocation] = useState('')
+    const [locationValidationResult, validateAndSetLocationResult] = useStringValidation(queueNameSchema, true)
 
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
@@ -144,6 +146,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
                 setName(q.name);
                 setDescription(q.description);
                 setAllowedMeetingTypes(new Set(q.allowed_backends));
+                setQueueLocation(q.queueLocation);
             }
             setQueue(q);
             setAuthError(undefined);
@@ -162,9 +165,9 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
 
     // Set up API interactions
-    const updateQueue = async (name?: string, description?: string, allowed_backends?: Set<string>) => {
+    const updateQueue = async (name?: string, description?: string, location?: string, allowed_backends?: Set<string>) => {
         recordQueueManagementEvent("Updated Queue Details");
-        return await api.updateQueue(queue!.id, name, description, allowed_backends);
+        return await api.updateQueue(queue!.id, name, description, location, allowed_backends);
     }
     const [doUpdateQueue, updateQueueLoading, updateQueueError] = usePromise(updateQueue, setQueueChecked);
 
@@ -210,6 +213,12 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         setShowSuccessMessage(false);
     };
 
+    const handleLocationChange = (newQueueLocation: string) => {
+        setQueueLocation(newQueueLocation);
+        validateAndSetLocationResult(newQueueLocation);
+        setShowSuccessMessage(false);
+    };
+
     // On click handlers
     const handleSaveGeneralClick = () => {
         const curNameValidationResult = !nameValidationResult ? validateAndSetNameResult(name) : nameValidationResult;
@@ -217,13 +226,16 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             ? validateAndSetDescriptResult(description) : descriptValidationResult;
         const curAllowedValidationResult = !allowedValidationResult
             ? validateAndSetAllowedResult(allowedMeetingTypes) : allowedValidationResult;
-        if (!curNameValidationResult.isInvalid && !curDescriptValidationResult.isInvalid && !curAllowedValidationResult.isInvalid) {
+        const curLocationValidationResult = !locationValidationResult 
+            ? validateAndSetLocationResult(queueLocation) : locationValidationResult;
+        if (!curNameValidationResult.isInvalid && !curDescriptValidationResult.isInvalid && !curAllowedValidationResult.isInvalid && !curLocationValidationResult) {
             const nameForUpdate = name.trim() !== queue?.name ? name : undefined;
             const descriptForUpdate = description.trim() !== queue?.description ? description : undefined;
             const allowedForUpdate = checkIfSetsAreDifferent(new Set(queue!.allowed_backends), allowedMeetingTypes)
                 ? allowedMeetingTypes : undefined;
-            if (nameForUpdate !== undefined || descriptForUpdate !== undefined || allowedForUpdate) {
-                doUpdateQueue(nameForUpdate, descriptForUpdate, allowedForUpdate);
+            const locationForUpdate = queueLocation.trim() !== queue?.queueLocation ? queueLocation : undefined;
+            if (nameForUpdate !== undefined || descriptForUpdate !== undefined || allowedForUpdate || locationForUpdate !== undefined) {
+                doUpdateQueue(nameForUpdate, descriptForUpdate, locationForUpdate, allowedForUpdate);
                 setShowSuccessMessage(true);
             }
             resetValidationResults();
@@ -235,6 +247,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         setName(queue!.name);
         setDescription(queue!.description);
         setAllowedMeetingTypes(new Set(queue!.allowed_backends));
+        setQueueLocation(queue!.queueLocation);
         resetValidationResults();
     }
 
@@ -273,6 +286,9 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
                 onRemoveHost={confirmRemoveHost}
                 checkHostError={addHostError ? { source: 'Add Host', error: addHostError } : undefined}
                 onDeleteClick={confirmRemoveQueue}
+                queueLocation={queueLocation}
+                locationValidationResult={locationValidationResult}
+                onChangeLocation={handleLocationChange}
             />
         );
 
