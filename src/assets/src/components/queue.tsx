@@ -308,7 +308,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     <strong>Meeting Via</strong>: {meetingBackend.friendly_name} {!inProgress && changeMeetingType}
                 </Card.Text>
                 <Card.Text>
-                    <strong>Meet At</strong>: {props.queue.name}
+                    <strong>Meet At</strong>: {props.queue.queueLocation}
                 </Card.Text>
                 {agendaBlock}
             </Card.Body>
