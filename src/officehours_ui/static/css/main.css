@@ -687,3 +687,16 @@ div[role=main] {
 .badge-success {
 	background-color: var(--custom-green);
 }
+
+a.nav-link:hover {
+	background-color: #004881;
+	border-radius: 3px;
+}
+
+a.dropdown-item:hover {
+	background-color: #C0C0C0 !important;
+}
+
+input.dropdown-item:hover {
+	background-color: #C0C0C0 !important;
+}
