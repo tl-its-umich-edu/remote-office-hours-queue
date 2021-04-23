@@ -56,6 +56,7 @@ const blankText = 'This field may not be left blank.';
 export const queueNameSchema = string().trim().required(blankText).max(100, createRemainingCharsMessage);
 export const queueDescriptSchema = string().trim().max(1000, createRemainingCharsMessage);
 export const meetingAgendaSchema = string().trim().max(100, createRemainingCharsMessage);
+export const queueLocationSchema = string().trim().required(blankText).max(100, createRemainingCharsMessage);
 export const uniqnameSchema = string().trim().lowercase()
     .min(3, 'Uniqnames must be at least 3 characters long.')
     .max(8, 'Uniqnames must be at most 8 characters long.')

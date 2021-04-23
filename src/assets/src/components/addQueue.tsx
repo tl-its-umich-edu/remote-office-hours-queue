@@ -130,7 +130,7 @@ export function AddQueuePage(props: PageProps) {
     const [descriptValidationResult, validateAndSetDescriptResult] = useStringValidation(queueDescriptSchema, true);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
     const [allowedValidationResult, validateAndSetAllowedResult] = useMeetingTypesValidation(props.backends);
-    const [queueLocation, setQueueLocation] = useState('')
+    const [physLocation, setPhysLocation] = useState('')
     const [locationValidationResult, validateAndSetLocationResult] = useStringValidation(queueNameSchema, true)
 
     const [hosts, setHosts] = useState([props.user] as User[]);
@@ -145,9 +145,9 @@ export function AddQueuePage(props: PageProps) {
     );
 
     const addQueue = async (
-        queueName: string, allowedBackends: Set<string>, queueDescription: string, queueLocation: string, hosts: User[]
+        queueName: string, allowedBackends: Set<string>, queueDescription: string, queuePhysLocation: string, hosts: User[]
     ): Promise<QueueHost> => {
-        return await api.createQueue(queueName, allowedBackends, queueDescription, queueLocation, hosts);
+        return await api.createQueue(queueName, allowedBackends, queueDescription, queuePhysLocation, hosts);
     };
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(
         addQueue,
@@ -172,9 +172,9 @@ export function AddQueuePage(props: PageProps) {
         validateAndSetAllowedResult(newAllowedBackends);
     };
 
-    const handleLocationChange = (newQueueLocation: string) => {
-        setQueueLocation(newQueueLocation);
-        validateAndSetLocationResult(newQueueLocation);
+    const handleLocationChange = (newPhysLocation: string) => {
+        setPhysLocation(newPhysLocation);
+        validateAndSetLocationResult(newPhysLocation);
     };
 
     // On click handlers
@@ -187,8 +187,13 @@ export function AddQueuePage(props: PageProps) {
         const curAllowedValidationResult = !allowedValidationResult
             ? validateAndSetAllowedResult(allowedMeetingTypes) : allowedValidationResult;
         const curLocationValidationResult = !locationValidationResult 
-            ? validateAndSetLocationResult(queueLocation) : locationValidationResult;
-        if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid && !curLocationValidationResult.isInvalid) {
+            ? validateAndSetLocationResult(physLocation) : locationValidationResult;
+        if (
+            !curNameValidationResult!.isInvalid && 
+            !curDescriptValidationResult!.isInvalid && 
+            !curAllowedValidationResult!.isInvalid && 
+            !curLocationValidationResult.isInvalid
+        ) {
             setActiveKey(AvailableTabs.Hosts);
             setShowCorrectGeneralMessage(false);
         } else {
@@ -206,7 +211,7 @@ export function AddQueuePage(props: PageProps) {
 
     const handleManageHostsFinishClick = () => {
         if (name !== '' && allowedMeetingTypes.size !== 0) {
-            doAddQueue(name, allowedMeetingTypes, description, queueLocation, hosts);
+            doAddQueue(name, allowedMeetingTypes, description, physLocation, hosts);
         } else {
             throw Error('Attempted to pass invalid data to API for queue creation');
         }
@@ -251,7 +256,7 @@ export function AddQueuePage(props: PageProps) {
                 checkHostError={checkHostError ? { source: 'Check Host', error: checkHostError } : undefined}
                 onBackClick={() => setActiveKey(AvailableTabs.General)}
                 onFinishClick={handleManageHostsFinishClick}
-                queueLocation={queueLocation}
+                physLocation={physLocation}
                 locationValidationResult={locationValidationResult}
                 onChangeLocation={handleLocationChange}
             />
