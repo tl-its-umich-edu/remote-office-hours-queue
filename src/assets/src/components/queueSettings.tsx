@@ -146,7 +146,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
                 setName(q.name);
                 setDescription(q.description);
                 setAllowedMeetingTypes(new Set(q.allowed_backends));
-                setPhysLocation(q.physLocation);
+                setPhysLocation(q.phys_location);
             }
             setQueue(q);
             setAuthError(undefined);
@@ -229,7 +229,8 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             ? validateAndSetAllowedResult(allowedMeetingTypes) : allowedValidationResult;
         const curLocationValidationResult = !locationValidationResult 
             ? validateAndSetLocationResult(physLocation) : locationValidationResult;
-        if (!curNameValidationResult.isInvalid && 
+        if (
+            !curNameValidationResult.isInvalid && 
             !curDescriptValidationResult.isInvalid && 
             !curAllowedValidationResult.isInvalid && 
             !curLocationValidationResult.isInvalid
@@ -238,7 +239,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             const descriptForUpdate = description.trim() !== queue?.description ? description : undefined;
             const allowedForUpdate = checkIfSetsAreDifferent(new Set(queue!.allowed_backends), allowedMeetingTypes)
                 ? allowedMeetingTypes : undefined;
-            const locationForUpdate = physLocation.trim() !== queue?.physLocation ? physLocation : undefined;
+            const locationForUpdate = physLocation.trim() !== queue?.phys_location ? physLocation : undefined;
             if (nameForUpdate !== undefined || descriptForUpdate !== undefined || allowedForUpdate || locationForUpdate !== undefined) {
                 doUpdateQueue(nameForUpdate, descriptForUpdate, locationForUpdate, allowedForUpdate);
                 setShowSuccessMessage(true);
@@ -252,7 +253,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         setName(queue!.name);
         setDescription(queue!.description);
         setAllowedMeetingTypes(new Set(queue!.allowed_backends));
-        setPhysLocation(queue!.physLocation);
+        setPhysLocation(queue!.phys_location);
         resetValidationResults();
     }
 

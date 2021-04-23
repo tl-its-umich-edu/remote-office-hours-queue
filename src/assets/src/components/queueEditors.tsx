@@ -80,7 +80,7 @@ export function GeneralEditor(props: GeneralEditorProps) {
             {props.allowedMeetingTypes.has('inperson') && 
                 <>
                     <h3>In-Person Meeting Location {requiredSymbol}</h3>
-                    <p>Enter an in-person location where you would like to meet:</p>
+                    <p>Attendees who select to meet in-person will be instructed to meet at this location. Enter all information an attendee would need to know, such as a street address, building name, and/or room number.</p>
                     <StatelessInputGroupForm 
                         id='physLocation'
                         value={props.physLocation}
