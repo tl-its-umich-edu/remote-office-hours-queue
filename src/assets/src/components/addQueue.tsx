@@ -11,7 +11,7 @@ import { useMeetingTypesValidation, useStringValidation } from "../hooks/useVali
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { confirmUserExists, queueDescriptSchema, queueNameSchema } from "../validation";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
 
 
 enum AvailableTabs {
@@ -131,7 +131,7 @@ export function AddQueuePage(props: PageProps) {
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
     const [allowedValidationResult, validateAndSetAllowedResult] = useMeetingTypesValidation(props.backends);
     const [physLocation, setPhysLocation] = useState('')
-    const [locationValidationResult, validateAndSetLocationResult] = useStringValidation(queueNameSchema, true)
+    const [locationValidationResult, validateAndSetLocationResult] = useStringValidation(queueLocationSchema, true)
 
     const [hosts, setHosts] = useState([props.user] as User[]);
 
@@ -192,7 +192,7 @@ export function AddQueuePage(props: PageProps) {
             !curNameValidationResult!.isInvalid && 
             !curDescriptValidationResult!.isInvalid && 
             !curAllowedValidationResult!.isInvalid && 
-            !curLocationValidationResult.isInvalid
+            !curLocationValidationResult!.isInvalid
         ) {
             setActiveKey(AvailableTabs.Hosts);
             setShowCorrectGeneralMessage(false);
