@@ -166,9 +166,9 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
 
     // Set up API interactions
-    const updateQueue = async (name?: string, description?: string, location?: string, allowed_backends?: Set<string>) => {
+    const updateQueue = async (name?: string, description?: string, physLocation?: string, allowed_backends?: Set<string>) => {
         recordQueueManagementEvent("Updated Queue Details");
-        return await api.updateQueue(queue!.id, name, description, location, allowed_backends);
+        return await api.updateQueue(queue!.id, name, description, physLocation, allowed_backends);
     }
     const [doUpdateQueue, updateQueueLoading, updateQueueError] = usePromise(updateQueue, setQueueChecked);
 
