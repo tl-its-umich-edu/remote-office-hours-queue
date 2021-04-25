@@ -151,7 +151,7 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Queue
         fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status',
-                  'allowed_backends']
+                  'allowed_backends', 'meeting_location']
 
     def get_line_length(self, obj):
         return len([meeting for meeting in obj.meeting_set.all() if meeting.status != MeetingStatus.STARTED])
@@ -186,7 +186,7 @@ class QueueHostSerializer(QueueAttendeeSerializer):
     class Meta:
         model = Queue
         fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids',
-                  'meeting_set', 'line_length', 'my_meeting', 'status', 'allowed_backends']
+                  'meeting_set', 'line_length', 'my_meeting', 'status', 'allowed_backends', 'meeting_location']
 
     def validate_host_ids(self, host_ids):
         '''

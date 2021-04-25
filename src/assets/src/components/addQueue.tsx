@@ -11,7 +11,7 @@ import { useMeetingTypesValidation, useStringValidation } from "../hooks/useVali
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { confirmUserExists, queueDescriptSchema, queueNameSchema } from "../validation";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueMeetingLocationSchema } from "../validation";
 
 
 enum AvailableTabs {
@@ -130,6 +130,10 @@ export function AddQueuePage(props: PageProps) {
     const [descriptValidationResult, validateAndSetDescriptResult] = useStringValidation(queueDescriptSchema, true);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
     const [allowedValidationResult, validateAndSetAllowedResult] = useMeetingTypesValidation(props.backends);
+    // our code
+    const [meetingLocation, setMeetingLocation] = useState('');
+    const [meetingLocationValidationResult, validateAndSetMeetingLocationResult] = useStringValidation(queueMeetingLocationSchema, true);
+    // our code
 
     const [hosts, setHosts] = useState([props.user] as User[]);
 
@@ -143,9 +147,9 @@ export function AddQueuePage(props: PageProps) {
     );
 
     const addQueue = async (
-        queueName: string, allowedBackends: Set<string>, queueDescription: string, hosts: User[]
+        queueName: string, allowedBackends: Set<string>, meetingLocation: string, queueDescription: string, hosts: User[]
     ): Promise<QueueHost> => {
-        return await api.createQueue(queueName, allowedBackends, queueDescription, hosts);
+        return await api.createQueue(queueName, allowedBackends, meetingLocation, queueDescription, hosts);
     };
     const [doAddQueue, addQueueLoading, addQueueError] = usePromise(
         addQueue,
@@ -169,6 +173,12 @@ export function AddQueuePage(props: PageProps) {
         setAllowedMeetingTypes(newAllowedBackends);
         validateAndSetAllowedResult(newAllowedBackends);
     };
+    //  our code
+    const handleMeetingLocationChange = (newMeetingLocation: string) => {
+        setMeetingLocation(newMeetingLocation);
+        validateAndSetMeetingLocationResult(newMeetingLocation);
+    };
+    //  our code
 
     // On click handlers
     const handleHostRemoveClick = (host: User) => setHosts(hosts.filter((user: User) => user.id !== host.id));
@@ -179,7 +189,11 @@ export function AddQueuePage(props: PageProps) {
             ? validateAndSetDescriptResult(description) : descriptValidationResult;
         const curAllowedValidationResult = !allowedValidationResult
             ? validateAndSetAllowedResult(allowedMeetingTypes) : allowedValidationResult;
-        if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid) {
+        // our code
+        const curMeetingLocationValidationResult = !meetingLocationValidationResult
+            ? validateAndSetMeetingLocationResult(meetingLocation) : meetingLocationValidationResult;
+        // our code
+        if (!curNameValidationResult!.isInvalid && !curDescriptValidationResult!.isInvalid && !curAllowedValidationResult!.isInvalid && !curMeetingLocationValidationResult!.isInvalid) {
             setActiveKey(AvailableTabs.Hosts);
             setShowCorrectGeneralMessage(false);
         } else {
@@ -197,7 +211,7 @@ export function AddQueuePage(props: PageProps) {
 
     const handleManageHostsFinishClick = () => {
         if (name !== '' && allowedMeetingTypes.size !== 0) {
-            doAddQueue(name, allowedMeetingTypes, description, hosts);
+            doAddQueue(name, allowedMeetingTypes, meetingLocation, description, hosts);
         } else {
             throw Error('Attempted to pass invalid data to API for queue creation');
         }
@@ -232,6 +246,11 @@ export function AddQueuePage(props: PageProps) {
                 allowedMeetingTypes={allowedMeetingTypes}
                 allowedValidationResult={allowedValidationResult}
                 onChangeAllowed={handleAllowedChange}
+                // our code
+                meetingLocation={meetingLocation}
+                meetingLocationValidationResult={meetingLocationValidationResult}
+                onChangeMeetingLocation={handleMeetingLocationChange}
+                // our code
                 showCorrectGeneralMessage={showCorrectGeneralMessage}
                 onGeneralNextClick={handleGeneralNextClick}
                 currentUser={props.user}

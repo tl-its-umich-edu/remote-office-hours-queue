@@ -29,6 +29,11 @@ interface GeneralEditorProps extends QueueEditorProps {
     onChangeAllowed: (allowed: Set<string>) => void;
     showCorrectGeneralMessage: boolean;
     showSuccessMessage?: boolean;
+    // our code
+    meetingLocation: string;
+    meetingLocationValidationResult?: ValidationResult;
+    onChangeMeetingLocation: (value: string) => void;
+    // our code
 }
 
 export function GeneralEditor(props: GeneralEditorProps) {
@@ -74,6 +79,27 @@ export function GeneralEditor(props: GeneralEditorProps) {
                 onChange={props.onChangeAllowed}
                 disabled={props.disabled}
             />
+            {/* our code */}
+            {
+                props.allowedMeetingTypes.has("inperson") &&
+                <div>
+                <h3>Meeting Location {requiredSymbol}</h3>
+                <p>Attendees who select to meet in-person will be instructed to 
+                    meet at this location. Enter all information an attendee would 
+                    need to know, such as a street address, building name, and/or 
+                    room number.</p>
+                <StatelessInputGroupForm
+                    id='meetingLocation'
+                    value={props.meetingLocation}
+                    formLabel='Meeting Location'
+                    placeholder='Meeting Location...'
+                    disabled={props.disabled}
+                    validationResult={props.meetingLocationValidationResult}
+                    onChangeValue={props.onChangeMeetingLocation}
+                />
+                </div>
+            }
+            {/* our code */}
         </div>
     );
 }

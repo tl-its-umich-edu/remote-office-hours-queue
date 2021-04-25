@@ -80,13 +80,14 @@ export const getQueue = async (id: number) => {
 }
 
 export const createQueue = async (
-    name: string, allowed_backends: Set<string>, description?: string, hosts?: User[]
+    name: string, allowed_backends: Set<string>, meeting_location: string, description?: string, hosts?: User[]
 ) => {
     const resp = await fetch("/api/queues/", { 
         method: "POST",
         body: JSON.stringify({
             name: name,
             allowed_backends: Array.from(allowed_backends),
+            meeting_location: meeting_location,
             description: description,
             host_ids: hosts ? hosts.map(h => h.id) : []
         }),
@@ -97,12 +98,15 @@ export const createQueue = async (
 }
 
 export const updateQueue = async (
-    queue_id: number, name?: string, description?: string, allowed_backends?: Set<string>
+    queue_id: number, name?: string, description?: string, allowed_backends?: Set<string>, meeting_location?: string
 ) => {
     const queuePatched = Object();
     if (name !== undefined) queuePatched['name'] = name;
     if (description !== undefined) queuePatched['description'] = description;
     if (allowed_backends) queuePatched['allowed_backends'] = Array.from(allowed_backends);
+    // our code
+    if (meeting_location !== undefined) queuePatched['meeting_location'] = meeting_location;
+    // our code
 
     const resp = await fetch(`/api/queues/${queue_id}/`, {
         method: "PATCH",

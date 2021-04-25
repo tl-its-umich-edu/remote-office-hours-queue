@@ -60,7 +60,9 @@ export const uniqnameSchema = string().trim().lowercase()
     .min(3, 'Uniqnames must be at least 3 characters long.')
     .max(8, 'Uniqnames must be at most 8 characters long.')
     .matches(/^[a-z]+$/i, 'Uniqnames cannot contain non-alphabetical characters.');
-
+// our code
+export const queueMeetingLocationSchema = string().trim().required(blankText).max(200, createRemainingCharsMessage);
+// our code
 
 // Type validator(s)
 

@@ -69,15 +69,16 @@ export interface QueueFull extends QueueBase {
     description: string;
     hosts: User[];
     allowed_backends: string[];
-}
-
-export interface QueueHost extends QueueAttendee {
-    meeting_set: Meeting[];
+    meeting_location: string;
 }
 
 export interface QueueAttendee extends QueueFull {
     my_meeting: Meeting | null;
     line_length: number;
+}
+
+export interface QueueHost extends QueueAttendee {
+    meeting_set: Meeting[];
 }
 
 export const isQueueHost = (q: QueueAttendee | QueueHost): q is QueueHost => {

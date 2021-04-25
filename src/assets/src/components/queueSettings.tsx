@@ -17,7 +17,7 @@ import { QueueAttendee, QueueHost, User, isQueueHost } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { checkIfSetsAreDifferent, recordQueueManagementEvent, redirectToLogin } from "../utils";
-import { confirmUserExists, queueDescriptSchema, queueNameSchema } from "../validation";
+import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueMeetingLocationSchema } from "../validation";
 
 
 const buttonSpacing = 'mr-3 mb-3';
@@ -135,6 +135,10 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     const [descriptValidationResult, validateAndSetDescriptResult, clearDescriptResult] = useStringValidation(queueDescriptSchema, true);
     const [allowedMeetingTypes, setAllowedMeetingTypes] = useState(new Set() as Set<string>);
     const [allowedValidationResult, validateAndSetAllowedResult, clearAllowedResult] = useMeetingTypesValidation(props.backends, queue);
+    // our code
+    const [meetingLocation, setMeetingLocation] = useState('');
+    const [meetingLocationValidationResult, validateAndSetMeetingLocationResult, clearMeetingLocationResult] = useStringValidation(queueMeetingLocationSchema, true);
+    // our code
 
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
@@ -144,6 +148,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
                 setName(q.name);
                 setDescription(q.description);
                 setAllowedMeetingTypes(new Set(q.allowed_backends));
+                setMeetingLocation(q.meeting_location)
             }
             setQueue(q);
             setAuthError(undefined);
@@ -159,12 +164,13 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         clearNameResult()
         clearDescriptResult();
         clearAllowedResult();
+        clearMeetingLocationResult();
     }
 
     // Set up API interactions
-    const updateQueue = async (name?: string, description?: string, allowed_backends?: Set<string>) => {
+    const updateQueue = async (name?: string, description?: string, allowed_backends?: Set<string>, meeting_location?: string) => {
         recordQueueManagementEvent("Updated Queue Details");
-        return await api.updateQueue(queue!.id, name, description, allowed_backends);
+        return await api.updateQueue(queue!.id, name, description, allowed_backends, meeting_location);
     }
     const [doUpdateQueue, updateQueueLoading, updateQueueError] = usePromise(updateQueue, setQueueChecked);
 
@@ -209,6 +215,13 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         validateAndSetAllowedResult(newAllowedBackends);
         setShowSuccessMessage(false);
     };
+    // our code
+    const handleMeetingLocationChange = (newMeetingLocation: string) => {
+        setMeetingLocation(newMeetingLocation);
+        validateAndSetMeetingLocationResult(newMeetingLocation);
+        setShowSuccessMessage(false);
+    };
+    // our code
 
     // On click handlers
     const handleSaveGeneralClick = () => {
@@ -217,13 +230,20 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
             ? validateAndSetDescriptResult(description) : descriptValidationResult;
         const curAllowedValidationResult = !allowedValidationResult
             ? validateAndSetAllowedResult(allowedMeetingTypes) : allowedValidationResult;
-        if (!curNameValidationResult.isInvalid && !curDescriptValidationResult.isInvalid && !curAllowedValidationResult.isInvalid) {
+        // our code
+        const curMeetingLocationValidationResult = !meetingLocationValidationResult
+            ? validateAndSetMeetingLocationResult(name) : meetingLocationValidationResult;
+        // our code
+        if (!curNameValidationResult.isInvalid && !curDescriptValidationResult.isInvalid && !curAllowedValidationResult.isInvalid && !curMeetingLocationValidationResult!.isInvalid) {
             const nameForUpdate = name.trim() !== queue?.name ? name : undefined;
             const descriptForUpdate = description.trim() !== queue?.description ? description : undefined;
             const allowedForUpdate = checkIfSetsAreDifferent(new Set(queue!.allowed_backends), allowedMeetingTypes)
                 ? allowedMeetingTypes : undefined;
-            if (nameForUpdate !== undefined || descriptForUpdate !== undefined || allowedForUpdate) {
-                doUpdateQueue(nameForUpdate, descriptForUpdate, allowedForUpdate);
+            // our code
+            const meetingLocationForUpdate = meetingLocation.trim() !== queue?.meeting_location ? meetingLocation : undefined;
+            // our code
+            if (nameForUpdate !== undefined || descriptForUpdate !== undefined || allowedForUpdate || meetingLocationForUpdate !== undefined) {
+                doUpdateQueue(nameForUpdate, descriptForUpdate, allowedForUpdate, meetingLocationForUpdate);
                 setShowSuccessMessage(true);
             }
             resetValidationResults();
@@ -235,6 +255,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
         setName(queue!.name);
         setDescription(queue!.description);
         setAllowedMeetingTypes(new Set(queue!.allowed_backends));
+        setMeetingLocation(queue!.meeting_location);
         resetValidationResults();
     }
 
@@ -263,6 +284,11 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
                 allowedMeetingTypes={allowedMeetingTypes}
                 allowedValidationResult={allowedValidationResult}
                 onChangeAllowed={handleAllowedChange}
+                // our code
+                meetingLocation={meetingLocation}
+                meetingLocationValidationResult={meetingLocationValidationResult}
+                onChangeMeetingLocation={handleMeetingLocationChange}
+                // our code
                 showCorrectGeneralMessage={showCorrectGeneralMessage}
                 showSuccessMessage={showSuccessMessage}
                 onSaveGeneralClick={handleSaveGeneralClick}

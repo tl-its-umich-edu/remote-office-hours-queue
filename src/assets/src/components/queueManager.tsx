@@ -168,6 +168,10 @@ function QueueManager(props: QueueManagerProps) {
                 <Col md={2}><div id='created'>Created</div></Col>
                 <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
             </Row>
+            <Row noGutters className={spacingClass}>
+                <Col md={2}><div id='meetingLocation'>Meeting Location</div></Col>
+                <Col md={6}><div aria-labelledby='meetingLocation'>{props.queue.meeting_location}</div></Col>
+            </Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
             <Row noGutters className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
             <Row noGutters className={spacingClass}>
@@ -187,6 +191,9 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
+            {/* our code */}
+            <h2 className={spacingClass}>Chat with the Queue</h2>
+            {/* our code */}
             <Row noGutters className={spacingClass}>
                 <Col md={12}><MeetingsInQueueTable meetings={unstartedMeetings} {...props} /></Col>
             </Row>
