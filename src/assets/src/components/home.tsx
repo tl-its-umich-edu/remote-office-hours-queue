@@ -47,7 +47,7 @@ export function HomePage(props: PageProps) {
             <QueueLookup/>
             <hr/>
             <Link to="/manage">
-                Manage Your Own Queues
+                Manage Queues
             </Link>
             </>
         )
