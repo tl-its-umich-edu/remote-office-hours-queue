@@ -191,9 +191,6 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
-            {/* our code */}
-            <h2 className={spacingClass}>Chat with the Queue</h2>
-            {/* our code */}
             <Row noGutters className={spacingClass}>
                 <Col md={12}><MeetingsInQueueTable meetings={unstartedMeetings} {...props} /></Col>
             </Row>
