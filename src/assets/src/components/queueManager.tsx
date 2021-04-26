@@ -172,6 +172,10 @@ function QueueManager(props: QueueManagerProps) {
                 <Col md={2}><div id='meetingLocation'>Meeting Location</div></Col>
                 <Col md={6}><div aria-labelledby='meetingLocation'>{props.queue.meeting_location}</div></Col>
             </Row>
+            <Row noGutters className={spacingClass}>
+                <Col md={2}><div id='description'>Description</div></Col>
+                <Col md={6}><div aria-labelledby='description'>{props.queue.description}</div></Col>
+            </Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
             <Row noGutters className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
             <Row noGutters className={spacingClass}>
