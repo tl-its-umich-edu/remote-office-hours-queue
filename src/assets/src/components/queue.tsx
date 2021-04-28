@@ -71,6 +71,14 @@ interface QueueAttendingProps {
 function QueueAttendingNotJoined(props: QueueAttendingProps) {
     const joinedOther = props.joinedQueue && props.joinedQueue.id !== props.queue.id;
     
+    const notJoinedInpersonMeetingText = (
+        props.queue.inperson_location === ''
+            ? (
+                'The host(s) have not specified an in-person meeting location'
+            )
+            : <>In-person meetings will take place at: <strong>{props.queue.inperson_location}</strong></>
+    );
+
     const controls = props.queue.status !== "closed" && (
         joinedOther && props.joinedQueue
             ? (
@@ -99,8 +107,8 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
                 <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
                 <li>You are not in the meeting queue yet</li>
                 {
-                    props.queue.allowed_backends.includes('inperson') &&
-                    <li>In-person meetings will take place at: <strong>{props.queue.inperson_location}</strong></li>
+                    props.queue.allowed_backends.includes('inperson') && 
+                    <li>{notJoinedInpersonMeetingText}</li>
                 }
             </ul>
         </div>
@@ -278,6 +286,14 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
             : 'The host has created the meeting. Join it now! The host will join when they are ready for you.'
     );
 
+    const joinedInpersonMeetingText = (
+        props.queue.inperson_location === '' 
+            ? (
+                'The host(s) have not specified an in-person meeting location'
+            )
+            : props.queue.inperson_location
+    );
+
     const joinLink = isVideoMeeting && (
         meeting.backend_metadata!.meeting_url
             ? (
@@ -313,7 +329,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 {
                     meetingBackend.name === 'inperson' &&
                     <Card.Text>
-                        <strong>Meet At</strong>: {props.queue.inperson_location}
+                        <strong>Meet At</strong>: {joinedInpersonMeetingText}
                     </Card.Text>
                 }
                 {agendaBlock}
