@@ -80,7 +80,7 @@ export const getQueue = async (id: number) => {
 }
 
 export const createQueue = async (
-    name: string, allowed_backends: Set<string>, description?: string, phys_location?: string, hosts?: User[]
+    name: string, allowed_backends: Set<string>, description?: string, inperson_location?: string, hosts?: User[]
 ) => {
     const resp = await fetch("/api/queues/", { 
         method: "POST",
@@ -88,7 +88,7 @@ export const createQueue = async (
             name: name,
             allowed_backends: Array.from(allowed_backends),
             description: description,
-            phys_location: phys_location,
+            inperson_location: inperson_location,
             host_ids: hosts ? hosts.map(h => h.id) : []
         }),
         headers: getPostHeaders(),
@@ -98,12 +98,12 @@ export const createQueue = async (
 }
 
 export const updateQueue = async (
-    queue_id: number, name?: string, description?: string, phys_location?: string, allowed_backends?: Set<string>
+    queue_id: number, name?: string, description?: string, inperson_location?: string, allowed_backends?: Set<string>
 ) => {
     const queuePatched = Object();
     if (name !== undefined) queuePatched['name'] = name;
     if (description !== undefined) queuePatched['description'] = description;
-    if (phys_location !== undefined) queuePatched['phys_location'] = phys_location;
+    if (inperson_location !== undefined) queuePatched['inperson_location'] = inperson_location;
     if (allowed_backends) queuePatched['allowed_backends'] = Array.from(allowed_backends);
 
     const resp = await fetch(`/api/queues/${queue_id}/`, {
