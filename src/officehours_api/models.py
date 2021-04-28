@@ -94,7 +94,7 @@ class Queue(SafeDeleteModel):
         models.CharField(max_length=20, choices=get_backend_types(), blank=False),
         default=get_default_allowed_backends,
     )
-    phys_location = models.CharField(max_length=100, blank=True)
+    inperson_location = models.CharField(max_length=100, blank=True)
 
     @property
     def hosts_with_phone_numbers(self):

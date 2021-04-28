@@ -98,7 +98,10 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
             <ul>
                 <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
                 <li>You are not in the meeting queue yet</li>
-                <li>In-person meetings will take place at: <strong>{props.queue.phys_location}</strong></li>
+                {
+                    props.queue.allowed_backends.includes('inperson') &&
+                    <li>In-person meetings will take place at: <strong>{props.queue.inperson_location}</strong></li>
+                }
             </ul>
         </div>
         {controls}
@@ -307,9 +310,12 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                 <Card.Text>
                     <strong>Meeting Via</strong>: {meetingBackend.friendly_name} {!inProgress && changeMeetingType}
                 </Card.Text>
-                <Card.Text>
-                    <strong>Meet At</strong>: {props.queue.phys_location}
-                </Card.Text>
+                {
+                    meetingBackend.name === 'inperson' &&
+                    <Card.Text>
+                        <strong>Meet At</strong>: {props.queue.inperson_location}
+                    </Card.Text>
+                }
                 {agendaBlock}
             </Card.Body>
         </Card>

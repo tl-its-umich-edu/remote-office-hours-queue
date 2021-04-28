@@ -69,7 +69,7 @@ export interface QueueFull extends QueueBase {
     description: string;
     hosts: User[];
     allowed_backends: string[];
-    phys_location: string;
+    inperson_location: string;
 }
 
 export interface QueueHost extends QueueAttendee {
