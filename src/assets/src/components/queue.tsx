@@ -74,7 +74,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
     const notJoinedInpersonMeetingText = (
         props.queue.inperson_location === ''
             ? (
-                'The host(s) have not specified an in-person meeting location'
+                'The host(s) have not specified an in-person meeting location.'
             )
             : <>In-person meetings will take place at: <strong>{props.queue.inperson_location}</strong></>
     );
@@ -289,7 +289,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const joinedInpersonMeetingText = (
         props.queue.inperson_location === '' 
             ? (
-                'The host(s) have not specified an in-person meeting location'
+                'The host(s) have not specified an in-person meeting location.'
             )
             : props.queue.inperson_location
     );
