@@ -1,12 +1,13 @@
 import * as React from "react";
-import { useState, createRef, ChangeEvent } from "react";
+import { useEffect, useState, createRef, ChangeEvent as ReactChangeEvent } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { Alert, Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 import Dialog from "react-bootstrap-dialog";
 
-import {
+import { ChangeLog } from "./changeLog";
+import { 
     UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
     CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, userLoggedOnWarning
 } from "./common";
@@ -14,6 +15,9 @@ import { DialInContent } from './dialIn';
 import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
+import { ChangeEvent as EntityChangeEvent } from "../changes";
+import { useEntityChanges } from "../hooks/useEntityChanges";
+import { usePreviousState } from "../hooks/usePreviousState";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
 import {
@@ -110,9 +114,11 @@ interface QueueManagerProps {
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     onStartMeeting: (m: Meeting) => void;
+    meetingChangeEvents: EntityChangeEvent[];
+    deleteMeetingChangeEvent: (key: number) => void;
 }
 
-function QueueManager(props: QueueManagerProps) {
+function QueueManager (props: QueueManagerProps) {
     const spacingClass = 'mt-4';
 
     let startedMeetings = [];
@@ -160,13 +166,18 @@ function QueueManager(props: QueueManagerProps) {
                         type='switch'
                         label={currentStatus ? 'Open' : 'Closed'}
                         checked={props.queue.status === 'open'}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => props.onSetStatus(!currentStatus)}
+                        onChange={(e: ReactChangeEvent<HTMLInputElement>) => props.onSetStatus(!currentStatus)}
                     />
                 </Col>
             </Row>
             <Row noGutters className={spacingClass}>
                 <Col md={2}><div id='created'>Created</div></Col>
                 <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
+            </Row>
+            <Row noGutters className={spacingClass}>
+                <Col md={12}>
+                    <ChangeLog changeEvents={props.meetingChangeEvents} deleteChangeEvent={props.deleteMeetingChangeEvent} />
+                </Col>
             </Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
             <Row noGutters className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
@@ -262,6 +273,8 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
 
     // Set up basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
+    const oldQueue = usePreviousState(queue);
+
     const [authError, setAuthError] = useState(undefined as Error | undefined);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
@@ -275,6 +288,12 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         }
     }
     const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
+
+    const [meetingChangeEvents, compareAndSetMeetingChangeEvents, deleteMeetingChangeEvent] = useEntityChanges<Meeting>();
+    useEffect(() => {
+        if (queue && oldQueue) compareAndSetMeetingChangeEvents(oldQueue.meeting_set, queue.meeting_set);
+    }, [queue]);
+
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
@@ -353,6 +372,8 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
                 onStartMeeting={doStartMeeting}
+                meetingChangeEvents={meetingChangeEvents}
+                deleteMeetingChangeEvent={deleteMeetingChangeEvent}
             />
         );
     return (
