@@ -221,7 +221,6 @@ class Backend(BackendBase):
             f"{Backend.base_url}/oauth/authorize"
             f"?response_type=code"
             f"&client_id={cls.client_id}"
-            f"&scope=meeting:read%20meeting:write"
             f"&state={state}"
             f"&redirect_uri={redirect_uri}"
         )
