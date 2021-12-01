@@ -163,6 +163,7 @@ class Backend(BackendBase):
                     "join_before_host": False,
                     "waiting_room": True,
                     "meeting_authentication": False,
+                    "use_pmi": False
                 },
             },
         )
