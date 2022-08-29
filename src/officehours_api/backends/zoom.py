@@ -122,7 +122,7 @@ class Backend(BackendBase):
                 },
                 headers=cls._get_client_auth_headers(),
             )
-            if resp.status_code == 401:
+            if resp.status_code >= 400 and resp.status_code < 500:
                 # The refresh_token was invalidated somehow.
                 # Maybe the user removed our Zoom app's auth.
                 # Force them to be prompted again.
