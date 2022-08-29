@@ -126,6 +126,8 @@ class Backend(BackendBase):
                 # The refresh_token was invalidated somehow.
                 # Maybe the user removed our Zoom app's auth.
                 # Force them to be prompted again.
+                # The specific code sent by Zoom has changed before,
+                # so it now checks for any client error during refresh.
                 zoom_meta = {}
                 user.profile.backend_metadata['zoom'] = zoom_meta
                 user.profile.save()
