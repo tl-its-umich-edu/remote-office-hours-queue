@@ -131,6 +131,7 @@ class Backend(BackendBase):
                 zoom_meta = {}
                 user.profile.backend_metadata['zoom'] = zoom_meta
                 user.profile.save()
+                logger.info(f'Removed Zoom metadata for user {user.id} to prompt re-authorization.')
             resp.raise_for_status()
             token = resp.json()
             zoom_meta.update({
