@@ -111,9 +111,20 @@ class Backend(BackendBase):
         return resp.json()
 
     @classmethod
+    def _clear_backend_metadata(cls, user: User) -> None:
+        user.profile.backend_metadata['zoom'] = {}
+        user.profile.save()
+        logger.info(f'Removed Zoom metadata for user {user.id} to prompt re-authorization.')
+
+    @classmethod
+    def _calculate_expires_at(cls, expires_in: int) -> float:
+        return time() + expires_in - cls.expiry_buffer_seconds
+
+    @classmethod
     def _get_access_token(cls, user: User) -> str:
         zoom_meta = user.profile.backend_metadata['zoom']
         if time() > zoom_meta['access_token_expires']:
+            logger.debug('Refreshing token')
             resp = requests.post(
                 f'{cls.base_url}/oauth/token',
                 params={
@@ -128,16 +139,13 @@ class Backend(BackendBase):
                 # Force them to be prompted again.
                 # The specific code sent by Zoom has changed before,
                 # so it now checks for any client error during refresh.
-                zoom_meta = {}
-                user.profile.backend_metadata['zoom'] = zoom_meta
-                user.profile.save()
-                logger.info(f'Removed Zoom metadata for user {user.id} to prompt re-authorization.')
+                cls._clear_backend_metadata(user)
             resp.raise_for_status()
             token = resp.json()
             zoom_meta.update({
                 'refresh_token': token['refresh_token'],
                 'access_token': token['access_token'],
-                'access_token_expires': time() - token['expires_in'] - cls.expiry_buffer_seconds,
+                'access_token_expires': cls._calculate_expires_at(token['expires_in']),
             })
             user.profile.save()
         return zoom_meta['access_token']
@@ -170,6 +178,9 @@ class Backend(BackendBase):
                 },
             },
         )
+        if resp.status_code == 401:
+            logger.info(f'Access token for user {user.id} seems to be invalid.')
+            cls._clear_backend_metadata(user)
         resp.raise_for_status()
         logger.debug("Created meeting: %s", resp.json())
         return resp.json()
@@ -206,7 +217,7 @@ class Backend(BackendBase):
         zoom_meta.update({
             'refresh_token': token['refresh_token'],
             'access_token': token['access_token'],
-            'access_token_expires': time() - token['expires_in'] - cls.expiry_buffer_seconds,
+            'access_token_expires': cls._calculate_expires_at(token['expires_in']),
         })
         request.user.profile.backend_metadata['zoom'] = zoom_meta
         me = cls._get_me(request.user)
@@ -228,7 +239,7 @@ class Backend(BackendBase):
             f"&state={state}"
             f"&redirect_uri={redirect_uri}"
         )
-    
+
     @classmethod
     def is_authorized(cls, user: User) -> bool:
         return bool(user.profile.backend_metadata.get('zoom'))
