@@ -122,7 +122,7 @@ class Backend(BackendBase):
 
     @classmethod
     def _get_access_token(cls, user: User) -> str:
-        zoom_meta = user.profile.backend_metadata['zoom']
+        zoom_meta = user.profile.backend_metadata['zoom'].copy()
         if time() > zoom_meta['access_token_expires']:
             logger.debug('Refreshing token')
             resp = requests.post(
@@ -142,13 +142,14 @@ class Backend(BackendBase):
                 cls._clear_backend_metadata(user)
             resp.raise_for_status()
             token = resp.json()
-            zoom_meta.update({
+            new_zoom_data = {
                 'refresh_token': token['refresh_token'],
                 'access_token': token['access_token'],
                 'access_token_expires': cls._calculate_expires_at(token['expires_in']),
-            })
+            }
+            user.profile.backend_metadata['zoom'].update(new_zoom_data)
             user.profile.save()
-        return zoom_meta['access_token']
+        return user.profile.backend_metadata['zoom']['access_token']
 
     @classmethod
     def _get_session(cls, user: User) -> requests.Session:
