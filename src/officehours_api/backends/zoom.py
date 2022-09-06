@@ -122,7 +122,7 @@ class Backend(BackendBase):
 
     @classmethod
     def _get_access_token(cls, user: User) -> str:
-        zoom_meta = user.profile.backend_metadata['zoom'].copy()
+        zoom_meta = user.profile.backend_metadata['zoom']
         if time() > zoom_meta['access_token_expires']:
             logger.debug('Refreshing token')
             resp = requests.post(
