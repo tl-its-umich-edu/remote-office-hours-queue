@@ -27,7 +27,7 @@ RUN apt-get -y install gcc
 RUN pip install \
     'gunicorn~=20.0.4' \
     'uvicorn[standard]~=0.12.2' \
-    'psycopg2-binary~=2.9.3'
+    'psycopg2-binary~=2.9.5'
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
