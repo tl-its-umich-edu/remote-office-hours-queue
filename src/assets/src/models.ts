@@ -12,13 +12,21 @@ export interface MeetingBackend {
     intl_telephone_url: string | null;
 }
 
-export interface User {
+interface Base {
     id: number;
+}
+
+export interface User extends Base {
     username: string;
     first_name: string;
     last_name: string;
     attendee_set?: User[];
     hosted_queues?: ReadonlyArray<QueueBase>;
+}
+
+export const isUser = (value: any): value is User => {
+    if (!value || typeof value !== 'object') return false;
+    return 'username' in value && 'first_name' in value && 'last_name' in value;
 }
 
 export interface MyUser extends User {
@@ -46,8 +54,7 @@ export enum MeetingStatus {
     STARTED = 2
 }
 
-export interface Meeting {
-    id: number;
+export interface Meeting extends Base {
     line_place: number | null;
     attendees: User[];
     agenda: string;
@@ -58,10 +65,17 @@ export interface Meeting {
     status: MeetingStatus;
 }
 
-export interface QueueBase {
-    id: number;
+export const isMeeting = (entity: object): entity is Meeting => {
+    return 'attendees' in entity;
+}
+
+export interface QueueBase extends Base {
     name: string;
     status: "open" | "closed";
+}
+
+export const isQueueBase = (entity: object): entity is QueueBase => {
+    return 'name' in entity && 'status' in entity;
 }
 
 export interface QueueFull extends QueueBase {
