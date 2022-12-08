@@ -199,7 +199,10 @@ class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
             m.start()
         except DisabledBackendException as e:
             return Response({'Start Meeting': e.message}, status=status.HTTP_400_BAD_REQUEST)
-        m.save()
+        try:
+            m.save()
+        except Exception as e:
+            return Response({'Start Meeting': e.message}, status=status.HTTP_400_BAD_REQUEST)
         serializer = MeetingSerializer(m)
         return Response(serializer.data)
 
