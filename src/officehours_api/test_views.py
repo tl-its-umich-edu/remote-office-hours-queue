@@ -1,7 +1,8 @@
 # started code reference from remote-office-hours-queue/src/officehours_api/tests.py
+import json
 
 from django.contrib.auth.models import AnonymousUser, User
-from django.test import TestCase, override_settings, RequestFactory
+from django.test import Client, TestCase
 from rest_framework.test import APIRequestFactory
 
 from officehours_api.models import User, Queue, Meeting
@@ -9,10 +10,13 @@ from officehours_api.views import MeetingDetail
 
 
 class MeetingTestCase(TestCase):
+
     def setUp(self):
         self.foo = User.objects.create(username='foo', email='foo@example.com')
         self.bar = User.objects.create(username='bar', email='bar@example.com')
         self.baz = User.objects.create(username='baz', email='baz@example.com')
+        self.baz.set_password('rohqtest')
+        self.baz.save()
         self.hostie = User.objects.create(
             username='hostie', email='hostie@example.com')
         self.queue = Queue.objects.create(
@@ -21,7 +25,7 @@ class MeetingTestCase(TestCase):
         self.queue.hosts.set([self.hostie, self.baz])
         self.queue.save()
         self.exceptions = 0
-        self.factory = APIRequestFactory()
+        self.client = Client()
 
     # changed the create meeting from the one already in test.py (changes a bit)
     def create_meeting(self, host, attendees, start=False):
@@ -46,11 +50,13 @@ class MeetingTestCase(TestCase):
             "assignee_id": self.baz.id
         }
         
-        request = self.factory.put(url, data)
-        request.user = self.baz
-        # view response
-        response = MeetingDetail.as_view()(request, pk=meeting_in_progress.id)
-        print(response)
+        login_result = self.client.login(username='baz', password='rohqtest')
+        response = self.client.put(url, data, content_type='application/json')
 
-        # self.assertEqual(response.content,
-        #                 "Can't change assignee once meeting is started!")
+        # view response
+        print(response)
+        print(response.content)
+
+        response_body = json.loads(response.content)
+
+        self.assertEqual(response_body['Meeting Detail'], "Can't change assignee once meeting is started!")
