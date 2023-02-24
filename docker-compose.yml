@@ -31,7 +31,7 @@ services:
       - officehours-postgres-data:/var/lib/postgresql/data
 
   redis:
-    image: redis:5
+    image: redis:7
 
   webpack_watcher:
     build:
