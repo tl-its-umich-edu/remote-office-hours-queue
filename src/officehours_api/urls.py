@@ -18,19 +18,3 @@ urlpatterns = [
     path('attendees/', views.AttendeeList.as_view(), name='attendee-list'),
     path('attendees/<int:pk>/', views.AttendeeDetail.as_view(), name='attendee-detail'),
 ]
-
-if settings.DEBUG:
-    from drf_yasg.views import get_schema_view as get_yasg_view
-    from drf_yasg import openapi
-
-    yasg_view = get_yasg_view(
-        openapi.Info(
-            title='Office Hours API',
-            default_version='v1',
-        ),
-    )
-
-    urlpatterns += [
-        path('swagger', yasg_view.with_ui('swagger', cache_timeout=0), name='swagger'),
-        path('redoc', yasg_view.with_ui('redoc', cache_timeout=0), name='redoc'),
-    ]
