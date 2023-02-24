@@ -12,7 +12,7 @@ RUN npm run prod
 
 #####################################################################
 
-FROM python:3.8-slim
+FROM python:3.10-slim
 
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1

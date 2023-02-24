@@ -14,7 +14,6 @@ from officehours_api.models import Queue, Meeting, Profile
 from officehours_api.permissions import is_host
 from officehours_api.serializers import (
     QueueHostSerializer, QueueAttendeeSerializer, MyUserSerializer,
-    NestedUserSerializer
 )
 
 

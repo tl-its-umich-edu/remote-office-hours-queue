@@ -72,7 +72,7 @@ INSTALLED_APPS = [
 
 if DEBUG:
     INSTALLED_APPS += [
-        'drf_yasg',
+        'drf_spectacular',
     ]
 
 WATCHMAN_TOKENS = os.getenv('WATCHMAN_TOKENS')
@@ -118,6 +118,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'EXCEPTION_HANDLER': 'officehours_api.exceptions.backend_error_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
 
