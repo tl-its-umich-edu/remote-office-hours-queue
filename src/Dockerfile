@@ -25,8 +25,8 @@ ENV WEB_CONCURRENCY=5
 RUN apt-get update
 RUN apt-get -y install gcc libpq-dev
 RUN pip install \
-    'gunicorn~=20.0.4' \
-    'uvicorn[standard]~=0.12.2' \
+    'gunicorn==20.1.0' \
+    'uvicorn[standard]==0.20.0' \
     'psycopg2~=2.9.5'
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
