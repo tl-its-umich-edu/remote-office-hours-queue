@@ -46,7 +46,6 @@ ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
 
 # Add additional non-Django apps here for consistent logging behavior
 EXTRA_APPS = [
-    'daphne',
     'channels',
     'officehours_api.apps.OfficehoursApiConfig',
     'officehours_ui.apps.OfficehoursUiConfig',
