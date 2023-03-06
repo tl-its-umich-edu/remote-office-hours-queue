@@ -2,7 +2,8 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import generics, status, filters
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import generics, serializers, status, filters
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.decorators import api_view
@@ -22,6 +23,16 @@ from officehours_api.permissions import (
 )
 
 
+@extend_schema(
+    responses={
+        200: inline_serializer('api_root', {
+            'users': serializers.CharField(),
+            'queues': serializers.CharField(),
+            'meetings': serializers.CharField(),
+            'attendees': serializers.CharField()
+        })
+    }
+)
 @api_view(['GET'])
 def api_root(request, format=None):
     '''
@@ -77,7 +88,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
         user = self.get_object()
         self.check_change_permission(request, user)
         return super().update(request, *args, **kwargs)
-    
+
     def partial_update(self, request, *args, **kwargs):
         user = self.get_object()
         self.check_change_permission(request, user)
@@ -125,6 +136,8 @@ class QueueDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDe
 
 class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
     logging_methods = settings.LOGGING_METHODS
+
+    serializer_class = ShallowUserSerializer  # For DRF Spectacular
 
     def check_queue_permission(self, request, queue):
         if not is_host(request.user, queue):
@@ -176,6 +189,8 @@ class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdate
 
 class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
     permission_classes = (IsAuthenticated, IsAssignee,)
+
+    serializer_class = MeetingSerializer  # For DRF Spectacular
 
     def post(self, request, pk):
         m = Meeting.objects.get(pk=pk)
