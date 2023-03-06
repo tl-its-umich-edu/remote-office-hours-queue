@@ -11,7 +11,6 @@ from django.core.validators import MaxLengthValidator
 from safedelete.models import (
     SafeDeleteModel, SOFT_DELETE_CASCADE, HARD_DELETE,
 )
-from jsonfield import JSONField
 from requests.exceptions import RequestException
 
 from officehours_api.exceptions import (
@@ -53,7 +52,7 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
     notify_me_attendee = models.BooleanField(default=False)
     notify_me_host = models.BooleanField(default=False)
-    backend_metadata = JSONField(null=True, default=dict, blank=True)
+    backend_metadata = models.JSONField(null=True, default=dict, blank=True)
 
     @property
     def authorized_backends(self):
@@ -137,7 +136,7 @@ class Meeting(SafeDeleteModel):
         null=False,
         default=get_default_backend,
     )
-    backend_metadata = JSONField(null=True, default=dict)
+    backend_metadata = models.JSONField(null=True, default=dict)
 
     @property
     def attendees_with_phone_numbers(self):
