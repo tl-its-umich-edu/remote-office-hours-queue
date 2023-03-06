@@ -73,6 +73,8 @@ def get_users_with_emails(manager: models.Manager):
 
 class Queue(SafeDeleteModel):
     _safedelete_policy = SOFT_DELETE_CASCADE
+    deleted_by_cascade = None
+
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -118,6 +120,8 @@ class MeetingStatus(Enum):
 
 class Meeting(SafeDeleteModel):
     _safedelete_policy = HARD_DELETE
+    deleted_by_cascade = None
+
     queue = models.ForeignKey(
         Queue, on_delete=models.CASCADE,
         null=True
@@ -226,11 +230,9 @@ class Meeting(SafeDeleteModel):
 
 
 class Attendee(SafeDeleteModel):
-    '''
-    Attendee must subclass SafeDeleteModel in order to be safedeleted
-    when a Meeting is safedeleted
-    '''
     _safedelete_policy = HARD_DELETE
+    deleted_by_cascade = None
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
