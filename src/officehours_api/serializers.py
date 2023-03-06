@@ -1,8 +1,10 @@
 from typing import TypedDict, Literal
 
-from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
+
 from officehours_api.models import Queue, Meeting, MeetingStatus, Attendee
 
 
@@ -39,8 +41,10 @@ class NestedMeetingSerializer(serializers.ModelSerializer):
             'status'
         ]
 
+    @extend_schema_field(serializers.IntegerField)
     def get_status(self, obj):
         return obj.status.value
+
 
 class NestedMyMeetingSerializer(serializers.ModelSerializer):
     backend_metadata = serializers.JSONField(read_only=True)
@@ -53,6 +57,7 @@ class NestedMyMeetingSerializer(serializers.ModelSerializer):
             'status'
         ]
 
+    @extend_schema_field(serializers.IntegerField)
     def get_status(self, obj):
         return obj.status.value
 
@@ -83,6 +88,39 @@ class ShallowUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name']
 
 
+class QueueAttendeeSerializer(serializers.ModelSerializer):
+    '''
+    Serializer used when viewing queue as an attendee.
+    '''
+    context: UserContext
+
+    hosts = NestedUserSerializer(many=True, read_only=True)
+    line_length = serializers.SerializerMethodField(read_only=True)
+    my_meeting = serializers.SerializerMethodField(read_only=True)
+    allowed_backends = serializers.ListField(child=serializers.CharField())
+
+    class Meta:
+        model = Queue
+        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status',
+                  'allowed_backends', 'inperson_location']
+
+    @extend_schema_field(serializers.IntegerField)
+    def get_line_length(self, obj):
+        return len([meeting for meeting in obj.meeting_set.all() if meeting.status != MeetingStatus.STARTED])
+
+    @extend_schema_field(NestedMyMeetingSerializer)
+    def get_my_meeting(self, obj):
+        user = self.context['user']
+        my_meeting = (
+            obj.meeting_set.filter(attendees__in=[self.context['user']]).first()
+            if user.is_authenticated else None
+        )
+        if not my_meeting:
+            return None
+        serializer = NestedMyMeetingSerializer(my_meeting, context=self.context)
+        return serializer.data
+
+
 class MyUserSerializer(serializers.ModelSerializer):
     context: UserContext
 
@@ -102,6 +140,7 @@ class MyUserSerializer(serializers.ModelSerializer):
             'phone_number', 'notify_me_attendee', 'notify_me_host', 'authorized_backends',
         ]
 
+    @extend_schema_field(QueueAttendeeSerializer)
     def get_my_queue(self, obj):
         try:
             meeting = obj.meeting_set.get()
@@ -110,6 +149,7 @@ class MyUserSerializer(serializers.ModelSerializer):
         serializer = QueueAttendeeSerializer(meeting.queue, context=self.context)
         return serializer.data
 
+    @extend_schema_field(ShallowUserSerializer)
     def get_hosted_queues(self, obj):
         queues_qs: QuerySet = obj.queue_set.all()
         if not queues_qs.exists():
@@ -135,37 +175,6 @@ class ShallowQueueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Queue
         fields = ['id', 'name', 'status']
-
-
-class QueueAttendeeSerializer(serializers.ModelSerializer):
-    '''
-    Serializer used when viewing queue as an attendee.
-    '''
-    context: UserContext
-
-    hosts = NestedUserSerializer(many=True, read_only=True)
-    line_length = serializers.SerializerMethodField(read_only=True)
-    my_meeting = serializers.SerializerMethodField(read_only=True)
-    allowed_backends = serializers.ListField(child=serializers.CharField())
-
-    class Meta:
-        model = Queue
-        fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status',
-                  'allowed_backends', 'inperson_location']
-
-    def get_line_length(self, obj):
-        return len([meeting for meeting in obj.meeting_set.all() if meeting.status != MeetingStatus.STARTED])
-
-    def get_my_meeting(self, obj):
-        user = self.context['user']
-        my_meeting = (
-            obj.meeting_set.filter(attendees__in=[self.context['user']]).first()
-            if user.is_authenticated else None
-        )
-        if not my_meeting:
-            return None
-        serializer = NestedMyMeetingSerializer(my_meeting, context=self.context)
-        return serializer.data
 
 
 class QueueHostSerializer(QueueAttendeeSerializer):
