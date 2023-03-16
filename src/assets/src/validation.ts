@@ -1,4 +1,4 @@
-import { string, StringSchema, SchemaDescription, TestMessageParams } from 'yup';
+import { string, StringSchema, SchemaDescription, TestMessageParams, ValidationError } from 'yup';
 import { MeetingBackend, MeetingStatus, QueueHost } from "./models";
 import { getUser } from "./services/api";
 
@@ -32,7 +32,7 @@ export const confirmUserExists = async (uniqname: string) => {
     try {
         return await getUser(sanitizedUniqname);
     } catch (err) {
-        throw err.name === "NotFoundError"
+        throw (typeof err === 'object' && err !== null && 'name' in err && err.name === "NotFoundError")
             ? new Error(createInvalidUniqnameMessage(sanitizedUniqname))
             : err;
     }
@@ -82,6 +82,10 @@ export function validateString (value: string, schema: StringSchema, showRemaini
             messages.push(createRemainingCharsMessage({'value': transformedValue, 'max': maxLimit}));
         }
     } catch (error) {
+        if (!ValidationError.isError(error)) {
+            console.error('ValidationError expected but something else occurred.')
+            throw error
+        }
         transformedValue = error.value;
         isInvalid = true;
         messages = error.errors;
