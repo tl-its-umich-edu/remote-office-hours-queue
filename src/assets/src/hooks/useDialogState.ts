@@ -17,7 +17,10 @@ export function useDialogState (): [
             show: true,
             title,
             description,
-            action,
+            action: () => {
+                action();
+                resetDialogState();
+            },
             onClose: resetDialogState
         })
     }

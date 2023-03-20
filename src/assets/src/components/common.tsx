@@ -446,7 +446,6 @@ export const Dialog = (props: DialogProps) => {
         <Modal
             show={show}
             onHide={onClose}
-            //centered
         >
             {(
                 props.title !== undefined &&
@@ -461,8 +460,8 @@ export const Dialog = (props: DialogProps) => {
                     <p>{description}</p>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={action} variant='primary'>OK</Button>
                     <Button onClick={props.onClose} variant='outline-dark'>Cancel</Button>
+                    <Button onClick={action} variant='primary'>OK</Button>
                 </Modal.Footer>
                 </>
             )}
