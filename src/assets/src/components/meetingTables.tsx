@@ -21,7 +21,7 @@ const MeetingDetails = (props: MeetingDetailsProps) => {
     return (
         <Row>
             <Col md={6} className='mb-1'>
-                <Badge variant='secondary' aria-label='Meeting Type'>{props.readableMeetingType}</Badge>
+                <Badge bg='secondary' aria-label='Meeting Type'>{props.readableMeetingType}</Badge>
             </Col>
             <Col md={6}>
                 <Button

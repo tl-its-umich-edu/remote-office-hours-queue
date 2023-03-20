@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
-import Dialog from "react-bootstrap-dialog";
 import { StringSchema } from "yup";
 
 import { useStringValidation } from "../hooks/useValidation";
@@ -39,6 +38,7 @@ interface RemoveButtonProps {
     disabled: boolean;
     size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
+    children?: React.ReactNode;
 }
 
 export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
@@ -59,6 +59,7 @@ interface AddButtonProps {
     disabled: boolean;
     size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
+    children: React.ReactNode;
 }
 
 export const AddButton: React.FC<AddButtonProps> = (props) => {
@@ -86,19 +87,6 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
         </p>
     );
 }
-
-
-export const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, description: string) => {
-    dialog.current!.show({
-        title: title,
-        body: description,
-        actions: [
-            Dialog.CancelAction(),
-            Dialog.OKAction(action),
-        ],
-    });
-}
-
 
 export interface FormError {
     source: string;
@@ -213,6 +201,7 @@ interface StatelessValidatedInputFormProps extends SingleInputFormProps {
     value: string;
     validationResult?: ValidationResult;
     onChangeValue: (value: string) => void;
+    children?: React.ReactNode;
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
@@ -229,11 +218,9 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
             onSubmit(props.value);
         };
         buttonBlock = (
-            <InputGroup.Append>
-                <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>
-                    {props.children}
-                </Button>
-            </InputGroup.Append>
+            <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>
+                {props.children}
+            </Button>
         );
     }
 
@@ -342,6 +329,7 @@ interface SingleInputFieldProps {
     fieldSchema: StringSchema;
     showRemaining?: boolean;
     onSuccess?: () => void;
+    children: React.ReactNode;
 }
 
 // Stateful wrapper for one text input field and associated feedback
@@ -380,6 +368,7 @@ export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
 interface EditToggleFieldProps extends SingleInputFieldProps {
     value: string;
     initialState: boolean;
+    children: React.ReactNode;
 }
 
 // Wrapper for input fields that can be expanded or hidden with an Edit button
@@ -440,6 +429,46 @@ export const LoginDialog = (props: LoginDialogProps) =>
         </Modal.Footer>
     </Modal>
 
+export interface DialogState {
+    show: boolean;
+    onClose?: () => void;
+    title?: string;
+    description?: string;
+    action?: () => void;
+}
+
+interface DialogProps extends DialogState {}
+
+export const Dialog = (props: DialogProps) => {
+    const { show, onClose, title, description, action } = props;
+
+    return (
+        <Modal
+            show={show}
+            onHide={onClose}
+            //centered
+        >
+            {(
+                props.title !== undefined &&
+                props.description !== undefined &&
+                props.action !== undefined
+            ) && (
+                <>
+                <Modal.Header closeButton>
+                    <Modal.Title>{title}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>{description}</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={action} variant='primary'>OK</Button>
+                    <Button onClick={props.onClose} variant='outline-dark'>Cancel</Button>
+                </Modal.Footer>
+                </>
+            )}
+        </Modal>
+    );
+}
 
 interface BreadcrumbsProps {
     intermediatePages?: {title: string, href: string}[];
@@ -491,7 +520,7 @@ export function QueueTable (props: QueueTableProps) {
         <tr key={q.id}>
             <td aria-label={`Queue ID Number`}>
                 <Link to={`${linkBase}${q.id}`}>
-                    <Badge variant='primary' pill={true}>{q.id}</Badge>
+                    <Badge bg='primary' pill={true}>{q.id}</Badge>
                 </Link>
             </td>
             <td aria-label={`Name for Queue ID ${q.id}`}>
@@ -499,7 +528,7 @@ export function QueueTable (props: QueueTableProps) {
             </td>
             <td aria-label={`Status for Queue ID ${q.id}`}>
                 <Link to={`${linkBase}${q.id}`}>
-                    <Badge variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
+                    <Badge bg={q.status === 'open' ? 'success' : 'danger'} pill={true}>
                         {q.status}
                     </Badge>
                 </Link>

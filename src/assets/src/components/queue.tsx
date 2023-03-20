@@ -1,21 +1,21 @@
 import * as React from "react";
 import { useState, createRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
-import Dialog from "react-bootstrap-dialog";
 
 import {
     BluejeansMetadata, EnabledBackendName, Meeting, MeetingBackend, MeetingStatus, MyUser,
     QueueAttendee, User, VideoBackendNames, ZoomMetadata
 } from "../models";
 import {
-    checkForbiddenError, Breadcrumbs, DateTimeDisplay, DisabledMessage, EditToggleField, ErrorDisplay,
-    FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog, showConfirmation, StatelessInputGroupForm
+    checkForbiddenError, Breadcrumbs, DateTimeDisplay, Dialog, DisabledMessage, EditToggleField, ErrorDisplay,
+    FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog, StatelessInputGroupForm
 } from "./common";
 import { DialInContent } from "./dialIn";
 import { BackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
+import { useDialogState } from "../hooks/useDialogState";
 import { usePromise } from "../hooks/usePromise";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
@@ -421,14 +421,14 @@ interface QueuePageParams {
     queue_id: string;
 }
 
-export function QueuePage(props: PageProps<QueuePageParams>) {
+export function QueuePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
-    const queue_id = props.match.params.queue_id;
+
+    const { queue_id } = useParams<QueuePageParams>();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
-    const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
@@ -450,6 +450,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
     const [showMeetingTypeDialog, setShowMeetingTypeDialog] = useState(false);
+    const [dialogState, setStateAndOpenDialog] = useDialogState();
+
     //Setup interactions
     const joinQueue = async (backendType: string) => {
         ReactGA.event({
@@ -496,7 +498,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
                     : ''
             )
         );
-        showConfirmation(dialogRef, () => doLeaveQueue(), dialogParts.title, description);
+        setStateAndOpenDialog(dialogParts.title, description, () => doLeaveQueue());
     }
     const leaveAndJoinQueue = async (backendType: string) => {
         ReactGA.event({
@@ -557,7 +559,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             onChangeBackend={setSelectedBackend}/>
     return (
         <div>
-            <Dialog ref={dialogRef}/>
+            <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             {meetingTypeDialog}
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
