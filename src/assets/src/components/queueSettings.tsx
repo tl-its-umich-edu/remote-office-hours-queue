@@ -1,16 +1,16 @@
 import * as React from "react";
-import { createRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
-import Dialog from "react-bootstrap-dialog";
 
 import {
-    Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog, showConfirmation
+    Breadcrumbs, checkForbiddenError, Dialog, ErrorDisplay, FormError, LoadingDisplay, LoginDialog
 } from "./common";
 import { PageProps } from "./page";
 import { GeneralEditor, ManageHostsEditor, MultiTabEditorProps } from "./queueEditors";
+import { useDialogState } from "../hooks/useDialogState";
 import { usePromise } from "../hooks/usePromise";
 import { useMeetingTypesValidation, useStringValidation} from "../hooks/useValidation";
 import { QueueAttendee, QueueHost, User, isQueueHost } from "../models";
@@ -110,18 +110,18 @@ interface SettingsPageParams {
     queue_id: string;
 }
 
-export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
+export function ManageQueueSettingsPage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
 
     // Set up page state
-    const dialogRef = createRef<Dialog>();
+    const { queue_id: queueID } = useParams<SettingsPageParams>();
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
+    const [dialogState, setStateAndOpenDialog] = useDialogState();
 
     // Set up WebSocket
-    const queueID = props.match.params.queue_id;
     if (queueID === undefined) throw new Error("queueID is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIDInt = Number(queueID);
@@ -178,7 +178,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
     const [doRemoveHost, removeHostLoading, removeHostError] = usePromise(removeHost);
     const confirmRemoveHost = (h: User) => {
-        showConfirmation(dialogRef, () => doRemoveHost(h), "Remove Host?", `Are you sure you want to remove host ${h.username}?`);
+        setStateAndOpenDialog("Remove Host?", `Are you sure you want to remove host ${h.username}?`, () => doRemoveHost(h));
     }
     const addHost = async (uniqname: string) => {
         const user = await confirmUserExists(uniqname);
@@ -194,7 +194,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
     }
     const [doRemoveQueue, removeQueueLoading, removeQueueError] = usePromise(removeQueue);
     const confirmRemoveQueue = () => {
-        showConfirmation(dialogRef, () => doRemoveQueue(), "Delete Queue?", "Are you sure you want to permanently delete this queue?");
+        setStateAndOpenDialog("Delete Queue?", "Are you sure you want to permanently delete this queue?", () => doRemoveQueue());
     }
 
     // On change handlers
@@ -300,7 +300,7 @@ export function ManageQueueSettingsPage(props: PageProps<SettingsPageParams>) {
 
     return (
         <div>
-            <Dialog ref={dialogRef} />
+            <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs
                 currentPageTitle='Settings' 
