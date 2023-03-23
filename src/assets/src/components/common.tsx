@@ -167,14 +167,12 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
         && <span className="sr-only" role="alert" aria-live="polite">Copied</span>
     return (
         <>
-            <div className="input-group">
-                <input readOnly id={props.id} ref={inputRef} onClick={() => copy()} value={props.text} type="text" className="form-control" />
-                <div className="input-group-append">
-                    <button type="button" ref={buttonRef} onClick={() => copy(true)} className="btn btn-secondary">
-                        {buttonInner}
-                    </button>
-                </div>
-            </div>
+            <InputGroup>
+                <Form.Control readOnly id={props.id} ref={inputRef} onClick={() => copy()} value={props.text} type="text" />
+                <Button type="button" variant="secondary" ref={buttonRef} onClick={() => copy(true)}>
+                    {buttonInner}
+                </Button>
+            </InputGroup>
             {copiedSrAlert}
         </>
     );

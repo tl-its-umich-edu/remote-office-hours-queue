@@ -20,7 +20,7 @@ import { checkIfSetsAreDifferent, recordQueueManagementEvent, redirectToLogin } 
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
 
 
-const buttonSpacing = 'mr-3 mb-3';
+const buttonSpacing = 'me-3 mb-3';
 
 interface QueueSettingsProps extends MultiTabEditorProps {
     // Shared

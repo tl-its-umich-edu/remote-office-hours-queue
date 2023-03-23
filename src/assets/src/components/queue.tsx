@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, createRef } from "react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
@@ -35,19 +35,34 @@ interface JoinQueueProps {
 const JoinQueue: React.FC<JoinQueueProps> = (props) => {
     return (
         <>
-        <div className="row col-lg">
-            <p className="mb-0">Select Meeting Type</p>
-            <p className="mb-0 required">*</p>
-        </div>
-        <BackendSelector backends={props.backends} allowedBackends={new Set(props.queue.allowed_backends)}
-            onChange={props.onChangeSelectedBackend} selectedBackend={props.selectedBackend}/>
-        <div className="row">
-            <div className="col-lg">
-                <button disabled={props.disabled} onClick={() => props.onJoinQueue(props.selectedBackend)} type="button" className="btn btn-primary bottom-content">
+        <Row>
+            <Col lg>
+                <p className="mb-0">Select Meeting Type<span className="required">*</span></p>
+            </Col>
+        </Row>
+        <Row>
+            <Col xs='auto'>
+                <BackendSelector
+                    backends={props.backends}
+                    allowedBackends={new Set(props.queue.allowed_backends)}
+                    onChange={props.onChangeSelectedBackend}
+                    selectedBackend={props.selectedBackend}
+                />
+            </Col>
+        </Row>
+        <Row>
+            <Col lg>
+                <Button
+                    variant="primary"
+                    className="bottom-content"
+                    type="button"
+                    disabled={props.disabled}
+                    onClick={() => props.onJoinQueue(props.selectedBackend)}
+                >
                     Join Queue
-                </button>
-            </div>
-        </div>
+                </Button>
+            </Col>
+        </Row>
         </>
     );
 }
@@ -83,11 +98,11 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
         joinedOther && props.joinedQueue
             ? (
                 <>
-                <div className="row">
-                    <div className="col-lg">
+                <Row>
+                    <Col lg>
                         <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
-                    </div>
-                </div>
+                    </Col>
+                </Row>
                 <JoinQueue queue={props.queue} backends={props.backends} onJoinQueue={props.onLeaveAndJoinQueue} disabled={props.disabled}
                     selectedBackend={props.selectedBackend} onChangeSelectedBackend={props.onChangeBackend}/>
                 </>
@@ -102,16 +117,15 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
     return (
         <>
         {closedAlert}
-        <div className="row">
-            <ul>
-                <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
-                <li>You are not in the meeting queue yet</li>
-                {
-                    props.queue.allowed_backends.includes('inperson') && 
-                    <li>{notJoinedInpersonMeetingText}</li>
-                }
-            </ul>
-        </div>
+        <Row>
+            <Col>
+                <ul>
+                    <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
+                    <li>You are not in the meeting queue yet</li>
+                    {props.queue.allowed_backends.includes('inperson') && <li>{notJoinedInpersonMeetingText}</li>}
+                </ul>
+            </Col>
+        </Row>
         {controls}
         </>
     );
@@ -224,7 +238,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 
     // Card content
     const changeMeetingType = props.queue.my_meeting?.assignee
-        ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
+        ? <small className="ms-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
         : <Button variant='link' onClick={props.onShowDialog} aria-label='Change Meeting Type' disabled={props.disabled}>Change</Button>;
 
     const notificationBlurb = !inProgress
@@ -301,7 +315,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     href={meeting.backend_metadata!.meeting_url}
                     target='_blank'
                     variant='warning'
-                    className='mr-3'
+                    className='me-3'
                     aria-label='Join Meeting'
                     disabled={props.disabled}
                 >

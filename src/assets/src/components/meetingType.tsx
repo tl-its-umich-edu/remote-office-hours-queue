@@ -66,8 +66,8 @@ export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
         props.onChange(event.currentTarget.value);
     }
     return (
-        <select className="btn btn-sm select-dropdown" onChange={handleChange} value={props.selectedBackend}>
+        <Form.Select className="select-dropdown" onChange={handleChange} value={props.selectedBackend}>
             {options}
-        </select>
+        </Form.Select>
     );
 }
