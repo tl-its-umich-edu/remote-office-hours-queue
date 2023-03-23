@@ -396,17 +396,17 @@ interface JoinedQueueAlertProps {
     joinedQueue: QueueAttendee;
 }
 
-export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>
-    <p className="col-lg alert alert-danger" role="alert">
-        <strong>You may only join one queue. </strong>
-        You are currently in {props.joinedQueue.name}.
-        If you choose to join another queue, you will lose your current place in line.
-        <br />
-        <Link to={`/queue/${props.joinedQueue.id}`} className="btn btn-danger">
-            Return to Previous Queue
+export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) => (
+    <Alert variant="danger">
+        <p className="mb-2">
+            <strong>You may only join one queue.</strong> You are currently in {props.joinedQueue.name}.
+            If you choose to join another queue, you will lose your current place in line.
+        </p>
+        <Link to={`/queue/${props.joinedQueue.id}`} tabIndex={-1}>
+            <Button variant="danger">Return to Previous Queue</Button>
         </Link>
-    </p>
-
+    </Alert>
+);
 
 interface LoginDialogProps {
     visible: boolean;
