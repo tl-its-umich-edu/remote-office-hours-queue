@@ -135,16 +135,6 @@ body {
 	}
 }
 
-@media (min-width:992px) {
-	.dropdown:hover>.dropdown-menu {
-		display: block;
-	}
-	.dropdown>.dropdown-toggle:active {
-		/*Without this, clicking will make it sticky*/
-		pointer-events: none;
-	}
-}
-
 h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
 	margin: 1em 0 .5em 0;
 	font-weight: 700;

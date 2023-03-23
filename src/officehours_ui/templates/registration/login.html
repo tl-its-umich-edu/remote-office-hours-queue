@@ -19,12 +19,12 @@
             <form method="post" action="{% url 'login' %}">
                 {% csrf_token %}
                 <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="username">Username</label>
+                    <div class="col-md-6 mb-3">
+                        <label class="mb-1" for="username">Username</label>
                         <input class="form-control" name="username" type="text" placeholder="Username" autofocus autocapitalize="none" autocomplete="username" maxlength="150" required id="username">
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="password">Password</label>
+                    <div class="col-md-6 mb-3">
+                        <label class="mb-1" for="password">Password</label>
                         <input class="form-control" name="password" type="password" placeholder="Password" autofocus autocomplete="current-password" required id="password">
                     </div>
                 </div>

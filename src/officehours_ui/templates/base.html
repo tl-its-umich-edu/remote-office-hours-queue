@@ -33,42 +33,54 @@
             <img src="{% static 'images/its-logo.png' %}" class="container banner-img img-responsive pull-left" alt="Remote Office Hours Queue"/>
           </a>
 				</div>
-				<button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<button class="navbar-toggler ml-auto" type="button" data-bs-toggle="collapse" data-bs-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
 						<i class="fas fa-bars text-light"></i>
 				</button>
-
 				<div class="collapse navbar-collapse navbars" aria-labelledby="aux-nav" role="navigation">
-          <div class="navbar-nav ml-auto">
-            <a class="nav-link" href="{% url 'home' %}">
-              Home
-            </a>
-            <a class="nav-link" href="https://documentation.its.umich.edu/office-hours" target="_blank">
-              Resources & Support
-              <i class="fa fa-external-link-alt"></i>
-            </a>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'home' %}">
+                Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://documentation.its.umich.edu/office-hours" target="_blank">
+                Resources & Support
+                <i class="fa fa-external-link-alt"></i>
+              </a>
+            </li>
             {% if request.user.is_authenticated %}
               <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   {{ request.user.username }}
                 </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
-                  <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
-                    Manage Queues
-                  </a>
-                  <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
-                    Preferences
-                  </a>
-                  <form action="{% url 'oidc_logout' %}" method="post">
-                    {% csrf_token %}
-                    <input type="submit" value="Logout" style="background-color: white" class="dropdown-item">
-                  </form>
-                </div>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                  <li>
+                    <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
+                      Manage Queues
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
+                      Preferences
+                    </a>
+                  </li>
+                  <li>
+                    <form action="{% url 'oidc_logout' %}" method="post">
+                      {% csrf_token %}
+                      <input type="submit" value="Logout" style="background-color: white" class="dropdown-item">
+                    </form>
+                  </li>
+                </ul>
               </li>
             {% else %}
-              <a href="{{ LOGIN_URL }}" class="nav-link">Login</a>
+              <li class="nav-item">
+                <a href="{{ LOGIN_URL }}" class="nav-link">Login</a>
+              </li>
             {% endif %}
-          </div>
+          </ul>
         </div>
+      </div>
     </nav>
   </header>
   
