@@ -19,7 +19,7 @@ enum AvailableTabs {
     Hosts = 'hosts'
 }
 
-const buttonSpacing = 'mr-3 mb-3';
+const buttonSpacing = 'me-3 mb-3';
 
 interface CancelAddButtonProps {
     disabled: boolean;

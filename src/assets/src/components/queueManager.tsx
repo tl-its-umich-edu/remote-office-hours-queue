@@ -133,11 +133,11 @@ function QueueManager(props: QueueManagerProps) {
 
     return (
         <div>
-            <div className="float-right">
-                <Link to={`/manage/${props.queue.id}/settings`}>
+            <div className="float-end">
+                <Link to={`/manage/${props.queue.id}/settings`} tabIndex={-1}>
                     <Button variant='primary' aria-label='Settings'>
                         <FontAwesomeIcon icon={faCog} />
-                        <span className='ml-2'>Settings</span>
+                        <span className='ms-2'>Settings</span>
                     </Button>
                 </Link>
             </div>
