@@ -234,7 +234,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 
     return (
         <Form onSubmit={handleSubmit}>
-            <InputGroup>
+            <InputGroup className='mb-2'>
                 <Form.Control
                     id={props.id}
                     as='input'
@@ -285,20 +285,19 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
 
     return (
         <Form onSubmit={handleSubmit}>
-            <Form.Group>
-                <Form.Control
-                    id={props.id}
-                    as='textarea'
-                    rows={5}
-                    ref={inputRef}
-                    value={props.value}
-                    aria-label={props.formLabel}
-                    placeholder={props.placeholder}
-                    onChange={(e) => handleChange(e.currentTarget.value)}
-                    disabled={props.disabled}
-                    isInvalid={props.validationResult?.isInvalid}
-                />
-            </Form.Group>
+            <Form.Control
+                id={props.id}
+                className='mb-2'
+                as='textarea'
+                rows={5}
+                ref={inputRef}
+                value={props.value}
+                aria-label={props.formLabel}
+                placeholder={props.placeholder}
+                onChange={(e) => handleChange(e.currentTarget.value)}
+                disabled={props.disabled}
+                isInvalid={props.validationResult?.isInvalid}
+            />
             {
                 (feedback || buttonBlock)
                     ? (
