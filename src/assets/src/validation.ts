@@ -1,4 +1,4 @@
-import { string, StringSchema, SchemaDescription, TestMessageParams, ValidationError } from 'yup';
+import { string, StringSchema, SchemaDescription, ValidationError } from 'yup';
 import { MeetingBackend, MeetingStatus, QueueHost } from "./models";
 import { getUser } from "./services/api";
 
@@ -7,19 +7,25 @@ import { getUser } from "./services/api";
 
 // Utilities
 
-function getMaxLimit (description: SchemaDescription): number | undefined {
-    const matches = description.tests.filter((obj: any) => obj.params?.max);
-    if (matches.length !== 1) {
-        console.error('Invalid use of getMaxLimit: ' + matches);
-    }
-    return matches.length === 1 ? matches[0].params.max : undefined;
+interface ParamsWithMax {
+    max: number
 }
 
-function createRemainingCharsMessage (data: { max: number; } & Partial<TestMessageParams>): string {
-    const remaining = data.max - data.value.length;
+const isParamsWithMax = (v: unknown) : v is ParamsWithMax => {
+    return typeof v === 'object' && v !== null && 'max' in v && typeof v.max === 'number';
+}
+
+
+function getMaxLimit (description: SchemaDescription): number | undefined {
+    const match = description.tests.find(({ params }) => isParamsWithMax(params));
+    return (match !== undefined && isParamsWithMax(match.params)) ? match.params.max : undefined;
+}
+
+function createRemainingCharsMessage ({ max, value }: { max: number, value: string }): string {
+    const remaining = max - value.length;
     const charsRemaining = (remaining > 0) ? remaining : 0;
     const charsOver = (remaining < 0) ? ` (${remaining * -1} over limit)` : '';
-    return `Remaining characters: ${charsRemaining}/${data.max}${charsOver}`;
+    return `Remaining characters: ${charsRemaining}/${max}${charsOver}`;
 }
 
 const createInvalidUniqnameMessage = (uniqname: string) => (
@@ -72,25 +78,32 @@ export interface ValidationResult {
 }
 
 export function validateString (value: string, schema: StringSchema, showRemaining: boolean): ValidationResult {
-    let transformedValue;
+    let transformedValue: string;
     let isInvalid = false;
-    let messages = Array();
+    let messages: string[] = Array();
     try {
-        transformedValue = schema.validateSync(value);
+        const result = schema.validateSync(value);
+        if (result === undefined) {
+            throw Error('validateString should have received a string in the value parameter, but it is undefined.');
+        } else {
+            transformedValue = result;
+        }
         const maxLimit = getMaxLimit(schema.describe());
         if (showRemaining && maxLimit) {
-            messages.push(createRemainingCharsMessage({'value': transformedValue, 'max': maxLimit}));
+            messages.push(createRemainingCharsMessage({value: transformedValue, max: maxLimit}));
+        } else {
+            console.warn('validateString called with showReamining but schema does not include a maxiumum.');
         }
     } catch (error) {
         if (!ValidationError.isError(error)) {
-            console.error('ValidationError expected but something else occurred.')
-            throw error
+            console.error('ValidationError was expected but something else occurred.');
+            throw error;
         }
         transformedValue = error.value;
         isInvalid = true;
         messages = error.errors;
     }
-    return {'transformedValue': transformedValue, 'isInvalid': isInvalid, 'messages': messages};
+    return { transformedValue, isInvalid, messages};
 }
 
 
