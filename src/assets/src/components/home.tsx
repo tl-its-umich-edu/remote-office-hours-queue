@@ -18,7 +18,7 @@ function QueueLookup() {
                     placeholder="Queue name or host uniqname..."
                     value={lookup}
                     onChange={(e) => setLookup(e.target.value)}
-                    />
+                />
                 <div className="input-group-append">
                     <button type="submit" className="btn btn-primary">Search Queues</button>
                 </div>
@@ -32,34 +32,34 @@ export function HomePage(props: PageProps) {
     const userWebSocketError = useUserWebSocket(props.user?.id, (u) => setUser(u as MyUser));
 
     const errorSources = [
-        {source: 'User Connection', error: userWebSocketError}
+        { source: 'User Connection', error: userWebSocketError }
     ].filter(e => e.error) as FormError[];
-    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources} />
     const queueAlert = user?.my_queue
-        && <JoinedQueueAlert joinedQueue={user.my_queue}/>
+        && <JoinedQueueAlert joinedQueue={user.my_queue} />
     const body = props.user
         ? (
             <>
-            <p className="lead">
-                Enter the name of the queue or the uniqname of the host to get started!
-            </p>
-            {queueAlert}
-            <QueueLookup/>
-            <hr/>
-            <Link to="/manage">
-                Manage Your Own Queues
-            </Link>
+                <p className="lead">
+                    Enter the name of the queue or the uniqname of the host to get started!
+                </p>
+                {queueAlert}
+                <QueueLookup />
+                <hr />
+                <Link to="/manage">
+                    Manage Queues
+                </Link>
             </>
         )
         : (
             <>
-            <p className="lead">Join or host a queue for office hours!</p>
-            <a href={props.loginUrl} className="btn btn-primary btn-lg">Login</a>
+                <p className="lead">Join or host a queue for office hours!</p>
+                <a href={props.loginUrl} className="btn btn-primary btn-lg">Login</a>
             </>
         );
     return (
         <div>
-            <Breadcrumbs currentPageTitle="Home"/>
+            <Breadcrumbs currentPageTitle="Home" />
             <div>
                 {errorDisplay}
                 <h1 className="display-4">Remote Office Hours Queue</h1>
