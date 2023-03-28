@@ -22,7 +22,7 @@ services:
       - webpack_watcher
 
   database:
-    image: postgres:14.4-alpine
+    image: postgres:14.7-alpine
     environment:
       - POSTGRES_USER=admin
       - POSTGRES_DB=admin
