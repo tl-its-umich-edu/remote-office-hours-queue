@@ -200,7 +200,7 @@ export const updateUser = async (user_id: number, phone_number: string, notify_m
 }
 
 export const searchQueue = async (term: string) => {
-    const resp = await fetch(`/api/queues_search/?search=${term}`, { method: "GET" });
+    const resp = await fetch(`/api/queues_search/?search=${encodeURIComponent(term)}`, { method: "GET" });
     await handleErrors(resp);
     return await resp.json() as ReadonlyArray<QueueBase>;
 }

@@ -11,7 +11,7 @@ urlpatterns = [
     path('manage/', SpaView.as_view(), name='manage'),
     path('manage/<str:queue_id>/', SpaView.as_view(), name='edit'),
     path('manage/<str:queue_id>/settings', SpaView.as_view()),
-    path('search/<str:term>/', SpaView.as_view()),
+    path('search/', SpaView.as_view()),
     path('preferences/', SpaView.as_view(), name='preferences'),
     path('add_queue/', SpaView.as_view(), name='add_queue'),
     path('auth/<backend_name>/', AuthPromptView.as_view(), name='auth_prompt'),
