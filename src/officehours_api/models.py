@@ -209,7 +209,7 @@ class Meeting(SafeDeleteModel):
         # Trigger m2m "remove" signals for attendees
         self.attendees.remove(*self.attendees.all())
         self.save()
-        super().delete(*args, **kwargs)
+        return super().delete(*args, **kwargs)
 
     @property
     def line_place(self) -> Optional[int]:
