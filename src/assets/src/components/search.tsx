@@ -9,22 +9,25 @@ import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 
 
-interface SearchPageParams {
-    term: string;
-}
-
-export function SearchPage(props: PageProps<SearchPageParams>) {
+export function SearchPage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
-    const term = props.match.params.term;
+    let term = (new URLSearchParams(props.location.search)).get('term') ?? undefined;
+    if (term !== undefined) {
+        term = decodeURIComponent(term);
+    }
     const [searchResults, setSearchResults] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
     const [doSearch, searchLoading, searchError] = usePromise(
         (term: string) => apiSearchQueue(term),
         setSearchResults
     );
     useEffect(() => {
-        if (term) doSearch(term);
+        if (term) {
+            doSearch(term);
+        } else {
+            setSearchResults([]);
+        }
     }, []);
     const loadingDisplay = <LoadingDisplay loading={searchLoading}/>
     const errorSources = [
@@ -40,7 +43,7 @@ export function SearchPage(props: PageProps<SearchPageParams>) {
                 </p>
             )
             : <QueueTable queues={searchResults} />
-    const redirectAlert = props.location.search.includes("redirected=true") && !/^\d+$/.exec(term)
+    const redirectAlert = props.location.search.includes("redirected=true") && term && !/^\d+$/.exec(term)
         && (
             <p className="alert alert-warning">
                 We didn't find a queue there! It's ok, we made a change that moved some queues around--it's us, not you. To help you find the queue you were looking for, we searched for any queues hosted by {term}. <a href="https://documentation.its.umich.edu/office-hours-links" target="_blank">Learn more about this search.</a>

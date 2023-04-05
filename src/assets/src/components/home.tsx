@@ -9,13 +9,15 @@ import { useUserWebSocket } from "../services/sockets";
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
     return (
-        <form className="form-inline row mt-3" method="get" action={"/search/" + lookup}>
+        <form className="form-inline row mt-3" method="get" action="/search/">
             <div className="input-group col-sm-12 col-md-8 col-lg-6">
-                <input type="text"
+                <input
+                    type="text"
                     required
                     aria-label="Queue name or host uniqname"
                     className="form-control"
                     placeholder="Queue name or host uniqname..."
+                    name="term"
                     value={lookup}
                     onChange={(e) => setLookup(e.target.value)}
                 />
