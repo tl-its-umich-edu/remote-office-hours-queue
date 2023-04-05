@@ -15,7 +15,7 @@ services:
       - 8003:8001
     volumes:
       - ./src:/usr/src/app:z
-    command: "python manage.py runserver 0.0.0.0:8001"
+    command: "python -m uvicorn officehours.asgi:application --host=0.0.0.0 --port=8001 --reload"
     depends_on:
       - database
       - redis
