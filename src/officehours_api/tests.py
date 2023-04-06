@@ -6,6 +6,10 @@ from twilio.base.exceptions import TwilioRestException
 
 from officehours_api.models import User, Queue, Meeting
 
+from officehours_api.serializers import MeetingSerializer
+
+from rest_framework.exceptions import ValidationError
+
 
 @override_settings(TWILIO_ACCOUNT_SID='aaa', TWILIO_AUTH_TOKEN='bbb', TWILIO_MESSAGING_SERVICE_SID='ccc')
 class NotificationTestCase(TestCase):
@@ -163,3 +167,38 @@ class NotificationTestCase(TestCase):
             receivers >=
             {'+15555550000', '+15555550001'}
         )
+
+class MeetingSerializerTestCase(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create(username='user1')
+        self.user2 = User.objects.create(username='user2')
+
+    def test_backend_type_invalid(self):
+        queue = Queue.objects.create(name='test queue', status='open', allowed_backends=['zoom'])
+        queue.hosts.add(self.user1)
+        data = {
+            'queue': queue.id,
+            'attendee_ids': [self.user2.id],
+            'agenda': 'test agenda',
+            'assignee_id': self.user1.id,
+            'backend_type': 'inperson'
+        }
+        serializer = MeetingSerializer(data=data)
+        with self.assertRaises(ValidationError) as cm:
+            serializer.is_valid(raise_exception=True)
+        error = str(cm.exception.detail['non_field_errors'][0])
+        self.assertEqual(error, 'Invalid backend type!')
+    
+    def test_backend_type_valid(self):
+        queue = Queue.objects.create(name='test queue', status='open', allowed_backends=['inperson'])
+        queue.hosts.add(self.user1)
+        data = {
+            'queue': queue.id,
+            'attendee_ids': [self.user2.id],
+            'agenda': 'test agenda',
+            'assignee_id': self.user1.id,
+            'backend_type': 'inperson'
+        }
+        serializer = MeetingSerializer(data=data)
+        valid = serializer.is_valid(raise_exception=False)
+        self.assertTrue(valid)
