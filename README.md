@@ -54,3 +54,14 @@ docker-compose run web python manage.py makemigrations --settings=officehours.ma
 ```
 
 This will generate the migrations with all backends enabled as choices.
+
+### Using OpenAPI and Swagger
+
+The backend uses the [Django Rest Framework](https://www.django-rest-framework.org/) to build out a REST API.
+When `DEBUG` is equal to `True` in Django settings, the application leverages the
+[drf-spectacular](https://drf-spectacular.readthedocs.io/en/latest/index.html) library to document existing endpoints
+and provide for API testing using Swagger.
+
+The Swagger UI can be accessed by navigating to [`api/schema/swagger-ui`](http://localhost:8003/api/schema/swagger-ui).
+Once on the page, requests can be made against the API using the "Try it out" functionality.
+The OpenAPI schema can be downloaded as a YAML file from [`/api/schema`](http://localhost:8003/api/schema).
