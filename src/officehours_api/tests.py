@@ -187,7 +187,7 @@ class MeetingSerializerTestCase(TestCase):
         with self.assertRaises(ValidationError) as cm:
             serializer.is_valid(raise_exception=True)
         error = str(cm.exception.detail['non_field_errors'][0])
-        self.assertEqual(error, 'Invalid backend type!')
+        self.assertEqual(error, "inperson is not one of the queue's allowed backend types (['zoom'])")
     
     def test_backend_type_valid(self):
         queue = Queue.objects.create(name='test queue', status='open', allowed_backends=['inperson'])
