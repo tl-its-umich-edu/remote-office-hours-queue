@@ -260,7 +260,8 @@ class MeetingSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         '''
-        Ensure the assignee is a host.
+        Ensure the assignee is a host,
+        and the meeting's backend type is in the queue's allowed backend type.
         '''
         queue = self.instance.queue if self.instance else attrs["queue"]
         hosts = queue.hosts.all()
