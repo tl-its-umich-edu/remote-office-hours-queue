@@ -267,7 +267,6 @@ class MeetingSerializer(serializers.ModelSerializer):
         hosts = queue.hosts.all()
         if attrs.get("assignee") and attrs["assignee"] not in hosts:
             raise serializers.ValidationError("Assignee must be a host!")
-        backend_type = attrs["backend_type"]
-        if backend_type not in queue.allowed_backends:
-            raise serializers.ValidationError(f"{backend_type} is not one of the queue's allowed backend types ({queue.allowed_backends})")
+        if attrs.get("backend_type") and attrs["backend_type"] not in queue.allowed_backends:
+            raise serializers.ValidationError(f"{attrs['backend_type']} is not one of the queue's allowed backend types ({queue.allowed_backends})")
         return attrs
