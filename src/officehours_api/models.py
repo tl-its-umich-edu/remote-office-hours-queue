@@ -53,7 +53,7 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
     notify_me_attendee = models.BooleanField(default=False)
     notify_me_host = models.BooleanField(default=False)
-    backend_metadata = JSONField(null=True, default=dict)
+    backend_metadata = JSONField(null=True, default=dict, blank=True)
 
     @property
     def authorized_backends(self):
