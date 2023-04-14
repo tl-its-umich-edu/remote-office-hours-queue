@@ -210,13 +210,14 @@ class MeetingSerializerTestCase(TestCase):
     def test_patch_backend_type_none(self):
         meeting = Meeting(**{
             'queue': self.inperson_queue,
+            'attendee': self.user2,
             'agenda': 'test agenda',
-            'assignee_id': self.user1.id,
+            'assignee': self.user1,
             'backend_type': 'inperson'
         })
         # Patch the meeting without a backend type
         data = {
-            'attendee_ids': [self.user2.id],
+            'agenda': 'patch the meeting without a backend type',
         }
         serializer = MeetingSerializer(meeting, data=data, partial=True)
         valid = serializer.is_valid(raise_exception=False)
@@ -226,13 +227,13 @@ class MeetingSerializerTestCase(TestCase):
     def test_patch_backend_type_invalid(self):
         meeting = Meeting(**{
             'queue': self.inperson_queue,
+            'attendee': self.user2,
             'agenda': 'test agenda',
-            'assignee_id': self.user1.id,
+            'assignee': self.user1,
             'backend_type': 'inperson'
         })
         # Patch the meeting to an invalid backend type
         data = {
-            'attendee_ids': [self.user2.id],
             'backend_type': 'zoom'
         }
         serializer = MeetingSerializer(meeting, data=data, partial=True)
