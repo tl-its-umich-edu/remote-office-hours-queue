@@ -1,15 +1,11 @@
 from unittest import mock, skipIf
 
 from django.test import TestCase, override_settings
-
+from rest_framework.exceptions import ValidationError
 from twilio.base.exceptions import TwilioRestException
 
-from rest_framework.exceptions import ValidationError
-
 from officehours.settings import ENABLED_BACKENDS
-
 from officehours_api.models import User, Queue, Meeting
-
 from officehours_api.serializers import MeetingSerializer
 
 
