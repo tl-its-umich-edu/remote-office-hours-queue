@@ -14,9 +14,6 @@ export function SearchPage(props: PageProps) {
         redirectToLogin(props.loginUrl);
     }
     let term = (new URLSearchParams(props.location.search)).get('term') ?? undefined;
-    if (term !== undefined) {
-        term = decodeURIComponent(term);
-    }
     const [searchResults, setSearchResults] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
     const [doSearch, searchLoading, searchError] = usePromise(
         (term: string) => apiSearchQueue(term),
