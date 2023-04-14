@@ -208,48 +208,34 @@ class MeetingSerializerTestCase(TestCase):
         self.assertTrue(valid)
 
     def test_patch_backend_type_none(self):
-        data = {
-            'queue': self.inperson_queue.id,
-            'attendee_ids': [self.user2.id],
+        meeting = Meeting(**{
+            'queue': self.inperson_queue,
             'agenda': 'test agenda',
             'assignee_id': self.user1.id,
             'backend_type': 'inperson'
-        }
-        serializer = MeetingSerializer(data=data)
-        valid = serializer.is_valid(raise_exception=False)
-        self.assertTrue(valid)
+        })
         # Patch the meeting without a backend type
         data = {
-            'queue': self.inperson_queue.id,
             'attendee_ids': [self.user2.id],
-            'agenda': 'test agenda',
-            'assignee_id': self.user1.id,
         }
-        serializer = MeetingSerializer(data=data)
+        serializer = MeetingSerializer(meeting, data=data, partial=True)
         valid = serializer.is_valid(raise_exception=False)
         self.assertTrue(valid)
 
     @skipIf('zoom' not in ENABLED_BACKENDS, 'Skipping because "zoom" backend type is not enabled')
     def test_patch_backend_type_invalid(self):
-        data = {
-            'queue': self.inperson_queue.id,
-            'attendee_ids': [self.user2.id],
+        meeting = Meeting(**{
+            'queue': self.inperson_queue,
             'agenda': 'test agenda',
             'assignee_id': self.user1.id,
             'backend_type': 'inperson'
-        }
-        serializer = MeetingSerializer(data=data)
-        valid = serializer.is_valid(raise_exception=False)
-        self.assertTrue(valid)
+        })
         # Patch the meeting to an invalid backend type
         data = {
-            'queue': self.inperson_queue.id,
             'attendee_ids': [self.user2.id],
-            'agenda': 'test agenda',
-            'assignee_id': self.user1.id,
             'backend_type': 'zoom'
         }
-        serializer = MeetingSerializer(data=data)
+        serializer = MeetingSerializer(meeting, data=data, partial=True)
         with self.assertRaises(ValidationError) as cm:
             serializer.is_valid(raise_exception=True)
         error = str(cm.exception.detail['non_field_errors'][0])
