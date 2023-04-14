@@ -33,7 +33,7 @@ function App(props: AppProps) {
             <Route path='/queue/:queue_id' exact render={p => 
                 <QueuePage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} key={(p.match.params as any).queue_id} defaultBackend={props.globals.default_backend} />
             }/>
-            <Route path={'/search/'} exact render={p =>
+            <Route path='/search/' exact render={p =>
                 <SearchPage {...p} user={props.globals.user} loginUrl={props.globals.login_url} backends={props.globals.backends} defaultBackend={props.globals.default_backend} />
             }/>
             <Route path='/preferences' exact render={p =>
