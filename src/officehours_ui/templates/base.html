@@ -60,7 +60,7 @@
                   </a>
                   <form action="{% url 'oidc_logout' %}" method="post">
                     {% csrf_token %}
-                    <input type="submit" value="Logout" style="background-color: white" class="dropdown-item" onclick="sendLogoutSignal()">
+                    <input type="submit" value="Logout" style="background-color: white" class="dropdown-item" id="logout-button">
                   </form>
                 </div>
               </li>
@@ -87,20 +87,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   <script>
-    function sendLogoutSignal(){
+    const logoutButton = document.querySelector('#logout-button');
+    logoutButton.addEventListener('click', () => {
       window.localStorage.setItem("loggedIn", "false");
-    }
-  </script>
-  <script>
+    });
     window.addEventListener('storage', (event) => {
-      if (event.storageArea != localStorage) return;
-      if (event.key === 'loggedIn') {
-        if (window.localStorage.getItem("loggedIn") == "false"){
-          var jsId = document.cookie.match(/JSESSIONID=[^;]+/);
-          if (jsId == null){
-            window.location.href = "/accounts/login/";
-          }
-        }
+      if (document.cookie.indexOf('JSESSIONID') === -1) {
+        window.location.href = "/accounts/login/";
       }
     });
   </script>
