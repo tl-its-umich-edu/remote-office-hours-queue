@@ -28,7 +28,7 @@
                         <input class="form-control" name="password" type="password" placeholder="Password" autofocus autocomplete="current-password" required id="password">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Login</button>
+                <button type="submit" class="btn btn-primary" id="login-button">Login</button>
                 <input type="hidden" name="next" value="{{ next }}">
             </form>
         </div>
@@ -36,4 +36,10 @@
             <a href="{% url 'password_reset' %}">Lost password?</a>
         </div>
     </div>
+    <script>
+        const loginButton = document.querySelector('#login-button');
+        loginButton.addEventListener('click', () => {
+          window.localStorage.setItem("loggedIn", "true");
+        });
+    </script>
 {% endblock %}
