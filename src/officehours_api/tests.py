@@ -207,7 +207,7 @@ class MeetingSerializerTestCase(TestCase):
         valid = serializer.is_valid(raise_exception=False)
         self.assertTrue(valid)
 
-    def test_patch_backend_type_none(self):
+    def test_patch_without_backend_type(self):
         meeting = Meeting(**{
             'queue': self.inperson_queue,
             'agenda': 'test agenda',
