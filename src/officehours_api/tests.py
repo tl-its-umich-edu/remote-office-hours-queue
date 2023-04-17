@@ -169,7 +169,7 @@ class NotificationTestCase(TestCase):
 
 class MeetingSerializerTestCase(TestCase):
     """
-    Test the scenarios where the backend type is invalid, valid,
+    Test the scenarios where the backend type is invalid, is valid,
     is not updated but something else is, and is updated to be invalid.
     """
 
