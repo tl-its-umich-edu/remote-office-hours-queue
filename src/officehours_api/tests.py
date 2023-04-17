@@ -170,7 +170,7 @@ class NotificationTestCase(TestCase):
 class MeetingSerializerTestCase(TestCase):
     """
     Test the scenarios where the backend type is invalid, valid,
-    patched to none, and patched to invalid.
+    is not updated but something else is, and is updated to be invalid.
     """
 
     def setUp(self):
