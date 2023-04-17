@@ -66,7 +66,7 @@ class NotificationTestCase(TestCase):
                 self.exceptions += 1
                 raise TwilioRestException(500, '')
         mock_twilio.messages.create.side_effect = side_effect
-    
+
     def assert_twilio_exception_logged(self, do):
         with self.assertLogs(logger='officehours_api.notifications', level='ERROR') as cm:
             do()
@@ -82,7 +82,7 @@ class NotificationTestCase(TestCase):
             receivers >=
             {'+15555551111','+15555552222',}
         )
-    
+
     @mock.patch('officehours_api.notifications.twilio')
     def test_first_meeting_bad_phone_logs_exception(self, mock_twilio: mock.MagicMock):
         self.queue.hosts.set([self.hostie, self.hostbad, self.hostacular, self.hostoptout])
@@ -210,11 +210,13 @@ class MeetingSerializerTestCase(TestCase):
     def test_patch_backend_type_none(self):
         meeting = Meeting(**{
             'queue': self.inperson_queue,
-            'attendee': self.user2,
             'agenda': 'test agenda',
             'assignee': self.user1,
             'backend_type': 'inperson'
         })
+        meeting.save()
+        meeting.attendees.add(self.user2)
+        meeting.save()
         # Patch the meeting without a backend type
         data = {
             'agenda': 'patch the meeting without a backend type',
@@ -227,11 +229,13 @@ class MeetingSerializerTestCase(TestCase):
     def test_patch_backend_type_invalid(self):
         meeting = Meeting(**{
             'queue': self.inperson_queue,
-            'attendee': self.user2,
             'agenda': 'test agenda',
             'assignee': self.user1,
             'backend_type': 'inperson'
         })
+        meeting.save()
+        meeting.attendees.add(self.user2)
+        meeting.save()
         # Patch the meeting to an invalid backend type
         data = {
             'backend_type': 'zoom'
