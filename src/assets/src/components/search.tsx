@@ -20,7 +20,7 @@ export function SearchPage(props: PageProps) {
         setSearchResults
     );
     useEffect(() => {
-        if (term) {
+        if (term !== undefined) {
             doSearch(term);
         } else {
             setSearchResults([]);
