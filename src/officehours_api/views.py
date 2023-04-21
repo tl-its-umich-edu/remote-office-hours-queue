@@ -15,7 +15,7 @@ from twilio.base.exceptions import TwilioRestException
 
 
 from officehours_api.exceptions import DisabledBackendException
-from officehours_api.models import Attendee, Meeting, Queue, Profile
+from officehours_api.models import Attendee, Meeting, Queue
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
