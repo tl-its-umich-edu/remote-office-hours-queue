@@ -10,9 +10,12 @@ from rest_framework.views import APIView
 from rest_framework_tracking.mixins import LoggingMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from twilio.rest import Client
+from twilio.base.exceptions import TwilioRestException
+
 
 from officehours_api.exceptions import DisabledBackendException
-from officehours_api.models import Attendee, Meeting, Queue
+from officehours_api.models import Attendee, Meeting, Queue, Profile
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
@@ -52,6 +55,7 @@ class DecoupledContextMixin:
 class UserList(DecoupledContextMixin, generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = ShallowUserSerializer
+    
 
 
 class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
@@ -73,9 +77,24 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
         if user != request.user:
             self.permission_denied(request)
 
+    def verify_phone(self, request, user):
+         client = Client()
+         if user != request.user:
+             if User.phone_number != None:
+                try:
+                    response = client.lookups.phone_numbers(User.phone_number).fetch(type="carrier")
+                    return True
+                except TwilioRestException as e:
+                    if e.code == 20404:
+                        return False
+                    else:
+                        raise e
+
+
     def update(self, request, *args, **kwargs):
-        user = self.get_object()
+        user = self.get_object
         self.check_change_permission(request, user)
+        self.verify_phone(request, user)
         return super().update(request, *args, **kwargs)
     
     def partial_update(self, request, *args, **kwargs):
@@ -87,6 +106,12 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
 class UserUniqnameDetail(UserDetail):
     lookup_field = 'username'
 
+    def get(self, request, *args, **kwargs):
+        # call the parent's get method to retrieve user details
+        response = super().get(request, *args, **kwargs)
+
+        # get the user instance
+        user = self.get_object()
 
 class QueueList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
@@ -200,3 +225,4 @@ class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
 class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
+
