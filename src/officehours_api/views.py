@@ -92,7 +92,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
 
 
     def update(self, request, *args, **kwargs):
-        user = self.get_object
+        user = self.get_object()
         self.check_change_permission(request, user)
         self.verify_phone(request, user)
         return super().update(request, *args, **kwargs)
