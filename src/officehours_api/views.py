@@ -173,7 +173,12 @@ class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdate
     serializer_class = MeetingSerializer
     permission_classes = (IsAuthenticated, IsHostOrAttendee,)
 
-
+    def update_asignee(self, request, *args, **kwargs):
+        try:
+            super().update_asignee(request, *args, **kwargs)
+        except Exception as e:
+            return Response({'Meeting Detail': e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        
 class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
     permission_classes = (IsAuthenticated, IsAssignee,)
 
@@ -200,3 +205,4 @@ class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
 class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
+
