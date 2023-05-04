@@ -57,8 +57,8 @@ This will generate the migrations with all backends enabled as choices.
 
 ### Using OpenAPI and Swagger
 
-The backend uses the [Django Rest Framework](https://www.django-rest-framework.org/) to build out a REST API.
-When `DEBUG` is equal to `True` in Django settings, the application leverages the
+The backend uses the [Django REST Framework](https://www.django-rest-framework.org/) to build out a REST API.
+When `DEBUG` is set to `True` in Django settings, the application leverages the
 [drf-spectacular](https://drf-spectacular.readthedocs.io/en/latest/index.html) library to document existing endpoints
 and provide for API testing using Swagger.
 
