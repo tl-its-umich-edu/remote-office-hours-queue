@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'django_filters',
     'django.contrib.sites',
     'django.contrib.flatpages',
+    'fontawesomefree'
 ]
 
 if DEBUG:
