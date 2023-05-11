@@ -10,7 +10,7 @@
     "react-dom": "^18.2.0",
     "react-ga": "~3.3.1",
     "react-phone-input-2": "^2.15.1",
-    "react-router-dom": "^5.3.4",
+    "react-router-dom": "^6.11.1",
     "reconnecting-websocket": "^4.4.0",
     "yup": "^1.1.1"
   },
@@ -23,7 +23,6 @@
   "devDependencies": {
     "@types/react": "^18.2.5",
     "@types/react-dom": "^18.2.3",
-    "@types/react-router-dom": "^5.3.3",
     "css-loader": "~6.7.3",
     "mini-css-extract-plugin": "2.7.5",
     "style-loader": "~3.3.2",
