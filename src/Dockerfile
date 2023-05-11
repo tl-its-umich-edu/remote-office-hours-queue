@@ -2,9 +2,6 @@
 FROM node:18-alpine AS node-webpack
 WORKDIR /usr/src/app
 
-# Adding this for now since webpack otherwise is crashing
-ENV NODE_OPTIONS=--openssl-legacy-provider
-
 # NOTE: package.json and webpack.config.js not likely to change between dev builds
 COPY package.json package-lock.json webpack.config.js tsconfig.json /usr/src/app/
 RUN npm install
