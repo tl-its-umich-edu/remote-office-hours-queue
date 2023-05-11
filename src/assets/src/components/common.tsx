@@ -168,7 +168,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
     return (
         <>
             <InputGroup>
-                <Form.Control readOnly id={props.id} ref={inputRef} onClick={() => copy()} value={props.text} type="text" />
+                <Form.Control className='disabled-input' readOnly ref={inputRef} onClick={() => copy()} value={props.text} type="text" />
                 <Button type="button" variant="secondary" ref={buttonRef} onClick={() => copy(true)}>
                     {buttonInner}
                 </Button>
@@ -234,7 +234,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 
     return (
         <Form onSubmit={handleSubmit}>
-            <InputGroup className='mb-2'>
+            <InputGroup className='mb-1'>
                 <Form.Control
                     id={props.id}
                     as='input'

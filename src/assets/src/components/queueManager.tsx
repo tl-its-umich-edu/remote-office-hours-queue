@@ -68,7 +68,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
 
     return (
         <Form onSubmit={handleSubmit} aria-label='Add Attendee'>
-            <InputGroup>
+            <InputGroup className='mb-1'>
                 <Form.Control
                     id='add_attendee'
                     as='input'
