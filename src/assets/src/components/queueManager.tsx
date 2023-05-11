@@ -160,17 +160,17 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={2}><div id='created'>Created</div></Col>
                 <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
             </Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
-            <Row noGutters className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
+            <Row className={spacingClass}>
                 <Col md={12}><MeetingsInProgressTable meetings={startedMeetings} {...props} /></Col>
             </Row>
             <h2 className={spacingClass}>Meetings in Queue</h2>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={8}>
                     {userLoggedOnWarning}
                     {props.addMeetingError && <ErrorDisplay formErrors={[props.addMeetingError]} />}
@@ -183,7 +183,7 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={12}><MeetingsInQueueTable meetings={unstartedMeetings} {...props} /></Col>
             </Row>
         </div>
