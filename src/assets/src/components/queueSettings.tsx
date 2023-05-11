@@ -106,17 +106,13 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
     );
 }
 
-interface SettingsPageParams {
-    queue_id: string;
-}
-
 export function ManageQueueSettingsPage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
 
     // Set up page state
-    const { queue_id: queueID } = useParams<SettingsPageParams>();
+    const { queue_id: queueID } = useParams();
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
     const [dialogState, setStateAndOpenDialog] = useDialogState();

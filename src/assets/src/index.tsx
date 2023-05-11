@@ -3,7 +3,7 @@ import './components/page';  // Work around definition files not triggering relo
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { AppRouter as App } from './containers/app';
+import { App } from './containers/app';
 import { MeetingBackend, User } from './models';
 
 export interface Globals {

@@ -242,16 +242,12 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
     );
 }
 
-interface QueueManagerPageParams {
-    queue_id: string;
-}
-
 export function QueueManagerPage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
 
-    let { queue_id } = useParams<QueueManagerPageParams>()
+    let { queue_id } = useParams()
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);

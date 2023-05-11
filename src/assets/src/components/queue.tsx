@@ -431,16 +431,12 @@ const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
     );
 }
 
-interface QueuePageParams {
-    queue_id: string;
-}
-
 export function QueuePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
 
-    const { queue_id } = useParams<QueuePageParams>();
+    const { queue_id } = useParams();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = parseInt(queue_id);
