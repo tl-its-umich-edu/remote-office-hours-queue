@@ -238,18 +238,16 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 
     // Card content
     const changeMeetingType = props.queue.my_meeting?.assignee
-        ? <small className="ms-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
+        ? <span className="ms-2 fs-6">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</span>
         : <Button variant='link' onClick={props.onShowDialog} aria-label='Change Meeting Type' disabled={props.disabled}>Change</Button>;
 
     const notificationBlurb = !inProgress
         && (
-            <Alert variant="info">
-                <small>
-                    Did you know? You can receive an SMS (text) message when
-                    it's your turn by adding your cell phone number and
-                    enabling attendee notifications in
-                    your <Link to="/preferences">User Preferences</Link>.
-                </small>
+            <Alert variant="info" className='fs-6'>
+                Did you know? You can receive an SMS (text) message when
+                it's your turn by adding your cell phone number and
+                enabling attendee notifications in
+                your <Link to="/preferences">User Preferences</Link>.
             </Alert>
         );
 
@@ -257,7 +255,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? (
             <>
             <Card.Text><strong>Meeting Agenda</strong> (Optional):</Card.Text>
-            <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
+            <Card.Text className='fs-6'>Let the host(s) know the topic you wish to discuss.</Card.Text>
             <EditToggleField
                 id='agenda'
                 value={meeting.agenda}
