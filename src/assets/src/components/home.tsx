@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import { MyUser } from "../models";
 import { Link } from "react-router-dom";
-import { Button, Col, Form, InputGroup, Row } from 'react-bootstrap';
+import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 
 import { ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
@@ -24,7 +24,7 @@ function QueueLookup() {
                             value={lookup}
                             onChange={(e) => setLookup(e.target.value)}
                         />
-                        <Button type="submit" variant='primary'>Search Queues</Button>
+                        <Button type="submit" variant="primary">Search Queues</Button>
                     </InputGroup>
                 </Form>
             </Col>

@@ -29,7 +29,7 @@ export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
     }
     const allowedMeetingTypeEditors = enabledBackends
         .map((b) =>
-            <FormGroup key={b.name} controlId={b.name} className='mb-3'>
+            <FormGroup key={b.name} controlId={b.name} className="mb-3">
                 <Form.Check
                     type="checkbox"
                     label={b.friendly_name}

@@ -68,7 +68,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
 
     return (
         <Form onSubmit={handleSubmit} aria-label='Add Attendee'>
-            <InputGroup className='mb-1'>
+            <InputGroup className="mb-1">
                 <Form.Control
                     id='add_attendee'
                     as='input'
@@ -135,9 +135,9 @@ function QueueManager(props: QueueManagerProps) {
         <div>
             <div className="float-end">
                 <Link to={`/manage/${props.queue.id}/settings`} tabIndex={-1}>
-                    <Button variant='primary' aria-label='Settings'>
+                    <Button variant="primary" aria-label="Settings">
                         <FontAwesomeIcon icon={faCog} />
-                        <span className='ms-2'>Settings</span>
+                        <span className="ms-2">Settings</span>
                     </Button>
                 </Link>
             </div>

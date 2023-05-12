@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes } from "react-router-dom";
 
 import { Globals } from "..";
 import { AddQueuePage } from "../components/addQueue";
@@ -29,14 +29,14 @@ export function App(props: AppProps) {
 
     return (
         <Routes>
-            <Route path='/' element={<HomePage {...commonProps} />} />
-            <Route path='/manage' element={<ManagePage {...commonProps} />} />
-            <Route path='/manage/:queue_id' element={<QueueManagerPage {...commonProps} />} />
-            <Route path='/manage/:queue_id/settings' element={<ManageQueueSettingsPage {...commonProps} />} />
-            <Route path='/queue/:queue_id' element={<QueuePage {...commonProps} />} />
-            <Route path='/search/' element={<SearchPage {...commonProps} />} />
-            <Route path='/preferences' element={<PreferencesPage {...commonProps} />} />
-            <Route path='/add_queue' element={<AddQueuePage {...commonProps} />} />
+            <Route path="/" element={<HomePage {...commonProps} />} />
+            <Route path="/manage" element={<ManagePage {...commonProps} />} />
+            <Route path="/manage/:queue_id" element={<QueueManagerPage {...commonProps} />} />
+            <Route path="/manage/:queue_id/settings" element={<ManageQueueSettingsPage {...commonProps} />} />
+            <Route path="/queue/:queue_id" element={<QueuePage {...commonProps} />} />
+            <Route path="/search/" element={<SearchPage {...commonProps} />} />
+            <Route path="/preferences" element={<PreferencesPage {...commonProps} />} />
+            <Route path="/add_queue" element={<AddQueuePage {...commonProps} />} />
         </Routes>
     );
 }
