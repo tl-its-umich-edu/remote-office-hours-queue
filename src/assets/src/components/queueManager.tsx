@@ -84,7 +84,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
                     onChange={setSelectedBackend}
                     selectedBackend={selectedBackend}
                 />
-                <Button variant='success' type='submit' disabled={props.disabled}>
+                <Button variant="success" type="submit" disabled={props.disabled}>
                     + Add Attendee
                 </Button>
             </InputGroup>
@@ -289,7 +289,7 @@ export function QueueManagerPage(props: PageProps) {
             "Remove Meeting?",
             `Are you sure you want to remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}?`,
             () => doRemoveMeeting(m)
-        )
+        );
     }
     const addMeeting = async (uniqname: string, backend: string) => {
         const user = await confirmUserExists(uniqname);
