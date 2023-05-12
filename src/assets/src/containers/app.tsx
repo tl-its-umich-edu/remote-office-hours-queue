@@ -2,16 +2,16 @@ import * as React from "react";
 import { Route, Routes } from 'react-router-dom';
 
 import { Globals } from "..";
+import { AddQueuePage } from "../components/addQueue";
 import { HomePage } from "../components/home";
 import { ManagePage } from "../components/manage";
+import { PageProps } from "../components/page";
+import { PreferencesPage } from "../components/preferences";
 import { QueuePage } from "../components/queue";
 import { QueueManagerPage } from "../components/queueManager";
-import { SearchPage } from "../components/search";
-import { PreferencesPage } from "../components/preferences";
-import { AddQueuePage } from "../components/addQueue";
 import { ManageQueueSettingsPage } from "../components/queueSettings";
+import { SearchPage } from "../components/search";
 import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
-import { PageProps } from "../components/page";
 
 interface AppProps {
     globals: Globals;

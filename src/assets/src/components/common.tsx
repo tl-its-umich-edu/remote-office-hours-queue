@@ -168,7 +168,7 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
     return (
         <>
             <InputGroup>
-                <Form.Control className='disabled-input' readOnly ref={inputRef} onClick={() => copy()} value={props.text} type="text" />
+                <Form.Control className="disabled-input" readOnly ref={inputRef} onClick={() => copy()} value={props.text} type="text" />
                 <Button type="button" variant="secondary" ref={buttonRef} onClick={() => copy(true)}>
                     {buttonInner}
                 </Button>
@@ -450,16 +450,16 @@ export const Dialog = (props: DialogProps) => {
                 props.action !== undefined
             ) && (
                 <>
-                <Modal.Header closeButton>
-                    <Modal.Title>{title}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <p>{description}</p>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button onClick={props.onClose} variant='outline-dark'>Cancel</Button>
-                    <Button onClick={action} variant='primary'>OK</Button>
-                </Modal.Footer>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{title}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>{description}</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button onClick={props.onClose} variant='outline-dark'>Cancel</Button>
+                        <Button onClick={action} variant='primary'>OK</Button>
+                    </Modal.Footer>
                 </>
             )}
         </Modal>
