@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-import { DialogState } from '../components/common';
+import { DialogState } from "../components/common";
 
 export function useDialogState (): [
     DialogState, (title: string, description: string, action: () => void) => void

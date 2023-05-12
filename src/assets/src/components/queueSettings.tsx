@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronLeft } from "@fortawesome/free-solid-svg-icons";
 import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
 

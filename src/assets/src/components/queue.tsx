@@ -41,7 +41,7 @@ const JoinQueue: React.FC<JoinQueueProps> = (props) => {
             </Col>
         </Row>
         <Row>
-            <Col xs='auto'>
+            <Col xs="auto">
                 <BackendSelector
                     backends={props.backends}
                     allowedBackends={new Set(props.queue.allowed_backends)}
@@ -243,7 +243,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 
     const notificationBlurb = !inProgress
         && (
-            <Alert variant="info" className='fs-6'>
+            <Alert variant="info" className="fs-6">
                 Did you know? You can receive an SMS (text) message when
                 it's your turn by adding your cell phone number and
                 enabling attendee notifications in
@@ -255,7 +255,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? (
             <>
             <Card.Text><strong>Meeting Agenda</strong> (Optional):</Card.Text>
-            <Card.Text className='fs-6'>Let the host(s) know the topic you wish to discuss.</Card.Text>
+            <Card.Text className="fs-6">Let the host(s) know the topic you wish to discuss.</Card.Text>
             <EditToggleField
                 id='agenda'
                 value={meeting.agenda}

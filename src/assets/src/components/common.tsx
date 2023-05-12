@@ -216,7 +216,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
             onSubmit(props.value);
         };
         buttonBlock = (
-            <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>
+            <Button bsPrefix={buttonClass} type="submit" disabled={props.disabled}>
                 {props.children}
             </Button>
         );
@@ -234,7 +234,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 
     return (
         <Form onSubmit={handleSubmit}>
-            <InputGroup className='mb-1'>
+            <InputGroup className="mb-1">
                 <Form.Control
                     id={props.id}
                     as='input'
@@ -287,8 +287,8 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
         <Form onSubmit={handleSubmit}>
             <Form.Control
                 id={props.id}
-                className='mb-2'
-                as='textarea'
+                className="mb-2"
+                as="textarea"
                 rows={5}
                 ref={inputRef}
                 value={props.value}
@@ -457,8 +457,8 @@ export const Dialog = (props: DialogProps) => {
                         <p>{description}</p>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button onClick={props.onClose} variant='outline-dark'>Cancel</Button>
-                        <Button onClick={action} variant='primary'>OK</Button>
+                        <Button onClick={props.onClose} variant="outline-dark">Cancel</Button>
+                        <Button onClick={action} variant="primary">OK</Button>
                     </Modal.Footer>
                 </>
             )}
