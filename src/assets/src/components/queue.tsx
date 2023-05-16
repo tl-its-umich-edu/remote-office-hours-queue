@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import * as ReactGA from "react-ga";
+import ReactGA from "react-ga4";
 import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
 
 import {
