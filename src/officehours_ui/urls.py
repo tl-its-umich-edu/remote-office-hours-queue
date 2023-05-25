@@ -17,6 +17,6 @@ urlpatterns = [
     path('add_queue/', SpaView.as_view(), name='add_queue'),
     path('auth/<backend_name>/', AuthPromptView.as_view(), name='auth_prompt'),
     path('callback/<backend_name>/', auth_callback_view, name='auth_callback'),
-    path("robots.txt", SpaView.as_view(template_name="robots.txt", content_type="text/plain")),
+    path("robots.txt", RedirectView.as_view(url='/static/robots.txt', permanent=True)),
     path("favicon.ico", RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
 ]
