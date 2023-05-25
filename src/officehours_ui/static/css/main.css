@@ -559,6 +559,20 @@ h3.alert-heading {
 	color: #cecbc9;
 }
 
+
+.table-responsive {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, .5) white;
+}
+
+/* Firefox */
+@-moz-document url-prefix() {
+    .table-responsive {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, .5) white;
+    }
+}
+
 .table-responsive::-webkit-scrollbar {
     -webkit-appearance: none;
 }
