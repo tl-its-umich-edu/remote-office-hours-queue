@@ -3,48 +3,41 @@
 {% get_flatpages as flatpages %}
 <!doctype html>
 <html lang="en">
-
-<head>
+  <head>
   {% block head %}
-  <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}" />
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
-    integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+	<link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}"/>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
-  <link rel="stylesheet" mo type="text/css" href="//fonts.googleapis.com/css?family=Roboto:400" />
-  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:400i" />
-  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700" />
-  <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700i" />
+	<link rel="stylesheet" mo type="text/css" href="//fonts.googleapis.com/css?family=Roboto:400"/>
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:400i"/>
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700"/>
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700i"/>
   {% block styles %}{% endblock %}
   <title>Remote Office Hours Queue - {% block title %}{% endblock %}</title>
   {{ spa_globals|json_script:"spa_globals" }}
   {% endblock %}
-</head>
+  </head>
 
-<body>
-  <div id="skip-link">
-    <a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
-  </div>
-  <header id="navbarSupportedContent">
-    <nav class="navbar navbar-expand-lg" id="aux-nav" aria-label="Auxiliary Navigation">
-      <div class="container">
-        <div class="navbar-brand">
+  <body>
+	<div id="skip-link">
+		<a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
+	</div>
+	<header id="navbarSupportedContent">
+		<nav class="navbar navbar-expand-lg" id="aux-nav" aria-label="Auxiliary Navigation">
+			<div class="container">
+				<div class="navbar-brand">
           <a href="{% url 'home' %}">
-            <img src="{% static 'images/its-logo.png' %}" class="container banner-img img-responsive pull-left"
-              alt="Remote Office Hours Queue" />
+            <img src="{% static 'images/its-logo.png' %}" class="container banner-img img-responsive pull-left" alt="Remote Office Hours Queue"/>
           </a>
-        </div>
+				</div>
+				<button class="navbar-toggler ml-auto" id="navbar-toggle" type="button" data-toggle="collapse" data-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+						<i class="fas fa-bars text-light"></i>
+				</button>
 
-        <button class="navbar-toggler ml-auto" id="navbar-toggle" type="button" data-toggle="collapse"
-          data-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false"
-          aria-label="Toggle navigation">
-          <i class="fas fa-bars text-light"></i>
-        </button>
-
-        <div class="collapse navbar-collapse navbars" aria-labelledby="aux-nav" role="navigation">
+				<div class="collapse navbar-collapse navbars" aria-labelledby="aux-nav" role="navigation">
           <div class="navbar-nav ml-auto">
             <a class="nav-link" href="{% url 'home' %}">
               Home
@@ -54,60 +47,54 @@
               <i class="fa fa-external-link-alt"></i>
             </a>
             {% if request.user.is_authenticated %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                {{ request.user.username }}
-              </a>
-              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
-                <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
-                  Manage Queues
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {{ request.user.username }}
                 </a>
-                <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
-                  Preferences
-                </a>
-                <form action="{% url 'oidc_logout' %}" method="post">
-                  {% csrf_token %}
-                  <input type="submit" value="Logout" style="background-color: white" class="dropdown-item">
-                </form>
-              </div>
-            </li>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
+                  <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
+                    Manage Queues
+                  </a>
+                  <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
+                    Preferences
+                  </a>
+                  <form action="{% url 'oidc_logout' %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Logout" style="background-color: white" class="dropdown-item">
+                  </form>
+                </div>
+              </li>
             {% else %}
-            <a href="{{ LOGIN_URL }}" class="nav-link">Login</a>
+              <a href="{{ LOGIN_URL }}" class="nav-link">Login</a>
             {% endif %}
           </div>
         </div>
     </nav>
   </header>
-
+  
   {% for page in flatpages %}
-  {% if page.title == "User Comm Banner" %}
-  {{page.content|safe}}
-  {% endif %}
+    {% if page.title == "User Comm Banner" %}
+      {{page.content|safe}}
+    {% endif %}
   {% endfor %}
 
-  <div id="main-content" class="container" role="main">
+	<div id="main-content" class="container" role="main">
     {% block content %}{% endblock %}
     {% csrf_token %}
-  </div>
+	</div>
 
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-    crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-    crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-    crossorigin="anonymous"></script>
-
-
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   <script>
-    $('#navbar-toggle').click(function () {
-      $(this).find('i').toggleClass('fas fa-bars text-light').toggleClass('fas fa-times');
+    const navBarToggleIconEl = document.getElementById('navbar-toggle').children[0];
+
+    navBarToggleIconEl.addEventListener('click', () => {
+      navBarToggleIconEl.classList.toggle('fa-bars');
+      navBarToggleIconEl.classList.toggle('fa-times');
     });
   </script>
   {% block scripts %}{% endblock %}
-</body>
-
+  
+  </body>
 </html>
