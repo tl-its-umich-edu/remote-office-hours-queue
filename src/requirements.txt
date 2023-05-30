@@ -1,4 +1,4 @@
-django==3.2.18
+django==3.2.19
 djangorestframework==3.14.0
 drf-spectacular==0.26.0
 mozilla-django-oidc==3.0.0
