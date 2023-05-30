@@ -323,7 +323,7 @@ interface SingleInputFieldProps {
     buttonOptions: ButtonOptions;
     initFocus?: boolean;
     fieldComponent: React.FC<StatelessValidatedInputFormProps>;
-    fieldSchema: StringSchema;
+    fieldSchema: StringSchema<string>;
     showRemaining?: boolean;
     onSuccess?: () => void;
     children: React.ReactNode;
