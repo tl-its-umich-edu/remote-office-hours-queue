@@ -96,7 +96,13 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         : validationStatus === null
             ? <Alert variant='primary'>Your preferences were not changed.</Alert>
         : validationStatus.length
-            ? <Alert variant='danger'><ul className="mb-0">{validationStatus.map(e => <li>{e.message}</li>)}</ul></Alert>
+            ? (
+                <Alert variant='danger'>
+                    <ul className="mb-0">
+                        {validationStatus.map((e, i) => <li key={i}>{e.message}</li>)}
+                    </ul>
+                </Alert>
+            )
         : props.errorOccurred
             ? <Alert variant='danger'>An error occurred while trying to update your preferences; please try again later.</Alert>
         : <Alert variant='success'>Your preferences were successfully updated.</Alert>
