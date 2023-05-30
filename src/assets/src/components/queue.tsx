@@ -210,8 +210,8 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
             <Col md={6} sm={true}>
                 <Card>
                     <Card.Body>
-                        <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
-                        <Card.Text><DialInContent {...props} /></Card.Text>
+                        <Card.Title as='h5' className='mt-0'>Having Trouble with Video?</Card.Title>
+                        <Card.Text as='div'><DialInContent {...props} /></Card.Text>
                     </Card.Body>
                 </Card>
             </Col>
