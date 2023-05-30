@@ -60,10 +60,10 @@ export const validatePhoneNumber = (phone: string, countryDialCode: string): Err
 const blankText = 'This field may not be left blank.';
 
 export const queueNameSchema = string().trim().required(blankText).max(100, createRemainingCharsMessage);
-export const queueDescriptSchema = string().trim().max(1000, createRemainingCharsMessage);
-export const meetingAgendaSchema = string().trim().max(100, createRemainingCharsMessage);
-export const queueLocationSchema = string().trim().max(100, createRemainingCharsMessage);
-export const uniqnameSchema = string().trim().lowercase()
+export const queueDescriptSchema = string().defined().trim().max(1000, createRemainingCharsMessage);
+export const meetingAgendaSchema = string().defined().trim().max(100, createRemainingCharsMessage);
+export const queueLocationSchema = string().defined().trim().max(100, createRemainingCharsMessage);
+export const uniqnameSchema = string().defined().trim().lowercase()
     .min(3, 'Uniqnames must be at least 3 characters long.')
     .max(8, 'Uniqnames must be at most 8 characters long.')
     .matches(/^[a-z]+$/i, 'Uniqnames cannot contain non-alphabetical characters.');
@@ -77,17 +77,12 @@ export interface ValidationResult {
     messages: ReadonlyArray<string>;
 }
 
-export function validateString (value: string, schema: StringSchema, showRemaining: boolean): ValidationResult {
+export function validateString (value: string, schema: StringSchema<string>, showRemaining: boolean): ValidationResult {
     let transformedValue: string;
     let isInvalid = false;
     let messages: string[] = Array();
     try {
-        const result = schema.validateSync(value);
-        if (result === undefined) {
-            throw Error('validateString should have received a string in the value parameter, but it is undefined.');
-        } else {
-            transformedValue = result;
-        }
+        transformedValue = schema.validateSync(value);
         const maxLimit = getMaxLimit(schema.describe());
         if (showRemaining && maxLimit) {
             messages.push(createRemainingCharsMessage({value: transformedValue, max: maxLimit}));
