@@ -11,15 +11,6 @@ export const redirectToLogin = (loginUrl: string) => {
     location.href = loginUrl + '?next=' + location.pathname;
 }
 
-export const redirectToSearch = (term: string) => {
-    ReactGA.event({
-        category: "Navigation",
-        action: "Redirected to Search",
-        nonInteraction: true,
-    });
-    location.href = `/search/${term}/?redirected=true`;
-}
-
 export const redirectToBackendAuth = (backend: string) => {
     ReactGA.event({
         category: "Auth",
