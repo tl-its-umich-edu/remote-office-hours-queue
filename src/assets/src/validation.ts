@@ -86,8 +86,6 @@ export function validateString (value: string, schema: StringSchema<string>, sho
         const maxLimit = getMaxLimit(schema.describe());
         if (showRemaining && maxLimit) {
             messages.push(createRemainingCharsMessage({value: transformedValue, max: maxLimit}));
-        } else {
-            console.warn('validateString called with showReamining but schema does not include a maxiumum.');
         }
     } catch (error) {
         if (!ValidationError.isError(error)) {
