@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import GoogleAnalytics from 'react-ga4';
+import { useLocation } from 'react-router-dom';
 
 export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) => {
+    let location = useLocation();
     const [initialized, setInitialized] = useState(false);
     const [previousPage, setPreviousPage] = useState(null as string | null);
 
@@ -11,10 +13,10 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
     }
 
     useEffect(() => {
-        const page = window.location.pathname + window.location.search + window.location.hash
+        const page = location.pathname + location.search + location.hash;
         if (googleAnalyticsId && page !== previousPage) {
             setPreviousPage(page);
             GoogleAnalytics.send({ hitType: "pageview", page });
         }
-    });
+    }, [location]);
 }
