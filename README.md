@@ -65,3 +65,11 @@ and provide for API testing using Swagger.
 The Swagger UI can be accessed by navigating to [`api/schema/swagger-ui`](http://localhost:8003/api/schema/swagger-ui).
 Once on the page, requests can be made against the API using the "Try it out" functionality.
 The OpenAPI schema can be downloaded as a YAML file from [`/api/schema`](http://localhost:8003/api/schema).
+
+### Google Analytics
+
+This application is capable of being configured to use Google Analytics 4.
+In order to send events, the environment variable `GA_TRACKING_ID` needs to be set to
+your application's [measurement ID](https://support.google.com/analytics/answer/9539598#find-G-ID)
+and the `DEBUG` environment variable and Django setting need to be off or `False`.
+Thus, a deployment environment is currently the simplest place for testing.
