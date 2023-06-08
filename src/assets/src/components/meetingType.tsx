@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Form } from "react-bootstrap";
+import { Form, FormGroup } from "react-bootstrap";
 
 import { EnabledBackendName, MeetingBackend } from "../models";
 
@@ -29,14 +29,14 @@ export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
     }
     const allowedMeetingTypeEditors = enabledBackends
         .map((b) =>
-            <Form.Group key={b.name} controlId={b.name}>
+            <FormGroup key={b.name} controlId={b.name} className="mb-3">
                 <Form.Check
                     type="checkbox"
                     label={b.friendly_name}
                     checked={props.allowed.has(b.name)}
                     onChange={() => toggleAllowed(b.name)}
                 />
-            </Form.Group>
+            </FormGroup>
         );
     return (
         <Form>
@@ -66,8 +66,8 @@ export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
         props.onChange(event.currentTarget.value);
     }
     return (
-        <select className="btn btn-sm select-dropdown" onChange={handleChange} value={props.selectedBackend}>
+        <Form.Select className="select-dropdown" onChange={handleChange} value={props.selectedBackend}>
             {options}
-        </select>
+        </Form.Select>
     );
 }

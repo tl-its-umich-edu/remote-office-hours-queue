@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
 import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
-import Dialog from "react-bootstrap-dialog";
 import { StringSchema } from "yup";
 
 import { useStringValidation } from "../hooks/useValidation";
@@ -39,6 +38,7 @@ interface RemoveButtonProps {
     disabled: boolean;
     size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
+    children?: React.ReactNode;
 }
 
 export const RemoveButton: React.FC<RemoveButtonProps> = (props) => {
@@ -59,6 +59,7 @@ interface AddButtonProps {
     disabled: boolean;
     size?: "block" | "lg" | "sm";
     screenReaderLabel: string;
+    children: React.ReactNode;
 }
 
 export const AddButton: React.FC<AddButtonProps> = (props) => {
@@ -86,19 +87,6 @@ export const LoadingDisplay: React.FC<LoadingDisplayProps> = (props) => {
         </p>
     );
 }
-
-
-export const showConfirmation = (dialog: React.RefObject<Dialog>, action: () => void, title: string, description: string) => {
-    dialog.current!.show({
-        title: title,
-        body: description,
-        actions: [
-            Dialog.CancelAction(),
-            Dialog.OKAction(action),
-        ],
-    });
-}
-
 
 export interface FormError {
     source: string;
@@ -179,14 +167,12 @@ export const CopyField: React.FC<CopyFieldProps> = (props) => {
         && <span className="sr-only" role="alert" aria-live="polite">Copied</span>
     return (
         <>
-            <div className="input-group">
-                <input readOnly id={props.id} ref={inputRef} onClick={() => copy()} value={props.text} type="text" className="form-control" />
-                <div className="input-group-append">
-                    <button type="button" ref={buttonRef} onClick={() => copy(true)} className="btn btn-secondary">
-                        {buttonInner}
-                    </button>
-                </div>
-            </div>
+            <InputGroup>
+                <Form.Control className="disabled-input" readOnly ref={inputRef} onClick={() => copy()} value={props.text} type="text" />
+                <Button type="button" variant="secondary" ref={buttonRef} onClick={() => copy(true)}>
+                    {buttonInner}
+                </Button>
+            </InputGroup>
             {copiedSrAlert}
         </>
     );
@@ -213,6 +199,7 @@ interface StatelessValidatedInputFormProps extends SingleInputFormProps {
     value: string;
     validationResult?: ValidationResult;
     onChangeValue: (value: string) => void;
+    children?: React.ReactNode;
 }
 
 export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
@@ -229,11 +216,9 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
             onSubmit(props.value);
         };
         buttonBlock = (
-            <InputGroup.Append>
-                <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>
-                    {props.children}
-                </Button>
-            </InputGroup.Append>
+            <Button bsPrefix={buttonClass} type="submit" disabled={props.disabled}>
+                {props.children}
+            </Button>
         );
     }
 
@@ -249,7 +234,7 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
 
     return (
         <Form onSubmit={handleSubmit}>
-            <InputGroup>
+            <InputGroup className="mb-1">
                 <Form.Control
                     id={props.id}
                     as='input'
@@ -300,20 +285,19 @@ export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> =
 
     return (
         <Form onSubmit={handleSubmit}>
-            <Form.Group>
-                <Form.Control
-                    id={props.id}
-                    as='textarea'
-                    rows={5}
-                    ref={inputRef}
-                    value={props.value}
-                    aria-label={props.formLabel}
-                    placeholder={props.placeholder}
-                    onChange={(e) => handleChange(e.currentTarget.value)}
-                    disabled={props.disabled}
-                    isInvalid={props.validationResult?.isInvalid}
-                />
-            </Form.Group>
+            <Form.Control
+                id={props.id}
+                className="mb-2"
+                as="textarea"
+                rows={5}
+                ref={inputRef}
+                value={props.value}
+                aria-label={props.formLabel}
+                placeholder={props.placeholder}
+                onChange={(e) => handleChange(e.currentTarget.value)}
+                disabled={props.disabled}
+                isInvalid={props.validationResult?.isInvalid}
+            />
             {
                 (feedback || buttonBlock)
                     ? (
@@ -339,9 +323,10 @@ interface SingleInputFieldProps {
     buttonOptions: ButtonOptions;
     initFocus?: boolean;
     fieldComponent: React.FC<StatelessValidatedInputFormProps>;
-    fieldSchema: StringSchema;
+    fieldSchema: StringSchema<string>;
     showRemaining?: boolean;
     onSuccess?: () => void;
+    children: React.ReactNode;
 }
 
 // Stateful wrapper for one text input field and associated feedback
@@ -380,6 +365,7 @@ export const SingleInputField: React.FC<SingleInputFieldProps> = (props) => {
 interface EditToggleFieldProps extends SingleInputFieldProps {
     value: string;
     initialState: boolean;
+    children: React.ReactNode;
 }
 
 // Wrapper for input fields that can be expanded or hidden with an Edit button
@@ -410,17 +396,17 @@ interface JoinedQueueAlertProps {
     joinedQueue: QueueAttendee;
 }
 
-export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) =>
-    <p className="col-lg alert alert-danger" role="alert">
-        <strong>You may only join one queue. </strong>
-        You are currently in {props.joinedQueue.name}.
-        If you choose to join another queue, you will lose your current place in line.
-        <br />
-        <Link to={`/queue/${props.joinedQueue.id}`} className="btn btn-danger">
-            Return to Previous Queue
+export const JoinedQueueAlert: React.FC<JoinedQueueAlertProps> = (props) => (
+    <Alert variant="danger">
+        <p className="mb-2">
+            <strong>You may only join one queue.</strong> You are currently in {props.joinedQueue.name}.
+            If you choose to join another queue, you will lose your current place in line.
+        </p>
+        <Link to={`/queue/${props.joinedQueue.id}`} tabIndex={-1}>
+            <Button variant="danger">Return to Previous Queue</Button>
         </Link>
-    </p>
-
+    </Alert>
+);
 
 interface LoginDialogProps {
     visible: boolean;
@@ -440,6 +426,45 @@ export const LoginDialog = (props: LoginDialogProps) =>
         </Modal.Footer>
     </Modal>
 
+export interface DialogState {
+    show: boolean;
+    onClose?: () => void;
+    title?: string;
+    description?: string;
+    action?: () => void;
+}
+
+interface DialogProps extends DialogState {}
+
+export const Dialog = (props: DialogProps) => {
+    const { show, onClose, title, description, action } = props;
+
+    return (
+        <Modal
+            show={show}
+            onHide={onClose}
+        >
+            {(
+                props.title !== undefined &&
+                props.description !== undefined &&
+                props.action !== undefined
+            ) && (
+                <>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{title}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>{description}</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button onClick={props.onClose} variant="outline-dark">Cancel</Button>
+                        <Button onClick={action} variant="primary">OK</Button>
+                    </Modal.Footer>
+                </>
+            )}
+        </Modal>
+    );
+}
 
 interface BreadcrumbsProps {
     intermediatePages?: {title: string, href: string}[];
@@ -491,7 +516,7 @@ export function QueueTable (props: QueueTableProps) {
         <tr key={q.id}>
             <td aria-label={`Queue ID Number`}>
                 <Link to={`${linkBase}${q.id}`}>
-                    <Badge variant='primary' pill={true}>{q.id}</Badge>
+                    <Badge bg='primary' pill={true}>{q.id}</Badge>
                 </Link>
             </td>
             <td aria-label={`Name for Queue ID ${q.id}`}>
@@ -499,7 +524,7 @@ export function QueueTable (props: QueueTableProps) {
             </td>
             <td aria-label={`Status for Queue ID ${q.id}`}>
                 <Link to={`${linkBase}${q.id}`}>
-                    <Badge variant={q.status === 'open' ? 'success' : 'danger'} pill={true}>
+                    <Badge bg={q.status === 'open' ? 'success' : 'danger'} pill={true}>
                         {q.status}
                     </Badge>
                 </Link>

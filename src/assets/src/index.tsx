@@ -1,9 +1,9 @@
 import './models';  // Work around definition files not triggering reload https://github.com/TypeStrong/ts-loader/issues/808
 import './components/page';  // Work around definition files not triggering reload https://github.com/TypeStrong/ts-loader/issues/808
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { AppRouter as App } from './containers/app';
+import { App } from './containers/app';
 import { MeetingBackend, User } from './models';
 
 export interface Globals {
@@ -22,12 +22,15 @@ if (!globalsElement) throw new Error(`#${globalsId} not found!`);
 if (!globalsElement.textContent) throw new Error(`No data found in #${globalsId}!`);
 const globals = JSON.parse(globalsElement.textContent);
 
-ReactDOM.render(
+const container = document.getElementById('root')
+const root = createRoot(container!)
+
+root.render(
     (
         <Router basename='/'>
             <App globals={globals} />
         </Router>
-    ), document.getElementById('root')
+    )
 );
 
 // If you want your app to work offline and load faster, you can change

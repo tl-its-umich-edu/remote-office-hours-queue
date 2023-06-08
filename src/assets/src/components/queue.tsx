@@ -1,21 +1,21 @@
 import * as React from "react";
-import { useState, createRef } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
 import * as ReactGA from "react-ga";
 import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
-import Dialog from "react-bootstrap-dialog";
 
 import {
     BluejeansMetadata, EnabledBackendName, Meeting, MeetingBackend, MeetingStatus, MyUser,
     QueueAttendee, User, VideoBackendNames, ZoomMetadata
 } from "../models";
 import {
-    checkForbiddenError, Breadcrumbs, DateTimeDisplay, DisabledMessage, EditToggleField, ErrorDisplay,
-    FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog, showConfirmation, StatelessInputGroupForm
+    checkForbiddenError, Breadcrumbs, DateTimeDisplay, Dialog, DisabledMessage, EditToggleField, ErrorDisplay,
+    FormError, JoinedQueueAlert, LoadingDisplay, LoginDialog, StatelessInputGroupForm
 } from "./common";
 import { DialInContent } from "./dialIn";
 import { BackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
+import { useDialogState } from "../hooks/useDialogState";
 import { usePromise } from "../hooks/usePromise";
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
@@ -35,19 +35,34 @@ interface JoinQueueProps {
 const JoinQueue: React.FC<JoinQueueProps> = (props) => {
     return (
         <>
-        <div className="row col-lg">
-            <p className="mb-0">Select Meeting Type</p>
-            <p className="mb-0 required">*</p>
-        </div>
-        <BackendSelector backends={props.backends} allowedBackends={new Set(props.queue.allowed_backends)}
-            onChange={props.onChangeSelectedBackend} selectedBackend={props.selectedBackend}/>
-        <div className="row">
-            <div className="col-lg">
-                <button disabled={props.disabled} onClick={() => props.onJoinQueue(props.selectedBackend)} type="button" className="btn btn-primary bottom-content">
+        <Row>
+            <Col lg>
+                <p className="mb-0">Select Meeting Type<span className="required">*</span></p>
+            </Col>
+        </Row>
+        <Row>
+            <Col xs="auto">
+                <BackendSelector
+                    backends={props.backends}
+                    allowedBackends={new Set(props.queue.allowed_backends)}
+                    onChange={props.onChangeSelectedBackend}
+                    selectedBackend={props.selectedBackend}
+                />
+            </Col>
+        </Row>
+        <Row>
+            <Col lg>
+                <Button
+                    variant="primary"
+                    className="bottom-content"
+                    type="button"
+                    disabled={props.disabled}
+                    onClick={() => props.onJoinQueue(props.selectedBackend)}
+                >
                     Join Queue
-                </button>
-            </div>
-        </div>
+                </Button>
+            </Col>
+        </Row>
         </>
     );
 }
@@ -83,11 +98,11 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
         joinedOther && props.joinedQueue
             ? (
                 <>
-                <div className="row">
-                    <div className="col-lg">
+                <Row>
+                    <Col lg>
                         <JoinedQueueAlert joinedQueue={props.joinedQueue}/>
-                    </div>
-                </div>
+                    </Col>
+                </Row>
                 <JoinQueue queue={props.queue} backends={props.backends} onJoinQueue={props.onLeaveAndJoinQueue} disabled={props.disabled}
                     selectedBackend={props.selectedBackend} onChangeSelectedBackend={props.onChangeBackend}/>
                 </>
@@ -102,16 +117,15 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
     return (
         <>
         {closedAlert}
-        <div className="row">
-            <ul>
-                <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
-                <li>You are not in the meeting queue yet</li>
-                {
-                    props.queue.allowed_backends.includes('inperson') && 
-                    <li>{notJoinedInpersonMeetingText}</li>
-                }
-            </ul>
-        </div>
+        <Row>
+            <Col>
+                <ul>
+                    <li>Number of people currently in line: <strong>{props.queue.line_length}</strong></li>
+                    <li>You are not in the meeting queue yet</li>
+                    {props.queue.allowed_backends.includes('inperson') && <li>{notJoinedInpersonMeetingText}</li>}
+                </ul>
+            </Col>
+        </Row>
         {controls}
         </>
     );
@@ -196,8 +210,8 @@ const VideoMeetingInfo: React.FC<VideoMeetingInfoProps> = (props) => {
             <Col md={6} sm={true}>
                 <Card>
                     <Card.Body>
-                        <Card.Title className='mt-0'>Having Trouble with Video?</Card.Title>
-                        <Card.Text><DialInContent {...props} /></Card.Text>
+                        <Card.Title as='h5' className='mt-0'>Having Trouble with Video?</Card.Title>
+                        <Card.Text as='div'><DialInContent {...props} /></Card.Text>
                     </Card.Body>
                 </Card>
             </Col>
@@ -224,18 +238,16 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 
     // Card content
     const changeMeetingType = props.queue.my_meeting?.assignee
-        ? <small className="ml-2">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</small>
+        ? <span className="ms-2 fs-6">(A Host has been assigned to this meeting. Meeting Type can no longer be changed.)</span>
         : <Button variant='link' onClick={props.onShowDialog} aria-label='Change Meeting Type' disabled={props.disabled}>Change</Button>;
 
     const notificationBlurb = !inProgress
         && (
-            <Alert variant="info">
-                <small>
-                    Did you know? You can receive an SMS (text) message when
-                    it's your turn by adding your cell phone number and
-                    enabling attendee notifications in
-                    your <Link to="/preferences">User Preferences</Link>.
-                </small>
+            <Alert variant="info" className="fs-6">
+                Did you know? You can receive an SMS (text) message when
+                it's your turn by adding your cell phone number and
+                enabling attendee notifications in
+                your <Link to="/preferences">User Preferences</Link>.
             </Alert>
         );
 
@@ -243,7 +255,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
         ? (
             <>
             <Card.Text><strong>Meeting Agenda</strong> (Optional):</Card.Text>
-            <Card.Text><small>Let the host(s) know the topic you wish to discuss.</small></Card.Text>
+            <Card.Text className="fs-6">Let the host(s) know the topic you wish to discuss.</Card.Text>
             <EditToggleField
                 id='agenda'
                 value={meeting.agenda}
@@ -301,7 +313,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
                     href={meeting.backend_metadata!.meeting_url}
                     target='_blank'
                     variant='warning'
-                    className='mr-3'
+                    className='me-3'
                     aria-label='Join Meeting'
                     disabled={props.disabled}
                 >
@@ -417,18 +429,14 @@ const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
     );
 }
 
-interface QueuePageParams {
-    queue_id: string;
-}
-
-export function QueuePage(props: PageProps<QueuePageParams>) {
+export function QueuePage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
-    const queue_id = props.match.params.queue_id;
+
+    const { queue_id } = useParams();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
-    const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
@@ -450,6 +458,8 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
     const [showMeetingTypeDialog, setShowMeetingTypeDialog] = useState(false);
+    const [dialogState, setStateAndOpenDialog] = useDialogState();
+
     //Setup interactions
     const joinQueue = async (backendType: string) => {
         ReactGA.event({
@@ -496,7 +506,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
                     : ''
             )
         );
-        showConfirmation(dialogRef, () => doLeaveQueue(), dialogParts.title, description);
+        setStateAndOpenDialog(dialogParts.title, description, () => doLeaveQueue());
     }
     const leaveAndJoinQueue = async (backendType: string) => {
         ReactGA.event({
@@ -557,7 +567,7 @@ export function QueuePage(props: PageProps<QueuePageParams>) {
             onChangeBackend={setSelectedBackend}/>
     return (
         <div>
-            <Dialog ref={dialogRef}/>
+            <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             {meetingTypeDialog}
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>

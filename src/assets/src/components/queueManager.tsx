@@ -1,19 +1,19 @@
 import * as React from "react";
-import { useState, createRef, ChangeEvent } from "react";
-import { Link } from "react-router-dom";
+import { useState, ChangeEvent } from "react";
+import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { Alert, Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
-import Dialog from "react-bootstrap-dialog";
 
 import {
-    UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay,
-    CopyField, showConfirmation, LoginDialog, Breadcrumbs, DateTimeDisplay, userLoggedOnWarning
+    UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay, Dialog,
+    CopyField, LoginDialog, Breadcrumbs, DateTimeDisplay, userLoggedOnWarning
 } from "./common";
 import { DialInContent } from './dialIn';
 import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
+import { useDialogState } from "../hooks/useDialogState";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
 import {
@@ -68,7 +68,7 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
 
     return (
         <Form onSubmit={handleSubmit} aria-label='Add Attendee'>
-            <InputGroup>
+            <InputGroup className="mb-1">
                 <Form.Control
                     id='add_attendee'
                     as='input'
@@ -78,19 +78,15 @@ function AddAttendeeForm(props: AddAttendeeFormProps) {
                     disabled={props.disabled}
                     isInvalid={attendeeValidationResult?.isInvalid}
                 />
-                <InputGroup.Append>
-                    <MeetingBackendSelector
-                        allowedBackends={props.allowedBackends}
-                        backends={props.backends}
-                        onChange={setSelectedBackend}
-                        selectedBackend={selectedBackend}
-                    />
-                </InputGroup.Append>
-                <InputGroup.Append>
-                    <Button variant='success' type='submit' disabled={props.disabled}>
-                        + Add Attendee
-                    </Button>
-                </InputGroup.Append>
+                <MeetingBackendSelector
+                    allowedBackends={props.allowedBackends}
+                    backends={props.backends}
+                    onChange={setSelectedBackend}
+                    selectedBackend={selectedBackend}
+                />
+                <Button variant="success" type="submit" disabled={props.disabled}>
+                    + Add Attendee
+                </Button>
             </InputGroup>
             {feedback}
         </Form>
@@ -137,21 +133,21 @@ function QueueManager(props: QueueManagerProps) {
 
     return (
         <div>
-            <div className="float-right">
-                <Link to={`/manage/${props.queue.id}/settings`}>
-                    <Button variant='primary' aria-label='Settings'>
+            <div className="float-end">
+                <Link to={`/manage/${props.queue.id}/settings`} tabIndex={-1}>
+                    <Button variant="primary" aria-label="Settings">
                         <FontAwesomeIcon icon={faCog} />
-                        <span className='ml-2'>Settings</span>
+                        <span className="ms-2">Settings</span>
                     </Button>
                 </Link>
             </div>
             <h1>Manage: {props.queue.name}</h1>
             <p><Link to={"/queue/" + props.queue.id}>View as visitor</Link></p>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={2}><Form.Label htmlFor='queue-url'>Queue URL</Form.Label></Col>
                 <Col md={6}><CopyField text={absoluteUrl} id="queue-url"/></Col>
             </Row>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={2}><Form.Label htmlFor='queue-status'>Queue Status</Form.Label></Col>
                 <Col md={6}>
                     <Form.Check
@@ -164,17 +160,17 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={2}><div id='created'>Created</div></Col>
                 <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
             </Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
-            <Row noGutters className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
+            <Row className={spacingClass}>
                 <Col md={12}><MeetingsInProgressTable meetings={startedMeetings} {...props} /></Col>
             </Row>
             <h2 className={spacingClass}>Meetings in Queue</h2>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={8}>
                     {userLoggedOnWarning}
                     {props.addMeetingError && <ErrorDisplay formErrors={[props.addMeetingError]} />}
@@ -187,7 +183,7 @@ function QueueManager(props: QueueManagerProps) {
                     />
                 </Col>
             </Row>
-            <Row noGutters className={spacingClass}>
+            <Row className={spacingClass}>
                 <Col md={12}><MeetingsInQueueTable meetings={unstartedMeetings} {...props} /></Col>
             </Row>
         </div>
@@ -246,18 +242,14 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
     );
 }
 
-interface QueueManagerPageParams {
-    queue_id: string;
-}
-
-export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
+export function QueueManagerPage(props: PageProps) {
     if (!props.user) {
         redirectToLogin(props.loginUrl);
     }
-    const queue_id = props.match.params.queue_id;
+
+    let { queue_id } = useParams()
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
-    const dialogRef = createRef<Dialog>();
     const queueIdParsed = parseInt(queue_id);
 
     // Set up basic state
@@ -290,12 +282,13 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         await api.removeMeeting(m.id);
     }
     const [doRemoveMeeting, removeMeetingLoading, removeMeetingError] = usePromise(removeMeeting);
+    const [dialogState, setStateAndOpenDialog] = useDialogState();
+
     const confirmRemoveMeeting = (m: Meeting) => {
-        showConfirmation(
-            dialogRef,
-            () => doRemoveMeeting(m),
+        setStateAndOpenDialog(
             "Remove Meeting?",
-            `Are you sure you want to remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}?`
+            `Are you sure you want to remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}?`,
+            () => doRemoveMeeting(m)
         );
     }
     const addMeeting = async (uniqname: string, backend: string) => {
@@ -357,7 +350,7 @@ export function QueueManagerPage(props: PageProps<QueueManagerPageParams>) {
         );
     return (
         <>
-            <Dialog ref={dialogRef}/>
+            <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <MeetingInfoDialog backends={props.backends} meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)} />
             <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()} intermediatePages={[{title: "Manage", href: "/manage"}]} />

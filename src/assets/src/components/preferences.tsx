@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Alert, Button, Form } from "react-bootstrap";
+import { Alert, Button, Form, FormGroup } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 import 'react-phone-input-2/lib/bootstrap.css'
 
@@ -96,7 +96,13 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         : validationStatus === null
             ? <Alert variant='primary'>Your preferences were not changed.</Alert>
         : validationStatus.length
-            ? <Alert variant='danger'><ul className="mb-0">{validationStatus.map(e => <li>{e.message}</li>)}</ul></Alert>
+            ? (
+                <Alert variant='danger'>
+                    <ul className="mb-0">
+                        {validationStatus.map((e, i) => <li key={i}>{e.message}</li>)}
+                    </ul>
+                </Alert>
+            )
         : props.errorOccurred
             ? <Alert variant='danger'>An error occurred while trying to update your preferences; please try again later.</Alert>
         : <Alert variant='success'>Your preferences were successfully updated.</Alert>
@@ -107,12 +113,12 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             {alertBlock}
             <Form onSubmit={validateAndSubmit}>
                 <p>Enter a phone number in order to opt in to SMS notifications.</p>
-                <Form.Group controlId='phone'>
+                <FormGroup controlId='phone' className="mb-3">
                     <Form.Label>Phone Number</Form.Label>
                     {phoneInput}
                     {notifyMeAttendeeInput}
                     {notifyMeHostInput}
-                </Form.Group>
+                </FormGroup>
                 <Button variant="primary" type="submit" disabled={props.disabled}>Save</Button>
             </Form>
         </div>
