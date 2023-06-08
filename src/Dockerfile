@@ -1,5 +1,5 @@
 # build react components for production mode
-FROM node:12-alpine AS node-webpack
+FROM node:18-alpine AS node-webpack
 WORKDIR /usr/src/app
 
 # NOTE: package.json and webpack.config.js not likely to change between dev builds
@@ -26,7 +26,7 @@ RUN apt-get update
 RUN apt-get -y install gcc libpq-dev
 RUN pip install \
     'gunicorn==20.1.0' \
-    'uvicorn[standard]==0.20.0' \
+    'uvicorn[standard]==0.22.0' \
     'psycopg2~=2.9.5'
 COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt

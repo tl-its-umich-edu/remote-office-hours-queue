@@ -2,6 +2,8 @@ import * as React from "react";
 import { useState } from "react";
 import { MyUser } from "../models";
 import { Link } from "react-router-dom";
+import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+
 import { ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
 import { useUserWebSocket } from "../services/sockets";
@@ -9,23 +11,24 @@ import { useUserWebSocket } from "../services/sockets";
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
     return (
-        <form className="form-inline row mt-3" method="get" action="/search/">
-            <div className="input-group col-sm-12 col-md-8 col-lg-6">
-                <input
-                    type="text"
-                    required
-                    aria-label="Queue name or host uniqname"
-                    className="form-control"
-                    placeholder="Queue name or host uniqname..."
-                    name="term"
-                    value={lookup}
-                    onChange={(e) => setLookup(e.target.value)}
-                />
-                <div className="input-group-append">
-                    <button type="submit" className="btn btn-primary">Search Queues</button>
-                </div>
-            </div>
-        </form>
+        <Row className="mt-3">
+            <Col sm={12} md={8} lg={6}>
+                <Form method="get" action="/search/">
+                    <InputGroup>
+                        <Form.Control
+                            type="text"
+                            required
+                            aria-label="Queue name or host uniqname"
+                            placeholder="Queue name or host uniqname..."
+                            name="term"
+                            value={lookup}
+                            onChange={(e) => setLookup(e.target.value)}
+                        />
+                        <Button type="submit" variant="primary">Search Queues</Button>
+                    </InputGroup>
+                </Form>
+            </Col>
+        </Row>
     );
 }
 

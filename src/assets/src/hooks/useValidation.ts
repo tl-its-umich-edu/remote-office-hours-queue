@@ -7,7 +7,7 @@ import {
 } from "../validation";
 
 
-export function useStringValidation (schema: StringSchema, showRemaining?: boolean):
+export function useStringValidation (schema: StringSchema<string>, showRemaining?: boolean):
     [undefined | ValidationResult, (value: string) => ValidationResult, () => void]
 {
     const [validationResult, setValidationResult] = useState(undefined as undefined | ValidationResult);
