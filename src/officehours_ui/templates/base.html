@@ -33,8 +33,8 @@
             <img src="{% static 'images/its-logo.png' %}" class="container banner-img img-responsive pull-left" alt="Remote Office Hours Queue"/>
           </a>
 				</div>
-				<button class="navbar-toggler ml-auto" id="navbar-toggle" type="button" data-bs-toggle="collapse" data-bs-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-						<i class="fas fa-bars text-light"></i>
+				<button class="navbar-toggler ml-auto collapsed" id="navbar-toggle" type="button" data-bs-toggle="collapse" data-bs-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="icon text-light"></span>
 				</button>
 				<div class="collapse navbar-collapse navbars" aria-labelledby="aux-nav" role="navigation">
           <ul class="navbar-nav ms-auto">
@@ -94,14 +94,6 @@
     {% block content %}{% endblock %}
     {% csrf_token %}
 	</div>
-  <script>
-    const navBarToggleIconEl = document.getElementById('navbar-toggle').children[0];
-
-    navBarToggleIconEl.addEventListener('click', () => {
-      navBarToggleIconEl.classList.toggle('fa-bars');
-      navBarToggleIconEl.classList.toggle('fa-times');
-    });
-  </script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
   {% block scripts %}{% endblock %}
