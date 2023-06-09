@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 
 class UITestCase(TestCase):
+
     def test_robots_txt(self):
         c = Client()
         response = c.get('/robots.txt')
