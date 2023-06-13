@@ -17,6 +17,7 @@ spec:
   strategy:
     type: Docker
     dockerStrategy:
+      dockerfilePath: Dockerfile.openshift
       noCache: true
       forcePull: true
   triggers:
