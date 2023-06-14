@@ -14,7 +14,8 @@ from safedelete.models import (
 from requests.exceptions import RequestException
 
 from officehours_api.exceptions import (
-    BackendException, DisabledBackendException, NotAllowedBackendException
+    BackendException, DisabledBackendException, MeetingStartedException,
+    NotAllowedBackendException
 )
 from officehours_api import backends
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
@@ -197,9 +198,9 @@ class Meeting(SafeDeleteModel):
     def save(self, *args, **kwargs):
         if self.saved_status.value >= MeetingStatus.STARTED.value:
             if self.backend_type != self._saved_backend_type:
-                raise Exception("Can't change backend_type once meeting is started!")
+                raise MeetingStartedException("backend_type")
             if self.assignee != self._saved_assignee:
-                raise Exception("Can't change assignee once meeting is started!")
+                raise MeetingStartedException("assignee")
         super().save(*args, **kwargs)
         self.saved_status = self.status
         self._saved_backend_type = self.backend_type
