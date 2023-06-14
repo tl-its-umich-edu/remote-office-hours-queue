@@ -553,7 +553,6 @@ h3.alert-heading {
 	color: #cecbc9;
 }
 
-
 .table-responsive {
     scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, .5) white;
@@ -562,18 +561,17 @@ h3.alert-heading {
 .table-responsive::-webkit-scrollbar {
     -webkit-appearance: none;
 }
+
 .table-responsive::-webkit-scrollbar:horizontal {
     height: 11px;
 }
+
 .table-responsive::-webkit-scrollbar-thumb {
     border-radius: 8px;
     border: 2px solid white;
     background-color: rgba(0, 0, 0, .5);
 }
-.table-responsive::-webkit-scrollbar-track { 
-    background-color: #fff; 
-    border-radius: 8px; 
-} 
+
 .table {
 	--bs-table-hover-bg: none;
 }
