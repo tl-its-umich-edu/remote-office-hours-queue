@@ -112,12 +112,12 @@ export function ManageHostsEditor(props: ManageHostsEditorProps) {
     const hostUsernames = props.hosts.map(h => h.username);
 
     const hostsSoFar = props.hosts.map((host, key) => (
-        <ListGroup.Item key={key}>
+        <ListGroup.Item className='p-3' key={key}>
             <UserDisplay user={host} />
             {
                 (host.id !== props.currentUser?.id)
                     && (
-                        <div className='float-right'>
+                        <div className='float-end'>
                             <RemoveButton
                                 onRemove={() => props.onRemoveHost(host)}
                                 size='sm'
