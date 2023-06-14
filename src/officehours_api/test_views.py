@@ -1,4 +1,3 @@
-# started code reference from remote-office-hours-queue/src/officehours_api/tests.py
 import json
 from unittest import skipIf
 
