@@ -25,16 +25,17 @@ class MeetingTestCase(TestCase):
         self.queue = Queue.objects.create(name='Test Queue')
         self.queue.hosts.set([self.host_one, self.host_two])
         self.queue.save()
+
+        self.meeting = Meeting.objects.create(queue=self.queue, backend_type='inperson')
+        self.meeting.attendees.set([self.attendee_one])
+        self.meeting.assignee = self.host_two
+        self.meeting.start()
+        self.meeting.save()
+
         self.client = Client()
 
     def test_cannot_reassign_host_when_meeting_has_started(self):
-        meeting = Meeting.objects.create(queue=self.queue, backend_type='inperson')
-        meeting.attendees.set([self.attendee_one])
-        meeting.assignee = self.host_two
-        meeting.start()
-        meeting.save()
-
-        url = f'/api/meetings/{meeting.id}/'
+        url = f'/api/meetings/{self.meeting.id}/'
         data = {
             "attendee_ids": [self.attendee_one.id],
             "assignee_id": self.host_one.id
