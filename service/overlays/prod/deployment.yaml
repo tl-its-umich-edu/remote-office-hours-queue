@@ -1,10 +1,6 @@
 - op: replace
   path: /spec/template/spec/containers/0/image
   value: docker-registry.default.svc:5000/officehours/officehours:latest
-- op: remove
-  path: /spec/template/spec/containers/0/command
-- op: remove
-  path: /spec/template/spec/containers/0/args
 - op: replace
   path: /spec/selector/variant
   value: prod
