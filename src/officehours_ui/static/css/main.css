@@ -638,6 +638,18 @@ pre {
 	}
 }
 
+.navbar-toggler.collapsed .icon::before {
+	content: "\f0c9"; /* FontAwesome bars icon */
+	font-family: "Font Awesome 5 Free";
+	font-weight: 700;
+}
+ 
+.navbar-toggler:not(.collapsed) .icon::before {
+	content: "\f00d"; /* FontAwesome times icon */
+	font-family: "Font Awesome 5 Free";
+	font-weight: 700;
+}
+  
 div[role=main] {
 	padding-top: 2rem;
 	padding-bottom: 2rem;
