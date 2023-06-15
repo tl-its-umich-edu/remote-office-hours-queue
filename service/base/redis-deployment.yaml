@@ -20,7 +20,7 @@ spec:
       containers:
       - image: docker-registry.default.svc:5000/openshift/redis:7
         name: redis
-        command: ["redis-server", "--stop-writes-on-bgsave-error", "no"]
+        command: ["redis-server", "--stop-writes-on-bgsave-error", "no", "--save", "\"\""]
         resources: {}
       restartPolicy: Always
 status: {}
