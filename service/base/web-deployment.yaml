@@ -24,8 +24,6 @@ spec:
       containers:
       - name: web
         image: docker-registry.default.svc:5000/officehours-dev/officehours:latest
-        command: ["/usr/src/app/docker-entrypoint.sh", "python", "manage.py", "runserver"]
-        args: ["0.0.0.0:8001"]
         ports:
         - containerPort: 8001
         envFrom:
