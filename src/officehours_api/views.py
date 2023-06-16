@@ -188,7 +188,7 @@ class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdate
 
     def update(self, request, *args, **kwargs):
         try:
-            super().update(request, *args, **kwargs)
+            return super().update(request, *args, **kwargs)
         except MeetingStartedException as e:
             return Response({'Meeting Detail': e.message}, status=status.HTTP_400_BAD_REQUEST)
 
