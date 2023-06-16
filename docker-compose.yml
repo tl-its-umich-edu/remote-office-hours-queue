@@ -33,6 +33,12 @@ services:
   redis:
     image: redis:7
     command: redis-server --stop-writes-on-bgsave-error no --save ""
+    # This is to simulate an Openshift container with no write permission except to /tmp
+    read_only: true
+    tmpfs:
+        - /tmp
+    volumes:
+        - officehours-redis-ro:/data:ro
 
   webpack_watcher:
     build:
@@ -45,3 +51,4 @@ services:
 
 volumes:
   officehours-postgres-data:
+  officehours-redis-ro:
