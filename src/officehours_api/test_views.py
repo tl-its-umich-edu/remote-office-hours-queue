@@ -32,12 +32,25 @@ class MeetingTestCase(TestCase):
         self.meeting = Meeting.objects.create(queue=self.queue, backend_type='inperson')
         self.meeting.attendees.set([self.attendee_one])
         self.meeting.assignee = self.host_two
-        self.meeting.start()
         self.meeting.save()
 
         self.client = Client()
 
+    def test_can_update_assignee_in_unstarted_meeting(self):
+        url = f'/api/meetings/{self.meeting.id}/'
+        data = {
+            "attendee_ids": [self.attendee_one.id],
+            "assignee_id": self.host_one.id
+        }
+        self.client.login(username='hostone', password='rohqtest')
+        response = self.client.put(url, data, content_type='application/json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def test_cannot_reassign_host_when_meeting_has_started(self):
+        self.meeting.start()
+        self.meeting.save()
+
         url = f'/api/meetings/{self.meeting.id}/'
         data = {
             "attendee_ids": [self.attendee_one.id],
@@ -56,6 +69,9 @@ class MeetingTestCase(TestCase):
 
     @skipIf('zoom' not in ENABLED_BACKENDS, 'Skipping because "zoom" backend type is not enabled')
     def test_cannot_change_backend_type_when_meeting_has_started(self):
+        self.meeting.start()
+        self.meeting.save()
+
         url = f'/api/meetings/{self.meeting.id}/'
         data = {
             "attendee_ids": [self.attendee_one.id],
