@@ -369,9 +369,9 @@ function QueueAttending(props: QueueAttendingProps) {
         && (
             <>
             <br/>
-            <p className="alert alert-info col-lg">
+            <Alert variant="info">
                 This is your queue, you can <Link to={"/manage/" + props.queue.id}>manage it</Link>.
-            </p>
+            </Alert>
             </>
         );
     const footer = (
