@@ -47,7 +47,7 @@ export function GeneralEditor(props: GeneralEditorProps) {
             <h2>General</h2>
             {props.showSuccessMessage ? <Alert variant='success'>{successMessage}</Alert> : undefined}
             {props.showCorrectGeneralMessage ? <Alert variant='danger'>{correctMessage}</Alert> : undefined}
-            <p>{requiredSymbol} indicates a required field.</p>
+            <p>{requiredSymbol} Required field</p>
             <h3>Name {requiredSymbol}</h3>
             <StatelessInputGroupForm
                 id='name'
