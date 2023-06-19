@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Badge, Button, Col, Row, Table, Form } from "react-bootstrap";
+import { Badge, Button, Col, Form, Row, Table } from "react-bootstrap";
 
 import { UserDisplay, RemoveButton } from "./common";
 import { getBackendByName } from "./meetingType";
