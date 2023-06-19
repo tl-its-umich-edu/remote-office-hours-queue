@@ -383,7 +383,7 @@ export const EditToggleField: React.FC<EditToggleFieldProps> = (props) => {
         : (
             <div className="input-group">
                 <span>{props.value}</span>
-                <button onClick={toggleEditMode} type="button" className="btn btn-sm">
+                <button onClick={toggleEditMode} type="button" className="btn btn-sm edit-toggle-button">
                     <FontAwesomeIcon icon={faPencilAlt} /> Edit
                 </button>
             </div>
