@@ -97,7 +97,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                     Back
                                 </Button>
                                 <Button
-                                    variant='primary'
+                                    variant='success'
                                     className={buttonSpacing}
                                     aria-label='Finish Adding Queue'
                                     disabled={props.disabled}
