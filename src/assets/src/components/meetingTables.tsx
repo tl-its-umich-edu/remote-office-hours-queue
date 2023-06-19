@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Badge, Button, Col, Row, Table } from "react-bootstrap";
+import { Badge, Button, Col, Row, Table, Form } from "react-bootstrap";
 
 import { UserDisplay, RemoveButton } from "./common";
 import { getBackendByName } from "./meetingType";
@@ -57,13 +57,13 @@ const AssigneeSelector = (props: AssigneeSelectorProps) => {
 
     return (
         <div className='form-group'>
-            <select className="form-control assign"
+            <Form.Select className="assign"
                 value={props.meeting.assignee?.id ?? ""}
                 onChange={onChangeAssignee}
                 disabled={props.disabled}
             >
                 {assigneeOptions}
-            </select>
+            </Form.Select>
         </div>
     )
 }
