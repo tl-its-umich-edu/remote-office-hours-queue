@@ -37,7 +37,7 @@ const JoinQueue: React.FC<JoinQueueProps> = (props) => {
         <>
         <Row>
             <Col lg>
-                <p className="mb-0">Select Meeting Type<span className="required">*</span></p>
+                <p className="mb-0">Select Meeting Type <span className="required">*</span></p>
             </Col>
         </Row>
         <Row>
@@ -412,14 +412,21 @@ const ChangeMeetingTypeDialog = (props: ChangeMeetingTypeDialogProps) => {
                 <Modal.Title>Change Meeting Type</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className="row col-lg">
-                    <p>Select Meeting Type</p>
-                    <p className="required">*</p>
-                </div>
-                <BackendSelector backends={props.backends}
-                    allowedBackends={new Set(props.queue.allowed_backends)}
-                    onChange={props.onChangeBackend}
-                    selectedBackend={props.selectedBackend}/>
+                <Row>
+                    <Col lg>
+                        <p>Select Meeting Type <span className="required">*</span></p>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col xs='auto'>
+                        <BackendSelector
+                            backends={props.backends}
+                            allowedBackends={new Set(props.queue.allowed_backends)}
+                            onChange={props.onChangeBackend}
+                            selectedBackend={props.selectedBackend}
+                        />
+                    </Col>
+                </Row>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={props.onClose}>Cancel</Button>
