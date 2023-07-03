@@ -1,40 +1,39 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-commonLabels:
-  variant: prod
-  org: umich
+labels:
+- includeSelectors: true
+  pairs:
+    org: umich
+    variant: prod
 nameSuffix: -prod
-bases:
+resources:
 - ../../base
-patchesStrategicMerge:
-- tls.yaml
-patchesJson6902:
-- target:
+patches:
+- path: hostname.yaml
+  target:
     group: extensions
-    version: v1beta1
     kind: Ingress
     name: web
-  path: hostname.yaml
-- target:
-    version: v1
+    version: v1beta1
+- path: deployment.yaml
+  target:
     kind: DeploymentConfig
     name: web
-  path: deployment.yaml
-- target:
     version: v1
+- path: build.yaml
+  target:
     kind: BuildConfig
     name: web
-  path: build.yaml
-- target:
-    group: autoscaling
     version: v1
+- path: web-autoscaler.yaml
+  target:
+    group: autoscaling
     kind: HorizontalPodAutoscaler
     name: web
-  path: web-autoscaler.yaml
+    version: v1
+- path: tls.yaml
 secretGenerator:
-- name: secrets
-  behavior: merge
-  type: Opaque
+- behavior: merge
   files:
   - secret/DEBUG
   - secret/SECRET_KEY
@@ -49,9 +48,11 @@ secretGenerator:
   - secret/REDIS_HOST
   - secret/ZOOM_CLIENT_ID
   - secret/ZOOM_CLIENT_SECRET
-- name: web-tls
-  behavior: replace
-  type: "kubernetes.io/tls"
+  name: secrets
+  type: Opaque
+- behavior: replace
   files:
   - secret/tls.key
   - secret/tls.crt
+  name: web-tls
+  type: kubernetes.io/tls

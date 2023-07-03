@@ -1,5 +1,5 @@
 # build react components for production mode
-FROM docker-registry.default.svc:5000/openshift/node:18-alpine AS node-webpack
+FROM image-registry.openshift-image-registry.svc:5000/openshift/node:18-alpine AS node-webpack
 WORKDIR /usr/src/app
 
 # NOTE: package.json and webpack.config.js not likely to change between dev builds
