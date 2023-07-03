@@ -1,16 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-commonLabels:
-  variant: dev
-  org: umich
+labels:
+- includeSelectors: true
+  pairs:
+    org: umich
+    variant: dev
 nameSuffix: -dev
-bases:
+resources:
 - ../../base
 secretGenerator:
-  - name: secrets
-    behavior: merge
-    type: Opaque
-    files:
-    - secret/EMAIL_SUBJECT_PREFIX
-    - secret/ZOOM_CLIENT_ID
-    - secret/ZOOM_CLIENT_SECRET
+- behavior: merge
+  files:
+  - secret/EMAIL_SUBJECT_PREFIX
+  - secret/ZOOM_CLIENT_ID
+  - secret/ZOOM_CLIENT_SECRET
+  name: secrets
+  type: Opaque

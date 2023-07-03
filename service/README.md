@@ -14,11 +14,11 @@ using [`kustomize`](https://kubectl.docs.kubernetes.io/guides/introduction/kusto
 
 2. Install `kustomize`.
 
-    You can install Kustomize using the command from the
+    You can install Kustomize using homebrew or using the command from the
     [website](https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/),
-    and adding version 3.8.5 (what is supported for now) as an argument.
+    and adding version 5.1.0 (what is tested/supported for now) as an argument.
     ```
-    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash -s 3.8.5
+    curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash -s 5.1.0
     ```
 
 ## Updating a project
