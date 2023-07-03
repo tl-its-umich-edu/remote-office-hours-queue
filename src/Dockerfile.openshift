@@ -12,7 +12,7 @@ RUN npm run prod
 
 #####################################################################
 
-FROM docker-registry.default.svc:5000/openshift/python:3.10-slim-bullseye
+FROM image-registry.openshift-image-registry.svc:5000/openshift/python:3.10-slim-bullseye
 
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
