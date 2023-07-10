@@ -49,6 +49,6 @@ secretGenerator:
   - secret/WebHookSecretKey
   name: github
   type: Opaque
-# crds:
-# - openshift-buildconfig.json
-# - openshift-deploymentconfig.json
+crds:
+- openshift-buildconfig.json
+- openshift-deploymentconfig.json
