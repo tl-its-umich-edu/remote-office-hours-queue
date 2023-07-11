@@ -4,6 +4,10 @@ metadata:
   name: web
   labels:
     app: web
+  annotations:
+    # The following triggers cert-manager to obtain a certificate automatically
+    # using the production Let’s Encrypt environment
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
   tls:
   - hosts:

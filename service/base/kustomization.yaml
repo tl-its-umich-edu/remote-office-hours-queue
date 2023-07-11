@@ -41,11 +41,6 @@ secretGenerator:
   name: secrets
   type: Opaque
 - files:
-  - secret/tls.key
-  - secret/tls.crt
-  name: web-tls
-  type: kubernetes.io/tls
-- files:
   - secret/WebHookSecretKey
   name: github
   type: Opaque
