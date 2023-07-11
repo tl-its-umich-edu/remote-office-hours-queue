@@ -11,10 +11,10 @@ resources:
 patches:
 - path: hostname.yaml
   target:
-    group: extensions
+    group: networking.k8s.io
     kind: Ingress
     name: web
-    version: v1beta1
+    version: v1
 - path: deployment.yaml
   target:
     kind: DeploymentConfig
@@ -51,9 +51,3 @@ secretGenerator:
   - secret/ZOOM_CLIENT_SECRET
   name: secrets
   type: Opaque
-- behavior: replace
-  files:
-  - secret/tls.key
-  - secret/tls.crt
-  name: web-tls
-  type: kubernetes.io/tls
