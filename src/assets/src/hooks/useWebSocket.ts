@@ -67,6 +67,6 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             ws.onmessage = null;
             ws.close();
         }
-    }, []);
+    }, [url]);
     return error;
 }
