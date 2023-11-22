@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { Alert, Button, Form, FormGroup } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
-import 'react-phone-input-2/lib/bootstrap.css'
+import 'react-phone-input-2/lib/bootstrap.css';
 
 import * as api from "../services/api";
 import { MyUser } from "../models";
@@ -11,6 +11,8 @@ import { usePromise } from "../hooks/usePromise";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 import { validatePhoneNumber } from "../validation";
+import { Helmet } from 'react-helmet';
+import { getPageTitle } from './titleUtils';
 
 interface PreferencesEditorProps {
     user: MyUser;
@@ -167,6 +169,9 @@ export function PreferencesPage(props: PageProps) {
         );
     return (
         <>
+            <Helmet>
+                <title>{getPageTitle('Preferences')}</title>
+            </Helmet>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle='User Preferences' />
             {errorDisplay}

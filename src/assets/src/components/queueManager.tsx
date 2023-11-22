@@ -24,7 +24,8 @@ import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
-
+import { Helmet } from 'react-helmet';
+import { getPageTitle } from './titleUtils';
 
 interface AddAttendeeFormProps {
     allowedBackends: Set<string>;
@@ -350,6 +351,9 @@ export function QueueManagerPage(props: PageProps) {
         );
     return (
         <>
+            <Helmet>
+                <title>{getPageTitle('Manage Queue')}</title>
+            </Helmet>
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <MeetingInfoDialog backends={props.backends} meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)} />

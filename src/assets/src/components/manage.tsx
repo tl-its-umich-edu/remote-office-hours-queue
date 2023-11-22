@@ -2,6 +2,8 @@ import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
+import { Helmet } from 'react-helmet';
+import { getPageTitle } from './titleUtils';
 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoginDialog, QueueTable } from "./common";
 import { PageProps } from "./page";
@@ -47,6 +49,9 @@ export function ManagePage(props: PageProps) {
         && <ManageQueueTable queues={queues} disabled={false}/>
     return (
         <div>
+            <Helmet>
+                <title>{getPageTitle('Manage')}</title>
+            </Helmet>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle="Manage"/>
             {errorDisplay}
