@@ -3,16 +3,15 @@ import React from 'react'
 
 import { render, waitFor } from '@testing-library/react';
 import { PreferencesPage } from '../preferences';
-import { MemoryRouter } from "react-router-dom"; // our router
+import { MemoryRouter } from "react-router-dom";
 jest.mock('react-phone-input-2/lib/bootstrap.css', () => '')
 const commonProps = {
   user: {
-    id: '123', // Mock user id
-    // other necessary user properties...
+    id: '123',
   },
   loginUrl: 'mockedLoginUrl',
-  backends: ['backend1', 'backend2'], // Mock array of backends
-  defaultBackend: 'defaultBackend', // Mock default backend
+  backends: ['backend1', 'backend2'],
+  defaultBackend: 'defaultBackend',
 };
 
 it('should render prefernces title', async () => {

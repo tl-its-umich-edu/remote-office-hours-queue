@@ -1,16 +1,15 @@
 /** @jest-environment jsdom */
 import React from 'react'
-import { MemoryRouter } from "react-router-dom"; // our router
+import { MemoryRouter } from "react-router-dom";
 import { render, waitFor } from '@testing-library/react';
 import { ManagePage } from '../manage';
 const commonProps = {
     user: {
-      id: '123', // Mock user id
-      // other necessary user properties...
+      id: '123',
     },
     loginUrl: 'mockedLoginUrl',
-    backends: ['backend1', 'backend2'], // Mock array of backends
-    defaultBackend: 'defaultBackend', // Mock default backend
+    backends: ['backend1', 'backend2'],
+    defaultBackend: 'defaultBackend',
   };
   
   

@@ -1,18 +1,18 @@
 /** @jest-environment jsdom */
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { MemoryRouter, Routes, Route } from 'react-router-dom'; // Assuming you're using React Router v6 or higher
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { ManageQueueSettingsPage } from '../queueSettings';
 
 
 const commonProps = {
   user: {
-    id: '123', // Mock user id
+    id: '123',
   },
   loginUrl: 'mockedLoginUrl',
-  backends: ['backend1', 'backend2'], // Mock array of backends
-  defaultBackend: 'defaultBackend', // Mock default backend
+  backends: ['backend1', 'backend2'],
+  defaultBackend: 'defaultBackend',
 };
 
 it('should render queue settings page title', async () => {

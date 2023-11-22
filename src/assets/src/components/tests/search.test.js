@@ -7,11 +7,11 @@ import { MemoryRouter } from "react-router-dom";
 
 const commonProps = {
   user: {
-    id: '123', // Mock user id
+    id: '123',
   },
   loginUrl: 'mockedLoginUrl',
-  backends: ['backend1', 'backend2'], // Mock array of backends
-  defaultBackend: 'defaultBackend', // Mock default backend
+  backends: ['backend1', 'backend2'],
+  defaultBackend: 'defaultBackend',
 };
 
 it('should render search page title', async () => {
