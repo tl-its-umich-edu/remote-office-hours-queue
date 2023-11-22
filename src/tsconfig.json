@@ -6,12 +6,13 @@
 		"strict": true,
         "esModuleInterop": true,
         "jsx": "react",
+		
 		"skipLibCheck": true,
-		"sourceMap": true
+		"sourceMap": true,
 	},
 	"include": [
 		"assets/src"
-	],
+, "assets/src/components/tests/home.test.js"	],
 	"exclude": [
 		"assets/dist",
 		"node_modules",

@@ -21,7 +21,8 @@ import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, redirectToLogin } from "../utils";
 import { meetingAgendaSchema } from "../validation";
-
+import { Helmet } from 'react-helmet';
+import { getPageTitle } from './titleUtils';
 
 interface JoinQueueProps {
     queue: QueueAttendee;
@@ -574,6 +575,9 @@ export function QueuePage(props: PageProps) {
             onChangeBackend={setSelectedBackend}/>
     return (
         <div>
+            <Helmet>
+                <title>{getPageTitle('Queue')}</title>
+            </Helmet>
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             {meetingTypeDialog}
