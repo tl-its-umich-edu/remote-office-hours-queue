@@ -445,6 +445,7 @@ export function QueuePage(props: PageProps) {
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
     const queueIdParsed = isNaN(parseInt(queue_id)) ? 10000000000 : parseInt(queue_id);
+    const queue_id_display = parseInt(queue_id).toString()
 
     //Setup basic state
     const [selectedBackend, setSelectedBackend] = useState(undefined as string | undefined);
@@ -577,7 +578,7 @@ export function QueuePage(props: PageProps) {
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             {meetingTypeDialog}
-            <Breadcrumbs currentPageTitle={queue?.name ?? queue_id}/>
+            <Breadcrumbs currentPageTitle={queue?.name ?? queue_id_display}/>
             {loadingDisplay}
             {errorDisplay}
             {queueDisplay}
