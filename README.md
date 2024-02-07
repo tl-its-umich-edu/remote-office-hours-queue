@@ -20,7 +20,7 @@ The frontend is served through [django-webpack-loader](https://github.com/owais/
 [DRF](https://www.django-rest-framework.org/) REST endpoints and [Django Channels](https://channels.readthedocs.io/en/latest/) websockets.
 Authentication is handled with OIDC via [mozilla-django-oidc](https://github.com/mozilla/mozilla-django-oidc).
 The user interface leverages [Bootstrap 4](https://getbootstrap.com/docs/4.1/getting-started/introduction/) and
-a React implementation of Bootstrap, [`react-bootstrap`](https://react-bootstrap.github.io/).
+a React implementation of Bootstrap, [react-bootstrap](https://react-bootstrap.github.io/).
 
 ## Development
 
