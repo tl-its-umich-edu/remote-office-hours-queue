@@ -3,10 +3,10 @@
   value: docker-registry.default.svc:5000/officehours-test/officehours:latest
 - op: replace
   path: /spec/selector/variant
-  value: qa
+  value: test
 - op: replace
   path: /spec/template/metadata/labels/variant
-  value: qa
+  value: test
 - op: replace
   path: /spec/triggers/0/imageChangeParams/from/namespace
   value: officehours-test

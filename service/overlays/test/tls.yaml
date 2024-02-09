@@ -7,4 +7,6 @@ spec:
   - hosts:
     - qa.officehours.it.umich.edu
     - www.qa.officehours.it.umich.edu
+    - test.officehours.it.umich.edu
+    - www.test.officehours.it.umich.edu
     secretName: web-tls

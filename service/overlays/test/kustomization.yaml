@@ -4,8 +4,8 @@ labels:
 - includeSelectors: true
   pairs:
     org: umich
-    variant: qa
-nameSuffix: -qa
+    variant: test 
+nameSuffix: -test
 resources:
 - ../../base
 patches:
