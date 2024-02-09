@@ -3,6 +3,10 @@
 Resource configuration and secret consumption for OpenShift projects are managed
 using [`kustomize`](https://kubectl.docs.kubernetes.io/guides/introduction/kustomize/).
 
+## Important note
+
+`officehours-qa` was renamed to `officehours-test` during the migration process to ROSA. Not everything has been renamed yet, including the domain names and some of the directory names here. Just know that these instances are currently identical. 
+
 ## Setup
 
 1. Populate `service/secrets/*`.
