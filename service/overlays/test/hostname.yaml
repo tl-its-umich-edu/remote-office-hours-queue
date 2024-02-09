@@ -4,9 +4,3 @@
 - op: add
   path: /spec/rules/1/host
   value: www.qa.officehours.it.umich.edu
-- op: add
-  path: /spec/rules/2/host
-  value: test.officehours.it.umich.edu
-- op: add
-  path: /spec/rules/3/host
-  value: www.test.officehours.it.umich.edu
