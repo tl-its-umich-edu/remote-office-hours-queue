@@ -4,7 +4,7 @@ metadata:
   name: web
 spec:
   scaleTargetRef:
-    apiVersion: v1
+    apiVersion: apps.openshift.io/v1
     kind: DeploymentConfig
     name: officehours-web-dev
   minReplicas: 1
