@@ -5,12 +5,17 @@ using [`kustomize`](https://kubectl.docs.kubernetes.io/guides/introduction/kusto
 
 ## Setup
 
-1. Populate `service/secrets/*`.
+1. Populate `service/base/secret/*` and `service/overlays/*/secret/*`.
 
     Sensitive values and files are located in the
     [Office Hours Secrets](https://www.dropbox.com/sh/n1igrgdsm4rt4uf/AAAXLbZOT7tpVk8XZEQj5E0ca?dl=0)
     Dropbox folder. Merge the `base` and `overlays` directories with their equivalents in the `service`
     directory in your local repository.
+
+    1. Download `base.zip`: https://www.dropbox.com/scl/fo/ibafd6hctx55ezcaa5dof/h?rlkey=qv53e05fu1z9w0h8vire7cqjk&dl=1
+    1. Extract `base.zip`: `(cd service/base; unzip base.zip)`
+    1. Download `overlays.zip`: https://www.dropbox.com/scl/fo/9q8mvuezmvmw7524veshx/h?rlkey=gds439f8vb2531gkih221giqh&dl=1
+    1. Extract `overlays.zip`: `(cd service/overlays; unzip overlays.zip)`
 
 2. Install `kustomize`.
 
@@ -40,3 +45,32 @@ you may need to first delete the ingress before running `kustomize build`.
 ```
 oc delete ingress some-ingress-name
 ```
+
+## Split kustomize output into files
+
+For debugging purposes, it may be helpful to get the output from `kustomize`
+as individual files, one for each artifact.  This can be done by splitting the
+output into files and then giving those files meaningful names.
+
+If using `csplit` included with macOS, it may be necessary to adjust the
+number of splits (7)…
+
+```sh
+kustomize build overlays/prod | csplit -s - /^---$/ '{7}'
+```
+
+Using `gcsplit`, installed via Homebrew `coreutils` package, an asterisk
+indicates splitting as many times as necessary
+
+```sh
+kustomize build overlays/prod | gcsplit -s - /^---$/ '{*}'
+```
+
+Finally, rename the `xx` files created by `csplit` with meaningful names.  In
+this case, name the files for the kind of artifact and its internal name.  Use
+`yq` (may be installed via Homebrew) to query values from YAML files…
+
+```sh
+for i in xx*; do sed '/^---$/,1d' $i > $(yq '.kind + "-" + .metadata.name + ".yaml"' $i); done; rm xx*
+```
+
