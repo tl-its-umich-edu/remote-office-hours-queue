@@ -15,7 +15,9 @@ import { validatePhoneNumber } from "../validation";
 interface PreferencesEditorProps {
     user: MyUser;
     disabled: boolean;
-    onUpdateInfo: (phoneNumber: string, notifyMeAttendee: boolean, notifyMeHost: boolean) => void;
+    onUpdateNotificationInfo: (notifyMeAttendee: boolean, notifyMeHost: boolean) => void;
+    onGetOneTimePassword: (phoneNumberToSubmit: string) => Promise<unknown>;
+    onVerifyOneTimePassword: (otp: string) => Promise<unknown>;
     errorOccurred: boolean;
 }
 
@@ -141,11 +143,12 @@ export function PreferencesPage(props: PageProps) {
     }, []);
 
     // Setup interactions
-    const [doUpdateInfo, updateInfoLoading, updateInfoError] = usePromise(
-        (phoneNumber, notifyMeAttendee, notifyMeHost) =>
-            api.updateUser(userId, phoneNumber, notifyMeAttendee, notifyMeHost) as Promise<MyUser>, setUser
+    const [doUpdateNotificationInfo, updateInfoLoading, updateInfoError] = usePromise(
+        (notifyMeAttendee, notifyMeHost) =>
+            api.updateUserNotificationInfo(userId, notifyMeAttendee, notifyMeHost) as Promise<MyUser>, setUser
     );
-
+    const doGetOneTimePassword = (phoneNumberToSubmit: string) => {return api.getOneTimePassword(userId, phoneNumberToSubmit) as Promise<unknown> }
+    const doVerifyOneTimePassword = (otp: string) => {const resp = api.verifyOneTimePassword(userId, otp) as Promise<unknown>; doRefresh(); return resp;}
     // Render
     const isChanging = updateInfoLoading;
     const isLoading = isChanging;
@@ -161,7 +164,9 @@ export function PreferencesPage(props: PageProps) {
             <PreferencesEditor
                 user={user}
                 disabled={isChanging}
-                onUpdateInfo={doUpdateInfo}
+                onUpdateNotificationInfo={doUpdateNotificationInfo}
+                onGetOneTimePassword={doGetOneTimePassword}
+                onVerifyOneTimePassword={doVerifyOneTimePassword}
                 errorOccurred={!!errorSources.length}
             />
         );
