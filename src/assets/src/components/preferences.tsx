@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { Alert, Button, Form, FormGroup } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
+import Spinner from "react-bootstrap/Spinner";
 import 'react-phone-input-2/lib/bootstrap.css'
 
 import * as api from "../services/api";
@@ -187,11 +188,46 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         <div>
             <h1>View/Update Preferences</h1>
             {alertBlock}
-            <Form onSubmit={validateAndSubmit}>
-                <p>Enter a phone number in order to opt in to SMS notifications.</p>
-                <FormGroup controlId='phone' className="mb-3">
-                    <Form.Label>Phone Number</Form.Label>
-                    {phoneInput}
+            <h2>Contact Information</h2>
+            {phoneUpdateStatus === "" &&
+                <Form>
+                    <p>Enter a phone number in order to opt in to SMS notifications.</p>
+                    <FormGroup controlId='phone' className="mb-3">
+                        <Form.Label>Phone Number</Form.Label>
+                        {phoneInput}
+                    </FormGroup>
+                    {!sendingCode ? <Button variant="secondary" type="submit" disabled={props.disabled} onClick={getOneTimePassword}>Get Verification Code</Button>
+                        : <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Sending...</Button>}
+                </Form>
+            }
+            {phoneUpdateStatus === "verify" &&
+                <Form>
+                    <p>Enter the verification code sent to {formattedPhoneNumberToSubmit} (<a onClick={() => setPhoneUpdateStatus("")}
+                        className="link-primary">edit</a>)</p>
+                    <FormGroup controlId='otp' className="mb-3">
+                        <Form.Control type="number" value={otpValue}
+                            onKeyDown={(e) => { ["e", "E", "+", "-"].includes(e.key) && e.preventDefault() }}
+                            onChange={(e) => { if (e.target.value.length <= 4) setOtpValue(e.target.value) }}
+                            disabled={props.disabled}
+                            className="w-25" required></Form.Control>
+                    </FormGroup>
+                    {!verifying ?
+                        <Button variant="secondary" type="submit" disabled={props.disabled || sendingCode} onClick={verifyOneTimePassword}>Verify</Button>
+                        : <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Verifying...</Button>
+                    }
+                    {!sendingCode ?
+                        <p className="mt-2">Didn't receive a code?&nbsp;
+                            {timeToResendCode ? <a className="link-secondary">Resend Code in {timeToResendCode}s</a>
+                                : <a onClick={getOneTimePassword} className={!verifying ? "link-primary" : "link-secondary"}>Resend Code</a>
+                            }
+                        </p>
+                        : <p className="mt-2"><Spinner animation="border" size="sm" as="span" role="status" /> Sending...</p>
+                    }
+                </Form>
+            }
+            <h2>Notification Settings</h2>
+            <Form onSubmit={validateAndSubmitNotification}>
+                <FormGroup controlId='notification-settings' className="mb-3">
                     {notifyMeAttendeeInput}
                     {notifyMeHostInput}
                 </FormGroup>
