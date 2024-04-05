@@ -82,7 +82,7 @@ export const getQueue = async (id: number) => {
 export const createQueue = async (
     name: string, allowed_backends: Set<string>, description?: string, inperson_location?: string, hosts?: User[]
 ) => {
-    const resp = await fetch("/api/queues/", { 
+    const resp = await fetch("/api/queues/", {
         method: "POST",
         body: JSON.stringify({
             name: name,
@@ -116,7 +116,7 @@ export const updateQueue = async (
 }
 
 export const deleteQueue = async (id: number) => {
-    const resp = await fetch(`/api/queues/${id}/`, { 
+    const resp = await fetch(`/api/queues/${id}/`, {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
@@ -185,18 +185,43 @@ export const getUser = async (id_or_username: number | string) => {
     return await resp.json() as User | MyUser;
 }
 
-export const updateUser = async (user_id: number, phone_number: string, notify_me_attendee: boolean, notify_me_host: boolean) => {
+export const updateUserNotificationInfo = async (user_id: number, notify_me_attendee: boolean, notify_me_host: boolean) => {
     const resp = await fetch(`/api/users/${user_id}/`, {
         method: "PATCH",
         headers: getPatchHeaders(),
         body: JSON.stringify({
-            phone_number,
             notify_me_attendee,
             notify_me_host,
         }),
     });
     await handleErrors(resp);
     return await resp.json() as User | MyUser;
+}
+
+export const getOneTimePassword = async (user_id: number, phone_number: string) => {
+    const resp = await fetch(`/api/users/${user_id}/otp/`, {
+        method: "PATCH",
+        headers: getPostHeaders(),
+        body: JSON.stringify({
+            "action": "send",
+            "otp_phone_number": phone_number,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
+}
+
+export const verifyOneTimePassword = async (user_id: number, otp: string) => {
+    const resp = await fetch(`/api/users/${user_id}/otp/`, {
+        method: "PATCH",
+        headers: getPostHeaders(),
+        body: JSON.stringify({
+            "action": "verify",
+            "otp_token": otp,
+        }),
+    });
+    await handleErrors(resp);
+    return await resp.json();
 }
 
 export const searchQueue = async (term: string) => {
