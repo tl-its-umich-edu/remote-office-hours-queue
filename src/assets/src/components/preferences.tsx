@@ -25,14 +25,20 @@ type ValidationStatus = null | Error[]; // null = no changes, [] = valid
 
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
+    const [phoneUpdateStatus, setPhoneUpdateStatus] = useState("");
+    const [timeToResendCode, setTimeToResendCode] = useState(0);
+    const [otpValue, setOtpValue] = useState("");
+    const [sendingCode, setSendingCode] = useState(false);
+    const [verifying, setVerifying] = useState(false);
     const [countryDialCode, setCountryDialCode] = useState("");
     const [notifyMeAttendee, setNotifyMeAttendee] = useState(props.user.notify_me_attendee);
     const [notifyMeHost, setNotifyMeHost] = useState(props.user.notify_me_host);
     const [validationStatus, setValidationStatus] = useState(undefined as undefined | ValidationStatus);
 
     const phoneNumberToSubmit = (phoneField.length <= countryDialCode.length) ? "" : phoneField;
-    const changed = props.user.phone_number !== phoneNumberToSubmit
-        || props.user.notify_me_attendee !== notifyMeAttendee
+    const formattedPhoneNumberToSubmit = phoneNumberToSubmit.replace(/(\d{1})(\d{3})(\d{3})(\d{4})/, "+$1 ($2) $3-$4");
+    const changedPhoneNumber = props.user.phone_number !== phoneNumberToSubmit;
+    const changedNotificationSettings = props.user.notify_me_attendee !== notifyMeAttendee
         || props.user.notify_me_host !== notifyMeHost;
 
     const phoneInput = (
@@ -45,8 +51,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 setPhoneField(value);
                 if ('dialCode' in data) setCountryDialCode(data.dialCode);
             }}
-            disabled={props.disabled}
-            inputProps={{id: 'phone'}}
+            disabled={props.disabled || sendingCode}
+            inputProps={{ id: 'phone' }}
             placeholder=""
         />
     );
@@ -71,25 +77,93 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             label="As a host, I want to be notified via SMS when someone joins my empty queue." />
     );
 
-    const validateAndSubmit = (e: React.SyntheticEvent) => {
+    const oneTimePasswordTimer = () => {
+        let timer = 5;
+        const interval = setInterval(() => {
+            setTimeToResendCode(timer--);
+            if (timer === -1) {
+                clearInterval(interval);
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }
+
+    const getOneTimePassword = async (e: React.SyntheticEvent) => {
+        e.preventDefault(); // Prevent page reload
+        if (sendingCode || verifying) return;
+        setSendingCode(true);
+
+        // check if time buffer has passed, phone number has changed, 
+        // and phone number is valid
+        const timeRemaining = timeToResendCode ?
+            [new Error(`You must wait ${timeToResendCode} more seconds before requesting a new verification code.`)]
+            : [];
+        const phoneChangedError = !changedPhoneNumber ?
+            [new Error("You must enter a new phone number to receive a verification code.")]
+            : [];
+        const phoneValidationErrors = validatePhoneNumber(phoneNumberToSubmit, countryDialCode);
+        const errors = [...timeRemaining, ...phoneChangedError, ...phoneValidationErrors];
+
+        if (errors.length) {
+            setValidationStatus(errors);
+            setSendingCode(false);
+            return;
+        }
+
+        setValidationStatus(undefined);
+        oneTimePasswordTimer(); // start timer to resend code
+
+        try {
+            await props.onGetOneTimePassword(phoneNumberToSubmit); // send otp & save in db
+            setPhoneUpdateStatus("verify"); // move to verification step
+        }
+        catch (error: any) {
+            setValidationStatus([error]); // display error
+        }
+        setSendingCode(false);
+    }
+
+    const verifyOneTimePassword = async (e: React.SyntheticEvent) => {
+        e.preventDefault(); // Prevent page reload
+        if (sendingCode || verifying) return;
+        setVerifying(true);
+
+        if (otpValue.length !== 4) {
+            setValidationStatus([new Error("You must enter a 4-digit verification code.")]);
+            setVerifying(false);
+            return;
+        }
+        setValidationStatus(undefined);
+
+        try {
+            await props.onVerifyOneTimePassword(otpValue);
+            setPhoneField(phoneNumberToSubmit); // update phone form field
+            setPhoneUpdateStatus(""); // reset to phone input
+            setValidationStatus([])
+        }
+        catch (error: any) {
+            console.log(error)
+            setValidationStatus([error]);
+        }
+        setVerifying(false);
+    }
+
+    const validateAndSubmitNotification = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
-        if (!changed) {
+        if (!changedNotificationSettings) {
             setValidationStatus(null);
             return;
         }
-        const phoneValidationErrors = phoneNumberToSubmit
-            ? validatePhoneNumber(phoneField, countryDialCode)
-            : [];
         const optInValidationErrors = [
-            (notifyMeAttendee && !phoneNumberToSubmit)
-                && new Error("You must enter a phone number to opt in to attendee SMS notifications."),
-            (notifyMeHost && !phoneNumberToSubmit)
-                && new Error("You must enter a phone number to opt in to host SMS notifications."),
+            (notifyMeAttendee && props.user.phone_number === "")
+            && new Error("You must enter a phone number to opt in to attendee SMS notifications."),
+            (notifyMeHost && props.user.phone_number === "")
+            && new Error("You must enter a phone number to opt in to host SMS notifications."),
         ].filter(e => e) as Error[];
-        const validationErrors = phoneValidationErrors.concat(optInValidationErrors);
-        setValidationStatus(validationErrors);
-        if (!validationErrors.length)
-            props.onUpdateInfo(phoneNumberToSubmit, notifyMeAttendee, notifyMeHost);
+        setValidationStatus(optInValidationErrors);
+        if (!optInValidationErrors.length)
+            props.onUpdateNotificationInfo(notifyMeAttendee, notifyMeHost);
     }
 
     const alertBlock =
