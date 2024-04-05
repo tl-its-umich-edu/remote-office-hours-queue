@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from django.conf import settings
@@ -23,6 +24,25 @@ def build_addendum(domain: str):
         f"Opt out at {pref_url}"
     )
 
+async def send_one_time_password(phone_number: str, otp_token: str):
+    '''
+    Send a one-time password to a phone number.
+    Returns True if the message was sent successfully, False otherwise.
+    '''
+    logger.info("send_one_time_password: %s", phone_number)
+    try:
+        twilio.messages.create(
+            messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
+            to=phone_number,
+            body=(
+                f"Your verification code is {otp_token}"
+                f"{build_addendum(Site.objects.get_current().domain)}"
+            ),
+        )
+        return True
+    except:
+        logger.exception(f"Error while sending OTP to {phone_number}")
+        return False
 
 def notify_meeting_started(started: Meeting):
     phone_numbers = list(
