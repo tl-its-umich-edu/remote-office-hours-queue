@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete, post_save
@@ -24,19 +25,26 @@ def build_addendum(domain: str):
         f"Opt out at {pref_url}"
     )
 
+
 async def send_one_time_password(phone_number: str, otp_token: str):
     '''
     Send a one-time password to a phone number.
     Returns True if the message was sent successfully, False otherwise.
     '''
+    @sync_to_async # This decorator is necessary to use Django ORM in an async function.
+    def get_current_domain(site: Site): 
+        return site.objects.get_current().domain
+
     logger.info("send_one_time_password: %s", phone_number)
+
+    domain = await get_current_domain(Site)
     try:
         twilio.messages.create(
             messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
             to=phone_number,
             body=(
                 f"Your verification code is {otp_token}"
-                f"{build_addendum(Site.objects.get_current().domain)}"
+                f"{build_addendum(domain)}"
             ),
         )
         return True
