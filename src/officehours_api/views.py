@@ -148,6 +148,7 @@ class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIVie
             if verified == True:
                 request.data["phone_number"] = user.profile.otp_phone_number
                 request.data["otp_token"] = ""
+                request.data["otp_phone_number"] = ""
                 request.data["otp_expiration"] = datetime.now(timezone.utc) - timedelta(minutes=1)
                 return super().update(request, *args, **kwargs)
             else:
