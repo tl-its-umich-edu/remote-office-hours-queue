@@ -79,7 +79,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     );
 
     const oneTimePasswordTimer = () => {
-        let timer = 5;
+        let timer = 30;
         const interval = setInterval(() => {
             setTimeToResendCode(timer--);
             if (timer === -1) {
