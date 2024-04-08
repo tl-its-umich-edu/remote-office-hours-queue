@@ -100,7 +100,7 @@ class ChannelLayersConfigTest(TestCase):
     def test_channel_layers(self):
         redis_host = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0][0]
         redis_port = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0][1]
-        self.assertFalse('\n' in redis_host, f"The REDIS_HOST value '{redis_host}' should not contain newlines")
+        self.assertEqual(redis_host, redis_host.strip())
         self.assertIsInstance(redis_port, int)  
 
     def test_twilio_settings(self):
