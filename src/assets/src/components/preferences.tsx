@@ -194,7 +194,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                         {phoneInput}
                     </FormGroup>
 
-                    {!sendingCode && changedPhoneNumber ? <Button variant="secondary" type="submit" disabled={props.disabled} onClick={getOneTimePassword}>Get a one-time passcode for verification</Button>
+                    {!sendingCode && changedPhoneNumber ? <Button variant="secondary" type="submit" disabled={props.disabled} onClick={getOneTimePassword}>Obtain a one-time phone verification code</Button>
                         : sendingCode 
                             ? <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Sending...</Button>
                             : null }
