@@ -25,6 +25,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='profile',
             name='otp_token',
-            field=models.CharField(blank=True, default='', max_length=6, null=True),
+            field=models.CharField(blank=True, default='', max_length=4, null=True),
         ),
     ]
