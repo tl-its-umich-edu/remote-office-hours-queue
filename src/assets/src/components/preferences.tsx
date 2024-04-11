@@ -100,11 +100,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         const timeRemaining = timeToResendCode ?
             [new Error(`You must wait ${timeToResendCode} more seconds before requesting a new verification code.`)]
             : [];
-        const phoneChangedError = !changedPhoneNumber ?
-            [new Error("You must enter a new phone number to receive a verification code.")]
-            : [];
         const phoneValidationErrors = validatePhoneNumber(phoneNumberToSubmit, countryDialCode);
-        const errors = [...timeRemaining, ...phoneChangedError, ...phoneValidationErrors];
+        const errors = [...timeRemaining, ...phoneValidationErrors];
 
         if (errors.length) {
             setValidationStatus(errors);
@@ -196,8 +193,11 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                         <Form.Label>Phone Number</Form.Label>
                         {phoneInput}
                     </FormGroup>
-                    {!sendingCode ? <Button variant="secondary" type="submit" disabled={props.disabled} onClick={getOneTimePassword}>Get Verification Code</Button>
-                        : <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Sending...</Button>}
+
+                    {!sendingCode && changedPhoneNumber ? <Button variant="secondary" type="submit" disabled={props.disabled} onClick={getOneTimePassword}>Get a one-time passcode for verification</Button>
+                        : sendingCode 
+                            ? <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Sending...</Button>
+                            : null }
                 </Form>
             }
             {phoneUpdateStatus === "verify" &&
@@ -212,7 +212,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                             className="w-25" required></Form.Control>
                     </FormGroup>
                     {!verifying ?
-                        <Button variant="secondary" type="submit" disabled={props.disabled || sendingCode} onClick={verifyOneTimePassword}>Verify</Button>
+                        <Button variant="primary" type="submit" disabled={props.disabled || sendingCode} onClick={verifyOneTimePassword}>Verify</Button>
                         : <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Verifying...</Button>
                     }
                     {!sendingCode ?
