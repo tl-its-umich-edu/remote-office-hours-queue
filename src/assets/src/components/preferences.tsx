@@ -79,7 +79,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     );
 
     const oneTimePasswordTimer = () => {
-        let timer = 30;
+        let timer = process.env.REACT_APP_OTP_TIMER ? parseInt(process.env.REACT_APP_OTP_TIMER) : 30;
         const interval = setInterval(() => {
             setTimeToResendCode(timer--);
             if (timer === -1) {
