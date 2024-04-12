@@ -15,6 +15,10 @@ from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 logger = logging.getLogger(__name__)
 
+# TODO: obtain production client_id and client_secret
+# TODO: configure logging output of debug information and access it through Docker consoles
+# TODO: replace API calls with ZoomClient.raw calls
+# TODO: replace ZoomClient.raw calls with dedicated methods
 
 class ZoomMeeting(TypedDict):
     uuid: str
@@ -211,6 +215,7 @@ class Backend(BackendBase):
 
     @classmethod
     def auth_callback(cls, request):
+        # TODO: figure out what this function does and how to replace this with the oauth_wizard function
         logger.debug("Triggered Zoom auth callback for %s", request.user.username)
         code = request.GET.get('code')
         token = cls._spend_authorization_code(code, request)
@@ -231,6 +236,7 @@ class Backend(BackendBase):
         state = request.GET.get('state')
         return redirect(state)
 
+    # TODO: is this still necessary with the PyZoom library?
     @classmethod
     def get_auth_url(cls, redirect_uri: str, state: str):
         return (
