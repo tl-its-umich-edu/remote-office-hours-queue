@@ -12,6 +12,9 @@ from django.shortcuts import redirect
 from officehours_api.backends.backend_base import BackendBase
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
+from pyzoom import request_tokens
+from pyzoom import refresh_tokens
+from pyzoom import ZoomClient
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +113,11 @@ class Backend(BackendBase):
             },
             headers=cls._get_client_auth_headers(),
         )
+
+        # Alternative implementation of _spend_authorization_code from lines 108-116
+        # client = ZoomClient.from_environment()
+        # resp = client.raw.post('/oauth/token')
+
         resp.raise_for_status()
         logger.debug("Received authorization code from Zoom")
         return resp.json()
@@ -151,6 +159,15 @@ class Backend(BackendBase):
                 'access_token': token['access_token'],
                 'access_token_expires': cls._calculate_expires_at(token['expires_in']),
             }
+
+            # Alternative implementation of token refresh from lines 147-168
+            # token = refresh_tokens(cls.client_id, cls.client_secret, token['refresh_token'])
+            # new_zoom_data = {
+            #     'refresh_token': token['refresh_token'],
+            #     'access_token': token['access_token'],
+            #     'access_token_expires': cls._calculate_expires_at(token['expires_in']),
+            # }
+
             user.profile.backend_metadata['zoom'].update(new_zoom_data)
             user.profile.save()
         return user.profile.backend_metadata['zoom']['access_token']
@@ -164,6 +181,12 @@ class Backend(BackendBase):
             'Content-Type': 'application/json',
         })
         return session
+
+    @classmethod
+    def _get_client(cls, user: User) -> ZoomClient:
+        """Get a ZoomClient instance for the given user. Replaces the _get_session method."""
+        zoom_meta = user.profile.backend_metadata['zoom']
+        return ZoomClient(zoom_meta['access_token'])
 
     @classmethod
     def _create_meeting(cls, user: User) -> ZoomMeeting:
@@ -190,11 +213,38 @@ class Backend(BackendBase):
         logger.debug("Created meeting: %s", resp.json())
         return resp.json()
 
+    # alternative implementation of _create_meeting from lines 192-215
+    # TODO: would anything go wrong if I don't specify the duration_min and password fields?
+    # @classmethod
+    # def _create_meeting(cls, user: User) -> ZoomMeeting:
+    #     client = cls._get_client(user)
+    #     user_id = user.profile.backend_metadata['zoom']['user_id']
+    #     meeting = client.meetings.create_meeting(
+    #         topic='Remote Office Hours Queue Meeting',
+    #         start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+    #         timezone='America/Detroit',
+    #         settings={
+    #             "join_before_host": False,
+    #             "waiting_room": True,
+    #             "meeting_authentication": False,
+    #             "use_pmi": False
+    #         },
+    #     )
+    #     return meeting
+
     @classmethod
     def _get_me(cls, user: User) -> ZoomUser:
         session = cls._get_session(user)
         resp = session.get(f'{cls.base_url}/v2/users/me')
         return resp.json()
+
+    # alternative implementation of _get_me from lines 236 to 240
+    # @classmethod
+    # def _get_me(cls, user: User) -> ZoomUser:
+    #     client = cls._get_client(user)
+    #     user_info = client.raw.get('/users/me')
+    #     return user_info
+    #
 
     @classmethod
     def save_user_meeting(cls, backend_metadata: dict, assignee: User):
@@ -212,6 +262,24 @@ class Backend(BackendBase):
             'host_meeting_url': f"{cls.base_domain_url}/s/{meeting['id']}",
         })
         return backend_metadata
+
+    # @classmethod
+    # def save_user_meeting(cls, backend_metadata: dict, assignee: User):
+    #     if not backend_metadata:
+    #         backend_metadata = {}
+    #     if backend_metadata.get('meeting_id'):
+    #         return backend_metadata
+    #
+    #     meeting = cls._create_meeting(assignee)
+    #     backend_metadata.update({
+    #         'user_id': meeting['host_id'],
+    #         'meeting_id': meeting['id'],
+    #         'numeric_meeting_id': meeting['id'],
+    #         'meeting_url': meeting['join_url'],
+    #         'host_meeting_url': f"{cls.base_domain_url}/s/{meeting['id']}",
+    #     })
+    #     return backend_metadata
+    #
 
     @classmethod
     def auth_callback(cls, request):
