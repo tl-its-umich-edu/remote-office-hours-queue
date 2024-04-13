@@ -19,6 +19,7 @@ interface PreferencesEditorProps {
     onUpdateNotificationInfo: (notifyMeAttendee: boolean, notifyMeHost: boolean) => void;
     onGetOneTimePassword: (phoneNumberToSubmit: string) => Promise<unknown>;
     onVerifyOneTimePassword: (otp: string) => Promise<unknown>;
+    otpRequestBuffer: number;
     errorOccurred: boolean;
 }
 
@@ -79,7 +80,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     );
 
     const oneTimePasswordTimer = () => {
-        let timer = process.env.REACT_APP_OTP_TIMER ? parseInt(process.env.REACT_APP_OTP_TIMER) : 30;
+        let timer = props.otpRequestBuffer;
+        console.log(timer);
         const interval = setInterval(() => {
             setTimeToResendCode(timer--);
             if (timer === -1) {
@@ -277,6 +279,7 @@ export function PreferencesPage(props: PageProps) {
                 onUpdateNotificationInfo={doUpdateNotificationInfo}
                 onGetOneTimePassword={doGetOneTimePassword}
                 onVerifyOneTimePassword={doVerifyOneTimePassword}
+                otpRequestBuffer={props.otpRequestBuffer}
                 errorOccurred={!!errorSources.length}
             />
         );

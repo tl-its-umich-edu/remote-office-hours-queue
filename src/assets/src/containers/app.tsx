@@ -24,7 +24,8 @@ export function App(props: AppProps) {
         user: props.globals.user,
         loginUrl: props.globals.login_url,
         backends: props.globals.backends,
-        defaultBackend: props.globals.default_backend
+        defaultBackend: props.globals.default_backend,
+        otpRequestBuffer: props.globals.otp_request_buffer,
     };
 
     return (
