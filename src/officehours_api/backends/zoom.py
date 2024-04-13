@@ -18,7 +18,7 @@ from pyzoom import ZoomClient
 
 logger = logging.getLogger(__name__)
 
-# TODO: obtain production client_id and client_secret
+# TODO: Reconfigure callback URL of custom Zoom app to get the original code to work
 # TODO: configure logging output of debug information and access it through Docker consoles
 # TODO: replace API calls with ZoomClient.raw calls
 # TODO: replace ZoomClient.raw calls with dedicated methods
