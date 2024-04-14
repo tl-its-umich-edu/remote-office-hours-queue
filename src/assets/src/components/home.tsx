@@ -2,14 +2,22 @@ import * as React from "react";
 import { useState } from "react";
 import { MyUser } from "../models";
 import { Link } from "react-router-dom";
-import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+import { Button, Col, Form, InputGroup, Row, Alert } from "react-bootstrap";
 
 import { ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
 import { useUserWebSocket } from "../services/sockets";
+import { uniqnameSchema, queueNameSchema } from "../validation";
 
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
+    const [emailError, setEmailError] = useState(false);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setLookup(value);
+        setEmailError(value.includes('@'));
+    }
     return (
         <Row className="mt-3">
             <Col sm={12} md={8} lg={6}>
@@ -22,10 +30,15 @@ function QueueLookup() {
                             placeholder="Queue name or host uniqname..."
                             name="term"
                             value={lookup}
-                            onChange={(e) => setLookup(e.target.value)}
+                            onChange={handleChange}
                         />
-                        <Button type="submit" variant="primary">Search Queues</Button>
+                        <Button type="submit" variant="primary" disabled={emailError}>Search Queues</Button>
                     </InputGroup>
+                    {emailError && (
+                        <Alert variant="warning" className="mt-2">
+                            Emails cannot be entered.
+                        </Alert>
+                    )}
                 </Form>
             </Col>
         </Row>
