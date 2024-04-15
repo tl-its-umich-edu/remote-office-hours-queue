@@ -164,6 +164,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         catch (error: any) {
             setValidationStatus([error]); // display error
         }
+        
+        setDigits(["", "", "", ""]); // reset digits
         setSendingCode(false);
     }
 
@@ -192,6 +194,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             console.log(error)
             setValidationStatus([error]);
         }
+        
+        setDigits(["", "", "", ""]); // reset digits
         setVerifying(false);
     }
 
