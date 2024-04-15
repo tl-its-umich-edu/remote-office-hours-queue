@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Alert, Button, Form, FormGroup } from "react-bootstrap";
+import { Alert, Button, Col, Form, FormGroup, Row } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 import Spinner from "react-bootstrap/Spinner";
 import 'react-phone-input-2/lib/bootstrap.css'
@@ -29,7 +29,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
     const [phoneUpdateStatus, setPhoneUpdateStatus] = useState("");
     const [timeToResendCode, setTimeToResendCode] = useState(0);
-    const [otpValue, setOtpValue] = useState("");
+    const [digits, setDigits] = useState(["", "", "", ""]);
     const [sendingCode, setSendingCode] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const [countryDialCode, setCountryDialCode] = useState("");
@@ -79,6 +79,49 @@ function PreferencesEditor(props: PreferencesEditorProps) {
             label="As a host, I want to be notified via SMS when someone joins my empty queue." />
     );
 
+    const digitInput = (i: number, digit: string): React.JSX.Element => {
+        return (
+            <div style={{ width: 100 }}>
+                <Col>
+                    <Form.Control
+                        key={i}
+                        id={`otp-digit-${i}`}
+                        className="text-center"
+                        type="text"
+                        value={digit}
+                        onChange={(e) => updateDigits(i, e.target.value)}
+                        onKeyUp={handleOtpEnter}
+                        disabled={verifying}
+                        autoFocus={i === 0}
+                    />
+                </Col>
+            </div>);
+    }
+
+    const updateDigits = (index: number, value: string) => {
+        const regex = /^[0-9]?$/;
+        if (!regex.test(value)) return;
+        
+        const newDigits = [...digits];
+        newDigits[index] = value;
+        setDigits(newDigits);
+
+        const nextInput = document.getElementById(`otp-digit-${index + 1}`); // move to next input on input
+        value.length && nextInput && nextInput.focus();
+        const prevInput = document.getElementById(`otp-digit-${index - 1}`); // move to previous input on delete
+        !value.length && prevInput && prevInput.focus();
+
+
+        // if (index === 3) {
+        //     verifyOneTimePassword(undefined, newDigits.join(""));
+        // } 
+        // optional auto-submit
+    }
+    
+    const handleOtpEnter = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter" && digits.join("").length === 4) verifyOneTimePassword();
+    }
+
     const oneTimePasswordTimer = () => {
         let timer = props.otpRequestBuffer;
         console.log(timer);
@@ -124,11 +167,14 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         setSendingCode(false);
     }
 
-    const verifyOneTimePassword = async (e: React.SyntheticEvent) => {
-        e.preventDefault(); // Prevent page reload
+    const verifyOneTimePassword = async (e?: React.SyntheticEvent, otpValueIn?: string) => {
+        if (e) e.preventDefault();
+
         if (sendingCode || verifying) return;
         setVerifying(true);
 
+        const otpValue = otpValueIn ? otpValueIn : digits.join("");
+        console.log(otpValue);
         if (otpValue.length !== 4) {
             setValidationStatus([new Error("You must enter a 4-digit verification code.")]);
             setVerifying(false);
@@ -206,13 +252,14 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 <Form>
                     <p>Enter the verification code sent to {formattedPhoneNumberToSubmit} (<a onClick={() => setPhoneUpdateStatus("")}
                         className="link-primary">edit</a>)</p>
-                    <FormGroup controlId='otp' className="mb-3">
-                        <Form.Control type="number" value={otpValue}
-                            onKeyDown={(e) => { ["e", "E", "+", "-"].includes(e.key) && e.preventDefault() }}
-                            onChange={(e) => { if (e.target.value.length <= 4) setOtpValue(e.target.value) }}
-                            disabled={props.disabled}
-                            className="w-25" required></Form.Control>
-                    </FormGroup>
+                    <Form className="mb-3">
+                        <Row>
+                            {digits.map((digit, i) => (
+                                digitInput(i, digit)
+                            ))}
+
+                        </Row>
+                    </Form>
                     {!verifying ?
                         <Button variant="primary" type="submit" disabled={props.disabled || sendingCode} onClick={verifyOneTimePassword}>Verify</Button>
                         : <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Verifying...</Button>
