@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { MyUser } from "../models";
 import { Link } from "react-router-dom";
 import { Button, Col, Form, InputGroup, Row, Alert } from "react-bootstrap";
@@ -11,17 +11,28 @@ import { uniqnameSchema, queueNameSchema } from "../validation";
 
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
-    const [emailError, setEmailError] = useState(false);
+    const formRef = useRef<HTMLFormElement>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setLookup(value);
-        setEmailError(value.includes('@'));
+    }
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const processedLookup = lookup.replace(/@umich\.edu/gi, '');
+        if (formRef.current) {
+            const inputElement = formRef.current.elements.namedItem("term") as HTMLInputElement;
+            if (inputElement) {
+                inputElement.value = processedLookup;
+            }
+            formRef.current.submit();
+        }
     }
     return (
         <Row className="mt-3">
             <Col sm={12} md={8} lg={6}>
-                <Form method="get" action="/search/">
+                <Form ref={formRef} method="get" action="/search/" onSubmit={handleSubmit}>
                     <InputGroup>
                         <Form.Control
                             type="text"
@@ -32,12 +43,12 @@ function QueueLookup() {
                             value={lookup}
                             onChange={handleChange}
                         />
-                        <Button type="submit" variant="primary" disabled={emailError}>Search Queues</Button>
+                        <Button type="submit" variant="primary">Search Queues</Button>
                     </InputGroup>
                     {emailError && (
-                        <div style={{ margin: '5px'}}>
-                            <span style={{ color: 'red' }}>Emails cannot be used to search queue. Please use uniqname instead.</span>
-                        </div>
+                        <Alert variant="warning" className="mt-2">
+                            Emails cannot be entered.
+                        </Alert>
                     )}
                 </Form>
             </Col>
