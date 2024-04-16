@@ -14,6 +14,7 @@ export interface Globals {
     login_url: string;
     backends: MeetingBackend[];
     default_backend: string;
+    otp_request_buffer: number;
 }
 
 const globalsId = 'spa_globals';

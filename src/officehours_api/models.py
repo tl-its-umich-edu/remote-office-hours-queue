@@ -54,6 +54,9 @@ class Profile(models.Model):
     notify_me_attendee = models.BooleanField(default=False)
     notify_me_host = models.BooleanField(default=False)
     backend_metadata = models.JSONField(null=True, default=dict, blank=True)
+    otp_phone_number = models.CharField(max_length=20, default="", blank=True, null=True)
+    otp_token = models.CharField(max_length=4, default="", blank=True, null=True)
+    otp_expiration = models.DateTimeField(null=True, blank=True, default=None)
 
     @property
     def authorized_backends(self):

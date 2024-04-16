@@ -1,3 +1,5 @@
+from datetime import datetime, timezone, timedelta
+from random import randint
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -11,12 +13,14 @@ from rest_framework.views import APIView
 from rest_framework_tracking.mixins import LoggingMixin
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
+from asgiref.sync import async_to_sync, sync_to_async
 
+from officehours_api.notifications import send_one_time_password
 from officehours_api.exceptions import DisabledBackendException, MeetingStartedException
 from officehours_api.models import Attendee, Meeting, Queue
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer,
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, PhoneSerializer
 )
 from officehours_api.permissions import (
     IsAssignee, IsHostOrReadOnly, IsHostOrAttendee, is_host
@@ -94,6 +98,66 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
         self.check_change_permission(request, user)
         return super().partial_update(request, *args, **kwargs)
 
+class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PhoneSerializer
+
+    def check_change_permission(self, request, user):
+        if user != request.user:
+            self.permission_denied(request)
+
+    def generate_otp(self, request):
+        request.data["otp_token"] = randint(1000, 9999)
+        request.data["otp_expiration"] = datetime.now(timezone.utc) + timedelta(minutes=5)
+
+    def verify_otp(self, request):
+        """Returns True if the OTP is correct, and a string with an error message otherwise"""
+        user = self.request.user
+        if user.profile.otp_expiration < datetime.now(timezone.utc):
+            return "Your verification code has expired. Please request a new one."
+            
+        elif user.profile.otp_token != request.data["otp_token"]:
+            return "Incorect Verification Code Entered."
+        return True
+    
+    async def send_otp(self, request, *args, **kwargs):
+        '''
+        Send the OTP to the user's phone number.
+        Returns True if the message was sent successfully, Error Response otherwise.
+        '''
+        self.generate_otp(request)
+        if await send_one_time_password(request.data["otp_phone_number"], request.data["otp_token"]):
+            return True
+        else:
+            return Response({"detail": "Failed to send verification code; please check your phone number and try again."}, 
+                            status=status.HTTP_400_BAD_REQUEST)
+    
+    def update(self, request, *args, **kwargs):
+        user = self.request.user
+        self.check_change_permission(request, user)
+
+        if request.data["action"] == "send":
+            otp_sent = async_to_sync(self.send_otp)(request, *args, **kwargs)
+            if otp_sent == True:
+                return super().update(request, *args, **kwargs)
+            else:
+                return otp_sent
+        elif request.data["action"] == "verify":
+            verified = self.verify_otp(request)
+            if verified == True:
+                request.data["phone_number"] = user.profile.otp_phone_number
+                request.data["otp_token"] = ""
+                request.data["otp_phone_number"] = ""
+                request.data["otp_expiration"] = datetime.now(timezone.utc) - timedelta(minutes=1)
+                return super().update(request, *args, **kwargs)
+            else:
+                return Response({"detail": verified}, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, *args, **kwargs):
+        user = self.request.user
+        self.check_change_permission(request, user)
+        return super().partial_update(request, *args, **kwargs)
 
 class UserUniqnameDetail(UserDetail):
     lookup_field = 'username'
