@@ -36,7 +36,7 @@ function QueueLookup() {
                     </InputGroup>
                     {emailError && (
                         <Alert variant="warning" className="mt-2">
-                            Emails cannot be entered.
+                            Emails cannot be used to search queue. Please use uniqname instead.
                         </Alert>
                     )}
                 </Form>
