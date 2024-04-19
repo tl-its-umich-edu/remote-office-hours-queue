@@ -35,9 +35,9 @@ function QueueLookup() {
                         <Button type="submit" variant="primary" disabled={emailError}>Search Queues</Button>
                     </InputGroup>
                     {emailError && (
-                        <Alert variant="warning" className="mt-2">
-                            Emails cannot be used to search queue. Please use uniqname instead.
-                        </Alert>
+                        <div style={{ margin: '5px'}}>
+                            <span style={{ color: 'red' }}>Emails cannot be used to search queue. Please use uniqname instead.</span>
+                        </div>
                     )}
                 </Form>
             </Col>
