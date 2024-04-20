@@ -1,11 +1,9 @@
 import json
 from typing import List, Literal, TypedDict
-from base64 import b64encode
 from time import time
 from datetime import datetime
 import logging
 
-import requests
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.shortcuts import redirect
@@ -13,7 +11,6 @@ from django.shortcuts import redirect
 from officehours_api.backends.backend_base import BackendBase
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
-from pyzoom import request_tokens
 from pyzoom.schemas import ZoomMeetingSettings
 from pyzoom.oauth import refresh_tokens, request_tokens
 from pyzoom import ZoomClient
@@ -97,7 +94,7 @@ class Backend(BackendBase):
         # the request_tokens function from the PyZoom libraru replaces
         # the request to /oauth/token for the authorization code grant type
         tokens = request_tokens(cls.client_id, cls.client_secret, redirect_uri, code)
-        logger.debug("Received authorization code from Zoom", tokens)
+        logger.debug("Received authorization code from Zoom")
         return tokens
 
     @classmethod
@@ -117,21 +114,22 @@ class Backend(BackendBase):
             logger.debug('Refreshing token')
             # The refresh_tokens function from the PyZoom library replaces the request to /oauth/token
             # for the refresh token grant type
-            pyzoom_response = refresh_tokens(cls.client_id, cls.client_secret, zoom_meta['refresh_token'])
-            if 400 <= pyzoom_response.status_code < 500:
+            resp = refresh_tokens(cls.client_id, cls.client_secret, zoom_meta['refresh_token'])
+            if resp.status_code >= 400 and resp.status_code < 500:
                 # The refresh_token was invalidated somehow.
                 # Maybe the user removed our Zoom app's auth.
                 # Force them to be prompted again.
                 # The specific code sent by Zoom has changed before,
                 # so it now checks for any client error during refresh.
                 cls._clear_backend_metadata(user)
-            pyzoom_response.raise_for_status()
-            pyzoom_token = pyzoom_response.json()
-            user.profile.backend_metadata['zoom'].update({
-                'refresh_token': pyzoom_token['refresh_token'],
-                'access_token': pyzoom_token['access_token'],
-                'access_token_expires': cls._calculate_expires_at(pyzoom_token['expires_in'])
-            })
+            resp.raise_for_status()
+            token = resp.json()
+            new_zoom_data = {
+                'refresh_token': token['refresh_token'],
+                'access_token': token['access_token'],
+                'access_token_expires': cls._calculate_expires_at(token['expires_in']),
+            }
+            user.profile.backend_metadata['zoom'].update(new_zoom_data)
             user.profile.save()
         return user.profile.backend_metadata['zoom']['access_token']
 
@@ -176,11 +174,9 @@ class Backend(BackendBase):
         so we will have to use the ZoomClient.raw.get method to make an API call.
         """
         client = cls._get_client(user)
-        user_info_resp = client.raw.get('/users/me')
-        user_info_resp.raise_for_status()
-        user_info = user_info_resp.json()
-        logger.debug(f"Response from PyZoom for _get_me: {user_info}")
-        return user_info
+        resp = client.raw.get('/users/me')
+        resp.raise_for_status()
+        return resp.json()
 
     @classmethod
     def save_user_meeting(cls, backend_metadata: dict, assignee: User):
