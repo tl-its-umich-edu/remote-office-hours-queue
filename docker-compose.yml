@@ -11,6 +11,9 @@ services:
       - DEBUG=True
       - DATABASE_URL=postgresql://admin:admin_pw@database/admin
       - FEEDBACK_EMAIL=office-hours-devs@umich.edu
+      - ZOOM_CLIENT_ID=byY9yWA4QFOD9G5nqPAlag
+      - ZOOM_CLIENT_SECRET=GsksJCDxMTJrgS8dN8cqcB4aTvzBWvPz
+#        The token is expected to be RUKNNLNSTWanxBrW9NojCA
     ports:
       - 8003:8001
     volumes:
