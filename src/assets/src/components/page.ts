@@ -5,4 +5,5 @@ export interface PageProps {
     loginUrl: string;
     backends: MeetingBackend[];
     defaultBackend: string;
+    otpRequestBuffer: number;
 }
