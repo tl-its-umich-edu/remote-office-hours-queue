@@ -1,3 +1,4 @@
+import json
 from typing import List, Literal, TypedDict
 from base64 import b64encode
 from time import time
@@ -13,7 +14,8 @@ from officehours_api.backends.backend_base import BackendBase
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
 from pyzoom import request_tokens
-from pyzoom import refresh_tokens
+from pyzoom.schemas import ZoomMeetingSettings
+from pyzoom import refresh_tokens # TODO: what does this do?
 from pyzoom import ZoomClient
 
 logger = logging.getLogger(__name__)
@@ -95,6 +97,7 @@ class Backend(BackendBase):
 
     @classmethod
     def _get_client_auth_headers(cls) -> dict:
+        # TODO: is this function still necessary?
         client = b64encode(bytes(f"{cls.client_id}:{cls.client_secret}", 'ascii')).decode('ascii')
         return {
             'Authorization': f"Basic {client}",
@@ -145,6 +148,7 @@ class Backend(BackendBase):
 
     @classmethod
     def _calculate_expires_at(cls, expires_in: int) -> float:
+        # TODO: is this function replaceable with the PyZoom library?
         return time() + expires_in - cls.expiry_buffer_seconds
 
     @classmethod
@@ -154,54 +158,24 @@ class Backend(BackendBase):
         logger.debug(f"Zoom metadata requested by function _get_access_token: {zoom_meta}")
         if time() > zoom_meta['access_token_expires']:
             logger.debug('Refreshing token')
-            try:
-                pyzoom_response = request_tokens(cls.client_id, cls.client_secret, token['refresh_token'])
-                if 400 <= pyzoom_response.status_code < 500:
-                    # The refresh_token was invalidated somehow.
-                    # Maybe the user removed our Zoom app's auth.
-                    # Force them to be prompted again.
-                    # The specific code sent by Zoom has changed before,
-                    # so it now checks for any client error during refresh.
-                    cls._clear_backend_metadata(user)
-                pyzoom_response.raise_for_status()
-                pyzoom_token = pyzoom_response.json()
-                logger.debug(f"Response from PyZoom: {pyzoom_token}")
-                user.profile.backend_metadata['zoom'].update({
-                    'refresh_token': pyzoom_token['refresh_token'],
-                    'access_token': pyzoom_token['access_token'],
-                    'access_token_expires': cls._calculate_expires_at(pyzoom_token['expires_in'])
-                })
-                user.profile.save()
-            except Exception as e:
-                logger.error(f"Error in PyZoom response for function _get_access_token: {e}")
-                # Use old implementation if PyZoom fails
-                resp = requests.post(
-                    f'{cls.base_url}/oauth/token',
-                    params={
-                        'grant_type': 'refresh_token',
-                        'refresh_token': zoom_meta['refresh_token'],
-                    },
-                    headers=cls._get_client_auth_headers(),
-                )
-                if resp.status_code >= 400 and resp.status_code < 500:
-                    # The refresh_token was invalidated somehow.
-                    # Maybe the user removed our Zoom app's auth.
-                    # Force them to be prompted again.
-                    # The specific code sent by Zoom has changed before,
-                    # so it now checks for any client error during refresh.
-                    cls._clear_backend_metadata(user)
-                resp.raise_for_status()
-                token = resp.json()
-                # Log debug information about the response
-                logger.debug(f"Response from Zoom: {token}")
-                new_zoom_data = {
-                    'refresh_token': token['refresh_token'],
-                    'access_token': token['access_token'],
-                    'access_token_expires': cls._calculate_expires_at(token['expires_in']),
-                }
-                user.profile.backend_metadata['zoom'].update(new_zoom_data)
-                user.profile.save()
-
+            # try:
+            pyzoom_response = request_tokens(cls.client_id, cls.client_secret, zoom_meta['refresh_token'])
+            if 400 <= pyzoom_response.status_code < 500:
+                # The refresh_token was invalidated somehow.
+                # Maybe the user removed our Zoom app's auth.
+                # Force them to be prompted again.
+                # The specific code sent by Zoom has changed before,
+                # so it now checks for any client error during refresh.
+                cls._clear_backend_metadata(user)
+            pyzoom_response.raise_for_status()
+            pyzoom_token = pyzoom_response.json()
+            logger.debug(f"Response from PyZoom: {pyzoom_token}")
+            user.profile.backend_metadata['zoom'].update({
+                'refresh_token': pyzoom_token['refresh_token'],
+                'access_token': pyzoom_token['access_token'],
+                'access_token_expires': cls._calculate_expires_at(pyzoom_token['expires_in'])
+            })
+            user.profile.save()
         return user.profile.backend_metadata['zoom']['access_token']
 
     @classmethod
@@ -223,82 +197,50 @@ class Backend(BackendBase):
 
     @classmethod
     def _create_meeting(cls, user: User) -> ZoomMeeting:
-        session = cls._get_session(user)
-        user_id = user.profile.backend_metadata['zoom']['user_id']
-        request_url = f'{cls.base_url}/v2/users/{user_id}/meetings'
-        # Log debug information about the request
-        logger.debug(f"Requesting meeting creation from Zoom at {request_url} at function _create_meeting.")
-        resp = session.post(
-            request_url,
-            json={
-                'topic': 'Remote Office Hours Queue Meeting',
-                'start_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'timezone': 'America/Detroit',
-                "settings": {
-                    "join_before_host": False,
-                    "waiting_room": True,
-                    "meeting_authentication": False,
-                    "use_pmi": False
-                },
-            },
-        )
-        if resp.status_code == 401:
-            logger.info(f'Access token for user {user.id} seems to be invalid.')
-            cls._clear_backend_metadata(user)
-        resp.raise_for_status()
-        logger.info("Created meeting: %s", resp.json())
-
-        # Log debug information about the response
-        logger.debug(f"Response from Zoom: {resp.json()}")
-
-        # alternative implementation of _create_meeting
-        # TODO: would anything go wrong if I don't specify the duration_min and password fields?
+        # Get a ZoomClient instance for the given user
         client = cls._get_client(user)
         user_id = user.profile.backend_metadata['zoom']['user_id']
-        try:
-            meeting = client.meetings.create_meeting(
-                topic='Remote Office Hours Queue Meeting',
-                start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                timezone='America/Detroit',
-                settings={
-                    "join_before_host": False,
-                    "waiting_room": True,
-                    "meeting_authentication": False,
-                    "use_pmi": False
-                },
-            )
-            logger.info("Created meeting through PyZoom: %s", meeting.json())
-        except Exception as e:
-            logger.error(f"Error in PyZoom response: {e}")
-
-        return resp.json()
+        # Specify the meeting settings
+        # We are initializing the meeting settings with the default settings
+        # and then modifying the settings we want to change
+        meeting_settings = ZoomMeetingSettings.default_settings()
+        meeting_settings.waiting_room = True
+        meeting_settings.join_before_host = False
+        meeting_settings.meeting_authentication = False
+        meeting_settings.use_pmi = False
+        meeting_settings.contact_name = user.first_name + ' ' + user.last_name
+        meeting_settings.contact_email = user.email
+        # invoke the create_meeting method of the ZoomClient instance
+        meeting = client.meetings.create_meeting(
+            topic='Remote Office Hours Queue Meeting',
+            start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            duration_min=60,
+            timezone='America/Detroit',
+            settings=meeting_settings
+        )
+        # The .json() method does not seem to work all that well
+        meeting_json = json.loads(meeting.json())
+        logger.info("Created meeting: %s", meeting_json)
+        return meeting_json
 
     @classmethod
     def _get_me(cls, user: User) -> ZoomUser:
-        session = cls._get_session(user)
-        resp = session.get(f'{cls.base_url}/v2/users/me')
-        # Log debug information about the response
-        logger.debug(f"Response from Zoom: {resp.json()}")
-
-        # Alternative implementation of _get_me from lines 236 to 240
+        # TODO: there may still be dedicated methods for getting user information
         try:
             client = cls._get_client(user)
             user_info_resp = client.raw.get('/users/me')
             user_info_resp.raise_for_status()
             user_info = user_info_resp.json()
             logger.debug(f"Response from PyZoom: {user_info}")
+            return user_info
         except Exception as e:
             logger.error(f"Error in PyZoom response: {e}")
-
-        return resp.json()
-
-    # alternative implementation of _get_me from lines 236 to 240
-    # @classmethod
-    # def _get_me(cls, user: User) -> ZoomUser:
-    #     client = cls._get_client(user)
-    #     user_info = client.raw.get('/users/me')
-    #     return user_info
-    #
+            logger.warning("Falling back to requests library")
+            session = cls._get_session(user)
+            resp = session.get(f'{cls.base_url}/v2/users/me')
+            # Log debug information about the response
+            logger.debug(f"Response from Zoom: {resp.json()}")
+            return resp.json()
 
     @classmethod
     def save_user_meeting(cls, backend_metadata: dict, assignee: User):
