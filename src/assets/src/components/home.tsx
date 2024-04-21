@@ -7,7 +7,6 @@ import { Button, Col, Form, InputGroup, Row, Alert } from "react-bootstrap";
 import { ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
 import { useUserWebSocket } from "../services/sockets";
-import { uniqnameSchema, queueNameSchema } from "../validation";
 
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
@@ -45,11 +44,6 @@ function QueueLookup() {
                         />
                         <Button type="submit" variant="primary">Search Queues</Button>
                     </InputGroup>
-                    {emailError && (
-                        <Alert variant="warning" className="mt-2">
-                            Emails cannot be entered.
-                        </Alert>
-                    )}
                 </Form>
             </Col>
         </Row>
