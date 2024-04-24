@@ -91,7 +91,7 @@ class Backend(BackendBase):
     @classmethod
     def _spend_authorization_code(cls, code: str, request) -> ZoomAccessToken:
         redirect_uri = request.build_absolute_uri('/callback/zoom/')
-        # the request_tokens function from the PyZoom libraru replaces
+        # the request_tokens function from the PyZoom library replaces
         # the request to /oauth/token for the authorization code grant type
         tokens = request_tokens(cls.client_id, cls.client_secret, redirect_uri, code)
         logger.debug("Received authorization code from Zoom")
