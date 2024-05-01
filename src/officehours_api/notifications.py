@@ -12,10 +12,18 @@ from twilio.rest import Client as TwilioClient
 
 from officehours_api.models import Queue, Meeting, MeetingStatus
 
-logger = logging.getLogger(__name__)
+def initialize_twilio():
+    logger = logging.getLogger(__name__)
 
-twilio = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+    if (settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID):
+        twilio_client = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+        logger.info("Twilio client initialized.")
+    else:
+        logger.info("Twilio client setup skipped. Twilio settings values are not set (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID).")
+        twilio_client = None
+    return logger, twilio_client
 
+logger, twilio = initialize_twilio()
 
 # `reverse()` at the module level breaks `/admin`, so defer it by wrapping it in a function.
 def build_addendum(domain: str):
