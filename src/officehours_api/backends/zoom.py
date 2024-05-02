@@ -162,7 +162,7 @@ class Backend(BackendBase):
             timezone='America/Detroit',
             settings=meeting_settings
         )
-        # The .json() method does not seem to work all that well
+        # The return value of meeting.json() is a string object
         meeting_json = json.loads(meeting.json())
         logger.info("Created meeting: %s", meeting_json)
         return meeting_json
