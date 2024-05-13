@@ -21,7 +21,7 @@ def initialize_twilio():
         twilio_client = TwilioClient(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
         logger.info("Twilio client initialized.")
     else:
-        logger.info("Twilio client setup skipped. Twilio settings values are not set (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID).")
+        logger.warning("Twilio client setup skipped. Twilio settings values are not set (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_MESSAGING_SERVICE_SID).")
         twilio_client = None
     return twilio_client
 
