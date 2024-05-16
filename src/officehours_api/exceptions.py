@@ -42,6 +42,10 @@ class MeetingStartedException(Exception):
     def __init__(self, field_name: str):
         self.message = f"Can't change {field_name} once meeting is started!"
 
+class TwilioClientNotInitializedException(Exception):
+    
+        def __init__(self):
+            self.message = "Twilio client not initialized."
 
 def backend_error_handler(exc, context):
     if isinstance(exc, BackendException):
