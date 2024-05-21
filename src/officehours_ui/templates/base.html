@@ -83,21 +83,8 @@
       </div>
     </nav>
   </header>
-  
-  {% for page in flatpages %}
-    <!-- <div style="background: #CCF7FF; margin-top: 10px; margin-bottom: 10px; padding: 20px"> -->
-    <div class="alert alert-info" role="alert">
-      <div style="text-align: center;">
-        {% if page.title == "User Comm Banner" %}
-          {{page.content|safe}}
-        {% elif page.title == "Data Alert" %}
-          {{page.content|safe}}
-        {% endif %}
-      </div>
-    </div>
-  {% endfor %}
 
-	<div id="main-content" class="container" role="main">
+  <div id="main-content" class="container" role="main">
     {% block content %}{% endblock %}
     {% csrf_token %}
 	</div>
@@ -105,5 +92,20 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
   {% block scripts %}{% endblock %}
+
+  <footer>
+    {% for page in flatpages %}
+      <!-- <div style="background: #CCF7FF; margin-top: 10px; margin-bottom: 10px; padding: 20px"> -->
+      <div class="alert alert-info" role="alert">
+        <div style="text-align: center;">
+          {% if page.title == "User Comm Banner" %}
+            {{page.content|safe}}
+          {% elif page.title == "Data Alert" %}
+            {{page.content|safe}}
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </footer>
   </body>
 </html>
