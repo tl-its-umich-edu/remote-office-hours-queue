@@ -85,9 +85,16 @@
   </header>
   
   {% for page in flatpages %}
-    {% if page.title == "User Comm Banner" %}
-      {{page.content|safe}}
-    {% endif %}
+    <!-- <div style="background: #CCF7FF; margin-top: 10px; margin-bottom: 10px; padding: 20px"> -->
+    <div class="alert alert-info" role="alert">
+      <div style="text-align: center;">
+        {% if page.title == "User Comm Banner" %}
+          {{page.content|safe}}
+        {% elif page.title == "Data Alert" %}
+          {{page.content|safe}}
+        {% endif %}
+      </div>
+    </div>
   {% endfor %}
 
 	<div id="main-content" class="container" role="main">
