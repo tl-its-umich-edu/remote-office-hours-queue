@@ -744,3 +744,13 @@ a.dropdown-item:hover {
 input.dropdown-item:hover {
 	background-color: #C0C0C0 !important;
 }
+
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.sticky-footer {
+	margin-top: auto;
+}
