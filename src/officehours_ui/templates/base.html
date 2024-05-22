@@ -95,13 +95,11 @@
 
   <footer class="sticky-footer">
     {% for page in flatpages %}
-      <!-- <div style="background: #CCF7FF; margin-top: 10px; margin-bottom: 10px; padding: 20px"> -->
       <div class="alert alert-info" role="alert">
         <div style="text-align: center;">
           {% if page.title == "User Comm Banner" %}
             {{page.content|safe}}
           {% elif page.title == "Data Alert" %}
-            <!-- Remote Office Hours Queue facilitates conversations to support student success, including course office hours and academic advising appointments. Activity data, such as queue name, host name, attendee name, zoom link, meeting date/time, location, agenda title, etc. is shared with the owners of individual queues and may be used to improve university operations. -->
             {{page.content|safe}}
           {% endif %}
         </div>
