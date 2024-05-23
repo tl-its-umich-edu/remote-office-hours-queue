@@ -95,8 +95,8 @@
 
   <footer class="sticky-footer">
     {% for page in flatpages %}
-      <div class="alert alert-info" style="margin-bottom: 0px;" role="alert">
-        <div style="text-align: center;">
+      <div class="alert alert-info" style="margin-bottom: 0px; background:#333333" role="alert">
+        <div style="text-align: center; color: #9B9B9B">
           {% if page.title == "User Comm Banner" %}
             {{page.content|safe}}
           {% elif page.title == "Data Alert" %}
