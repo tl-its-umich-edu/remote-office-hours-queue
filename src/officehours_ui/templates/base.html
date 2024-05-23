@@ -93,18 +93,22 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
   {% block scripts %}{% endblock %}
 
-  <footer class="sticky-footer">
-    {% for page in flatpages %}
+  {% for page in flatpages %}
+    {% if page.title == "User Comm Banner" %}
+      {{page.content|safe}}
+    {% endif %}
+  {% endfor %}
+
+  {% get_flatpages '/dataalert/' as flatpages %}
+  {% if flatpages.first and flatpages.first.content %}
+    <footer class="sticky-footer">
       <div class="alert alert-info" style="margin-bottom: 0px; background:#333333" role="alert">
         <div style="text-align: center; color: #9B9B9B">
-          {% if page.title == "User Comm Banner" %}
-            {{page.content|safe}}
-          {% elif page.title == "Data Alert" %}
-            {{page.content|safe}}
-          {% endif %}
+          {{flatpages.first.content|safe}}
         </div>
       </div>
-    {% endfor %}
-  </footer>
+    </footer>
+  {% endif %}
+  
   </body>
 </html>
