@@ -744,3 +744,24 @@ a.dropdown-item:hover {
 input.dropdown-item:hover {
 	background-color: #C0C0C0 !important;
 }
+
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.sticky-footer {
+	margin-top: auto;
+}
+
+.alert-footer {
+	margin-bottom: 0px;
+	background:#333333;
+	border: 0px;
+}
+
+.alert-footer-text {
+	text-align: center;
+	color: #9B9B9B
+}
