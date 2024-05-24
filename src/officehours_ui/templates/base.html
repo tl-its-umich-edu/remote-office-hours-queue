@@ -102,7 +102,6 @@
   {% get_flatpages '/dataalert/' as flatpages %}
   {% if flatpages.first and flatpages.first.content %}
     <footer class="sticky-footer">
-      <!-- <div class="alert alert-info" style="margin-bottom: 0px; background:#333333" role="alert"> -->
       <div class="alert alert-info alert-footer" role="alert">
         <div class="alert-footer-text">
           {{flatpages.first.content|safe}}
