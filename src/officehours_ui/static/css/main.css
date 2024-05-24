@@ -754,3 +754,14 @@ body {
 .sticky-footer {
 	margin-top: auto;
 }
+
+.alert-footer {
+	margin-bottom: 0px;
+	background:#333333;
+	border: 0px;
+}
+
+.alert-footer-text {
+	text-align: center;
+	color: #9B9B9B
+}
