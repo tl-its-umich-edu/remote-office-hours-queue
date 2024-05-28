@@ -287,7 +287,7 @@ export function QueueManagerPage(props: PageProps) {
     const confirmRemoveMeeting = (m: Meeting) => {
         setStateAndOpenDialog(
             "Remove Meeting?",
-            `Are you sure you want to remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}?`,
+            m.attendees[0] ? `Are you sure you want to remove your meeting with ${m.attendees[0].first_name} ${m.attendees[0].last_name}?` : "Are you sure you want to remove this meeting?",
             () => doRemoveMeeting(m)
         );
     }

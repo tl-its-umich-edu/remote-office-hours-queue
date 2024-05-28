@@ -80,13 +80,20 @@ interface UnstartedMeetingEditorProps extends MeetingEditorProps, AssigneeSelect
 }
 
 function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
-    const attendee = props.meeting.attendees[0];
+    const attendee = props.meeting.attendees[0] ?? null;
     if (!attendee) return (
         <>
         <td>No attendee</td>
         <td></td>
         <td>Invalid meeting ID: {props.meeting.id}</td>
-        <td></td>
+        <td>
+            <RemoveButton
+                onRemove={() => props.onRemoveMeeting(props.meeting)}
+                size="sm"
+                screenReaderLabel={`Remove Meeting ${props.meeting.id} with no attendee`}
+                disabled={props.disabled}
+            />
+        </td>
         </>
     );
     const attendeeString = `${attendee.first_name} ${attendee.last_name}`;
@@ -138,7 +145,22 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
 }
 
 function StartedMeetingEditor (props: MeetingEditorProps) {
-    const attendee = props.meeting.attendees[0];
+    const attendee = props.meeting.attendees[0] ?? null;
+    if (!attendee) return (
+        <>
+        <td>No attendee</td>
+        <td></td>
+        <td>Invalid meeting ID: {props.meeting.id}</td>
+        <td>
+            <RemoveButton
+                onRemove={() => props.onRemoveMeeting(props.meeting)}
+                size="sm"
+                screenReaderLabel={`Remove Meeting ${props.meeting.id} with no attendee`}
+                disabled={props.disabled}
+            />
+        </td>
+        </>
+    );
     const attendeeString = `${attendee.first_name} ${attendee.last_name}`;
     const isHost = props.user.id === props.meeting.assignee!.id;
     const joinUrl = isHost
