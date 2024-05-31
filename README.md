@@ -20,7 +20,7 @@ The frontend is served through [django-webpack-loader](https://github.com/owais/
 [DRF](https://www.django-rest-framework.org/) REST endpoints and [Django Channels](https://channels.readthedocs.io/en/latest/) websockets.
 Authentication is handled with OIDC via [mozilla-django-oidc](https://github.com/mozilla/mozilla-django-oidc).
 The user interface leverages [Bootstrap 4](https://getbootstrap.com/docs/4.1/getting-started/introduction/) and
-a React implementation of Bootstrap, [`react-bootstrap`](https://react-bootstrap.github.io/).
+a React implementation of Bootstrap, [react-bootstrap](https://react-bootstrap.github.io/).
 
 ## Development
 
@@ -54,3 +54,22 @@ docker-compose run web python manage.py makemigrations --settings=officehours.ma
 ```
 
 This will generate the migrations with all backends enabled as choices.
+
+### Using OpenAPI and Swagger
+
+The backend uses the [Django REST Framework](https://www.django-rest-framework.org/) to build out a REST API.
+When `DEBUG` is set to `True` in Django settings, the application leverages the
+[drf-spectacular](https://drf-spectacular.readthedocs.io/en/latest/index.html) library to document existing endpoints
+and provide for API testing using Swagger.
+
+The Swagger UI can be accessed by navigating to [`api/schema/swagger-ui`](http://localhost:8003/api/schema/swagger-ui).
+Once on the page, requests can be made against the API using the "Try it out" functionality.
+The OpenAPI schema can be downloaded as a YAML file from [`/api/schema`](http://localhost:8003/api/schema).
+
+### Google Analytics
+
+This application is capable of being configured to use Google Analytics 4.
+In order to send events, the environment variable `GA_TRACKING_ID` needs to be set to
+your application's [measurement ID](https://support.google.com/analytics/answer/9539598#find-G-ID)
+and the `DEBUG` environment variable and Django setting need to be off or `False`.
+Thus, a deployment environment is currently the simplest place for testing.

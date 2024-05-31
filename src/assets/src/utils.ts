@@ -1,4 +1,4 @@
-import * as ReactGA from "react-ga";
+import ReactGA from "react-ga4";
 import { MyUser, QueueFull, QueueHost } from "./models";
 import * as api from "./services/api";
 
@@ -9,15 +9,6 @@ export const redirectToLogin = (loginUrl: string) => {
         nonInteraction: true,
     });
     location.href = loginUrl + '?next=' + location.pathname;
-}
-
-export const redirectToSearch = (term: string) => {
-    ReactGA.event({
-        category: "Navigation",
-        action: "Redirected to Search",
-        nonInteraction: true,
-    });
-    location.href = `/search/${term}/?redirected=true`;
 }
 
 export const redirectToBackendAuth = (backend: string) => {

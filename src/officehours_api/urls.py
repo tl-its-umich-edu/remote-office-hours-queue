@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.api_root, name='api-root'),
     path('users/', views.UserList.as_view(), name='user-list'),
     path('users/<int:pk>/', views.UserDetail.as_view(), name='user-detail'),
+    path('users/<int:pk>/otp/', views.UserOTP.as_view(), name='user-otp'),
     path('users/<str:username>/', views.UserUniqnameDetail.as_view(), name='user-uniqname-detail'),
     path('queues/', views.QueueList.as_view(), name='queue-list'),
     path('queues/<int:pk>/', views.QueueDetail.as_view(), name='queue-detail'),
@@ -20,17 +21,9 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    from drf_yasg.views import get_schema_view as get_yasg_view
-    from drf_yasg import openapi
-
-    yasg_view = get_yasg_view(
-        openapi.Info(
-            title='Office Hours API',
-            default_version='v1',
-        ),
-    )
+    from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
     urlpatterns += [
-        path('swagger', yasg_view.with_ui('swagger', cache_timeout=0), name='swagger'),
-        path('redoc', yasg_view.with_ui('redoc', cache_timeout=0), name='redoc'),
+        path('schema/', SpectacularAPIView.as_view(), name='schema'),
+        path('schema/swagger-ui', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui')
     ]

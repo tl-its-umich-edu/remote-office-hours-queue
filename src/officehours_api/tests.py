@@ -1,10 +1,12 @@
-from unittest import mock
+from unittest import mock, skipIf
 
 from django.test import TestCase, override_settings
-
+from rest_framework.exceptions import ValidationError
 from twilio.base.exceptions import TwilioRestException
 
+from officehours.settings import ENABLED_BACKENDS
 from officehours_api.models import User, Queue, Meeting
+from officehours_api.serializers import MeetingSerializer
 
 
 @override_settings(TWILIO_ACCOUNT_SID='aaa', TWILIO_AUTH_TOKEN='bbb', TWILIO_MESSAGING_SERVICE_SID='ccc')
@@ -64,7 +66,7 @@ class NotificationTestCase(TestCase):
                 self.exceptions += 1
                 raise TwilioRestException(500, '')
         mock_twilio.messages.create.side_effect = side_effect
-    
+
     def assert_twilio_exception_logged(self, do):
         with self.assertLogs(logger='officehours_api.notifications', level='ERROR') as cm:
             do()
@@ -80,7 +82,7 @@ class NotificationTestCase(TestCase):
             receivers >=
             {'+15555551111','+15555552222',}
         )
-    
+
     @mock.patch('officehours_api.notifications.twilio')
     def test_first_meeting_bad_phone_logs_exception(self, mock_twilio: mock.MagicMock):
         self.queue.hosts.set([self.hostie, self.hostbad, self.hostacular, self.hostoptout])
@@ -163,3 +165,83 @@ class NotificationTestCase(TestCase):
             receivers >=
             {'+15555550000', '+15555550001'}
         )
+
+
+class MeetingSerializerTestCase(TestCase):
+    """
+    Test the scenarios where the backend type is invalid, is valid,
+    is not updated but something else is, and is updated to be invalid.
+    """
+
+    def setUp(self):
+        self.user1 = User.objects.create(username='user1')
+        self.user2 = User.objects.create(username='user2')
+        self.inperson_queue = Queue.objects.create(name='test queue', status='open', allowed_backends=['inperson'])
+        self.zoom_queue = Queue.objects.create(name='test queue', status='open', allowed_backends=['zoom'])
+        self.inperson_queue.hosts.add(self.user1)
+        self.zoom_queue.hosts.add(self.user1)
+
+    def test_backend_type_invalid(self):
+        data = {
+            'queue': self.zoom_queue.id,
+            'attendee_ids': [self.user2.id],
+            'agenda': 'test agenda',
+            'assignee_id': self.user1.id,
+            'backend_type': 'inperson'
+        }
+        serializer = MeetingSerializer(data=data)
+        with self.assertRaises(ValidationError) as cm:
+            serializer.is_valid(raise_exception=True)
+        error = str(cm.exception.detail['non_field_errors'][0])
+        self.assertEqual(error, "inperson is not one of the queue's allowed backend types (['zoom'])")
+
+    def test_backend_type_valid(self):
+        data = {
+            'queue': self.inperson_queue.id,
+            'attendee_ids': [self.user2.id],
+            'agenda': 'test agenda',
+            'assignee_id': self.user1.id,
+            'backend_type': 'inperson'
+        }
+        serializer = MeetingSerializer(data=data)
+        valid = serializer.is_valid(raise_exception=False)
+        self.assertTrue(valid)
+
+    def test_patch_without_backend_type(self):
+        meeting = Meeting(**{
+            'queue': self.inperson_queue,
+            'agenda': 'test agenda',
+            'assignee': self.user1,
+            'backend_type': 'inperson'
+        })
+        meeting.save()
+        meeting.attendees.add(self.user2)
+        meeting.save()
+        # Patch the meeting without a backend type
+        data = {
+            'agenda': 'patch the meeting without a backend type',
+        }
+        serializer = MeetingSerializer(meeting, data=data, partial=True)
+        valid = serializer.is_valid(raise_exception=False)
+        self.assertTrue(valid)
+
+    @skipIf('zoom' not in ENABLED_BACKENDS, 'Skipping because "zoom" backend type is not enabled')
+    def test_patch_backend_type_invalid(self):
+        meeting = Meeting(**{
+            'queue': self.inperson_queue,
+            'agenda': 'test agenda',
+            'assignee': self.user1,
+            'backend_type': 'inperson'
+        })
+        meeting.save()
+        meeting.attendees.add(self.user2)
+        meeting.save()
+        # Patch the meeting to an invalid backend type
+        data = {
+            'backend_type': 'zoom'
+        }
+        serializer = MeetingSerializer(meeting, data=data, partial=True)
+        with self.assertRaises(ValidationError) as cm:
+            serializer.is_valid(raise_exception=True)
+        error = str(cm.exception.detail['non_field_errors'][0])
+        self.assertEqual(error, "zoom is not one of the queue's allowed backend types (['inperson'])")

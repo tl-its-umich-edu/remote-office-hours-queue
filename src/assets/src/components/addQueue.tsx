@@ -19,7 +19,7 @@ enum AvailableTabs {
     Hosts = 'hosts'
 }
 
-const buttonSpacing = 'mr-3 mb-3';
+const buttonSpacing = 'me-3 mb-3';
 
 interface CancelAddButtonProps {
     disabled: boolean;
@@ -27,7 +27,7 @@ interface CancelAddButtonProps {
 
 function CancelAddButton (props: CancelAddButtonProps) {
     return (
-        <Link to='/manage/'>
+        <Link to='/manage/' tabIndex={-1}>
             <Button variant='link' className={'text-danger ' + buttonSpacing} aria-label='Cancel' disabled={props.disabled}>
                 Cancel
             </Button>
@@ -97,7 +97,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                     Back
                                 </Button>
                                 <Button
-                                    variant='primary'
+                                    variant='success'
                                     className={buttonSpacing}
                                     aria-label='Finish Adding Queue'
                                     disabled={props.disabled}

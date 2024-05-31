@@ -1,10 +1,9 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
   labels:
     app: redis
-  name: redis
 spec:
   replicas: 1
   strategy:
@@ -18,9 +17,9 @@ spec:
         variant: dev
     spec:
       containers:
-      - image: redis:5
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/redis:7
         name: redis
-        command: ["redis-server", "--stop-writes-on-bgsave-error", "no"]
+        command: ["redis-server", "--stop-writes-on-bgsave-error", "no", "--save", "\"\""]
         resources: {}
       restartPolicy: Always
 status: {}

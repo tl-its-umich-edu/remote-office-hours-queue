@@ -68,11 +68,12 @@ INSTALLED_APPS = [
     'django_filters',
     'django.contrib.sites',
     'django.contrib.flatpages',
+    'fontawesomefree'
 ]
 
 if DEBUG:
     INSTALLED_APPS += [
-        'drf_yasg',
+        'drf_spectacular',
     ]
 
 WATCHMAN_TOKENS = os.getenv('WATCHMAN_TOKENS')
@@ -118,6 +119,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'EXCEPTION_HANDLER': 'officehours_api.exceptions.backend_error_handler',
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
 
@@ -311,7 +313,7 @@ CHANNEL_LAYERS = {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             "hosts": [(
-                os.getenv('REDIS_HOST', 'redis'),
+                os.getenv('REDIS_HOST', 'redis').strip(),
                 int(os.getenv('REDIS_PORT', '6379'))
             )],
         },
@@ -322,6 +324,7 @@ CHANNEL_LAYERS = {
 TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
+OTP_REQUEST_BUFFER = int(os.getenv('OTP_REQUEST_BUFFER', "30"))
 
 # Backends
 DOCS_BASE_URL = 'https://its.umich.edu/communication/videoconferencing/'

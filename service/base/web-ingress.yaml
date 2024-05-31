@@ -1,9 +1,13 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: web
   labels:
     app: web
+  annotations:
+    # The following triggers cert-manager to obtain a certificate automatically
+    # using the production Let’s Encrypt environment
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
   tls:
   - hosts:
@@ -15,13 +19,19 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-         serviceName: web
-         servicePort: 80
+          service:
+            name: web
+            port:
+              number: 80
   - host: www.dev.officehours.it.umich.edu
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-         serviceName: web
-         servicePort: 80
+          service:
+            name: web
+            port:
+              number: 80

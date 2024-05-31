@@ -11,11 +11,11 @@ from django.core.validators import MaxLengthValidator
 from safedelete.models import (
     SafeDeleteModel, SOFT_DELETE_CASCADE, HARD_DELETE,
 )
-from jsonfield import JSONField
 from requests.exceptions import RequestException
 
 from officehours_api.exceptions import (
-    BackendException, DisabledBackendException, NotAllowedBackendException
+    BackendException, DisabledBackendException, MeetingStartedException,
+    NotAllowedBackendException
 )
 from officehours_api import backends
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
@@ -53,7 +53,10 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
     notify_me_attendee = models.BooleanField(default=False)
     notify_me_host = models.BooleanField(default=False)
-    backend_metadata = JSONField(null=True, default=dict)
+    backend_metadata = models.JSONField(null=True, default=dict, blank=True)
+    otp_phone_number = models.CharField(max_length=20, default="", blank=True, null=True)
+    otp_token = models.CharField(max_length=4, default="", blank=True, null=True)
+    otp_expiration = models.DateTimeField(null=True, blank=True, default=None)
 
     @property
     def authorized_backends(self):
@@ -74,6 +77,8 @@ def get_users_with_emails(manager: models.Manager):
 
 class Queue(SafeDeleteModel):
     _safedelete_policy = SOFT_DELETE_CASCADE
+    deleted_by_cascade = None
+
     name = models.CharField(max_length=100)
     hosts = models.ManyToManyField(User)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -119,6 +124,8 @@ class MeetingStatus(Enum):
 
 class Meeting(SafeDeleteModel):
     _safedelete_policy = HARD_DELETE
+    deleted_by_cascade = None
+
     queue = models.ForeignKey(
         Queue, on_delete=models.CASCADE,
         null=True
@@ -137,7 +144,7 @@ class Meeting(SafeDeleteModel):
         null=False,
         default=get_default_backend,
     )
-    backend_metadata = JSONField(null=True, default=dict)
+    backend_metadata = models.JSONField(null=True, default=dict)
 
     @property
     def attendees_with_phone_numbers(self):
@@ -194,9 +201,9 @@ class Meeting(SafeDeleteModel):
     def save(self, *args, **kwargs):
         if self.saved_status.value >= MeetingStatus.STARTED.value:
             if self.backend_type != self._saved_backend_type:
-                raise Exception("Can't change backend_type once meeting is started!")
+                raise MeetingStartedException("backend_type")
             if self.assignee != self._saved_assignee:
-                raise Exception("Can't change assignee once meeting is started!")
+                raise MeetingStartedException("assignee")
         super().save(*args, **kwargs)
         self.saved_status = self.status
         self._saved_backend_type = self.backend_type
@@ -206,7 +213,7 @@ class Meeting(SafeDeleteModel):
         # Trigger m2m "remove" signals for attendees
         self.attendees.remove(*self.attendees.all())
         self.save()
-        super().delete(*args, **kwargs)
+        return super().delete(*args, **kwargs)
 
     @property
     def line_place(self) -> Optional[int]:
@@ -227,11 +234,9 @@ class Meeting(SafeDeleteModel):
 
 
 class Attendee(SafeDeleteModel):
-    '''
-    Attendee must subclass SafeDeleteModel in order to be safedeleted
-    when a Meeting is safedeleted
-    '''
     _safedelete_policy = HARD_DELETE
+    deleted_by_cascade = None
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

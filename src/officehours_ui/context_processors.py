@@ -41,5 +41,6 @@ def spa_globals(request):
             'login_url': settings.LOGIN_URL,
             'backends': backend_dicts,
             'default_backend': settings.DEFAULT_BACKEND,
+            'otp_request_buffer': settings.OTP_REQUEST_BUFFER,
         }
     }

@@ -1,9 +1,9 @@
-import { RouteComponentProps } from "react-router";
 import { MeetingBackend, User } from "../models";
 
-export interface PageProps<TParams = {}> extends RouteComponentProps<TParams> {
+export interface PageProps {
     user?: User;
     loginUrl: string;
     backends: MeetingBackend[];
     defaultBackend: string;
+    otpRequestBuffer: number;
 }
