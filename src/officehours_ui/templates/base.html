@@ -105,13 +105,19 @@
  <script>
   //  need to add something to make sure the use icon in top right is accurate because right now it is not updating correctly
    const logoutButton = document.querySelector('#logout-button');
-   logoutButton.addEventListener('click', () => {
-     window.localStorage.setItem("loggedIn", "false");
-   });
+   if (logoutButton !== null) {
+     logoutButton.addEventListener('click', () => {
+       window.localStorage.setItem("loggedIn", "false");
+     });
+   }
    window.addEventListener('storage', (event) => {
-     if (document.cookie.indexOf('JSESSIONID') === -1) {
-       window.location.href = "/accounts/login/";
-     }
+    //  if (document.cookie.indexOf('JSESSIONID') === -1) {
+    //  if (document.cookie.indexOf('sessionid') === -1) {
+    //    window.location.href = "/accounts/login/";
+    //  }
+    if (event.key === 'loggedIn' && event.newValue === 'false' && event.oldValue === 'true') {
+      window.location.href = '/accounts/login';
+    }
    });
  </script>
  {% block scripts %}{% endblock %}
