@@ -260,3 +260,19 @@ def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
 
 if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID:
     import officehours_api.notifications
+
+# Unmanaged class to track meeting start logs view from rest_framework_tracking_apirequestlog
+class MeetingStartLogView(models.Model):
+    id = models.IntegerField(primary_key=True)
+    queue = models.CharField(max_length=255)
+    created_at = models.DateTimeField()
+    attendees = models.JSONField()
+    assignee = models.JSONField()
+    backend_metadata = models.JSONField()
+    backend_type = models.CharField(max_length=255)
+    agenda = models.CharField(max_length=255)
+    view = models.CharField(max_length=255)
+
+    class Meta:
+      db_table = 'meeting_start_log'
+      managed = False
