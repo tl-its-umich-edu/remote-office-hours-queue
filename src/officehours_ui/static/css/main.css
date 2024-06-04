@@ -3,7 +3,8 @@
 	--med-blue: #40658F;
 	--light-blue: #6189b7;
 	--custom-red: #CC0000;
-	--custom-green: #00820D;
+	--custom-blue: #39587F;
+	--custom-green: #00660A;
 }
 
 body {
@@ -724,6 +725,10 @@ div[role=main] {
 	font-size: 90%;
 }
 
+.bg-primary {
+	background-color: var(--custom-blue) !important;
+}
+
 .bg-danger {
 	background-color: var(--custom-red) !important;
 }
@@ -743,4 +748,25 @@ a.dropdown-item:hover {
 
 input.dropdown-item:hover {
 	background-color: #C0C0C0 !important;
+}
+
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.sticky-footer {
+	margin-top: auto;
+}
+
+.alert-footer {
+	margin-bottom: 0px;
+	background:#333333;
+	border: 0px;
+}
+
+.alert-footer-text {
+	text-align: center;
+	color: #9B9B9B
 }
