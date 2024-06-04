@@ -10,9 +10,9 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             sql="""
-                CREATE OR REPLACE VIEW public.meeting_start_logs AS
+                CREATE VIEW meeting_start_logs AS
                 SELECT rfta.id,
-                    rfta.response::jsonb ->> 'queue'::text AS queue,
+                    (rfta.response::jsonb ->> 'queue')::int AS queue, 
                     to_timestamp(rfta.response::jsonb ->> 'created_at'::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text) AS created_at,
                     rfta.response::jsonb -> 'attendees'::text AS attendees,
                     rfta.response::jsonb -> 'assignee'::text AS assignee,
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ORDER BY (to_timestamp(rfta.response::jsonb ->> 'created_at'::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text)) DESC
             """,
             reverse_sql="""
-                DROP VIEW IF EXISTS public.meeting_start_logs;
+                DROP VIEW IF EXISTS meeting_start_logs;
             """
         ),
     ]
