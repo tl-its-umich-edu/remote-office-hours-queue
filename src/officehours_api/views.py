@@ -297,15 +297,15 @@ class ExportMeetingStartLogs(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, queue_id=None, format=None):
-        user = request.user.username
+        username = request.user.username
         
         if queue_id:
-            logs = MeetingStartLogsView.objects.filter(assignee__contains=user, queue=queue_id)
-            filename = f"meeting_start_logs_{user}_queue_{queue_id}.csv"
+            logs = MeetingStartLogsView.objects.filter(assignee__contains={'username':username}, queue=queue_id)
+            filename = f"meeting_start_logs_{username}_queue_{queue_id}.csv"
 
         else:
-            logs = MeetingStartLogsView.objects.filter(assignee__contains=user)
-            filename = f"meeting_start_logs_{user}.csv"
+            logs = MeetingStartLogsView.objects.filter(assignee__contains={'username':username})
+            filename = f"meeting_start_logs_{username}.csv"
 
         
         response = HttpResponse(content_type='text/csv')
