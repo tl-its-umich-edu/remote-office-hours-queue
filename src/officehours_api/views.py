@@ -296,13 +296,12 @@ class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
 class ExportMeetingStartLogs(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, format=None):
+    def get(self, request, queue_id=None, format=None):
         user = request.user.username
-        queue = request.GET.get('queue', None)
         
-        if queue:
-            logs = MeetingStartLogsView.objects.filter(assignee__contains=user, queue=queue)
-            filename = f"meeting_start_logs_{user}_queue_{queue}.csv"
+        if queue_id:
+            logs = MeetingStartLogsView.objects.filter(assignee__contains=user, queue=queue_id)
+            filename = f"meeting_start_logs_{user}_queue_{queue_id}.csv"
 
         else:
             logs = MeetingStartLogsView.objects.filter(assignee__contains=user)
