@@ -264,14 +264,14 @@ if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILI
 # Unmanaged class to track meeting start logs view from rest_framework_tracking_apirequestlog
 class MeetingStartLogView(models.Model):
     id = models.IntegerField(primary_key=True)
-    queue = models.CharField(max_length=255)
+    queue = models.TextField()
     created_at = models.DateTimeField()
     attendees = models.JSONField()
     assignee = models.JSONField()
     backend_metadata = models.JSONField()
-    backend_type = models.CharField(max_length=255)
-    agenda = models.CharField(max_length=255)
-    view = models.CharField(max_length=255)
+    backend_type = models.TextField()
+    agenda = models.TextField()
+    view = models.CharField(max_length=200)
 
     class Meta:
       db_table = 'meeting_start_log'
