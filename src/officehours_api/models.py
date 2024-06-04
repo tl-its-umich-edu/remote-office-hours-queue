@@ -262,7 +262,7 @@ if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILI
     import officehours_api.notifications
 
 # Unmanaged class to track meeting start logs view from rest_framework_tracking_apirequestlog
-class MeetingStartLogView(models.Model):
+class MeetingStartLogsView(models.Model):
     id = models.IntegerField(primary_key=True)
     queue = models.IntegerField()
     created_at = models.DateTimeField()
@@ -274,5 +274,5 @@ class MeetingStartLogView(models.Model):
     view = models.CharField(max_length=200)
 
     class Meta:
-      db_table = 'meeting_start_log'
+      db_table = 'meeting_start_logs'
       managed = False

@@ -1,7 +1,9 @@
+import csv
 from datetime import datetime, timezone, timedelta
 from random import randint
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -17,7 +19,7 @@ from asgiref.sync import async_to_sync, sync_to_async
 
 from officehours_api.notifications import send_one_time_password
 from officehours_api.exceptions import DisabledBackendException, MeetingStartedException, TwilioClientNotInitializedException
-from officehours_api.models import Attendee, Meeting, Queue
+from officehours_api.models import Attendee, Meeting, Queue, MeetingStartLogsView
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer, PhoneSerializer
@@ -290,3 +292,40 @@ class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
 class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
+
+class ExportMeetingStartLogs(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, format=None):
+        user = request.user.username
+        queue = request.GET.get('queue', None)
+        
+        if queue:
+            logs = MeetingStartLogsView.objects.filter(assignee__contains=user, queue=queue)
+            filename = f"meeting_start_logs_{user}_queue_{queue}.csv"
+
+        else:
+            logs = MeetingStartLogsView.objects.filter(assignee__contains=user)
+            filename = f"meeting_start_logs_{user}.csv"
+
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+        writer.writerow(['ID', 'Queue', 'Created At', 'Attendees', 'Assignee', 'Backend Metadata', 'Backend Type', 'Agenda', 'View'])
+
+        for log in logs:
+            writer.writerow([
+                log.id,
+                log.queue,
+                log.created_at,
+                log.attendees,
+                log.assignee,
+                log.backend_metadata,
+                log.backend_type,
+                log.agenda,
+                log.view
+            ])
+
+        return response
