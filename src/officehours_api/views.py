@@ -306,7 +306,6 @@ class ExportMeetingStartLogs(APIView):
         # The value for deleted in the model is a DateTimeField, so if the value is not None, the queue is deleted.
         queues_user_is_in = Queue.objects.filter(hosts__in=[request.user], deleted__isnull=not deleted).values_list('id', flat=True)
 
-        print(queue_id)
         if queue_id:
             # Security check that they are actually in this queue
             if queue_id not in queues_user_is_in:
