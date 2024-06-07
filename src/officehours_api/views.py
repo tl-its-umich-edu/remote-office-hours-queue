@@ -298,15 +298,26 @@ class ExportMeetingStartLogs(APIView):
 
     def get(self, request, queue_id=None, format=None):
         username = request.user.username
+
+        # Get the true/false request parameter deleted. If it is not provided, set it to False. Otherwise set to true.
+        deleted = request.GET.get('deleted', 'false').lower() == 'true'
         
+        # Query from the Queue hosts table to find all the queues the user is a host of filtered also be deleted status. 
+        # The value for deleted in the model is a DateTimeField, so if the value is not None, the queue is deleted.
+        queues_user_is_in = Queue.objects.filter(hosts__in=[request.user], deleted__isnull=not deleted).values_list('id', flat=True)
+
+        print(queue_id)
         if queue_id:
-            logs = MeetingStartLogsView.objects.filter(assignee__contains={'username':username}, queue=queue_id)
-            filename = f"meeting_start_logs_{username}_queue_{queue_id}.csv"
-
+            # Security check that they are actually in this queue
+            if queue_id not in queues_user_is_in:
+                return Response({'detail': 'You are not a host of this queue.'}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                logs = MeetingStartLogsView.objects.filter(queue=queue_id)
+                filename = f"meeting_start_logs_{username}_queue_{queue_id}.csv"
+        # Otherwise, get all the logs for the queues the user is a host of
         else:
-            logs = MeetingStartLogsView.objects.filter(assignee__contains={'username':username})
+            logs = MeetingStartLogsView.objects.filter(queue__in=queues_user_is_in)
             filename = f"meeting_start_logs_{username}.csv"
-
         
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
