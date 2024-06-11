@@ -111,10 +111,6 @@
         });
       }
       window.addEventListener('storage', (event) => {
-        //  if (document.cookie.indexOf('JSESSIONID') === -1) {
-        //  if (document.cookie.indexOf('sessionid') === -1) {
-        //    window.location.href = "/accounts/login/";
-        //  }
         if (event.key === 'loggedIn' && event.newValue === 'false' && event.oldValue === 'true') {
           window.location.href = '/accounts/login';
         }
