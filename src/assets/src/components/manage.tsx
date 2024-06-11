@@ -8,16 +8,20 @@ import { PageProps } from "./page";
 import { QueueBase } from "../models";
 import { useUserWebSocket } from "../services/sockets";
 import { redirectToLogin } from "../utils";
+import * as api from "../services/api";
+import DownloadQueueHistoryModal from "./DownloadQueueHistoryModal";
 
 
 interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
+    onSingleQueueHistoryDownload?: (queueId: number) => void;
+    onAllQueueHistoryDownload?: (includeDeleted:boolean) => Promise<void>;
 }
 
 function ManageQueueTable(props: ManageQueueTableProps) {
     const queueResults = props.queues.length
-        ? <QueueTable queues={props.queues} manageLink={true} />
+        ? <QueueTable queues={props.queues} manageLink={true} includeCSVDownload={true} handleCSVDownload={props.onSingleQueueHistoryDownload} />
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>;
     return (
         <div>
@@ -26,6 +30,9 @@ function ManageQueueTable(props: ManageQueueTableProps) {
                 <Link to="/add_queue" tabIndex={-1}>
                     <Button variant='success' aria-label='Add Queue'>+ Add Queue</Button>
                 </Link>
+                {props.queues.length && props.onAllQueueHistoryDownload &&(
+                    <DownloadQueueHistoryModal onDownload={props.onAllQueueHistoryDownload} />
+                )}
             </div>
         </div>
     );
@@ -44,7 +51,11 @@ export function ManagePage(props: PageProps) {
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueTable = queues !== undefined
-        && <ManageQueueTable queues={queues} disabled={false}/>
+        && <ManageQueueTable 
+            queues={queues} 
+            disabled={false} 
+            onSingleQueueHistoryDownload={(queueId) => api.exportQueueHistoryLogs(queueId)}
+            onAllQueueHistoryDownload={(includeDeleted) => api.exportAllQueueHistoryLogs(includeDeleted)}/>
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />

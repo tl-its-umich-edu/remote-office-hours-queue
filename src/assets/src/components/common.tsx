@@ -2,7 +2,7 @@ import * as React from "react";
 import { createRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import { StringSchema } from "yup";
 
@@ -506,6 +506,8 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
 interface QueueTableProps {
     queues: readonly QueueBase[];
     manageLink?: boolean | undefined;
+    includeCSVDownload?: boolean | undefined;
+    handleCSVDownload?: (queueId: number) => void;
 }
 
 export function QueueTable (props: QueueTableProps) {
@@ -529,6 +531,14 @@ export function QueueTable (props: QueueTableProps) {
                     </Badge>
                 </Link>
             </td>
+            {props.includeCSVDownload && (
+                <td aria-label={`History for Queue ID ${q.id}`}>
+                    <Button onClick={() => props.handleCSVDownload && props.handleCSVDownload(q.id)}>
+                        <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
+                        Download
+                    </Button>
+                </td>
+            )}
         </tr>
     ));
     return (
@@ -538,6 +548,9 @@ export function QueueTable (props: QueueTableProps) {
                     <th aria-label='Queue ID Number'>Queue ID</th>
                     <th aria-label='Queue Name'>Name</th>
                     <th aria-label='Queue Status'>Status</th>
+                    {props.includeCSVDownload && (
+                        <th aria-label='Queue History' >Queue History</th>
+                    )}
                 </tr>
             </thead>
             <tbody>{queueItems}</tbody>
