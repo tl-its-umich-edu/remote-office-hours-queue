@@ -26,10 +26,12 @@ const DownloadQueueHistoryModal: React.FC<DownloadQueueHistoryModalProps> = ({ o
 
     return (
         <>
-            <Button variant='primary' className='ml-2' onClick={handleModalShow} aria-label='Download All Queue History'>
-                <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
-                Download All Queue History
-            </Button>
+            <span style={{marginLeft:"4px"}}>
+                <Button variant='primary' onClick={handleModalShow} aria-label='Download All Queue History'>
+                    <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
+                    Download All Queue History
+                </Button>
+            </span>
 
             <Modal show={modalShow} onHide={handleModalClose} centered>
                 <Modal.Header closeButton>
