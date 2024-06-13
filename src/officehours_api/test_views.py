@@ -8,6 +8,7 @@ from django.test import Client, TestCase, override_settings
 from rest_framework import status
 
 from officehours.settings import ENABLED_BACKENDS
+from officehours_api import notifications
 from officehours_api.models import Meeting, Queue
 from officehours_api.views import UserOTP
 
@@ -18,6 +19,9 @@ class MeetingTestCase(TestCase):
         self.attendee_one = User.objects.create(
             username='attendeeone', email='attendeeone@example.com'
         )
+        self.attendee_one.set_password('rohqtest')
+        self.attendee_one.save()
+
         self.host_one = User.objects.create(
             username='hostone', email='hostone@example.com'
         )
@@ -26,6 +30,8 @@ class MeetingTestCase(TestCase):
         self.host_two = User.objects.create(
             username='hosttwo', email='hosttwo@example.com'
         )
+        self.host_two.set_password('rohqtest')
+        self.host_two.save()
         self.queue = Queue.objects.create(
             name='Test Queue', allowed_backends=['inperson', 'zoom']
         )
@@ -36,7 +42,6 @@ class MeetingTestCase(TestCase):
         self.meeting.attendees.set([self.attendee_one])
         self.meeting.assignee = self.host_two
         self.meeting.save()
-
         self.client = Client()
 
     def test_can_update_assignee_in_unstarted_meeting(self):
@@ -92,6 +97,29 @@ class MeetingTestCase(TestCase):
             "Can't change backend_type once meeting is started!"
         )
 
+    def test_export_meeting_start_logs(self):
+        self.client.login(username='hosttwo', password='rohqtest')
+        # Start the meeting through the api to generate logs
+        response = self.client.post(f'/api/meetings/{self.meeting.id}/start')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.login(username='hostone', password='rohqtest')
+        # Start the meeting through the api to generate logs
+        response = self.client.get(f'/api/export_meeting_start_logs/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # This may change if the output of the export changes
+        self.assertEqual(len(response.content), 343)
+
+    def test_export_meeting_start_logs_by_queue(self):
+        self.client.login(username='hosttwo', password='rohqtest')
+        # Start the meeting through the api to generate logs
+        response = self.client.post(f'/api/meetings/{self.meeting.id}/start')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get(f'/api/export_meeting_start_logs/{self.queue.id}/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # This may change if the output of the export changes
+        self.assertEqual(len(response.content), 345)
+
+@skipIf(notifications.twilio is None, 'Skipping because "twilio" is not configured')
 @override_settings(TWILIO_ACCOUNT_SID='fake', TWILIO_AUTH_TOKEN='fake', TWILIO_MESSAGING_SERVICE_SID='fake')
 class UserOTPTestCase(TestCase):
     def setUp(self):

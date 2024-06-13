@@ -1,4 +1,5 @@
 import csv
+import logging
 from datetime import datetime, timezone, timedelta
 from random import randint
 from django.conf import settings
@@ -28,6 +29,7 @@ from officehours_api.permissions import (
     IsAssignee, IsHostOrReadOnly, IsHostOrAttendee, is_host
 )
 
+logger = logging.getLogger(__name__)
 
 @extend_schema(
     responses={
@@ -299,12 +301,11 @@ class ExportMeetingStartLogs(APIView):
     def get(self, request, queue_id=None, format=None):
         username = request.user.username
 
-        # Get the true/false request parameter deleted. If it is not provided, set it to False. Otherwise set to true.
-        deleted = request.GET.get('deleted', 'false').lower() == 'true'
-        
         # Query from the Queue hosts table to find all the queues the user is a host of filtered also be deleted status. 
         # The value for deleted in the model is a DateTimeField, so if the value is not None, the queue is deleted.
-        queues_user_is_in = Queue.objects.filter(hosts__in=[request.user], deleted__isnull=not deleted).values_list('id', flat=True)
+        queues_user_is_in = list(Queue.objects.filter(hosts__in=[request.user]).values_list('id', flat=True))
+
+        logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
 
         if queue_id:
             # Security check that they are actually in this queue
