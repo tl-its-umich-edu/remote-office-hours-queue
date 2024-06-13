@@ -250,7 +250,6 @@ export function QueueManagerPage(props: PageProps) {
     let { queue_id } = useParams()
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
-    // const queueIdParsed = parseInt(queue_id);
 
     // Set up basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
@@ -266,7 +265,6 @@ export function QueueManagerPage(props: PageProps) {
             setAuthError(new Error("You are not a host of this queue. If you believe you are seeing this message in error, contact the queue host(s)."));
         }
     }
-    // const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueChecked);
     const queueWebSocketError = useQueueWebSocket(queue_id, setQueueChecked);
     const [visibleMeetingDialog, setVisibleMeetingDialog] = useState(undefined as Meeting | undefined);
 
@@ -354,7 +352,6 @@ export function QueueManagerPage(props: PageProps) {
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <MeetingInfoDialog backends={props.backends} meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)} />
-            {/* <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()} intermediatePages={[{title: "Manage", href: "/manage"}]} /> */}
             <Breadcrumbs currentPageTitle={queue?.name ?? queue_id.toString()} intermediatePages={[{title: "Manage", href: "/manage"}]} />
             {loadingDisplay}
             {errorDisplay}
