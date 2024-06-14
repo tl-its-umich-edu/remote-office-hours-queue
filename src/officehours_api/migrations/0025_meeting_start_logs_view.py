@@ -11,19 +11,30 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="""
                 CREATE VIEW meeting_start_logs AS
-                SELECT rfta.id,
-                    (rfta.response::jsonb ->> 'queue')::int AS queue, 
-                    to_timestamp(rfta.response::jsonb ->> 'created_at'::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text) AS created_at,
-                    rfta.response::jsonb -> 'attendees'::text AS attendees,
-                    rfta.response::jsonb -> 'assignee'::text AS assignee,
-                    rfta.response::jsonb -> 'backend_metadata' AS backend_metadata,
-                    (rfta.response::jsonb ->> 'backend_type')::text AS backend_type,
-                    (rfta.response::jsonb ->> 'agenda')::text AS agenda,
-                    rfta.view
-                FROM rest_framework_tracking_apirequestlog rfta
-                WHERE rfta.view::text = 'officehours_api.views.MeetingStart'::text
-                    AND (rfta.response::jsonb ->> 'created_at'::text) IS NOT NULL
-                ORDER BY (to_timestamp(rfta.response::jsonb ->> 'created_at'::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text)) DESC
+                WITH parsed_response AS (
+                    SELECT
+                        response::jsonb AS response
+                    FROM
+                        rest_framework_tracking_apirequestlog
+                    WHERE
+                        view::text = 'officehours_api.views.MeetingStart'
+                        AND (response::jsonb ->> 'created_at') IS NOT NULL
+                )
+                SELECT
+                    response -> 'attendees' -> 0 ->> 'id' AS attendee_id,
+                    response -> 'attendees' -> 0 ->> 'user_id' AS attendee_user_id,
+                    response -> 'attendees' -> 0 ->> 'username' AS attendee_uniqname,
+                    response -> 'attendees' -> 0 ->> 'last_name' AS attendee_last_name,
+                    response -> 'attendees' -> 0 ->> 'first_name' AS attendee_first_name,
+                    response -> 'assignee' ->> 'id' AS host_id,
+                    response -> 'assignee' ->> 'username' AS host_uniqname,
+                    response -> 'assignee' ->> 'last_name' AS host_last_name,
+                    response -> 'assignee' ->> 'first_name' AS host_first_name,
+                    response -> 'backend_type' AS meeting_type,
+                    response -> 'backend_metadata' ->> 'meeting_url' AS meeting_url,
+                    response -> 'created_at' as meeting_created_at
+                FROM
+                    parsed_response
             """,
             reverse_sql="""
                 DROP VIEW IF EXISTS meeting_start_logs;
