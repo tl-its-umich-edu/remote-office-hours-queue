@@ -85,7 +85,7 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
         <>
         <td>No attendee</td>
         <td></td>
-        <td>Invalid meeting ID: {props.meeting.id}</td>
+        <td>Invalid meeting ID: {props.meeting.id}. Please remove this meeting</td>
         <td>
             <RemoveButton
                 onRemove={() => props.onRemoveMeeting(props.meeting)}
@@ -150,7 +150,7 @@ function StartedMeetingEditor (props: MeetingEditorProps) {
         <>
         <td>No attendee</td>
         <td></td>
-        <td>Invalid meeting ID: {props.meeting.id}</td>
+        <td>Invalid meeting ID: {props.meeting.id}. Please remove this meeting</td>
         <td>
             <RemoveButton
                 onRemove={() => props.onRemoveMeeting(props.meeting)}
