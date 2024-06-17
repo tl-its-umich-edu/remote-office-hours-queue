@@ -516,15 +516,15 @@ export function QueueTable (props: QueueTableProps) {
     const sortedQueues = sortQueues(props.queues.slice());
     const queueItems = sortedQueues.map(q => (
         <tr key={q.id}>
-            <td aria-label={`Queue ID Number`}>
+            <td className="align-middle" aria-label={`Queue ID Number`}>
                 <Link to={`${linkBase}${q.id}`}>
                     <Badge bg='primary' pill={true}>{q.id}</Badge>
                 </Link>
             </td>
-            <td aria-label={`Name for Queue ID ${q.id}`}>
+            <td className="align-middle" aria-label={`Name for Queue ID ${q.id}`}>
                 <Link to={`${linkBase}${q.id}`}>{q.name}</Link>
             </td>
-            <td aria-label={`Status for Queue ID ${q.id}`}>
+            <td className="align-middle" aria-label={`Status for Queue ID ${q.id}`}>
                 <Link to={`${linkBase}${q.id}`}>
                     <Badge bg={q.status === 'open' ? 'success' : 'danger'} pill={true}>
                         {q.status}
@@ -532,7 +532,7 @@ export function QueueTable (props: QueueTableProps) {
                 </Link>
             </td>
             {props.includeCSVDownload && (
-                <td aria-label={`History for Queue ID ${q.id}`}>
+                <td className="align-middle" aria-label={`History for Queue ID ${q.id}`}>
                     <Button onClick={() => props.handleCSVDownload && props.handleCSVDownload(q.id)}>
                         <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
                         Download
