@@ -79,13 +79,12 @@ interface UnstartedMeetingEditorProps extends MeetingEditorProps, AssigneeSelect
     onStartMeeting: (m: Meeting) => void;
 }
 
-function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
-    const attendee = props.meeting.attendees[0] ?? null;
-    if (!attendee) return (
-        <>
+const InvalidMeeting = (props: MeetingEditorProps) => {
+    return (
+<>
         <td>No attendee</td>
         <td></td>
-        <td>Invalid meeting ID: {props.meeting.id}. Please remove this meeting</td>
+        <td>Invalid meeting ID: {props.meeting.id}. Please remove this meeting.</td>
         <td>
             <RemoveButton
                 onRemove={() => props.onRemoveMeeting(props.meeting)}
@@ -96,6 +95,13 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
         </td>
         </>
     );
+
+}
+
+function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
+    const attendee = props.meeting.attendees[0] ?? null;
+    if (!attendee) return <InvalidMeeting {...props} />;
+
     const attendeeString = `${attendee.first_name} ${attendee.last_name}`;
     const assignee = props.meeting.assignee;
 
@@ -146,21 +152,8 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
 
 function StartedMeetingEditor (props: MeetingEditorProps) {
     const attendee = props.meeting.attendees[0] ?? null;
-    if (!attendee) return (
-        <>
-        <td>No attendee</td>
-        <td></td>
-        <td>Invalid meeting ID: {props.meeting.id}. Please remove this meeting</td>
-        <td>
-            <RemoveButton
-                onRemove={() => props.onRemoveMeeting(props.meeting)}
-                size="sm"
-                screenReaderLabel={`Remove Meeting ${props.meeting.id} with no attendee`}
-                disabled={props.disabled}
-            />
-        </td>
-        </>
-    );
+    if (!attendee) return <InvalidMeeting {...props} />;
+
     const attendeeString = `${attendee.first_name} ${attendee.last_name}`;
     const isHost = props.user.id === props.meeting.assignee!.id;
     const joinUrl = isHost
