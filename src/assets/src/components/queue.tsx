@@ -444,7 +444,6 @@ export function QueuePage(props: PageProps) {
     const { queue_id } = useParams();
     if (queue_id === undefined) throw new Error("queue_id is undefined!");
     if (!props.user) throw new Error("user is undefined!");
-    const queueIdParsed = parseInt(queue_id);
 
     //Setup basic state
     const [selectedBackend, setSelectedBackend] = useState(undefined as string | undefined);
@@ -461,7 +460,7 @@ export function QueuePage(props: PageProps) {
         }
         setQueue(q);
     }
-    const queueWebSocketError = useQueueWebSocket(queueIdParsed, setQueueWrapped);
+    const queueWebSocketError = useQueueWebSocket(queue_id, setQueueWrapped);
     const [myUser, setMyUser] = useState(undefined as MyUser | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setMyUser(u as MyUser));
     const [showMeetingTypeDialog, setShowMeetingTypeDialog] = useState(false);
@@ -577,7 +576,7 @@ export function QueuePage(props: PageProps) {
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             {meetingTypeDialog}
-            <Breadcrumbs currentPageTitle={queue?.name ?? queueIdParsed.toString()}/>
+            <Breadcrumbs currentPageTitle={queue?.name ?? queue_id.toString()}/>
             {loadingDisplay}
             {errorDisplay}
             {queueDisplay}

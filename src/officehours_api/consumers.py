@@ -27,6 +27,9 @@ class QueueConsumer(JsonWebsocketConsumer):
 
     @property
     def queue_id(self):
+        if not hasattr(self, '_queue_id'):
+            # Raise an exception if accessed before being set
+            raise AttributeError("queue_id not set")
         return self._queue_id
 
     @property
@@ -38,13 +41,17 @@ class QueueConsumer(JsonWebsocketConsumer):
         return self._user
 
     def connect(self):
-        self._queue_id = int(self.scope['url_route']['kwargs']['queue_id'])
-        self._user = self.scope["user"]
         try:
+            self._queue_id = int(self.scope['url_route']['kwargs']['queue_id'])
+            self._user = self.scope["user"]
             queue = Queue.objects.get(pk=self.queue_id)
-        except Queue.DoesNotExist:
+        except (Queue.DoesNotExist):
             self.accept()
             self.close(code=4404)
+            return
+        except (ValueError):
+            self.accept()
+            self.close(code=4405)
             return
 
         QueueSerializer = (
@@ -65,10 +72,13 @@ class QueueConsumer(JsonWebsocketConsumer):
         })
 
     def disconnect(self, close_code):
-        async_to_sync(self.channel_layer.group_discard)(
-            self.group_name,
-            self.channel_name
-        )
+        try:
+            async_to_sync(self.channel_layer.group_discard)(
+                self.group_name,
+                self.channel_name
+            )
+        except:
+            pass # queue_id not set yet
 
     def queue_update(self, event):
         try:

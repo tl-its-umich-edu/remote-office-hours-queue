@@ -5,7 +5,7 @@ const getProtocol = () => {
     return location.protocol === "https:" ? "wss:" : "ws:";
 }
 
-export const useQueueWebSocket = (queue_id: number, onUpdate: (q: QueueHost | QueueAttendee | undefined) => void) => {
+export const useQueueWebSocket = (queue_id: any, onUpdate: (q: QueueHost | QueueAttendee | undefined) => void) => {
     return useWebSocket(
         `${getProtocol()}//${location.host}/ws/queues/${queue_id}/`,
         onUpdate,

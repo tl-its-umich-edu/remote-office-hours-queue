@@ -16,7 +16,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from asgiref.sync import async_to_sync, sync_to_async
 
 from officehours_api.notifications import send_one_time_password
-from officehours_api.exceptions import DisabledBackendException, MeetingStartedException
+from officehours_api.exceptions import DisabledBackendException, MeetingStartedException, TwilioClientNotInitializedException
 from officehours_api.models import Attendee, Meeting, Queue
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
@@ -127,12 +127,17 @@ class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIVie
         Returns True if the message was sent successfully, Error Response otherwise.
         '''
         self.generate_otp(request)
-        if await send_one_time_password(request.data["otp_phone_number"], request.data["otp_token"]):
-            return True
-        else:
-            return Response({"detail": "Failed to send verification code; please check your phone number and try again."}, 
-                            status=status.HTTP_400_BAD_REQUEST)
-    
+        try:
+            if await send_one_time_password(request.data["otp_phone_number"], request.data["otp_token"]):
+                return True
+        except Exception as e:
+            msg = ""
+            if isinstance(e, TwilioClientNotInitializedException):
+                msg = "Cannot send verification code. Twilio configuration is not set up properly."
+            else:
+                msg = "Failed to send verification code; please check your phone number and try again."
+        return Response({"detail": msg}, 
+                                status=status.HTTP_400_BAD_REQUEST)
     def update(self, request, *args, **kwargs):
         user = self.request.user
         self.check_change_permission(request, user)
