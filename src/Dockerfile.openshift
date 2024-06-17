@@ -32,7 +32,7 @@ COPY requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt
 
 ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
-CMD ["sh", "-c", "gunicorn officehours.asgi:application --bind=0.0.0.0:8001 -k uvicorn.workers.UvicornWorker"]
+CMD ["sh", "-c", "gunicorn officehours.asgi:application --bind=0.0.0.0:8001 -k uvicorn.workers.UvicornWorker --access-logfile - --access-logformat='%(t)s [HTTP:%(s)s] [%({x-forwarded-for}i)s] "%(r)s" %(L)s' \"%(r)s\" %(s)s %(b)s %({Referer}i)s %({User-Agent}i)s'"]
 
 COPY --from=node-webpack /usr/src/app/package-lock.json package-lock.json
 COPY --from=node-webpack /usr/src/app/webpack-stats.json webpack-stats.json
