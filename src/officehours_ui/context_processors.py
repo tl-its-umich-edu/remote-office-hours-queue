@@ -14,6 +14,9 @@ def feedback(request):
 def login_url(request):
     return {'LOGIN_URL': getattr(settings, 'LOGIN_URL', None)}
 
+def logout_redirect_url(request):
+    return {'LOGOUT_REDIRECT_URL': getattr(settings, 'LOGOUT_REDIRECT_URL', None)}
+
 
 def debug(request):
     return {'DEBUG': settings.DEBUG}
