@@ -2,6 +2,7 @@ import csv
 import logging
 from datetime import datetime, timezone, timedelta
 from random import randint
+from django.db import connection
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -20,7 +21,7 @@ from asgiref.sync import async_to_sync, sync_to_async
 
 from officehours_api.notifications import send_one_time_password
 from officehours_api.exceptions import DisabledBackendException, MeetingStartedException, TwilioClientNotInitializedException
-from officehours_api.models import Attendee, Meeting, Queue, MeetingStartLogsView
+from officehours_api.models import Attendee, Meeting, Queue
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
     QueueHostSerializer, MeetingSerializer, AttendeeSerializer, PhoneSerializer
@@ -303,39 +304,39 @@ class ExportMeetingStartLogs(APIView):
 
         # Query from the Queue hosts table to find all the queues the user is a host of filtered also be deleted status. 
         # The value for deleted in the model is a DateTimeField, so if the value is not None, the queue is deleted.
-        queues_user_is_in = list(Queue.objects.filter(hosts__in=[request.user]).values_list('id', flat=True))
+        queues_user_is_in = tuple(Queue.objects.filter(hosts__in=[request.user]).values_list('id', flat=True))
 
         logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
 
+        # If they specify a single queue id, check if they're actually in it and return that
         if queue_id:
             # Security check that they are actually in this queue
             if queue_id not in queues_user_is_in:
                 return Response({'detail': 'You are not a host of this queue.'}, status=status.HTTP_403_FORBIDDEN)
             else:
-                logs = MeetingStartLogsView.objects.filter(queue=queue_id)
+                queues_user_is_in = (queue_id)
                 filename = f"meeting_start_logs_{username}_queue_{queue_id}.csv"
         # Otherwise, get all the logs for the queues the user is a host of
         else:
-            logs = MeetingStartLogsView.objects.filter(queue__in=queues_user_is_in)
             filename = f"meeting_start_logs_{username}.csv"
         
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         writer = csv.writer(response)
-        writer.writerow(['ID', 'Queue', 'Created At', 'Attendees', 'Assignee', 'Backend Metadata', 'Backend Type', 'Agenda', 'View'])
+        with connection.cursor() as cursor:
+            # Add a query to just get the logs for the queues_user_is_in
+            cursor.execute("SELECT * FROM meeting_start_logs where queue_id in (%s)" % queues_user_is_in)
+            rows = cursor.fetchall()
 
-        for log in logs:
-            writer.writerow([
-                log.id,
-                log.queue,
-                log.created_at,
-                log.attendees,
-                log.assignee,
-                log.backend_metadata,
-                log.backend_type,
-                log.agenda,
-                log.view
-            ])
+            # Get column names from the cursor description
+            column_names = [desc[0] for desc in cursor.description]
+
+            # Write the headers
+            writer.writerow(column_names)
+        
+           # Write the data rows
+            for row in rows:
+                writer.writerow(row)
 
         return response

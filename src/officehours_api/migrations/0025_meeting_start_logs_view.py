@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                     response -> 'backend_type' AS meeting_type,
                     response -> 'backend_metadata' ->> 'meeting_url' AS meeting_url,
                     response -> 'agenda' AS agenda,
-                    to_timestamp((response -> 'created_at')::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text) as meeting_created_at
+                    to_timestamp(response::jsonb ->> 'created_at'::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text) AS meeting_created_at
                 FROM
                     parsed_response
             """,
