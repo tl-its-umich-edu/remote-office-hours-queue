@@ -21,18 +21,20 @@ class Migration(migrations.Migration):
                         AND (response::jsonb ->> 'created_at') IS NOT NULL
                 )
                 SELECT
-                    response -> 'attendees' -> 0 ->> 'id' AS attendee_id,
-                    response -> 'attendees' -> 0 ->> 'user_id' AS attendee_user_id,
+                    (response -> 'queue')::int AS queue_id,
+                    (response -> 'attendees' -> 0 ->> 'id')::int AS attendee_id,
+                    (response -> 'attendees' -> 0 ->> 'user_id')::int AS attendee_user_id,
                     response -> 'attendees' -> 0 ->> 'username' AS attendee_uniqname,
                     response -> 'attendees' -> 0 ->> 'last_name' AS attendee_last_name,
                     response -> 'attendees' -> 0 ->> 'first_name' AS attendee_first_name,
-                    response -> 'assignee' ->> 'id' AS host_id,
+                    (response -> 'assignee' ->> 'id')::int AS host_id,
                     response -> 'assignee' ->> 'username' AS host_uniqname,
                     response -> 'assignee' ->> 'last_name' AS host_last_name,
                     response -> 'assignee' ->> 'first_name' AS host_first_name,
                     response -> 'backend_type' AS meeting_type,
                     response -> 'backend_metadata' ->> 'meeting_url' AS meeting_url,
-                    response -> 'created_at' as meeting_created_at
+                    response -> 'agenda' AS agenda,
+                    to_timestamp((response -> 'created_at')::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text) as meeting_created_at
                 FROM
                     parsed_response
             """,
