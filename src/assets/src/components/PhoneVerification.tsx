@@ -13,9 +13,9 @@ interface PhoneVerificationProps {
     onGetOneTimePassword: (phoneNumberToSubmit: string) => Promise<unknown>;
     onVerifyOneTimePassword: (otp: string) => Promise<unknown>;
     otpRequestBuffer: number;
-    alreadyVerified: boolean;
     disabled: boolean;
     setValidationErrors: (errors: Error[]) => void;
+    verifiedPhoneNumber: string;
 }
 
 enum OtpStatusValue {
@@ -29,7 +29,9 @@ enum OtpStatusValue {
 export function PhoneVerification(props: PhoneVerificationProps) {
     const [digits, setDigits] = useState(["", "", "", ""]);
     const [timeToResendCode, setTimeToResendCode] = useState(0);
-    const [otpStatus, setOtpStatus] = useState(props.alreadyVerified ? OtpStatusValue.Verified : OtpStatusValue.NotSent);
+
+    const alreadyVerified = props.verifiedPhoneNumber === props.phoneField && props.phoneField !== "";
+    const [otpStatus, setOtpStatus] = useState(alreadyVerified ? OtpStatusValue.Verified : OtpStatusValue.NotSent);
     const phoneNumberToSubmit =  (props.phoneField.length <= props.countryDialCode.length) ? "" : props.phoneField;
     const formattedPhoneNumberToSubmit = phoneNumberToSubmit.replace(/(\d{1})(\d{3})(\d{3})(\d{4})/, "+$1 ($2) $3-$4");
 
@@ -42,6 +44,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
             onChange={(value: any, data: any) => {
                 props.setPhoneField(value);
                 if ('dialCode' in data) props.setCountryDialCode(data.dialCode);
+                if (props.phoneField === value && value !== "") setOtpStatus(OtpStatusValue.Verified)
             }}
             disabled={props.disabled}
             inputProps={{id: 'phone'}}
@@ -177,8 +180,8 @@ export function PhoneVerification(props: PhoneVerificationProps) {
                 <div className="mb-3">
                     {phoneInput}
                 </div>
-                {otpStatus === OtpStatusValue.Verified && props.alreadyVerified && <p className="text-success">This phone number has been verified</p>}
-                <Button variant="secondary" type="submit" disabled={props.disabled || props.alreadyVerified } onClick={getOneTimePassword}>Obtain a one-time phone verification code</Button>
+                {otpStatus === OtpStatusValue.Verified && alreadyVerified && <p className="text-success">This phone number has been verified and saved. No need for re-verification for this number.</p>}
+                <Button variant="secondary" type="submit" disabled={props.disabled || alreadyVerified } onClick={getOneTimePassword}>Obtain a one-time phone verification code</Button>
             </FormGroup>
         ) :
         (

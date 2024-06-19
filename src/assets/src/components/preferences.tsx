@@ -142,7 +142,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                         onGetOneTimePassword={props.onGetOneTimePassword}
                         onVerifyOneTimePassword={props.onVerifyOneTimePassword}
                         otpRequestBuffer={props.otpRequestBuffer}
-                        alreadyVerified={phoneNumberToSubmit !== "" && !changedPhoneNumber}
+                        verifiedPhoneNumber={props.user.phone_number}
                         setValidationErrors={setValidationErrors}
                         disabled={props.disabled}
                     />
