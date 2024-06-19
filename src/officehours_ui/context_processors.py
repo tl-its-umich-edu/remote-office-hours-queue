@@ -45,5 +45,6 @@ def spa_globals(request):
             'backends': backend_dicts,
             'default_backend': settings.DEFAULT_BACKEND,
             'otp_request_buffer': settings.OTP_REQUEST_BUFFER,
+            'logout_redirect_url': settings.LOGOUT_REDIRECT_URL,
         }
     }
