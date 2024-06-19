@@ -133,6 +133,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'redirect_to_non_www.middleware.RedirectToNonWww',
+    'officehours_api.middleware.FilteredBrokenLinkEmailsMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]
 
