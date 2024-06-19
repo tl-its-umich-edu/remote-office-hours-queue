@@ -16,6 +16,7 @@ interface PhoneVerificationProps {
     disabled: boolean;
     setValidationErrors: (errors: Error[]) => void;
     verifiedPhoneNumber: string;
+    setFormStatus: (status: FormStatus) => void;
 }
 
 enum OtpStatusValue {
@@ -83,12 +84,6 @@ export function PhoneVerification(props: PhoneVerificationProps) {
         value.length && nextInput && nextInput.focus();
         const prevInput = document.getElementById(`otp-digit-${index - 1}`); // move to previous input on delete
         !value.length && prevInput && prevInput.focus();
-
-
-        // if (index === 3) {
-        //     verifyOneTimePassword(undefined, newDigits.join(""));
-        // } 
-        // optional auto-submit
     }
 
     const handleOtpEnter = (e: React.KeyboardEvent) => {
@@ -161,6 +156,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
             await props.onVerifyOneTimePassword(otpValue);
             props.setPhoneField(phoneNumberToSubmit);
             props.setValidationErrors([]);
+            props.setFormStatus(FormStatus.NotSubmitted)
         }
         catch (error: any) {
             console.log(error)
@@ -180,7 +176,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
                 <div className="mb-3">
                     {phoneInput}
                 </div>
-                {otpStatus === OtpStatusValue.Verified && alreadyVerified && <p className="text-success">This phone number has been verified and saved. No need for re-verification for this number.</p>}
+                {alreadyVerified && <p className="text-success">This phone number has been verified and saved. No need for re-verification for this number.</p>}
                 <Button variant="secondary" type="submit" disabled={props.disabled || alreadyVerified } onClick={getOneTimePassword}>Obtain a one-time phone verification code</Button>
             </FormGroup>
         ) :

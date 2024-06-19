@@ -24,7 +24,7 @@ interface PreferencesEditorProps {
 
 export enum FormStatus {
     NotSubmitted,
-    NoChanges,
+    // NoChanges,
     ValidationErrors,
     Success,
     SubmissionError
@@ -32,14 +32,15 @@ export enum FormStatus {
 
 function PreferencesEditor(props: PreferencesEditorProps) {
     const [phoneField, setPhoneField] = useState(props.user.phone_number);
-    const [countryDialCode, setCountryDialCode] = useState("");
+    const [countryDialCode, setCountryDialCode] = useState(props.user.phone_number !== "" ? props.user.phone_number.substring(0, 1) :"");
     const [notifyMeAttendee, setNotifyMeAttendee] = useState(props.user.notify_me_attendee);
     const [notifyMeHost, setNotifyMeHost] = useState(props.user.notify_me_host);
     const [formStatus, setFormStatus] = useState(FormStatus.NotSubmitted);
     const [validationErrors, setValidationErrors] = useState([] as Error[]);
 
     useEffect(() => {
-        if (validationErrors.length) setFormStatus(FormStatus.ValidationErrors);
+        if (validationErrors.length) setFormStatus(FormStatus.ValidationErrors)
+            // else setFormStatus(FormStatus.NotSubmitted)
     }, [validationErrors])
 
     const phoneNumberToSubmit = (phoneField.length <= countryDialCode.length) ? "" : phoneField;
@@ -69,10 +70,10 @@ function PreferencesEditor(props: PreferencesEditorProps) {
 
     const validateAndSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
-        if (!changedPhoneNumber && !changedNotifications) {
-            setFormStatus(FormStatus.NoChanges);
-            return;
-        }
+        // if (!changedPhoneNumber && !changedNotifications) {
+        //     setFormStatus(FormStatus.NoChanges);
+        //     return;
+        // }
         const phoneValidationErrors = phoneNumberToSubmit
             ? validatePhoneNumber(phoneField, countryDialCode)
             : [];
@@ -91,8 +92,6 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         if (!validationErrors.length) {
             props.onUpdateInfo(phoneNumberToSubmit, notifyMeAttendee, notifyMeHost);
             setFormStatus(FormStatus.Success);
-        } else {
-            setFormStatus(FormStatus.ValidationErrors);
         }
     }
     
@@ -108,8 +107,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         switch (formStatus) {
             case FormStatus.NotSubmitted:
                 return undefined;
-            case FormStatus.NoChanges:
-                return <Alert variant='primary'>No preferences were changed.</Alert>;
+            // case FormStatus.NoChanges:
+            //     return <Alert variant='primary'>No preferences were changed.</Alert>;
             case FormStatus.ValidationErrors:
                 return (
                     <Alert variant='danger'>
@@ -145,6 +144,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                         verifiedPhoneNumber={props.user.phone_number}
                         setValidationErrors={setValidationErrors}
                         disabled={props.disabled}
+                        setFormStatus={setFormStatus}
                     />
                     }
                     {notifyMeAttendeeInput}
@@ -152,7 +152,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
                 </FormGroup>
                 <Button variant="secondary" className="mb-3" onClick={clearAll} disabled={props.disabled}>Clear All</Button>
                 <br/>
-                <Button variant="primary" type="submit" disabled={props.disabled && !changedPhoneNumber && !changedNotifications}>Save Changes</Button>
+                <Button variant="primary" type="submit" disabled={props.disabled}>Save Changes</Button>
 
             </Form>
         </div>
@@ -177,8 +177,12 @@ export function PreferencesPage(props: PageProps) {
         (phoneNumber, notifyMeAttendee, notifyMeHost) =>
             api.updateUser(userId, phoneNumber, notifyMeAttendee, notifyMeHost) as Promise<MyUser>, setUser
     );
-    const doGetOneTimePassword = (phoneNumberToSubmit: string) => {return api.getOneTimePassword(userId, phoneNumberToSubmit) as Promise<unknown> }
-    const doVerifyOneTimePassword = (otp: string) => {const resp = api.verifyOneTimePassword(userId, otp) as Promise<unknown>; doRefresh(); return resp;}
+    const doGetOneTimePassword = async (phoneNumberToSubmit: string) => api.getOneTimePassword(userId, phoneNumberToSubmit) as Promise<unknown>
+    const doVerifyOneTimePassword = async (otp: string) => {
+        const resp = await api.verifyOneTimePassword(userId, otp) as Promise<unknown>; 
+        await doRefresh(); 
+        return resp;
+    }
 
     // Render
     const isChanging = updateInfoLoading;
@@ -195,10 +199,7 @@ export function PreferencesPage(props: PageProps) {
             <PreferencesEditor
                 user={user}
                 disabled={isChanging}
-                onUpdateInfo={(...args) => {
-                    doUpdateInfo(...args)
-                    setUser({...user, phone_number: args[0], notify_me_attendee: args[1], notify_me_host: args[2]})
-                }}
+                onUpdateInfo={doUpdateInfo}
                 onGetOneTimePassword={doGetOneTimePassword}
                 onVerifyOneTimePassword={doVerifyOneTimePassword}
                 otpRequestBuffer={props.otpRequestBuffer}
