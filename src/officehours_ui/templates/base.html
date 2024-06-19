@@ -21,94 +21,115 @@
   {% endblock %}
   </head>
 
+
   <body>
-	<div id="skip-link">
-		<a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
-	</div>
-	<header id="navbarSupportedContent">
-		<nav class="navbar navbar-expand-lg" id="aux-nav" aria-label="Auxiliary Navigation">
-			<div class="container">
-				<div class="navbar-brand">
-          <a href="{% url 'home' %}">
-            <img src="{% static 'images/its-logo.png' %}" class="container banner-img img-responsive" alt="Remote Office Hours Queue"/>
-          </a>
-				</div>
-				<button class="navbar-toggler ml-auto collapsed" type="button" data-bs-toggle="collapse" data-bs-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="icon text-light"></span>
-				</button>
-				<div class="collapse navbar-collapse navbars" aria-labelledby="aux-nav" role="navigation">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'home' %}">
-                Home
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="https://documentation.its.umich.edu/office-hours" target="_blank">
-                Resources & Support
-                <i class="fa fa-external-link-alt"></i>
-              </a>
-            </li>
-            {% if request.user.is_authenticated %}
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  {{ request.user.username }}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
-                  <li>
-                    <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
-                      Manage Queues
-                    </a>
-                  </li>
-                  <li>
-                    <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
-                      Preferences
-                    </a>
-                  </li>
-                  <li>
-                    <form action="{% url 'oidc_logout' %}" method="post">
-                      {% csrf_token %}
-                      <input type="submit" value="Logout" style="background-color: white" class="dropdown-item">
-                    </form>
-                  </li>
-                </ul>
-              </li>
-            {% else %}
+    <div id="skip-link">
+      <a href="#main-content" class="sr-only sr-only-focusable">Skip to main content</a>
+    </div>
+    <header id="navbarSupportedContent">
+      <nav class="navbar navbar-expand-lg" id="aux-nav" aria-label="Auxiliary Navigation">
+        <div class="container">
+          <div class="navbar-brand">
+            <a href="{% url 'home' %}">
+              <img src="{% static 'images/its-logo.png' %}" class="container banner-img img-responsive" alt="Remote Office Hours Queue"/>
+            </a>
+          </div>
+          <button class="navbar-toggler ml-auto collapsed" type="button" data-bs-toggle="collapse" data-bs-target=".navbars" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="icon text-light"></span>
+          </button>
+          <div class="collapse navbar-collapse navbars" aria-labelledby="aux-nav" role="navigation">
+            <ul class="navbar-nav ms-auto">
               <li class="nav-item">
-                <a href="{{ LOGIN_URL }}" class="nav-link">Login</a>
+                <a class="nav-link" href="{% url 'home' %}">
+                  Home
+                </a>
               </li>
-            {% endif %}
-          </ul>
+              <li class="nav-item">
+                <a class="nav-link" href="https://documentation.its.umich.edu/office-hours" target="_blank">
+                  Resources & Support
+                  <i class="fa fa-external-link-alt"></i>
+                </a>
+              </li>
+              {% if request.user.is_authenticated %}
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{ request.user.username }}
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                    <li>
+                      <a class="dropdown-item" href="{% url 'manage' %}" style="background-color: white; color:#212529">
+                        Manage Queues
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="{% url 'preferences' %}" style="background-color: white; color:#212529">
+                        Preferences
+                      </a>
+                    </li>
+                    <li>
+                      <form action="{% url 'oidc_logout' %}" method="post">
+                        {% csrf_token %}
+                        <input type="submit" value="Logout" style="background-color: white" class="dropdown-item" id="logout-button">
+                      </form>
+                    </li>
+                  </ul>
+                </li>
+              {% else %}
+                <li class="nav-item">
+                  <a href="{{ LOGIN_URL }}" class="nav-link">Login</a>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
-  </header>
+      </nav>
+    </header>
 
-  {% for page in flatpages %}
-    {% if page.title == "User Comm Banner" %}
-      {{page.content|safe}}
+
+    {% for page in flatpages %}
+      {% if page.title == "User Comm Banner" %}
+        {{page.content|safe}}
+      {% endif %}
+    {% endfor %}
+
+
+    <div id="main-content" class="container" role="main">
+      {% block content %}{% endblock %}
+      {% csrf_token %}
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
+    <script>
+      const logoutButton = document.querySelector('#logout-button');
+      if (logoutButton !== null) {
+        logoutButton.addEventListener('click', () => {
+          window.localStorage.setItem("loggedIn", "false");
+        });
+      }
+      window.addEventListener('storage', (event) => {
+        if (event.key === 'loggedIn' && event.newValue === 'false' && event.oldValue === 'true') {
+          window.location.href = '/accounts/login';
+        }
+      });
+    </script>
+    {% block scripts %}{% endblock %}
+
+
+    {% get_flatpages '/dataalert/' as flatpages %}
+    {% if flatpages.first and flatpages.first.content %}
+      <footer class="sticky-footer">
+        <div class="alert alert-info alert-footer" role="alert">
+          <div class="alert-footer-text">
+            {{flatpages.first.content|safe}}
+          </div>
+        </div>
+      </footer>
     {% endif %}
-  {% endfor %}
-
-  <div id="main-content" class="container" role="main">
-    {% block content %}{% endblock %}
-    {% csrf_token %}
-	</div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js" integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V" crossorigin="anonymous"></script>
-  {% block scripts %}{% endblock %}
-
-  {% get_flatpages '/dataalert/' as flatpages %}
-  {% if flatpages.first and flatpages.first.content %}
-    <footer class="sticky-footer">
-      <div class="alert alert-info alert-footer" role="alert">
-        <div class="alert-footer-text">
-          {{flatpages.first.content|safe}}
-        </div>
-      </div>
-    </footer>
-  {% endif %}
 
   </body>
 </html>
+
+
+

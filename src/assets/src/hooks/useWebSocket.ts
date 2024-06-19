@@ -38,6 +38,9 @@ export const useWebSocket = <T>(url: string, onUpdate: (content: T) => void, onD
             if (e.code === 4404) { // Equivalent of HTTP 404
                 setError(new Error("The resource you're looking for does not exist. Maybe it was deleted?"));
                 ws.close();
+            } else if (e.code === 4405) { // Custom 4404
+                setError(new Error("Oops! It looks like you've entered an invalid queue ID in the URL. Please make sure to enter the correct numeric queue ID. You can find the accurate queue ID in your 'Manage Queue' list for reference."));
+                ws.close();
             } else if (e.code === 1011) { // Equivalent of HTTP 500
                 setError(new Error("Sorry, there was a system error. Please try refreshing. If you continue to receive this error, contact the ITS Service Center."));
                 ws.close();
