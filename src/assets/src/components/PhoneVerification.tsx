@@ -178,7 +178,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
                 </div>
                 {alreadyVerified && <p className="text-success">This number has been verified, but if cleared and saved again, it may require re-verification</p>}
                 {props.verifiedPhoneNumber !== props.phoneField && props.phoneField.length <= props.countryDialCode.length &&
-                <p className="text-danger">You've cleared your saved number. If you submit, you may need to re-verify your old number again.</p>}
+                <p className="text-danger">You've cleared your saved number. If you submit, re-verification may be required.</p>}
                 <Button variant="secondary" type="submit" disabled={props.disabled || alreadyVerified } onClick={getOneTimePassword}>Obtain a one-time phone verification code</Button>
             </FormGroup>
         ) :
