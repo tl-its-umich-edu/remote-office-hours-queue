@@ -302,8 +302,8 @@ export const exportQueueHistoryLogs = async (queue_id: number) => {
     await downloadCsv(resp);
 }
 
-export const exportAllQueueHistoryLogs = async (includeDeleted: boolean) => {
-    const resp = await fetch(`/api/export_meeting_start_logs/?deleted=${includeDeleted}/`, {method: "GET"});
+export const exportAllQueueHistoryLogs = async () => {
+    const resp = await fetch(`/api/export_meeting_start_logs/`, {method: "GET"});
     await handleErrors(resp);
     await downloadCsv(resp);
 }

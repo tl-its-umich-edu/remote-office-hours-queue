@@ -4,23 +4,18 @@ import React, { useState } from "react";
 import { Button, Modal, Form } from "react-bootstrap";
 
 interface DownloadQueueHistoryModalProps {
-    onDownload: (includeDeleted: boolean) => Promise<void>;
+    onDownload: () => Promise<void>;
 }
 
 const DownloadQueueHistoryModal: React.FC<DownloadQueueHistoryModalProps> = ({ onDownload }) => {
     const [modalShow, setModalShow] = useState(false);
-    const [includeDeleted, setIncludeDeleted] = useState(false);
 
     const handleModalClose = () => setModalShow(false);
     const handleModalShow = () => setModalShow(true);
 
-    const handleIncludeDeletedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setIncludeDeleted(e.target.checked);
-    };
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault(); // Prevent the default form submission
-        await onDownload(includeDeleted);
+        await onDownload();
         handleModalClose();
     };
 
@@ -39,15 +34,7 @@ const DownloadQueueHistoryModal: React.FC<DownloadQueueHistoryModalProps> = ({ o
                 </Modal.Header>
                 <Form onSubmit={handleSubmit}>
                     <Modal.Body>
-                            <Form.Group controlId="formIncludeDeleted">
-                                <Form.Check 
-                                    type="checkbox" 
-                                    label="Include deleted queues in the CSV" 
-                                    checked={includeDeleted} 
-                                    onChange={handleIncludeDeletedChange}
-                                />
-                            </Form.Group>
-                        
+                        <p>Are you sure you want to download all queue history? This will also include deleted queues.</p>
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={handleModalClose}>

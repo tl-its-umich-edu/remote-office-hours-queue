@@ -16,7 +16,7 @@ interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
     onSingleQueueHistoryDownload?: (queueId: number) => void;
-    onAllQueueHistoryDownload?: (includeDeleted:boolean) => Promise<void>;
+    onAllQueueHistoryDownload?: () => Promise<void>;
 }
 
 function ManageQueueTable(props: ManageQueueTableProps) {
@@ -55,7 +55,7 @@ export function ManagePage(props: PageProps) {
             queues={queues} 
             disabled={false} 
             onSingleQueueHistoryDownload={(queueId) => api.exportQueueHistoryLogs(queueId)}
-            onAllQueueHistoryDownload={(includeDeleted) => api.exportAllQueueHistoryLogs(includeDeleted)}/>
+            onAllQueueHistoryDownload={() => api.exportAllQueueHistoryLogs()}/>
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
