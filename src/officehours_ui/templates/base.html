@@ -113,7 +113,6 @@
       }
       window.addEventListener('storage', (event) => {
         if (event.key === 'loggedIn' && event.newValue === 'false' && event.oldValue === 'true') {
-          // window.location.href = "{{LOGOUT_REDIRECT_URL}}";
           document.getElementById("logout-button").click() // trigger logout button click
         }
       });

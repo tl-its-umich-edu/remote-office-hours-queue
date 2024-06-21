@@ -14,9 +14,6 @@ def feedback(request):
 def login_url(request):
     return {'LOGIN_URL': getattr(settings, 'LOGIN_URL', None)}
 
-def logout_redirect_url(request):
-    return {'LOGOUT_REDIRECT_URL': getattr(settings, 'LOGOUT_REDIRECT_URL', None)}
-
 
 def debug(request):
     return {'DEBUG': settings.DEBUG}
@@ -45,6 +42,5 @@ def spa_globals(request):
             'backends': backend_dicts,
             'default_backend': settings.DEFAULT_BACKEND,
             'otp_request_buffer': settings.OTP_REQUEST_BUFFER,
-            'logout_redirect_url': settings.LOGOUT_REDIRECT_URL,
         }
     }
