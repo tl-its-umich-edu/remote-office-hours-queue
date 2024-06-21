@@ -36,10 +36,4 @@
             <a href="{% url 'password_reset' %}">Lost password?</a>
         </div>
     </div>
-    <script>
-        const loginButton = document.querySelector('#login-button');
-        loginButton.addEventListener('click', () => {
-          window.localStorage.setItem("loggedIn", "true");
-        });
-    </script>
 {% endblock %}
