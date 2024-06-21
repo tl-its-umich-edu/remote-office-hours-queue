@@ -24,7 +24,6 @@ interface PreferencesEditorProps {
 
 export enum FormStatus {
     NotSubmitted,
-    // NoChanges,
     ValidationErrors,
     Success,
     SubmissionError
@@ -40,12 +39,10 @@ function PreferencesEditor(props: PreferencesEditorProps) {
 
     useEffect(() => {
         if (validationErrors.length) setFormStatus(FormStatus.ValidationErrors)
-            // else setFormStatus(FormStatus.NotSubmitted)
     }, [validationErrors])
 
     const phoneNumberToSubmit = (phoneField.length <= countryDialCode.length) ? "" : phoneField;
     const changedPhoneNumber = props.user.phone_number !== phoneNumberToSubmit;
-    const changedNotifications = props.user.notify_me_attendee !== notifyMeAttendee || props.user.notify_me_host !== notifyMeHost;
 
     const notifyMeAttendeeInput = (
         <Form.Check 
@@ -70,10 +67,6 @@ function PreferencesEditor(props: PreferencesEditorProps) {
 
     const validateAndSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault() // Prevent page reload
-        // if (!changedPhoneNumber && !changedNotifications) {
-        //     setFormStatus(FormStatus.NoChanges);
-        //     return;
-        // }
         const phoneValidationErrors = phoneNumberToSubmit
             ? validatePhoneNumber(phoneField, countryDialCode)
             : [];
@@ -107,8 +100,6 @@ function PreferencesEditor(props: PreferencesEditorProps) {
         switch (formStatus) {
             case FormStatus.NotSubmitted:
                 return undefined;
-            // case FormStatus.NoChanges:
-            //     return <Alert variant='primary'>No preferences were changed.</Alert>;
             case FormStatus.ValidationErrors:
                 return (
                     <Alert variant='danger'>
