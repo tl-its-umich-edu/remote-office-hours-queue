@@ -9,7 +9,8 @@ logger = logging.getLogger(__name__)
 class FilteredBrokenLinkEmailsMiddleware(BrokenLinkEmailsMiddleware, MiddlewareMixin):
     ALLOWABLE_404_URLS = [
         # Add more regular expressions for allowable URLs as needed.
-        re.compile(r'^/queue/.*$'),
+        re.compile(r'^/api/queues/.*$'),
+        re.compile(r'^/api/meetings/.*$'),
     ]
     logger.info(f"inside FilteredBrokenLinkEmailsMiddleware")
     def process_response(self, request, response):
