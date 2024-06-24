@@ -1,9 +1,10 @@
-import json
 from typing import List, Literal, TypedDict
+from base64 import b64encode
 from time import time
 from datetime import datetime
 import logging
 
+import requests
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.shortcuts import redirect
@@ -11,9 +12,6 @@ from django.shortcuts import redirect
 from officehours_api.backends.backend_base import BackendBase
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
-from pyzoom.schemas import ZoomMeetingSettings
-from pyzoom.oauth import refresh_tokens, request_tokens
-from pyzoom import ZoomClient
 
 logger = logging.getLogger(__name__)
 
@@ -89,13 +87,28 @@ class Backend(BackendBase):
     client_secret = settings.ZOOM_CLIENT_SECRET
 
     @classmethod
+    def _get_client_auth_headers(cls) -> dict:
+        client = b64encode(bytes(f"{cls.client_id}:{cls.client_secret}", 'ascii')).decode('ascii')
+        return {
+            'Authorization': f"Basic {client}",
+            'Accept': 'application/json',
+        }
+
+    @classmethod
     def _spend_authorization_code(cls, code: str, request) -> ZoomAccessToken:
         redirect_uri = request.build_absolute_uri('/callback/zoom/')
-        # the request_tokens function from the PyZoom library replaces
-        # the request to /oauth/token for the authorization code grant type
-        tokens = request_tokens(cls.client_id, cls.client_secret, redirect_uri, code)
+        resp = requests.post(
+            f'{cls.base_url}/oauth/token',
+            params={
+                'grant_type': 'authorization_code',
+                'code': code,
+                'redirect_uri': redirect_uri,
+            },
+            headers=cls._get_client_auth_headers(),
+        )
+        resp.raise_for_status()
         logger.debug("Received authorization code from Zoom")
-        return tokens
+        return resp.json()
 
     @classmethod
     def _clear_backend_metadata(cls, user: User) -> None:
@@ -112,9 +125,14 @@ class Backend(BackendBase):
         zoom_meta = user.profile.backend_metadata['zoom']
         if time() > zoom_meta['access_token_expires']:
             logger.debug('Refreshing token')
-            # The refresh_tokens function from the PyZoom library replaces the request to /oauth/token
-            # for the refresh token grant type
-            resp = refresh_tokens(cls.client_id, cls.client_secret, zoom_meta['refresh_token'])
+            resp = requests.post(
+                f'{cls.base_url}/oauth/token',
+                params={
+                    'grant_type': 'refresh_token',
+                    'refresh_token': zoom_meta['refresh_token'],
+                },
+                headers=cls._get_client_auth_headers(),
+            )
             if resp.status_code >= 400 and resp.status_code < 500:
                 # The refresh_token was invalidated somehow.
                 # Maybe the user removed our Zoom app's auth.
@@ -134,48 +152,44 @@ class Backend(BackendBase):
         return user.profile.backend_metadata['zoom']['access_token']
 
     @classmethod
-    def _get_client(cls, user: User) -> ZoomClient:
-        """Gets a ZoomClient instance for the given user. Replaces the _get_session method."""
-        zoom_meta = user.profile.backend_metadata['zoom']
-        return ZoomClient(zoom_meta['access_token'])
+    def _get_session(cls, user: User) -> requests.Session:
+        session = requests.Session()
+        session.headers.update({
+            'Authorization': f'Bearer {cls._get_access_token(user)}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        })
+        return session
 
     @classmethod
     def _create_meeting(cls, user: User) -> ZoomMeeting:
-        """Creates a Zoom meeting for the given user."""
-        client = cls._get_client(user)
+        session = cls._get_session(user)
         user_id = user.profile.backend_metadata['zoom']['user_id']
-        # Specify the meeting settings
-        # We are initializing the meeting settings with the default settings
-        # and then modifying the settings we want to change
-        meeting_settings = ZoomMeetingSettings.default_settings()
-        meeting_settings.waiting_room = True
-        meeting_settings.join_before_host = False
-        meeting_settings.meeting_authentication = False
-        meeting_settings.use_pmi = False
-        meeting_settings.contact_name = user.first_name + ' ' + user.last_name
-        meeting_settings.contact_email = user.email
-        # invoke the create_meeting method of the ZoomClient instance
-        meeting = client.meetings.create_meeting(
-            topic='Remote Office Hours Queue Meeting',
-            start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
-            duration_min=60,
-            timezone='America/Detroit',
-            settings=meeting_settings
+        resp = session.post(
+            f'{cls.base_url}/v2/users/{user_id}/meetings',
+            json={
+                'topic': 'Remote Office Hours Queue Meeting',
+                'start_time': datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'timezone': 'America/Detroit',
+                "settings": {
+                    "join_before_host": False,
+                    "waiting_room": True,
+                    "meeting_authentication": False,
+                    "use_pmi": False
+                },
+            },
         )
-        # The return value of meeting.json() is a string object
-        meeting_json = json.loads(meeting.json())
-        logger.info("Created meeting: %s", meeting_json)
-        return meeting_json
+        if resp.status_code == 401:
+            logger.info(f'Access token for user {user.id} seems to be invalid.')
+            cls._clear_backend_metadata(user)
+        resp.raise_for_status()
+        logger.debug("Created meeting: %s", resp.json())
+        return resp.json()
 
     @classmethod
     def _get_me(cls, user: User) -> ZoomUser:
-        """Get the Zoom user info for the given user.
-        Note that the PyZoom library does not have a method for this,
-        so we will have to use the ZoomClient.raw.get method to make an API call.
-        """
-        client = cls._get_client(user)
-        resp = client.raw.get('/users/me')
-        resp.raise_for_status()
+        session = cls._get_session(user)
+        resp = session.get(f'{cls.base_url}/v2/users/me')
         return resp.json()
 
     @classmethod
@@ -219,9 +233,6 @@ class Backend(BackendBase):
 
     @classmethod
     def get_auth_url(cls, redirect_uri: str, state: str):
-        """Gets the URL to redirect the user to for authorization.
-        This is not implemented as a standalone function in the PyZoom library.
-        """
         return (
             f"{Backend.base_url}/oauth/authorize"
             f"?response_type=code"
