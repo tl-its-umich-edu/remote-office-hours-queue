@@ -20,7 +20,7 @@ from officehours_api.exceptions import DisabledBackendException, MeetingStartedE
 from officehours_api.models import Attendee, Meeting, Queue
 from officehours_api.serializers import (
     ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, PhoneSerializer
+    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, PhoneOTPSerializer
 )
 from officehours_api.permissions import (
     IsAssignee, IsHostOrReadOnly, IsHostOrAttendee, is_host
@@ -101,7 +101,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
 class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
-    serializer_class = PhoneSerializer
+    serializer_class = PhoneOTPSerializer
 
     def check_change_permission(self, request, user):
         if user != request.user:

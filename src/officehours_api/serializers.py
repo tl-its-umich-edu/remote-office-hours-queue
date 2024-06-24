@@ -128,7 +128,7 @@ class MyUserSerializer(serializers.ModelSerializer):
     email = serializers.CharField(read_only=True)
     my_queue = serializers.SerializerMethodField(read_only=True)
     hosted_queues = serializers.SerializerMethodField(read_only=True)
-    phone_number = serializers.CharField(source='profile.phone_number', allow_blank=True, read_only=True)
+    phone_number = serializers.CharField(source='profile.phone_number', allow_blank=True)
     notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
     notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
     authorized_backends = serializers.DictField(source='profile.authorized_backends', read_only=True)
@@ -161,12 +161,13 @@ class MyUserSerializer(serializers.ModelSerializer):
         profile = validated_data['profile']
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
+        instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
         instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me_attendee)
         instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me_host)
         instance.profile.save()
         return instance
 
-class PhoneSerializer(serializers.ModelSerializer):
+class PhoneOTPSerializer(serializers.ModelSerializer):
     '''Serializer used for OTP phone verification and updating via Twilio SMS.'''
     context: UserContext
 
