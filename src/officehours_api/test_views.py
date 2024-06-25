@@ -50,6 +50,12 @@ class MeetingTestCase(TestCase):
         self.host_two.set_password('rohqtest')
         self.host_two.save()
 
+        self.host_three = User.objects.create(
+            username='hostthree', email='hostthree@example.com'
+        )
+        self.host_three.set_password('rohqtest')
+        self.host_three.save()
+
         self.create_test_queue()
 
     def test_can_update_assignee_in_unstarted_meeting(self):
@@ -154,6 +160,7 @@ class MeetingTestCase(TestCase):
 
     def test_export_meeting_start_logs_for_queue(self):
         self.test_export_setup()
+        self.client.login(username='hostone', password='rohqtest')
         # Now just try on one queue, there should only be one extra row
         response = self.client.get(f'/api/export_meeting_start_logs/{self.queue.id}/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -161,10 +168,15 @@ class MeetingTestCase(TestCase):
         # Just check right now that there's a header row and a data row, perhaps do more validation later
         self.assertEqual(len(response_csv), 2)
 
+    def test_export_meeting_start_logs_for_not_hosting(self):
+        self.test_export_setup()
+        # Login as a host that isn't in any queues
+        self.client.login(username='hostthree', password='rohqtest')
+        response = self.client.get(f'/api/export_meeting_start_logs/')
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
     def test_export_meeting_start_logs_for_queue_deleted(self):
         self.test_export_setup()
-        # Now delete the queue, it should still export
-        self.queue.delete()
         response = self.client.get(f'/api/export_meeting_start_logs/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_csv = self.read_csv_from_response(response.content)

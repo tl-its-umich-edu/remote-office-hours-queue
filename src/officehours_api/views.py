@@ -305,9 +305,11 @@ class ExportMeetingStartLogs(APIView):
         # Query from the Queue hosts table to find all the queues the user is a host of, include deleted
         queues_user_is_in = Queue.all_objects.filter(hosts__in=[request.user]).values_list('id', flat=True)
 
-
+        # If the user isn't in any queues return a 204 error
+        if not queues_user_is_in:
+            return Response({'detail': 'You are not a host of any queues.'}, status=status.HTTP_204_NO_CONTENT)
         # If they specify a single queue id, check if they're actually in it and return that
-        if queue_id:
+        elif queue_id:
             # Security check that they are actually in this queue
             if queue_id not in queues_user_is_in:
                 return Response({'detail': 'You are not a host of this queue.'}, status=status.HTTP_403_FORBIDDEN)
