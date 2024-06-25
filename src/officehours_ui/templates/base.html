@@ -51,6 +51,9 @@
                 </a>
               </li>
               {% if request.user.is_authenticated %}
+                <script>
+                  window.localStorage.setItem("loggedIn", "true");
+                </script>
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="userMenu" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {{ request.user.username }}
@@ -110,7 +113,7 @@
       }
       window.addEventListener('storage', (event) => {
         if (event.key === 'loggedIn' && event.newValue === 'false' && event.oldValue === 'true') {
-          window.location.href = '/accounts/login';
+          document.getElementById("logout-button").click() // trigger logout button click
         }
       });
     </script>
