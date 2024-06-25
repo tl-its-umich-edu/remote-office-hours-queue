@@ -26,7 +26,7 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
 
     const [loaded, oneTrustActiveGroups, setOptanonWrapper] = useOneTrust();
     if (loaded) {
-        console.log("loaded oneTrustActiveGroups", oneTrustActiveGroups);
+        console.log("loaded oneTrustActiveGroups" + oneTrustActiveGroups);
     }
 
     useEffect(() => {
@@ -39,7 +39,6 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
     
     useEffect(() => {
         const updateGtagConsent = () => {
-            console.log("effect oneTrustActiveGroups", oneTrustActiveGroups);
 
             if (oneTrustActiveGroups.includes("C0002")) {
               GoogleAnalytics.gtag("consent", "update", { analytics_storage: "granted" });
@@ -65,6 +64,7 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
             }
             // window.dataLayer.push({ event: 'um_consent_updated' });
             GoogleAnalytics.event({ action: 'um_consent_updated', category: 'consent' });
+            console.log("effect oneTrustActiveGroups "+ oneTrustActiveGroups);
           };
 
           setOptanonWrapper(updateGtagConsent)
