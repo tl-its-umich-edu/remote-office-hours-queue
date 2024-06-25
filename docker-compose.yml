@@ -29,6 +29,8 @@ services:
       - POSTGRES_PASSWORD=admin_pw
     volumes:
       - officehours-postgres-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
 
   redis:
     image: redis:7
