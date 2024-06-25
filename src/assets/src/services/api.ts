@@ -300,11 +300,17 @@ export const startMeeting = async (meeting_id: number) => {
 export const exportQueueHistoryLogs = async (queue_id: number) => {
     const resp = await fetch(`/api/export_meeting_start_logs/${queue_id}/`, {method: "GET"});
     await handleErrors(resp);
+    if (resp.status == 204) {// No content in CSV
+        throw new Error("This queue has no meeting history.");
+    }
     await downloadCsv(resp);
 }
 
 export const exportAllQueueHistoryLogs = async () => {
     const resp = await fetch(`/api/export_meeting_start_logs/`, {method: "GET"});
     await handleErrors(resp);
+    if (resp.status == 204) { // No content in CSV
+        throw new Error("You have no queues with meeting history.");
+    }
     await downloadCsv(resp);
 }

@@ -507,11 +507,15 @@ interface QueueTableProps {
     queues: readonly QueueBase[];
     manageLink?: boolean | undefined;
     includeCSVDownload?: boolean | undefined;
-    handleCSVDownload?: (queueId: number) => void;
+    handleCSVDownload?: (queueId: number) => Promise<void>;
 }
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
+    const handleQueueHistoryExportSubmit = async (queueId: number) => {
+        if (props.handleCSVDownload === undefined) return;
+        await props.handleCSVDownload(queueId);
+    }
 
     const sortedQueues = sortQueues(props.queues.slice());
     const queueItems = sortedQueues.map(q => (
@@ -531,9 +535,9 @@ export function QueueTable (props: QueueTableProps) {
                     </Badge>
                 </Link>
             </td>
-            {props.includeCSVDownload && (
+            {props.includeCSVDownload && props.handleCSVDownload && (
                 <td className="align-middle" aria-label={`History for Queue ID ${q.id}`}>
-                    <Button onClick={() => props.handleCSVDownload && props.handleCSVDownload(q.id)}>
+                    <Button onClick={() => handleQueueHistoryExportSubmit(q.id)}>
                         <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
                         Download
                     </Button>
