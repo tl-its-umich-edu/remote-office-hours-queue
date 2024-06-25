@@ -1,7 +1,11 @@
+import csv
+import logging
 from datetime import datetime, timezone, timedelta
 from random import randint
+from django.db import connection
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -26,6 +30,7 @@ from officehours_api.permissions import (
     IsAssignee, IsHostOrReadOnly, IsHostOrAttendee, is_host
 )
 
+logger = logging.getLogger(__name__)
 
 @extend_schema(
     responses={
@@ -290,3 +295,52 @@ class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
 class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
+
+class ExportMeetingStartLogs(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, queue_id=None, format=None):
+        username = request.user.username
+
+        # Query from the Queue hosts table to find all the queues the user is a host of, include deleted
+        queues_user_is_in = Queue.all_objects.filter(hosts__in=[request.user]).values_list('id', flat=True)
+
+        # If the user isn't in any queues return a 204 error
+        if not queues_user_is_in:
+            return Response({'detail': 'You are not a host of any queues.'}, status=status.HTTP_204_NO_CONTENT)
+        # If they specify a single queue id, check if they're actually in it and return that
+        elif queue_id:
+            # Security check that they are actually in this queue
+            if queue_id not in queues_user_is_in:
+                return Response({'detail': 'You are not a host of this queue.'}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                queues_user_is_in = [queue_id]
+                filename = f"meeting_start_logs_{username}_queue_{queue_id}.csv"
+        # Otherwise, get all the logs for the queues the user is a host of
+        else:
+            filename = f"meeting_start_logs_{username}.csv"
+        
+        logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+
+        writer = csv.writer(response)
+        with connection.cursor() as cursor:
+            # Generate a string of placeholders, one for each item in the list
+            queue_id_placeholders = ', '.join(['%s'] * len(queues_user_is_in))
+
+            # Add a query to just get the logs for the queues_user_is_in
+            cursor.execute(f"SELECT * FROM meeting_start_logs where queue_id in ({queue_id_placeholders})", queues_user_is_in)
+            rows = cursor.fetchall()
+
+            # Get column names from the cursor description
+            column_names = [desc[0] for desc in cursor.description]
+
+            # Write the headers
+            writer.writerow(column_names)
+        
+           # Write the data rows
+            for row in rows:
+                writer.writerow(row)
+
+        return response
