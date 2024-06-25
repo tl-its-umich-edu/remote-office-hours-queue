@@ -302,11 +302,9 @@ class ExportMeetingStartLogs(APIView):
     def get(self, request, queue_id=None, format=None):
         username = request.user.username
 
-        # Query from the Queue hosts table to find all the queues the user is a host of filtered also be deleted status. 
-        # The value for deleted in the model is a DateTimeField, so if the value is not None, the queue is deleted.
-        queues_user_is_in = tuple(Queue.objects.filter(hosts__in=[request.user]).values_list('id', flat=True))
+        # Query from the Queue hosts table to find all the queues the user is a host of, include deleted
+        queues_user_is_in = Queue.all_objects.filter(hosts__in=[request.user]).values_list('id', flat=True)
 
-        logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
 
         # If they specify a single queue id, check if they're actually in it and return that
         if queue_id:
@@ -314,19 +312,23 @@ class ExportMeetingStartLogs(APIView):
             if queue_id not in queues_user_is_in:
                 return Response({'detail': 'You are not a host of this queue.'}, status=status.HTTP_403_FORBIDDEN)
             else:
-                queues_user_is_in = (queue_id)
+                queues_user_is_in = [queue_id]
                 filename = f"meeting_start_logs_{username}_queue_{queue_id}.csv"
         # Otherwise, get all the logs for the queues the user is a host of
         else:
             filename = f"meeting_start_logs_{username}.csv"
         
+        logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         writer = csv.writer(response)
         with connection.cursor() as cursor:
+            # Generate a string of placeholders, one for each item in the list
+            queue_id_placeholders = ', '.join(['%s'] * len(queues_user_is_in))
+
             # Add a query to just get the logs for the queues_user_is_in
-            cursor.execute("SELECT * FROM meeting_start_logs where queue_id in (%s)" % queues_user_is_in)
+            cursor.execute(f"SELECT * FROM meeting_start_logs where queue_id in ({queue_id_placeholders})", queues_user_is_in)
             rows = cursor.fetchall()
 
             # Get column names from the cursor description
