@@ -9,7 +9,7 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
 
     const [initialized, setInitialized] = useState(false);
     const [previousPage, setPreviousPage] = useState(null as string | null);
-    console.log("useGA rendered, initialized " + initialized ? "true" : "false")
+    console.log("useGA rendered, initialized " + (initialized ? "true" : "false"))
     if (googleAnalyticsId && !initialized) {
         console.log("useGA initializing");
         GoogleAnalytics.gtag("consent", "default", {
