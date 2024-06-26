@@ -61,6 +61,27 @@ const handleErrors = async (resp: Response) => {
     }
 }
 
+const downloadCsv = async (resp: Response) => {
+    const data = await resp.blob();
+    const url = window.URL.createObjectURL(data);
+    const contentDisposition = resp.headers.get('Content-Disposition');
+    let filename = 'download.csv'; // Default filename
+    if (contentDisposition) {
+        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+        let matches = filenameRegex.exec(contentDisposition);
+        if (matches && matches[1]) { 
+          filename = matches[1].replace(/['"]/g, '');
+        }
+    }
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
 export const getUsers = async () => {
     const resp = await fetch("/api/users/", { method: "GET" });
     await handleErrors(resp);
@@ -274,4 +295,22 @@ export const startMeeting = async (meeting_id: number) => {
     });
     await handleErrors(resp);
     return await resp.json() as Meeting;
+}
+
+export const exportQueueHistoryLogs = async (queue_id: number) => {
+    const resp = await fetch(`/api/export_meeting_start_logs/${queue_id}/`, {method: "GET"});
+    await handleErrors(resp);
+    if (resp.status == 204) {// No content in CSV
+        throw new Error("This queue has no meeting history.");
+    }
+    await downloadCsv(resp);
+}
+
+export const exportAllQueueHistoryLogs = async () => {
+    const resp = await fetch(`/api/export_meeting_start_logs/`, {method: "GET"});
+    await handleErrors(resp);
+    if (resp.status == 204) { // No content in CSV
+        throw new Error("You have no queues with meeting history.");
+    }
+    await downloadCsv(resp);
 }

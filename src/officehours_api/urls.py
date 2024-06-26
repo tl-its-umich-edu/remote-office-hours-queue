@@ -18,6 +18,9 @@ urlpatterns = [
     path('meetings/<int:pk>/start', views.MeetingStart.as_view(), name='meeting-start'),
     path('attendees/', views.AttendeeList.as_view(), name='attendee-list'),
     path('attendees/<int:pk>/', views.AttendeeDetail.as_view(), name='attendee-detail'),
+    path('export_meeting_start_logs/<int:queue_id>/', views.ExportMeetingStartLogs.as_view(), name='export-meeting-start-logs-with-queue'),
+    path('export_meeting_start_logs/', views.ExportMeetingStartLogs.as_view(), name='export-meeting-start-logs'),
+
 ]
 
 if settings.DEBUG:
