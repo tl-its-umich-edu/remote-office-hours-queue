@@ -12,8 +12,10 @@ export const useOneTrust = (): [boolean, string, (callback: () => void) => void]
     const dataDomainScript ='03e0096b-3569-4b70-8a31-918e55aa20da'
     const [oneTrustActiveGroups, setOneTrustActiveGroups] = useState("");
     const [loaded, setLoaded] = useState(false)
+    console.log("useOT rendered, loaded " + loaded ? "true" : "false" + " oneTrustActiveGroups " + oneTrustActiveGroups + " window.OnetrustActiveGroups " + window.OnetrustActiveGroups)
 
     useEffect(() => {
+        console.log("useOT Effect Initializing")
         const script = document.createElement('script');
         script.src = src;
         script.type = 'text/javascript';
@@ -37,6 +39,7 @@ export const useOneTrust = (): [boolean, string, (callback: () => void) => void]
     }, []);
 
     useEffect(() => {
+        console.log("useOT Effect window.oneTrustActiveGroups " + window.OnetrustActiveGroups)
         if (window.OnetrustActiveGroups) {
             setOneTrustActiveGroups(window.OnetrustActiveGroups);
         }

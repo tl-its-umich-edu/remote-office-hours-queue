@@ -9,8 +9,9 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
 
     const [initialized, setInitialized] = useState(false);
     const [previousPage, setPreviousPage] = useState(null as string | null);
-
+    console.log("useGA rendered, initialized " + initialized ? "true" : "false")
     if (googleAnalyticsId && !initialized) {
+        console.log("useGA initializing");
         GoogleAnalytics.gtag("consent", "default", {
             ad_storage: "denied",
             analytics_storage: "denied",
@@ -26,10 +27,12 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
 
     const [loaded, oneTrustActiveGroups, setOptanonWrapper] = useOneTrust();
     if (loaded) {
-        console.log("loaded oneTrustActiveGroups" + oneTrustActiveGroups);
+        console.log("useGA loaded " + oneTrustActiveGroups);
     }
+    console.log("useGA oneTrustActiveGroups " + oneTrustActiveGroups);
 
     useEffect(() => {
+        console.log("useGA Effect location" + location.pathname + location.search + location.hash + " previousPage " + previousPage)
         const page = location.pathname + location.search + location.hash;
         if (googleAnalyticsId && page !== previousPage) {
             setPreviousPage(page);
@@ -38,7 +41,9 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
     }, [location]);
     
     useEffect(() => {
+        console.log("useGA Effect oneTrustActiveGroups" + oneTrustActiveGroups)
         const updateGtagConsent = () => {
+          console.log("updateGtagConsent RUN oneTrustActiveGroups " + oneTrustActiveGroups)
 
             if (oneTrustActiveGroups.includes("C0002")) {
               GoogleAnalytics.gtag("consent", "update", { analytics_storage: "granted" });
@@ -64,7 +69,6 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
             }
             // window.dataLayer.push({ event: 'um_consent_updated' });
             GoogleAnalytics.event({ action: 'um_consent_updated', category: 'consent' });
-            console.log("effect oneTrustActiveGroups "+ oneTrustActiveGroups);
           };
 
           setOptanonWrapper(updateGtagConsent)
