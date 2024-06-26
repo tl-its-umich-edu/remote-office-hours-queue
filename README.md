@@ -73,3 +73,12 @@ In order to send events, the environment variable `GA_TRACKING_ID` needs to be s
 your application's [measurement ID](https://support.google.com/analytics/answer/9539598#find-G-ID)
 and the `DEBUG` environment variable and Django setting need to be off or `False`.
 Thus, a deployment environment is currently the simplest place for testing.
+
+### Local Database
+
+The local PostgreSQL database is exposed with the port 5432. You can connect to it on localhost with the 
+```
+user: admin
+password: admin_pw
+```
+Make sure you don't have anything else running on this port. The credentials above are default and defined in `docker-compose.yml`
