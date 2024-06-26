@@ -4,8 +4,6 @@ version: '3.4'
 services:
 
   web:
-    env_file:
-      - .env
     build:
       context: src
     environment:
@@ -31,8 +29,6 @@ services:
       - POSTGRES_PASSWORD=admin_pw
     volumes:
       - officehours-postgres-data:/var/lib/postgresql/data
-    ports:
-      - "15432:5432"
 
   redis:
     image: redis:7
