@@ -8,24 +8,32 @@ import { PageProps } from "./page";
 import { QueueBase } from "../models";
 import { useUserWebSocket } from "../services/sockets";
 import { redirectToLogin } from "../utils";
+import * as api from "../services/api";
+import DownloadQueueHistoryModal from "./DownloadQueueHistoryModal";
+import { usePromise } from "../hooks/usePromise";
 
 
 interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
+    onSingleQueueHistoryDownload?: (queueId: number) => Promise<void>;
+    onAllQueueHistoryDownload?: () => Promise<void>;
 }
 
 function ManageQueueTable(props: ManageQueueTableProps) {
     const queueResults = props.queues.length
-        ? <QueueTable queues={props.queues} manageLink={true} />
+        ? <QueueTable queues={props.queues} manageLink={true} includeCSVDownload={true} handleCSVDownload={props.onSingleQueueHistoryDownload} />
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>;
     return (
         <div>
             {queueResults}
             <div className="mt-3">
                 <Link to="/add_queue" tabIndex={-1}>
-                    <Button variant='success' aria-label='Add Queue'>+ Add Queue</Button>
+                    <Button disabled={props.disabled} variant='success' aria-label='Add Queue'>+ Add Queue</Button>
                 </Link>
+                {props.onAllQueueHistoryDownload ? (
+                    <DownloadQueueHistoryModal disabled={props.disabled} onDownload={props.onAllQueueHistoryDownload} />
+                ) : null}
             </div>
         </div>
     );
@@ -37,14 +45,23 @@ export function ManagePage(props: PageProps) {
     }
     const [queues, setQueues] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
+    const [ doExportAllQueues, exportAllLoading, exportAllError ] = usePromise(() => api.exportAllQueueHistoryLogs() as Promise<void>);
+    const [ doExportQueue, exportQueueLoading, exportQueueError ] = usePromise((queueId: number) => api.exportQueueHistoryLogs(queueId) as Promise<void>);
+
     
     const errorSources = [
-        {source: 'User Connection', error: userWebSocketError}
+        {source: 'User Connection', error: userWebSocketError},
+        {source: 'Export All Queues', error: exportAllError},
+        {source: 'Export Queue', error: exportQueueError},
     ].filter(e => e.error) as FormError[];
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
     const queueTable = queues !== undefined
-        && <ManageQueueTable queues={queues} disabled={false}/>
+        && <ManageQueueTable 
+            queues={queues} 
+            disabled={exportAllLoading || exportQueueLoading} 
+            onSingleQueueHistoryDownload={doExportQueue}
+            onAllQueueHistoryDownload={doExportAllQueues}/>
     return (
         <div>
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />

@@ -2,7 +2,7 @@ import * as React from "react";
 import { createRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faSyncAlt, faClipboard, faClipboardCheck, faPencilAlt, faTrashAlt, faHome, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 import { Alert, Badge, Breadcrumb, Button, Form, InputGroup, Modal, Table } from "react-bootstrap";
 import { StringSchema } from "yup";
 
@@ -506,29 +506,43 @@ export const Breadcrumbs = (props: BreadcrumbsProps) => {
 interface QueueTableProps {
     queues: readonly QueueBase[];
     manageLink?: boolean | undefined;
+    includeCSVDownload?: boolean | undefined;
+    handleCSVDownload?: (queueId: number) => Promise<void>;
 }
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
+    const handleQueueHistoryExportSubmit = async (queueId: number) => {
+        if (props.handleCSVDownload === undefined) return;
+        await props.handleCSVDownload(queueId);
+    }
 
     const sortedQueues = sortQueues(props.queues.slice());
     const queueItems = sortedQueues.map(q => (
         <tr key={q.id}>
-            <td aria-label={`Queue ID Number`}>
+            <td className="align-middle" aria-label={`Queue ID Number`}>
                 <Link to={`${linkBase}${q.id}`}>
                     <Badge bg='primary' pill={true}>{q.id}</Badge>
                 </Link>
             </td>
-            <td aria-label={`Name for Queue ID ${q.id}`}>
+            <td className="align-middle" aria-label={`Name for Queue ID ${q.id}`}>
                 <Link to={`${linkBase}${q.id}`}>{q.name}</Link>
             </td>
-            <td aria-label={`Status for Queue ID ${q.id}`}>
+            <td className="align-middle" aria-label={`Status for Queue ID ${q.id}`}>
                 <Link to={`${linkBase}${q.id}`}>
                     <Badge bg={q.status === 'open' ? 'success' : 'danger'} pill={true}>
                         {q.status}
                     </Badge>
                 </Link>
             </td>
+            {props.includeCSVDownload && props.handleCSVDownload && (
+                <td className="align-middle" aria-label={`History for Queue ID ${q.id}`}>
+                    <Button onClick={() => handleQueueHistoryExportSubmit(q.id)}>
+                        <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
+                        Download
+                    </Button>
+                </td>
+            )}
         </tr>
     ));
     return (
@@ -538,6 +552,9 @@ export function QueueTable (props: QueueTableProps) {
                     <th aria-label='Queue ID Number'>Queue ID</th>
                     <th aria-label='Queue Name'>Name</th>
                     <th aria-label='Queue Status'>Status</th>
+                    {props.includeCSVDownload && (
+                        <th aria-label='Queue History' >Queue History</th>
+                    )}
                 </tr>
             </thead>
             <tbody>{queueItems}</tbody>
