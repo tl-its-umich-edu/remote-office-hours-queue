@@ -22,6 +22,7 @@ export const useOneTrust = (): [(googleAnalytics:GA4) => void] => {
     const initializeOneTrust = (googleAnalytics: GA4) => {
         console.log("OT initializing ")
         const updateGtagCallback = () => {
+            console.log("OT CALLBACK RUNNING")
             if (oneTrustActiveGroups.includes("C0002")) {
                 googleAnalytics.gtag("consent", "update", { analytics_storage: "granted" });
               }
@@ -52,9 +53,11 @@ export const useOneTrust = (): [(googleAnalytics:GA4) => void] => {
         const src = 'https://cdn.cookielaw.org/consent/03e0096b-3569-4b70-8a31-918e55aa20da/otSDKStub.js'
         const dataDomainScript ='03e0096b-3569-4b70-8a31-918e55aa20da'
         const script = document.createElement('script');
+        console.log("OT SCRIPT is added")
         script.src = src;
         script.type = 'text/javascript';
         script.dataset.domainScript = dataDomainScript;
+        document.head.appendChild(script);
     }
 
     return [ initializeOneTrust ];
