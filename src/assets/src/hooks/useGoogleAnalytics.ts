@@ -6,6 +6,7 @@ import { useOneTrust } from './useOneTrust';
 
 export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) => {
     let location = useLocation();
+    const [initializeOneTrust] = useOneTrust();
 
     const [initialized, setInitialized] = useState(false);
     const [previousPage, setPreviousPage] = useState(null as string | null);
@@ -21,15 +22,10 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
             ad_personalization: "denied",
             wait_for_update: 500
         });
-        setInitialized(true);
         GoogleAnalytics.initialize(googleAnalyticsId, { testMode: debug });
+        initializeOneTrust(GoogleAnalytics);
+        setInitialized(true);
     }
-
-    const [loaded, oneTrustActiveGroups, setOptanonWrapper] = useOneTrust();
-    if (loaded) {
-        console.log("useGA loaded " + oneTrustActiveGroups);
-    }
-    console.log("useGA oneTrustActiveGroups " + oneTrustActiveGroups);
 
     useEffect(() => {
         console.log("useGA Effect location" + location.pathname + location.search + location.hash + " previousPage " + previousPage)
@@ -39,38 +35,4 @@ export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) 
             GoogleAnalytics.send({ hitType: "pageview", page });
         }
     }, [location]);
-    
-    useEffect(() => {
-        console.log("useGA Effect oneTrustActiveGroups" + oneTrustActiveGroups)
-        const updateGtagConsent = () => {
-          console.log("updateGtagConsent RUN oneTrustActiveGroups " + oneTrustActiveGroups)
-
-            if (oneTrustActiveGroups.includes("C0002")) {
-              GoogleAnalytics.gtag("consent", "update", { analytics_storage: "granted" });
-            }
-            if (oneTrustActiveGroups.includes("C0003")) {
-              GoogleAnalytics.gtag("consent", "update", { functional_storage: "granted" });
-            }
-            if (oneTrustActiveGroups.includes("C0004")) {
-              GoogleAnalytics.gtag("consent", "update", {
-                ad_storage: "granted",
-                ad_user_data: "granted",
-                ad_personalization: "granted",
-                personalization_storage: "granted"
-              });
-            } else {
-              // Remove Google Analytics cookies if tracking is declined
-              document.cookie.split(';').forEach(cookie => {
-                const [name] = cookie.split('=');
-                if (name.trim().match(/^_ga(_.+)?$/)) {
-                  document.cookie = `${name}=;path=/;domain=.${window.location.host.replace(/^(.*\.)?(.+\..+)$/, '$2')};expires=Thu, 01 Jan 1970 00:00:01 GMT`;
-                }
-              });
-            }
-            // window.dataLayer.push({ event: 'um_consent_updated' });
-            GoogleAnalytics.event({ action: 'um_consent_updated', category: 'consent' });
-          };
-
-          setOptanonWrapper(updateGtagConsent)
-        }, [oneTrustActiveGroups]);
 }
