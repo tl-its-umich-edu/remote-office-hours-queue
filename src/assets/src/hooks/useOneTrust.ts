@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { GA4 } from 'react-ga4/types/ga4';
 
 declare global {
@@ -9,27 +8,21 @@ declare global {
   }
 
 export const useOneTrust = (): [(googleAnalytics:GA4) => void] => {
-    const [oneTrustActiveGroups, setOneTrustActiveGroups] = useState("");
-    console.log("useOT rendering, " + " oneTrustActiveGroups " + oneTrustActiveGroups + " window.OnetrustActiveGroups " + window.OnetrustActiveGroups)
-
-    useEffect(() => {
-        console.log("useOT Effect window.onerustActiveGroups " + window.OnetrustActiveGroups)
-        if (window.OnetrustActiveGroups) {
-            setOneTrustActiveGroups(window.OnetrustActiveGroups);
-        }
-    }, [window.OnetrustActiveGroups]);
 
     const initializeOneTrust = (googleAnalytics: GA4) => {
         console.log("OT initializing ")
         const updateGtagCallback = () => {
-            console.log("OT CALLBACK RUNNING")
-            if (oneTrustActiveGroups.includes("C0002")) {
+            if (!window.OnetrustActiveGroups) {
+              console.log("OT CALLBACK, no active groups")
+                return;
+            }
+            if (window.OnetrustActiveGroups.includes("C0002")) {
                 googleAnalytics.gtag("consent", "update", { analytics_storage: "granted" });
               }
-              if (oneTrustActiveGroups.includes("C0003")) {
+              if (window.OnetrustActiveGroups.includes("C0003")) {
                 googleAnalytics.gtag("consent", "update", { functional_storage: "granted" });
               }
-              if (oneTrustActiveGroups.includes("C0004")) {
+              if (window.OnetrustActiveGroups.includes("C0004")) {
                 googleAnalytics.gtag("consent", "update", {
                   ad_storage: "granted",
                   ad_user_data: "granted",
@@ -37,6 +30,7 @@ export const useOneTrust = (): [(googleAnalytics:GA4) => void] => {
                   personalization_storage: "granted"
                 });
               } else {
+                console.log("OT CALLBACK remove cookies! ")
                 // Remove Google Analytics cookies if tracking is declined
                 document.cookie.split(';').forEach(cookie => {
                   const [name] = cookie.split('=');
@@ -53,7 +47,6 @@ export const useOneTrust = (): [(googleAnalytics:GA4) => void] => {
         const src = 'https://cdn.cookielaw.org/consent/03e0096b-3569-4b70-8a31-918e55aa20da/otSDKStub.js'
         const dataDomainScript ='03e0096b-3569-4b70-8a31-918e55aa20da'
         const script = document.createElement('script');
-        console.log("OT SCRIPT is added")
         script.src = src;
         script.type = 'text/javascript';
         script.dataset.domainScript = dataDomainScript;
