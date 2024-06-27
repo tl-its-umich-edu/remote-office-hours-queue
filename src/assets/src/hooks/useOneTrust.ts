@@ -1,4 +1,5 @@
 import { GA4 } from 'react-ga4/types/ga4';
+import Cookies from "js-cookie";
 
 declare global {
     interface Window {
@@ -32,12 +33,10 @@ export const useOneTrust = (): [(googleAnalytics:GA4) => void] => {
               } else {
                 console.log("OT CALLBACK remove cookies! ")
                 // Remove Google Analytics cookies if tracking is declined
-                document.cookie.split(';').forEach(cookie => {
-                  const [name] = cookie.split('=');
-                  if (name.trim().match(/^_ga(_.+)?$/)) {
-                    document.cookie = `${name}=;path=/;domain=.${window.location.host.replace(/^(.*\.)?(.+\..+)$/, '$2')};expires=Thu, 01 Jan 1970 00:00:01 GMT`;
-                  }
-                });
+                // Uses same library as this GA4 implementation: https://dev.to/ramonak/react-enable-google-analytics-after-a-user-grants-consent-5bg3
+                Cookies.remove("_ga");
+                Cookies.remove("_gat");
+                Cookies.remove("_gid");
               }
               // window.dataLayer.push({ event: 'um_consent_updated' });
               googleAnalytics.event({ action: 'um_consent_updated', category: 'consent' });
