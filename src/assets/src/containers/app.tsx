@@ -18,8 +18,7 @@ interface AppProps {
 }
 
 export function App(props: AppProps) {
-    useGoogleAnalytics(props.globals.ga_tracking_id, props.globals.debug);
-    console.log("APP Rendered")
+    useGoogleAnalytics(props.globals.ga_tracking_id, props.globals.debug, props.globals.one_trust_script_domain);
 
     const commonProps: PageProps = {
         user: props.globals.user,

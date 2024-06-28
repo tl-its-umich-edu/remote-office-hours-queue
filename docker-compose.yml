@@ -11,6 +11,7 @@ services:
       - DEBUG=True
       - DATABASE_URL=postgresql://admin:admin_pw@database/admin
       - FEEDBACK_EMAIL=office-hours-devs@umich.edu
+      - ONE_TRUST_SCRIPT_DOMAIN=03e0096b-3569-4b70-8a31-918e55aa20da
     ports:
       - 8003:8001
     volumes:
