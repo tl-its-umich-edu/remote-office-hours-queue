@@ -8,9 +8,9 @@ export enum GoogleAnalyticsConsentValue {
     Granted = "granted"
 }
 
-export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean, oneTrustScriptDomain?: string) => {
+export const useGoogleAnalytics = (googleAnalyticsId?: string, debug?: boolean) => {
     let location = useLocation();
-    const [initializeOneTrust] = useOneTrust(oneTrustScriptDomain);
+    const [initializeOneTrust] = useOneTrust();
 
     const [initialized, setInitialized] = useState(false);
     const [previousPage, setPreviousPage] = useState(null as string | null);

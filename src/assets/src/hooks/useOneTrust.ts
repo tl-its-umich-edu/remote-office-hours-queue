@@ -18,11 +18,8 @@ enum OneTrustCookieCategory {
     SocialMedia = "C0005",
 }
 
-export const useOneTrust = (oneTrustScriptDomain?: string): [(googleAnalytics:GA4) => void] | [] => 
+export const useOneTrust = (): [(googleAnalytics:GA4) => void] | [] => 
   {
-    if (!oneTrustScriptDomain) {
-      return [];
-    }
     // Embeds the script for UofM OneTrust consent banner implementation
     // See instructions at https://vpcomm.umich.edu/resources/cookie-disclosure/#3rd-party-google-analytics
     const initializeOneTrust = (googleAnalytics: GA4) => {
@@ -59,6 +56,7 @@ export const useOneTrust = (oneTrustScriptDomain?: string): [(googleAnalytics:GA
           }
         window.OptanonWrapper = updateGtagCallback;
 
+        const oneTrustScriptDomain = "03e0096b-3569-4b70-8a31-918e55aa20da"
         const src =`https://cdn.cookielaw.org/consent/${oneTrustScriptDomain}/otSDKStub.js`
         
         const script = document.createElement('script');

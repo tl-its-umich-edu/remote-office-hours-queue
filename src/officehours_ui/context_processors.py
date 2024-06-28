@@ -42,6 +42,5 @@ def spa_globals(request):
             'backends': backend_dicts,
             'default_backend': settings.DEFAULT_BACKEND,
             'otp_request_buffer': settings.OTP_REQUEST_BUFFER,
-            'one_trust_script_domain': settings.ONE_TRUST_SCRIPT_DOMAIN
         }
     }
