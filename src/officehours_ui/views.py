@@ -1,3 +1,4 @@
+from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.http import Http404
@@ -45,3 +46,6 @@ def auth_callback_view(request, backend_name: IMPLEMENTED_BACKEND_NAME):
     except AttributeError:
         raise Http404(f"Backend {backend_name} does not use three-legged OAuth2.")
     return auth_callback(request)
+
+def privacy_policy_redirect_view(request):
+    return redirect(settings.PRIVACY_REDIRECT_URL)

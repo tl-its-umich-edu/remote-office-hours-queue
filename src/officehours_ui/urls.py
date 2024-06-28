@@ -2,7 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.views.generic.base import RedirectView
 
-from .views import SpaView, AuthPromptView, auth_callback_view
+from .views import SpaView, AuthPromptView, auth_callback_view, privacy_policy_redirect_view
 
 
 urlpatterns = [
@@ -19,4 +19,5 @@ urlpatterns = [
     path('callback/<backend_name>/', auth_callback_view, name='auth_callback'),
     path("robots.txt", RedirectView.as_view(url='/static/robots.txt', permanent=True)),
     path("favicon.ico", RedirectView.as_view(url='/static/favicon.ico', permanent=True)),
+    path("privacy/", privacy_policy_redirect_view, name='privacy-policy')
 ]
