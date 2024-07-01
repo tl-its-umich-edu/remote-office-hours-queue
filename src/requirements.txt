@@ -1,5 +1,5 @@
 django==3.2.25
-djangorestframework==3.14.0
+djangorestframework==3.15.2
 drf-spectacular==0.26.0
 mozilla-django-oidc==3.0.0
 whitenoise==6.3.0
