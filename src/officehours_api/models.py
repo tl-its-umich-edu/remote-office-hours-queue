@@ -260,3 +260,9 @@ def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
 
 if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID:
     import officehours_api.notifications
+
+# This is a proxy model so Django avoids dropping the table
+class MeetingStartLogsView(models.Model):
+    class Meta:
+        managed = False  # No migrations will be created for this model
+        db_table = 'meeting_start_logs'
