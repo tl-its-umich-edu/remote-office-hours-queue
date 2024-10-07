@@ -1,7 +1,7 @@
 from typing import Literal, Optional, TypedDict
 
 
-IMPLEMENTED_BACKEND_NAME = Literal['zoom', 'bluejeans', 'inperson']
+IMPLEMENTED_BACKEND_NAME = Literal['zoom', 'inperson']
 
 
 class BackendDict(TypedDict):

@@ -121,26 +121,15 @@ class ChannelLayersConfigTest(TestCase):
             self.assertEqual(settings.ZOOM_SIGN_IN_HELP, settings.ZOOM_SIGN_IN_HELP.strip())
             
     def test_backend_clients(self):
-        self.assertEqual(settings.BLUEJEANS_CLIENT_ID, settings.BLUEJEANS_CLIENT_ID.strip())
-        self.assertEqual(settings.BLUEJEANS_CLIENT_SECRET, settings.BLUEJEANS_CLIENT_SECRET.strip())
         self.assertEqual(settings.ZOOM_CLIENT_ID, settings.ZOOM_CLIENT_ID.strip())
         self.assertEqual(settings.ZOOM_CLIENT_SECRET, settings.ZOOM_CLIENT_SECRET.strip())
-       
-    def test_bluejeans_urls(self):
-        self.assertEqual(settings.BLUEJEANS_DOCS_URL, settings.BLUEJEANS_DOCS_URL.strip())
-        self.assertEqual(settings.BLUEJEANS_TELE_NUM, settings.BLUEJEANS_TELE_NUM.strip())
-        self.assertEqual(settings.BLUEJEANS_INTL_URL, settings.BLUEJEANS_INTL_URL.strip())
                 
     def test_backend_client_ids_and_secrets(self):
-        self.assertEqual(settings.BLUEJEANS_CLIENT_ID, settings.BLUEJEANS_CLIENT_ID.strip())
-        self.assertEqual(settings.BLUEJEANS_CLIENT_SECRET, settings.BLUEJEANS_CLIENT_SECRET.strip())
         self.assertEqual(settings.ZOOM_CLIENT_ID, settings.ZOOM_CLIENT_ID.strip())
         self.assertEqual(settings.ZOOM_CLIENT_SECRET, settings.ZOOM_CLIENT_SECRET.strip())
         
     def test_enabled_backends(self):
         self.assertIn('inperson', settings.ENABLED_BACKENDS)
-        if 'bluejeans' in settings.ENABLED_BACKENDS:
-            self.assertTrue(settings.BLUEJEANS_CLIENT_ID and settings.BLUEJEANS_CLIENT_SECRET)
         if 'zoom' in settings.ENABLED_BACKENDS:
             self.assertTrue(settings.ZOOM_CLIENT_ID and settings.ZOOM_CLIENT_SECRET)
                     

@@ -1,7 +1,7 @@
 # Remote Office Hours Queue
 
 The Remote Office Hours Queue application helps users to manage and participate in drop-in office hours virtually or in-person.
-The application can schedule and link to Zoom and BlueJeans video-conferencing meetings.
+The application can schedule and link to Zoom video-conferencing meetings.
 More information about how the tool works is available on the [U-M ITS documentation site](https://documentation.its.umich.edu/office-hours).
 
 ## Getting Started
@@ -26,10 +26,8 @@ a React implementation of Bootstrap, [react-bootstrap](https://react-bootstrap.g
 
 ### Backends
 
-Remote Office Hours Queue currently supports meetings in-person or via Zoom or BlueJeans.
-These meeting providers -- `inperson`, `zoom`, and `bluejeans` -- are considered *backends*.
-
-To use or develop with BlueJeans, set `BLUEJEANS_CLIENT_ID` and `BLUEJEANS_CLIENT_SECRET` as environment variables.
+Remote Office Hours Queue currently supports meetings in-person or via Zoom.
+These meeting providers -- `inperson`, and `zoom` -- are considered *backends*.
 
 To use or develop with Zoom, set `ZOOM_CLIENT_ID` and `ZOOM_CLIENT_SECRET` as environment variables.
 

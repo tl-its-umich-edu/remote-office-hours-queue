@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BluejeansMetadata, MeetingBackend, ZoomMetadata } from "../models";
+import { MeetingBackend, ZoomMetadata } from "../models";
 
 
 interface OneTouchDialLinkProps {
@@ -30,18 +30,6 @@ interface DialInMessageProps extends OneTouchDialLinkProps, IntlTelephoneLinkPro
     profileURL?: string;
 }
 
-const BlueJeansDialInMessage = (props: DialInMessageProps) => {
-    const phoneLinkUsa = <OneTouchDialLink {...props} />;
-    return (
-        <span>
-            Having problems with video? As a back-up, you can call {phoneLinkUsa} from the USA
-            (or <IntlTelephoneLink {...props} />)
-            from any phone and enter {props.meetingNumber}#.
-            You do not need a passcode to join the meeting.
-        </span>
-    );
-}
-
 const ZoomDialInMessage = (props: DialInMessageProps) => {
     const phoneLinkUsa = <OneTouchDialLink {...props} />;
 
@@ -66,7 +54,7 @@ const ZoomDialInMessage = (props: DialInMessageProps) => {
 }
 
 interface DialInContentProps {
-    metadata: BluejeansMetadata | ZoomMetadata;
+    metadata: ZoomMetadata;
     backend: MeetingBackend;
     isHost?: boolean;
 }
@@ -84,9 +72,7 @@ export const DialInContent = (props: DialInContentProps) => {
 
         dialInMessage = props.backend.name === 'zoom'
             ? <ZoomDialInMessage {...dialInProps} />
-            : props.backend.name === 'bluejeans'
-                ? <BlueJeansDialInMessage {...dialInProps} />
-                : null;
+            : null;
     } else {
         dialInMessage = <span>Once the meeting is created, instructions for calling in to the meeting on a phone will appear here.</span>;
     }
