@@ -28,8 +28,7 @@ export const UserDisplay = (props: UserDisplayProps) =>
 
 export const userLoggedOnWarning = (
     <Alert variant='primary'>
-        <strong>Note:</strong> The person you want to add needs to have logged on to Remote Office Hours Queue
-        at least once in order to be added.
+        <strong>Note:</strong> If the queue is not empty, hosts will not be notified. Please manually remove attendees from queue after meeting with them or they are no longer available.
     </Alert>
 );
 
