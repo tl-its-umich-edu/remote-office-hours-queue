@@ -1,6 +1,6 @@
-export type EnabledBackendName = 'zoom' | 'bluejeans' | 'inperson';
+export type EnabledBackendName = 'zoom' | 'inperson';
 
-export const VideoBackendNames: EnabledBackendName[] = ['zoom', 'bluejeans'];
+export const VideoBackendNames: EnabledBackendName[] = ['zoom'];
 
 export interface MeetingBackend {
     name: EnabledBackendName;
@@ -29,7 +29,7 @@ export interface MyUser extends User {
     authorized_backends: {[backend: string]: boolean};
 }
 
-export interface BluejeansMetadata {
+export interface ZoomMetadata {
     user_email: string;
     user_id: number;
     meeting_id: number;
@@ -37,8 +37,6 @@ export interface BluejeansMetadata {
     host_meeting_url: string;
     numeric_meeting_id: string;  // Number for dial-in / URL
 }
-
-export interface ZoomMetadata extends BluejeansMetadata {}
 
 export enum MeetingStatus {
     UNASSIGNED = 0,
@@ -53,7 +51,7 @@ export interface Meeting {
     agenda: string;
     assignee?: User;
     backend_type: EnabledBackendName;
-    backend_metadata?: BluejeansMetadata|ZoomMetadata;
+    backend_metadata?: ZoomMetadata;
     created_at: string;
     status: MeetingStatus;
 }
