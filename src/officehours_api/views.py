@@ -121,27 +121,27 @@ class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIVie
         user = self.request.user
         if user.profile.otp_expiration < datetime.now(timezone.utc):
             return "Your verification code has expired. Please request a new one."
-            
+
         elif user.profile.otp_token != request.data["otp_token"]:
             return "Incorect Verification Code Entered."
         return True
-    
+
     async def send_otp(self, request, *args, **kwargs):
         '''
         Send the OTP to the user's phone number.
         Returns True if the message was sent successfully, Error Response otherwise.
         '''
+        msg = ''
         self.generate_otp(request)
         try:
             if await send_one_time_password(request.data["otp_phone_number"], request.data["otp_token"]):
                 return True
         except Exception as e:
-            msg = ""
             if isinstance(e, TwilioClientNotInitializedException):
                 msg = "Cannot send verification code. Twilio configuration is not set up properly."
             else:
                 msg = "Failed to send verification code; please check your phone number and try again."
-        return Response({"detail": msg}, 
+        return Response({"detail": msg},
                                 status=status.HTTP_400_BAD_REQUEST)
     def update(self, request, *args, **kwargs):
         user = self.request.user
@@ -319,7 +319,7 @@ class ExportMeetingStartLogs(APIView):
         # Otherwise, get all the logs for the queues the user is a host of
         else:
             filename = f"meeting_start_logs_{username}.csv"
-        
+
         logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
@@ -338,7 +338,7 @@ class ExportMeetingStartLogs(APIView):
 
             # Write the headers
             writer.writerow(column_names)
-        
+
            # Write the data rows
             for row in rows:
                 writer.writerow(row)

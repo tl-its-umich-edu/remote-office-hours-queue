@@ -222,7 +222,7 @@ class UserOTPTestCase(TestCase):
 
     @patch("officehours_api.views.send_one_time_password")
     def test_send_otp_failure(self, mock_send_one_time_password):
-        mock_send_one_time_password.return_value = False
+        mock_send_one_time_password.side_effect = Exception('Failed to send OTP')
 
         url = f'/api/users/{self.user.id}/otp/'
         data = {
@@ -241,7 +241,7 @@ class UserOTPTestCase(TestCase):
         self.assertEqual(self.user.profile.otp_phone_number, "") # otp_phone_number not saved
         self.assertEqual(self.user.profile.otp_token, "") # otp_token not saved
 
-    @patch("officehours_api.notifications.twilio.messages.create")  
+    @patch("officehours_api.notifications.twilio.messages.create")
     @patch("officehours_api.views.UserOTP.generate_otp")
     def test_verify_otp_expired(self, mock_generate_otp, _):
         otp_token = "1234"
@@ -250,7 +250,7 @@ class UserOTPTestCase(TestCase):
             request.data["otp_token"] = otp_token
             request.data["otp_expiration"] = otp_expiration
         mock_generate_otp.side_effect = generate_otp
-        
+
         url = f'/api/users/{self.user.id}/otp/'
         data_send = {
             "action": "send",
