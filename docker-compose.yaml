@@ -12,9 +12,12 @@ services:
       - FEEDBACK_EMAIL=office-hours-devs@umich.edu
     ports:
       - 8003:8001
+      - 5678:5678
     volumes:
       - ./src:/usr/src/app:z
-    command: "python -m uvicorn officehours.asgi:application --host=0.0.0.0 --port=8001 --reload"
+    command: >
+      python -m debugpy --listen 0.0.0.0:5678 --wait-for-client
+      -m uvicorn officehours.asgi:application --host=0.0.0.0 --port=8001 --reload
     depends_on:
       - database
       - redis
