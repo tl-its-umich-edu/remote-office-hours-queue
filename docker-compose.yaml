@@ -1,5 +1,4 @@
 ---
-version: '3.4'
 
 services:
 
@@ -38,9 +37,9 @@ services:
     # This is to simulate an Openshift container with no write permission except to /tmp
     read_only: true
     tmpfs:
-        - /tmp
+      - /tmp
     volumes:
-        - officehours-redis-ro:/data:ro
+      - officehours-redis-ro:/data:ro
 
   webpack_watcher:
     build:

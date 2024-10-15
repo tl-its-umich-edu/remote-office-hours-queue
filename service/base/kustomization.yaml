@@ -27,8 +27,6 @@ secretGenerator:
   - secret/OIDC_OP_USER_ENDPOINT
   - secret/OIDC_OP_JWKS_ENDPOINT
   - secret/OIDC_CREATE_USER
-  - secret/BLUEJEANS_CLIENT_ID
-  - secret/BLUEJEANS_CLIENT_SECRET
   - secret/FEEDBACK_EMAIL
   - secret/ADMIN_EMAIL
   - secret/EMAIL_HOST

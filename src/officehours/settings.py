@@ -338,18 +338,8 @@ ZOOM_INTL_URL = os.getenv('ZOOM_INTL_URL', ZOOM_PROFILE_URL + '/setting?tab=tele
 ZOOM_TELE_NUM = os.getenv('ZOOM_TELE_NUM', '1.312.626.6799')
 ZOOM_SIGN_IN_HELP = os.getenv('ZOOM_SIGN_IN_HELP')
 
-BLUEJEANS_DOCS_URL = os.getenv('BLUEJEANS_DOCS_URL', DOCS_BASE_URL + 'blue-jeans/getting-started')
-BLUEJEANS_TELE_NUM = os.getenv('BLUEJEANS_TELE_NUM', '1.312.216.0325')
-BLUEJEANS_INTL_URL = os.getenv('BLUEJEANS_INTL_URL', 'https://www.bluejeans.com/premium-numbers')
-
 ENABLED_BACKENDS = {'inperson'}
 DEFAULT_BACKEND = "inperson"
-
-BLUEJEANS_CLIENT_ID = os.getenv('BLUEJEANS_CLIENT_ID', '').strip()
-BLUEJEANS_CLIENT_SECRET = os.getenv('BLUEJEANS_CLIENT_SECRET', '').strip()
-if BLUEJEANS_CLIENT_ID and BLUEJEANS_CLIENT_SECRET:
-    ENABLED_BACKENDS.add("bluejeans")
-    DEFAULT_BACKEND = "bluejeans"
 
 ZOOM_CLIENT_ID = os.getenv('ZOOM_CLIENT_ID', '').strip()
 ZOOM_CLIENT_SECRET = os.getenv('ZOOM_CLIENT_SECRET', '').strip()

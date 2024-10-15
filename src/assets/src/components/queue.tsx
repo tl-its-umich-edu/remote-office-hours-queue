@@ -5,7 +5,7 @@ import ReactGA from "react-ga4";
 import { Alert, Button, Card, Col, Modal, Row } from "react-bootstrap";
 
 import {
-    BluejeansMetadata, EnabledBackendName, Meeting, MeetingBackend, MeetingStatus, MyUser,
+    EnabledBackendName, Meeting, MeetingBackend, MeetingStatus, MyUser,
     QueueAttendee, User, VideoBackendNames, ZoomMetadata
 } from "../models";
 import {
@@ -177,7 +177,7 @@ const JoinedClosedAlert = (props: JoinedClosedAlertProps) => {
 }
 
 interface VideoMeetingInfoProps {
-    metadata: BluejeansMetadata | ZoomMetadata;
+    metadata: ZoomMetadata;
     backend: MeetingBackend;
 }
 
