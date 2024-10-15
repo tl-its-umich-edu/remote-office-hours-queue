@@ -32,7 +32,7 @@ spec:
   triggers:
   - type: "ImageChange"
     imageChangeParams:
-      automatic: true
+      automatic: false
       from:
         kind: "ImageStreamTag"
         name: "officehours:latest"
