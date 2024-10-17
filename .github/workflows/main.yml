@@ -1,0 +1,62 @@
+name: ROHQ Build/Release
+
+on:
+  push:
+    branches: 
+      - master
+ 
+# Used to release a new version
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version'
+        required: true
+        default: 'MAJOR.MINOR.MICRO'
+    description: 'Manually trigger the workflow to create a new version tag and draft a release. This must be run from a tag that is pre-created.'
+          
+
+jobs:
+  build:
+    # to test a feature, change the repo name to your github id. I'm not sure of a better way to check this.
+    if: github.repository_owner == 'tl-its-umich-edu' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+  
+      - name: Checkout code 
+        uses: actions/checkout@v4
+    
+      - name: Extract branch name
+        id: extract_branch
+        run: echo "BRANCH_NAME=$(basename ${{ github.ref }})" >> $GITHUB_ENV
+      
+      - name: build Docker image
+        run: |
+          docker build ./src --tag ghcr.io/${{ github.repository }}:${BRANCH_NAME}
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Push Docker image to GitHub Container Registry
+        run: |
+          docker push ghcr.io/${{ github.repository }}:${BRANCH_NAME}
+    
+  release: 
+    # Making sure that release only runs for tag pushes
+    if: startsWith(github.ref, 'refs/tags/') 
+    needs: build # This ensures the build job finishes successfully before starting this job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Draft Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
