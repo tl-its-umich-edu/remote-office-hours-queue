@@ -85,29 +85,7 @@ Make sure you don't have anything else running on this port. The credentials abo
 
 1. Open the project in Visual Studio Code.
 2. Install **[Python Debugger extension](https://code.visualstudio.com/docs/python/debugging)** inside VS Code
-3. At the project root folder, create .vscode/launch.json with the following content:
-    ```json
-   {
-     "version": "0.2.0",
-     "configurations": [
-       {
-         "name": "Python: Attach to Docker",
-         "type": "python",
-         "request": "attach",
-         "connect": {
-           "host": "localhost",
-           "port": 5678
-         },
-         "pathMappings": [
-           {
-             "localRoot": "${workspaceFolder}/src",
-             "remoteRoot": "/usr/src/app"
-           }
-         ]
-       }
-     ]
-   }
-4. Rebuild and run the Docker image:
-   `docker-compose build` and
-   `docker-compose up`
-5. In VSCode, open Command Palette: Press Cmd+Shift+P on macOS (or Ctrl+Shift+P on Windows/Linux) to open the Command Palette. Search for "Debug: Start Debugging". Set breakpoints and start debugging!
+3. Rebuild and run the Docker image:
+   `docker compose build` and
+   `docker compose up`
+4. In VSCode, open Command Palette: Press Cmd+Shift+P on macOS (or Ctrl+Shift+P on Windows/Linux) to open the Command Palette. Search for "Debug: Start Debugging". Set breakpoints and start debugging!
