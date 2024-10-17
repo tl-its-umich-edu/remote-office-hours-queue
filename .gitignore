@@ -1,6 +1,10 @@
 /.env
 
-/.vscode
+# Ignore all files in the vscode directory
+.vscode/*
+
+# Except for launch.json
+!.vscode/launch.json
 
 .DS_Store
 
