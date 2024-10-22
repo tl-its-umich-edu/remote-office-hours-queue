@@ -11,9 +11,10 @@ from django.shortcuts import redirect
 from officehours_api.backends.backend_base import BackendBase
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
 
-from pyzoom.schemas import ZoomMeetingSettings
-from pyzoom.oauth import refresh_tokens, request_tokens
 from pyzoom import ZoomClient
+from pyzoom.err import APIError as ZoomAPIError
+from pyzoom.oauth import refresh_tokens, request_tokens
+from pyzoom.schemas import ZoomMeetingSettings
 
 logger = logging.getLogger(__name__)
 
@@ -110,20 +111,18 @@ class Backend(BackendBase):
     @classmethod
     def _get_access_token(cls, user: User) -> str:
         zoom_meta = user.profile.backend_metadata['zoom']
+        logger.debug(f'Checking access token for {user.id} expires at {zoom_meta["access_token_expires"]} time {time()}')
         if time() > zoom_meta['access_token_expires']:
-            logger.debug('Refreshing token')
+            logger.debug(f'Refreshing token for {user.id}')
             # The refresh_tokens function from the PyZoom library replaces the request to /oauth/token
             # for the refresh token grant type
-            resp = refresh_tokens(cls.client_id, cls.client_secret, zoom_meta['refresh_token'])
-            if resp.status_code >= 400 and resp.status_code < 500:
-                # The refresh_token was invalidated somehow.
-                # Maybe the user removed our Zoom app's auth.
-                # Force them to be prompted again.
-                # The specific code sent by Zoom has changed before,
-                # so it now checks for any client error during refresh.
+            try:
+                token = refresh_tokens(cls.client_id, cls.client_secret, zoom_meta['refresh_token'])
+            except ZoomAPIError:
+                logger.info(f'Access token for user {user.id} seems to be invalid, attempting to clear.')
                 cls._clear_backend_metadata(user)
-            resp.raise_for_status()
-            token = resp.json()
+                raise
+
             new_zoom_data = {
                 'refresh_token': token['refresh_token'],
                 'access_token': token['access_token'],
@@ -136,8 +135,7 @@ class Backend(BackendBase):
     @classmethod
     def _get_client(cls, user: User) -> ZoomClient:
         """Gets a ZoomClient instance for the given user. Replaces the _get_session method."""
-        zoom_meta = user.profile.backend_metadata['zoom']
-        return ZoomClient(zoom_meta['access_token'])
+        return ZoomClient(cls._get_access_token(user))
 
     @classmethod
     def _create_meeting(cls, user: User) -> ZoomMeeting:
@@ -155,13 +153,19 @@ class Backend(BackendBase):
         meeting_settings.contact_name = user.first_name + ' ' + user.last_name
         meeting_settings.contact_email = user.email
         # invoke the create_meeting method of the ZoomClient instance
-        meeting = client.meetings.create_meeting(
-            topic='Remote Office Hours Queue Meeting',
-            start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
-            duration_min=60,
-            timezone='America/Detroit',
-            settings=meeting_settings
-        )
+        try:
+            meeting = client.meetings.create_meeting(
+                topic='Remote Office Hours Queue Meeting',
+                start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                duration_min=60,
+                timezone='America/Detroit',
+                settings=meeting_settings
+            )
+        except ZoomAPIError:
+            logger.info(f'Access token for user {user.id} seems to be invalid, attempting to clear.')
+            cls._clear_backend_metadata(user)
+            raise
+
         # The return value of meeting.json() is a string object
         meeting_json = json.loads(meeting.json())
         logger.info("Created meeting: %s", meeting_json)
@@ -184,7 +188,6 @@ class Backend(BackendBase):
             backend_metadata = {}
         if backend_metadata.get('meeting_id'):
             return backend_metadata
-
         meeting = cls._create_meeting(assignee)
         backend_metadata.update({
             'user_id': meeting['host_id'],
