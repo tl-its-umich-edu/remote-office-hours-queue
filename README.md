@@ -80,3 +80,12 @@ user: admin
 password: admin_pw
 ```
 Make sure you don't have anything else running on this port. The credentials above are default and defined in `docker-compose.yml`
+
+### Debug with Debugpy in Visual Studio Code
+
+1. Open the project in Visual Studio Code.
+2. Install **[Python Debugger extension](https://code.visualstudio.com/docs/python/debugging)** inside VS Code
+3. Rebuild and run the Docker image:
+   `docker compose build` and
+   `docker compose up`
+4. In VSCode, open Command Palette: Press Cmd+Shift+P on macOS (or Ctrl+Shift+P on Windows/Linux) to open the Command Palette. Search for "Debug: Start Debugging". Set breakpoints and start debugging!
