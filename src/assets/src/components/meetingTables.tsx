@@ -98,6 +98,15 @@ const InvalidMeeting = (props: MeetingEditorProps) => {
 
 }
 
+// format the time in seconds to hours, minutes, and seconds
+function formatTimeInSeconds(timeInSeconds: number): string {
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = timeInSeconds % 60;
+
+    return `${hours} hours ${minutes} minutes ${seconds} seconds`;
+}
+
 function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
     const attendee = props.meeting.attendees[0] ?? null;
     if (!attendee) return <InvalidMeeting {...props} />;
@@ -140,11 +149,15 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
                 </>
             );
 
+    // calculate the time different from now to the time user joined the queue
+    const secondsInQueue = Math.floor((new Date().getTime() - new Date(props.meeting.created_at).getTime()) / 1000);
+
     return (
         <>
         <td><UserDisplay user={attendee}/></td>
         <td><AssigneeSelector {...props} /></td>
         <td><MeetingDetails {...props} /></td>
+        <td>{formatTimeInSeconds(secondsInQueue)}</td>
         <td><Row>{meetingActions}</Row></td>
         </>
     );
@@ -240,6 +253,7 @@ export function MeetingsInQueueTable (props: MeetingsInQueueTableProps) {
                         <th scope="col">Attendee</th>
                         <th scope="col">Host</th>
                         <th scope="col">Details</th>
+                        <th scope="col">Time in Queue</th>
                         <th scope="col">Meeting Actions</th>
                     </tr>
                 </thead>
