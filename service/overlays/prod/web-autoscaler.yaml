@@ -1,6 +1,3 @@
 - op: replace
   path: /spec/scaleTargetRef/name
   value: officehours-web-prod
-- op: replace
-  path: /spec/maxReplicas
-  value: 4
