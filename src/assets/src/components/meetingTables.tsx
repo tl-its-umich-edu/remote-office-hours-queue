@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Button, Col, Form, Row, Table } from "react-bootstrap";
 
@@ -98,13 +98,19 @@ const InvalidMeeting = (props: MeetingEditorProps) => {
 
 }
 
+// format the value and unit into a string,
+// with the unit pluralized if the value is greater than 1
+function formatUnit(value: number, unit: string): string {
+    return `${value} ${unit}${value > 1 ? 's' : ''}`;
+}
+
 // format the time in seconds to hours, minutes, and seconds
 function formatTimeInSeconds(timeInSeconds: number): string {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = timeInSeconds % 60;
 
-    return `${hours} hours ${minutes} minutes ${seconds} seconds`;
+    return `${formatUnit(hours, 'hour')} ${formatUnit(minutes, 'minute')} ${formatUnit(seconds, 'second')}`;
 }
 
 function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
@@ -149,9 +155,16 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
                 </>
             );
 
-    // calculate the time different from now to the time user joined the queue
-    const secondsInQueue = Math.floor((new Date().getTime() - new Date(props.meeting.created_at).getTime()) / 1000);
+        // calculate the time different from now to the time user joined the queue
+        const [secondsInQueue, setSecondsInQueue] = useState(Math.floor((new Date().getTime() - new Date(props.meeting.created_at).getTime()) / 1000));
 
+        useEffect(() => {
+            const intervalId = setInterval(() => {
+                setSecondsInQueue(Math.floor((new Date().getTime() - new Date(props.meeting.created_at).getTime()) / 1000));
+            }, 5000);
+
+            return () => clearInterval(intervalId);
+        }, [props.meeting.created_at]);
     return (
         <>
         <td><UserDisplay user={attendee}/></td>
