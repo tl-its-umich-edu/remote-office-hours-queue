@@ -16,7 +16,7 @@ services:
     volumes:
       - ./src:/usr/src/app:z
     command: >
-      python -m debugpy --listen 0.0.0.0:5678 --wait-for-client
+      python -m debugpy --listen 0.0.0.0:5678
       -m uvicorn officehours.asgi:application --host=0.0.0.0 --port=8001 --reload
     depends_on:
       - database
