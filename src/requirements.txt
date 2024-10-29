@@ -16,3 +16,4 @@ channels==4.1.0
 channels-redis==4.2.0
 twilio==9.3.3
 debugpy==1.8.7
+pyzoom==1.0.8
