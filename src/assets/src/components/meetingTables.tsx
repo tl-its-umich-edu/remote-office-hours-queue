@@ -101,16 +101,16 @@ const InvalidMeeting = (props: MeetingEditorProps) => {
 // format the value and unit into a string,
 // with the unit pluralized if the value is greater than 1
 function formatUnit(value: number, unit: string): string {
-    return `${value} ${unit}${value > 1 ? 's' : ''}`;
+    return value === 0 ? '' : `${value}${unit}`;
 }
 
 // format the time in seconds to hours, minutes, and seconds
 function formatTimeInSeconds(timeInSeconds: number): string {
-    const hours = Math.floor(timeInSeconds / 3600);
-    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const days = Math.floor(Math.floor(timeInSeconds / 3600) / 24);
+    const hours = Math.floor(Math.floor(timeInSeconds / 3600) % 24);
+    const minutes = Math.floor(Math.floor(timeInSeconds / 60) % 60);
     const seconds = timeInSeconds % 60;
-
-    return `${formatUnit(hours, 'hour')} ${formatUnit(minutes, 'minute')} ${formatUnit(seconds, 'second')}`;
+    return `${formatUnit(days, 'd')} ${formatUnit(hours, 'h')} ${formatUnit(minutes, 'm')} ${formatUnit(seconds, 's')}`.trim();
 }
 
 function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
@@ -161,7 +161,7 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
         useEffect(() => {
             const intervalId = setInterval(() => {
                 setSecondsInQueue(Math.floor((new Date().getTime() - new Date(props.meeting.created_at).getTime()) / 1000));
-            }, 5000);
+            }, 1000);
 
             return () => clearInterval(intervalId);
         }, [props.meeting.created_at]);
