@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Button, Col, Form, Row, Table } from "react-bootstrap";
 
@@ -98,6 +98,21 @@ const InvalidMeeting = (props: MeetingEditorProps) => {
 
 }
 
+// format the value and unit into a string,
+// with the unit pluralized if the value is greater than 1
+function formatUnit(value: number, unit: string): string {
+    return value === 0 ? '' : `${value}${unit}`;
+}
+
+// format the time in seconds to hours, minutes, and seconds
+function formatTimeInSeconds(timeInSeconds: number): string {
+    const days = Math.floor(Math.floor(timeInSeconds / 3600) / 24);
+    const hours = Math.floor(Math.floor(timeInSeconds / 3600) % 24);
+    const minutes = Math.floor(Math.floor(timeInSeconds / 60) % 60);
+    const seconds = timeInSeconds % 60;
+    return `${formatUnit(days, 'd')} ${formatUnit(hours, 'h')} ${formatUnit(minutes, 'm')} ${formatUnit(seconds, 's')}`.trim();
+}
+
 function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
     const attendee = props.meeting.attendees[0] ?? null;
     if (!attendee) return <InvalidMeeting {...props} />;
@@ -140,11 +155,22 @@ function UnstartedMeetingEditor (props: UnstartedMeetingEditorProps) {
                 </>
             );
 
+        // calculate the time different from now to the time user joined the queue
+        const [secondsInQueue, setSecondsInQueue] = useState(Math.floor((new Date().getTime() - new Date(props.meeting.created_at).getTime()) / 1000));
+
+        useEffect(() => {
+            const intervalId = setInterval(() => {
+                setSecondsInQueue(Math.floor((new Date().getTime() - new Date(props.meeting.created_at).getTime()) / 1000));
+            }, 1000);
+
+            return () => clearInterval(intervalId);
+        }, [props.meeting.created_at]);
     return (
         <>
         <td><UserDisplay user={attendee}/></td>
         <td><AssigneeSelector {...props} /></td>
         <td><MeetingDetails {...props} /></td>
+        <td>{formatTimeInSeconds(secondsInQueue)}</td>
         <td><Row>{meetingActions}</Row></td>
         </>
     );
@@ -240,6 +266,7 @@ export function MeetingsInQueueTable (props: MeetingsInQueueTableProps) {
                         <th scope="col">Attendee</th>
                         <th scope="col">Host</th>
                         <th scope="col">Details</th>
+                        <th scope="col">Time in Queue</th>
                         <th scope="col">Meeting Actions</th>
                     </tr>
                 </thead>
