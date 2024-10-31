@@ -5,6 +5,6 @@ metadata:
 spec:
   tls:
   - hosts:
-    - test.officehours.it.umich.edu
-    - www.test.officehours.it.umich.edu
+    - qa.officehours.it.umich.edu
+    - www.qa.officehours.it.umich.edu
     secretName: web-tls
