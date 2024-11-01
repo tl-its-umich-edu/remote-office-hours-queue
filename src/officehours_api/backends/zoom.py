@@ -146,11 +146,12 @@ class Backend(BackendBase):
         # We are initializing the meeting settings with the default settings
         # and then modifying the settings we want to change
         meeting_settings = ZoomMeetingSettings.default_settings()
+        meeting_settings.audio='both'
         meeting_settings.waiting_room = True
         meeting_settings.join_before_host = False
         meeting_settings.meeting_authentication = False
         meeting_settings.use_pmi = False
-        meeting_settings.contact_name = user.first_name + ' ' + user.last_name
+        meeting_settings.contact_name = user.get_full_name()
         meeting_settings.contact_email = user.email
         # invoke the create_meeting method of the ZoomClient instance
         try:
