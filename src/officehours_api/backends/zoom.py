@@ -153,7 +153,7 @@ class Backend(BackendBase):
             in_meeting=False,
             join_before_host=False,
             meeting_authentication=False,
-            mute_upon_entry=True,
+            mute_upon_entry=False,
             participant_video=True,
             registrants_email_notification=False,
             use_pmi=False,
