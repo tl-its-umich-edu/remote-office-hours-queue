@@ -142,7 +142,7 @@ class Backend(BackendBase):
         """Creates a Zoom meeting for the given user."""
         client = cls._get_client(user)
         meeting_settings = ZoomMeetingSettings(
-            approval_type=0,
+            approval_type=2,
             audio='both',
             auto_recording='none',
             cn_meeting=False,
