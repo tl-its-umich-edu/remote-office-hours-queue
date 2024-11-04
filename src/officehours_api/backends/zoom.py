@@ -141,18 +141,25 @@ class Backend(BackendBase):
     def _create_meeting(cls, user: User) -> ZoomMeeting:
         """Creates a Zoom meeting for the given user."""
         client = cls._get_client(user)
-        user_id = user.profile.backend_metadata['zoom']['user_id']
-        # Specify the meeting settings
-        # We are initializing the meeting settings with the default settings
-        # and then modifying the settings we want to change
-        meeting_settings = ZoomMeetingSettings.default_settings()
-        meeting_settings.audio='both'
-        meeting_settings.waiting_room = True
-        meeting_settings.join_before_host = False
-        meeting_settings.meeting_authentication = False
-        meeting_settings.use_pmi = False
-        meeting_settings.contact_name = user.get_full_name()
-        meeting_settings.contact_email = user.email
+        meeting_settings = ZoomMeetingSettings(
+            approval_type=0,
+            audio='both',
+            auto_recording='none',
+            cn_meeting=False,
+            contact_email=user.email,
+            contact_name=user.get_full_name(),
+            enforce_login=True,
+            host_video=True,
+            in_meeting=False,
+            join_before_host=False,
+            meeting_authentication=False,
+            mute_upon_entry=True,
+            participant_video=True,
+            registrants_email_notification=False,
+            use_pmi=False,
+            waiting_room=True,
+            watermark=False)
+
         # invoke the create_meeting method of the ZoomClient instance
         try:
             meeting = client.meetings.create_meeting(
