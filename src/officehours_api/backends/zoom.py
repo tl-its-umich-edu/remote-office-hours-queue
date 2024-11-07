@@ -149,12 +149,12 @@ class Backend(BackendBase):
             contact_email=user.email,
             contact_name=user.get_full_name(),
             enforce_login=True,
-            host_video=True,
+            host_video=False,
             in_meeting=False,
             join_before_host=False,
             meeting_authentication=False,
             mute_upon_entry=False,
-            participant_video=True,
+            participant_video=False,
             registrants_email_notification=False,
             use_pmi=False,
             waiting_room=True,
@@ -167,6 +167,7 @@ class Backend(BackendBase):
                 start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 duration_min=60,
                 timezone='America/Detroit',
+                password=' ',
                 settings=meeting_settings
             )
         except ZoomAPIError:
