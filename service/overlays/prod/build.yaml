@@ -1,6 +1,6 @@
 - op: replace
   path: /spec/output/to/name
-  value: image-registry.openshift-image-registry.svc:5000/officehours/officehours:latest
+  value: image-registry.openshift-image-registry.svc:5000/officehours-prod/officehours:latest
 - op: replace
   path: /spec/source/git/ref
   value: master
