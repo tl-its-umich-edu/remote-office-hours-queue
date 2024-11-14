@@ -12,13 +12,17 @@ using [`kustomize`](https://kubectl.docs.kubernetes.io/guides/introduction/kusto
 1. Populate `service/base/secret/*` and `service/overlays/*/secret/*`.
 
     Sensitive values and files are located in the
-    [Office Hours Secrets](https://www.dropbox.com/sh/n1igrgdsm4rt4uf/AAAXLbZOT7tpVk8XZEQj5E0ca?dl=0)
+    "[ROHQ - Remote Office Hours Queue](https://www.dropbox.com/scl/fo/lzw5ttjkofjqidrv3vncp/h?rlkey=76068m9ngi7o52kijtff7zj84&dl=0)"
     Dropbox folder. Merge the `base` and `overlays` directories with their equivalents in the `service`
     directory in your local repository.
 
     1. Download `base.zip`: https://www.dropbox.com/scl/fo/ibafd6hctx55ezcaa5dof/h?rlkey=qv53e05fu1z9w0h8vire7cqjk&dl=1
+       
+       This link downloads the contents of the Dropbox `base` folder as a ZIP file.
     1. Extract `base.zip`: `(cd service/base; unzip base.zip)`
     1. Download `overlays.zip`: https://www.dropbox.com/scl/fo/9q8mvuezmvmw7524veshx/h?rlkey=gds439f8vb2531gkih221giqh&dl=1
+
+       This link downloads the contents of the Dropbox `overlays` folder as a ZIP file.
     1. Extract `overlays.zip`: `(cd service/overlays; unzip overlays.zip)`
 
 2. Install `kustomize`.
@@ -78,3 +82,8 @@ this case, name the files for the kind of artifact and its internal name.  Use
 for i in xx*; do sed '/^---$/,1d' $i > $(yq '.kind + "-" + .metadata.name + ".yaml"' $i); done; rm xx*
 ```
 
+## Updating secrets in Dropbox
+
+When downloading `base.zip` and `overlays.zip` in the steps above, the links are to Dropbox folders with the names `base` and `overlays`.  The format of the URLs in the links specify that Dropbox should create a ZIP file of each directory's contents and download it to the local computer.
+
+To update (change or add) values in the ZIP files, go to the appropriate folder in Dropbox and make the updates there. 
