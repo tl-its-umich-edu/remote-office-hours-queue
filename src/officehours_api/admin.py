@@ -50,7 +50,7 @@ class QueueAdmin(SafeDeleteAdmin):
     list_display = ('id', highlight_deleted, 'created_at', 'status') + SafeDeleteAdmin.list_display
     list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
-    actions = [export_selected_queues_with_details]
+    actions = SafeDeleteAdmin.actions + (export_selected_queues_with_details,)
 
     
 class AttendeeInline(admin.TabularInline):
