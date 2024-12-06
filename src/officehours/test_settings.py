@@ -78,6 +78,7 @@ class ChannelLayersConfigTest(TestCase):
             self.assertEqual(settings.EMAIL_HOST, settings.EMAIL_HOST.strip())
         self.assertTrue(settings.EMAIL_SUBJECT_PREFIX.startswith('['))
         self.assertTrue(settings.EMAIL_SUBJECT_PREFIX.endswith('] '))
+        self.assertEqual(settings.EMAIL_SUBJECT_PREFIX, settings.EMAIL_SUBJECT_PREFIX.strip())
 
     def test_admins_and_managers(self):
         self.assertIsInstance(settings.ADMINS, list)
