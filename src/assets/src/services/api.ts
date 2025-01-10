@@ -161,7 +161,7 @@ export const addMeeting = async (queue_id: number, user_id: number, backend_type
 }
 
 export const removeMeeting = async (meeting_id: number) => {
-    const resp = await fetch(`/api/meetings/${meeting_id}`, {
+    const resp = await fetch(`/api/meetings/${meeting_id}/`, {
         method: "DELETE",
         headers: getDeleteHeaders(),
     });
