@@ -10,3 +10,6 @@
 - op: replace
   path: /spec/triggers/0/imageChangeParams/from/namespace
   value: officehours-test
+- op: replace
+  path: /spec/triggers/0/imageChangeParams/automatic
+  value: true

@@ -5,7 +5,7 @@ metadata:
   labels:
     app: web
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     app: web
     org: umich
@@ -29,10 +29,17 @@ spec:
         envFrom:
         - secretRef:
             name: secrets
+        resources:
+          limits:
+            cpu: '1'
+            memory: 4Gi
+          requests:
+            cpu: 100m
+            memory: 256Mi
   triggers:
   - type: "ImageChange"
     imageChangeParams:
-      automatic: true
+      automatic: false
       from:
         kind: "ImageStreamTag"
         name: "officehours:latest"

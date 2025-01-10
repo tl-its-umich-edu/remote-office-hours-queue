@@ -7,8 +7,8 @@ More information about how the tool works is available on the [U-M ITS documenta
 ## Getting Started
 
 ```
-docker-compose up
-docker-compose run --entrypoint="" web python manage.py createsuperuser
+docker compose up
+docker compose run --entrypoint="" web python manage.py createsuperuser
 ```
 
 Visit `localhost:8003/admin` in your browser and log in with your admin credentials, then visit `localhost:8003` to see the app!
@@ -41,14 +41,14 @@ Twilio provides free trial accounts with limited credit.
 You can use special [test credentials](https://www.twilio.com/docs/iam/test-credentials) to not be charged.
 You can also test notifications via unit tests, where Twilio is mocked:
 ```
-docker-compose run web python manage.py test officehours_api.tests.NotificationTestCase
+docker compose run web python manage.py test officehours_api.tests.NotificationTestCase
 ```
 
 ### Migrations
 
 If you need to create migrations in the course of development, do it like so:
 ```
-docker-compose run web python manage.py makemigrations --settings=officehours.makemigrations_settings
+docker compose run web python manage.py makemigrations --settings=officehours.makemigrations_settings
 ```
 
 This will generate the migrations with all backends enabled as choices.
