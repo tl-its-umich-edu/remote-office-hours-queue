@@ -12,7 +12,7 @@ RUN npm run prod
 
 #####################################################################
 
-FROM python:3.10-slim-bullseye
+FROM python:3.13-slim-bullseye
 
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -22,14 +22,13 @@ WORKDIR /usr/src/app
 
 ENV WEB_CONCURRENCY=5
 
-RUN apt-get update
-RUN apt-get -y install gcc libpq-dev
-RUN pip install \
-    'gunicorn==20.1.0' \
-    'uvicorn[standard]==0.22.0' \
-    'psycopg2~=2.9.5'
+RUN apt-get update && \
+    apt-get -y install gcc libpq-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt /tmp
-RUN pip install -r /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt --no-cache-dir
 
 ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
 CMD ["sh", "-c", "gunicorn officehours.asgi:application --bind=0.0.0.0:8001 -k uvicorn.workers.UvicornWorker"]
