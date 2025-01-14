@@ -289,7 +289,7 @@ export const changeMeetingType = async (meeting_id: number, backend_type: string
 }
 
 export const startMeeting = async (meeting_id: number) => {
-    const resp = await fetch(`/api/meetings/${meeting_id}/start`, {
+    const resp = await fetch(`/api/meetings/${meeting_id}/start/`, {
         method: "POST",
         headers: getPostHeaders(),
     });
