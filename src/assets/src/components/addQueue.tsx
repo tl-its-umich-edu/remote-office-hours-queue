@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button, Col, Nav, Row, Tab } from "react-bootstrap";
+import { Button, Col, Form, Nav, Row, Tab } from "react-bootstrap";
 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoadingDisplay, LoginDialog } from "./common";
 import { PageProps } from "./page";
@@ -49,6 +49,11 @@ interface AddQueueEditorProps extends MultiTabEditorProps {
 
 // The 'tab-custom' role is used to override a default 'tab' role that resulted in tab links not being keyboard accessible.
 function AddQueueEditor(props: AddQueueEditorProps) {
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        props.onGeneralNextClick();
+    };
+
     return (
         <Tab.Container id='add-queue-editor' defaultActiveKey='general' activeKey={props.activeKey} onSelect={props.onTabSelect}>
             <Row>
@@ -70,19 +75,21 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                     <h1>Add Queue</h1>
                     <Tab.Content aria-live='polite'>
                         <Tab.Pane eventKey='general'>
-                            <GeneralEditor {...props} />
-                            <div className='mt-4'>
-                                <Button
-                                    variant='primary'
-                                    className={buttonSpacing}
-                                    aria-label='Next'
-                                    disabled={props.disabled}
-                                    onClick={props.onGeneralNextClick}
-                                >
-                                    Next
-                                </Button>
-                                <CancelAddButton disabled={props.disabled} />
-                            </div>
+                            <Form onSubmit={handleSubmit}>
+                                <GeneralEditor {...props} />
+                                <div className='mt-4'>
+                                    <Button
+                                        variant='primary'
+                                        className={buttonSpacing}
+                                        aria-label='Next'
+                                        disabled={props.disabled}
+                                        type='submit'
+                                    >
+                                        Next
+                                    </Button>
+                                    <CancelAddButton disabled={props.disabled} />
+                                </div>
+                            </Form>
                         </Tab.Pane>
                         <Tab.Pane eventKey='hosts'>
                             <ManageHostsEditor {...props} />

@@ -252,65 +252,6 @@ export const StatelessInputGroupForm: React.FC<StatelessValidatedInputFormProps>
     );
 }
 
-export const StatelessTextAreaForm: React.FC<StatelessValidatedInputFormProps> = (props) => {
-    const inputRef = useInitFocusRef<HTMLTextAreaElement>(!!props.initFocus);
-    const handleChange = (newValue: string) => props.onChangeValue(newValue);
-
-    let buttonBlock;
-    let handleSubmit;
-    if (props.buttonOptions) {
-        const { onSubmit, buttonType } = props.buttonOptions;
-        const buttonClass = `btn btn-${buttonType} remaining-controls`;
-        handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-            e.preventDefault();
-            onSubmit(props.value);
-        };
-        buttonBlock = (
-            <Button bsPrefix={buttonClass} type='submit' disabled={props.disabled}>
-                {props.children}
-            </Button>
-        );
-    }
-
-    let feedback;
-    if (props.validationResult) {
-        const { isInvalid, messages } = props.validationResult;
-        const feedbackTextClass = isInvalid ? ' text-danger' : '';
-        if (messages.length > 0) {
-            // Only show one message at a time.
-            feedback = <span className={`form-feedback${feedbackTextClass}`}>{messages[0]}</span>;
-        }
-    }
-
-    return (
-        <Form onSubmit={handleSubmit}>
-            <Form.Control
-                id={props.id}
-                className="mb-2"
-                as="textarea"
-                rows={5}
-                ref={inputRef}
-                value={props.value}
-                aria-label={props.formLabel}
-                placeholder={props.placeholder}
-                onChange={(e) => handleChange(e.currentTarget.value)}
-                disabled={props.disabled}
-                isInvalid={props.validationResult?.isInvalid}
-            />
-            {
-                (feedback || buttonBlock)
-                    ? (
-                        <div className="remaining-controls-group">
-                            {feedback}
-                            {buttonBlock}
-                        </div>
-                    )
-                    : undefined
-            }
-        </Form>
-    );
-}
-
 // Stateful Field Components
 
 interface SingleInputFieldProps {
