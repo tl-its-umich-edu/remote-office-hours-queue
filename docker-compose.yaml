@@ -6,10 +6,12 @@ services:
     build:
       context: src
     environment:
-      - ALLOWED_HOSTS=*
-      - DEBUG=True
-      - DATABASE_URL=postgresql://admin:admin_pw@database/admin
-      - FEEDBACK_EMAIL=office-hours-devs@umich.edu
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - DEBUG=${DEBUG:-True}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://admin:admin_pw@database/admin}
+      - FEEDBACK_EMAIL=${FEEDBACK_EMAIL:-officehours-devs@umich.edu}
+    env_file:
+      - .env
     ports:
       - 8003:8001
       - 5678:5678

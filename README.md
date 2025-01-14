@@ -6,6 +6,12 @@ More information about how the tool works is available on the [U-M ITS documenta
 
 ## Getting Started
 
+Note: The application has provided defaults and will start without providing any configuration. 
+If you want to customize the configuration for things like Zoom and Twilio you need to copy the `.env.sample` file to `.env`. 
+Then comment out and modify the environment variables for the settings you'd like to change. 
+
+To start up the application you'd use these steps with docker.
+
 ```
 docker compose up
 docker compose run --entrypoint="" web python manage.py createsuperuser
