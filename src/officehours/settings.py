@@ -14,6 +14,7 @@ import os
 
 import dj_database_url
 from django.core.management.utils import get_random_secret_key
+from officehours.logging_config import CustomLogFormatter
 
 
 def csv_to_list(csv, delim=','):
@@ -232,9 +233,9 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {message}',
-            'style': '{'
+        'custom': {
+            '()': CustomLogFormatter,
+            'format': CustomLogFormatter.log_format,
         },
     },
     'filters': {
@@ -250,7 +251,7 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
             'filters': ['skip_auth_callback_requests'],
-            'formatter': 'verbose',
+            'formatter': 'custom'
         },
         'mail_admins': {
             'level': 'ERROR',
