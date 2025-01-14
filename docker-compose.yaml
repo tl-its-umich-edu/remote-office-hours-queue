@@ -4,7 +4,8 @@ services:
 
   web:
     build:
-      context: src
+      context: .
+      dockerfile: src/Dockerfile
     environment:
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
       - DEBUG=${DEBUG:-True}
@@ -48,7 +49,8 @@ services:
 
   webpack_watcher:
     build:
-      context: src
+      context: .
+      dockerfile: src/Dockerfile
       target: node-webpack
     command: npm run watch
     volumes:
