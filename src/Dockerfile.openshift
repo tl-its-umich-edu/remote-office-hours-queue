@@ -23,11 +23,11 @@ WORKDIR /usr/src/app
 ENV WEB_CONCURRENCY=5
 
 RUN apt-get update && \
-    apt-get -y install gcc libpq-dev && \
+    apt-get -y install gcc libpq-dev git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /tmp
+COPY src/requirements.txt /tmp
 RUN pip install -r /tmp/requirements.txt --no-cache-dir
 
 ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
@@ -40,3 +40,13 @@ COPY --from=node-webpack /usr/src/app/node_modules node_modules
 
 COPY src /usr/src/app
 RUN chmod -R g+rw /usr/src/app
+
+# Used to retrieve the git information in the build
+COPY .git /src/usr/app/.git
+RUN bash -l -c /usr/src/app/scripts/git_version_info.sh
+
+# Remove .git folder
+RUN rm -rf /usr/src/app/.git
+
+# Clean up unused packages
+RUN apt-get remove -y git && apt-get autoremove -y
