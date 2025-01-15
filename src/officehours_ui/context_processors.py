@@ -38,6 +38,7 @@ def spa_globals(request):
             'feedback_email': getattr(settings, 'FEEDBACK_EMAIL', None),
             'debug': settings.DEBUG,
             'ga_tracking_id': settings.GA_TRACKING_ID,
+            'one_trust_script_domain': settings.ONE_TRUST_SCRIPT_DOMAIN,
             'login_url': settings.LOGIN_URL,
             'backends': backend_dicts,
             'default_backend': settings.DEFAULT_BACKEND,

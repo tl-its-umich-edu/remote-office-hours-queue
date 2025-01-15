@@ -19,11 +19,10 @@ interface AppProps {
 }
 
 export function App(props: AppProps) {
-    const oneTrustScriptDomain = "03e0096b-3569-4b70-8a31-918e55aa20da"
     useGoogleAnalytics({
         googleAnalyticsId: props.globals.ga_tracking_id, 
         debug: props.globals.debug,
-        oneTrustScriptDomain
+        oneTrustScriptDomain: props.globals.one_trust_script_domain
     });
 
     const commonProps: PageProps = {
