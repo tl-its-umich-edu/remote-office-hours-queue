@@ -119,18 +119,29 @@
     </script>
     {% block scripts %}{% endblock %}
 
-
     {% get_flatpages '/page-footer/' as flatpages %}
-    {% if flatpages.first and flatpages.first.content %}
-      <footer class="sticky-footer">
-        <div class="alert alert-info alert-footer" role="alert">
-          <div class="alert-footer-text">
-            {{flatpages.first.content|safe}}
-          </div>
+    <footer class="sticky-footer">
+      <div class="alert alert-info alert-footer" role="alert">
+        <div class="alert-footer-text">
+          <table cellspacing="8" style="width: 100%; padding: 8px">
+            <tr>
+              {% if flatpages.first and flatpages.first.content %}
+                  <td style="text-align: center; vertical-align: middle;">
+                      {{ flatpages.first.content|safe }}
+                  </td>
+              {% endif %}
+              {% if user.is_staff and git_version %}
+                  <td style="text-align: center; vertical-align: middle; color: white;">
+                      Git version: <a style="color: white" href="{{ git_version.repo }}/commit/{{ git_version.commit }}" target="_blank">{{ git_version.commit_abbrev }}</a>
+                      (commit)
+                      <a style="color: white" href="{{ git_version.repo }}/tree/{{ git_version.branch }}" target="_blank"> {{ git_version.branch }}</a> (branch)
+                  </td>
+              {% endif %}
+            </tr>
+          </table>
         </div>
-      </footer>
-    {% endif %}
-
+      </div>
+    </footer>
   </body>
 </html>
 

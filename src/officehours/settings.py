@@ -142,6 +142,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'officehours.urls'
 
+# Git info settings
+SHA_ABBREV_LENGTH = 7
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -157,6 +160,7 @@ TEMPLATES = [
                 'officehours_ui.context_processors.debug',
                 'officehours_ui.context_processors.login_url',
                 'officehours_ui.context_processors.spa_globals',
+                'officehours_ui.context_processors.get_git_version_info',
             ],
         },
     },
