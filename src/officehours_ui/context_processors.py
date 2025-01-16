@@ -58,29 +58,11 @@ def format_github_url_using_https(github_url: str):
     return github_url
 
 def get_git_version_info(request):
-    # read file content from /etc/git.version
-    # if exists, return the content
+    # read git version info from environment variables
     # else, return None
-    git_version_file = "/etc/git.version"
-
-    # each row of git.version file is of format name=value
-    # parse the rows into a dictionary
-    repo = None
-    branch = None
-    commit = None
-
-    if os.path.exists(git_version_file):
-        with open(git_version_file, "r") as f:
-            # each row of git.version file is of format name=value
-            # parse the rows into a dictionary
-            for line in f:
-                name, value = line.strip().split("=")
-                if name == "GIT_REPO":
-                    repo = value
-                elif name == "GIT_BRANCH":
-                    branch = value
-                elif name == "GIT_COMMIT":
-                    commit = value
+    repo = os.getenv("GIT_REPO", None)
+    branch = os.getenv("GIT_BRANCH", None)
+    commit = os.getenv("GIT_COMMIT", None)
 
     if not repo or not branch or not commit:
         return None
