@@ -11,14 +11,19 @@ import { QueuePage } from "../components/queue";
 import { QueueManagerPage } from "../components/queueManager";
 import { ManageQueueSettingsPage } from "../components/queueSettings";
 import { SearchPage } from "../components/search";
-import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
+import { useGoogleAnalytics } from "@tl-its-umich-edu/react-ga-onetrust-consent";
+
 
 interface AppProps {
     globals: Globals;
 }
 
 export function App(props: AppProps) {
-    useGoogleAnalytics(props.globals.ga_tracking_id, props.globals.debug);
+    useGoogleAnalytics({
+        googleAnalyticsId: props.globals.ga_tracking_id, 
+        debug: props.globals.debug,
+        oneTrustScriptDomain: props.globals.one_trust_script_domain
+    });
 
     const commonProps: PageProps = {
         user: props.globals.user,

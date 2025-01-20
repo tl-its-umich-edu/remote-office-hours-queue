@@ -309,6 +309,7 @@ MANAGERS = ADMINS
 
 # Google Analytics
 GA_TRACKING_ID = os.getenv('GA_TRACKING_ID')
+ONE_TRUST_SCRIPT_DOMAIN = os.getenv('ONE_TRUST_SCRIPT_DOMAIN')
 
 # Django Flatpages
 SITE_ID = 1

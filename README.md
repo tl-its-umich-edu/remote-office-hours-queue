@@ -70,12 +70,11 @@ The Swagger UI can be accessed by navigating to [`api/schema/swagger-ui`](http:/
 Once on the page, requests can be made against the API using the "Try it out" functionality.
 The OpenAPI schema can be downloaded as a YAML file from [`/api/schema`](http://localhost:8003/api/schema).
 
-### Google Analytics
+### Google Analytics and OneTrust
 
-This application is capable of being configured to use Google Analytics 4.
-In order to send events, the environment variable `GA_TRACKING_ID` needs to be set to
-your application's [measurement ID](https://support.google.com/analytics/answer/9539598#find-G-ID)
-and the `DEBUG` environment variable and Django setting need to be off or `False`.
+For both cookie consent privacy banner and analytics tracking, this application utilizes the Teaching and Learning Google Analytics OneTrust React Module which is directly imported from the [Github Repo](https://github.com/tl-its-umich-edu/react-ga-onetrust-consent). 
+In order to send events, you will need the environment variables `GA_TRACKING_ID` and `ONE_TRUST_SCRIPT_DOMAIN` to be set to your application's [measurement ID](https://support.google.com/analytics/answer/9539598#find-G-ID) and your OneTrust platform integration id, respectively. See the [U-M Cookie Disclosure guide](https://vpcomm.umich.edu/resources/cookie-disclosure/) for more information.
+Finally, the `DEBUG` environment variable and Django setting need to be off or `False`.
 Thus, a deployment environment is currently the simplest place for testing.
 
 ### Local Database
