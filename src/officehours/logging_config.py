@@ -1,3 +1,4 @@
+from django.conf import settings
 import logging
 
 class CustomLogFormatter(logging.Formatter):
@@ -13,7 +14,8 @@ class CustomLogFormatter(logging.Formatter):
 def setup_logger():
     log_format = '%(asctime)s [HTTP:%(http_status)s] [%(x_forwarded_for)s] "%(request_line)s" %(response_time)s'
     logger = logging.getLogger('custom_logger')
-    logger.setLevel(logging.DEBUG)
+    # Link the log level to the Django log level
+    logger.setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(CustomLogFormatter(log_format))
