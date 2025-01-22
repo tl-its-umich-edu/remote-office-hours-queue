@@ -23,7 +23,16 @@ spec:
     spec:
       containers:
       - name: web
-        image: docker-registry.default.svc:5000/officehours-dev/officehours:latest
+        image: image-registry.openshift-image-registry.svc:5000/officehours-dev/officehours:latest
+        command: ["python"]
+        args: [
+          "-m",
+          "uvicorn",
+          "officehours.asgi:application",
+          "--host=0.0.0.0",
+          "--port=8001",
+          "--forwarded-allow-ips=${FORWARDED_ALLOW_IPS}"  # Will be set via environment variable
+        ]
         ports:
         - containerPort: 8001
         envFrom:
