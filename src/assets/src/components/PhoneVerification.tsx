@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState } from "react";
 import { FormStatus } from "./preferences";
 import { validatePhoneNumber } from "../validation";
-import { Button, Col, Form, FormGroup, Row, Spinner } from "react-bootstrap";
+import { Button, Col, Form, Row, Spinner } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
 
 interface PhoneVerificationProps {
@@ -172,7 +172,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
     return (
         <>
         {otpStatus === OtpStatusValue.NotSent || otpStatus === OtpStatusValue.Sending || otpStatus === OtpStatusValue.Verified ? (
-            <FormGroup>
+            <Form.Group>
                 <div className="mb-3">
                     {phoneInput}
                 </div>
@@ -180,10 +180,10 @@ export function PhoneVerification(props: PhoneVerificationProps) {
                 {props.verifiedPhoneNumber !== props.phoneField && props.phoneField.length <= props.countryDialCode.length &&
                 <p className="text-danger">You've cleared your saved number. If you submit, re-verification may be required.</p>}
                 <Button variant="secondary" type="submit" disabled={props.disabled || alreadyVerified } onClick={getOneTimePassword}>Obtain a one-time phone verification code</Button>
-            </FormGroup>
+            </Form.Group>
         ) :
         (
-            <FormGroup>
+            <Form.Group>
                 <p>Enter the verification code sent to {formattedPhoneNumberToSubmit} (
                     <a onClick={() => setOtpStatus(OtpStatusValue.NotSent)} className="link-primary">edit</a>
                     )
@@ -199,7 +199,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
                     <Button variant="primary" type="submit" disabled={props.disabled} onClick={verifyOneTimePassword}>Verify</Button>
                     : <Button variant="secondary"><Spinner animation="border" size="sm" as="span" role="status" /> Verifying...</Button>
                 }
-            </FormGroup>
+            </Form.Group>
         )
         }
         {otpStatus !== OtpStatusValue.NotSent && otpStatus !== OtpStatusValue.Verified && 
