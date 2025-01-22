@@ -265,9 +265,24 @@ LOGGING = {
             'handlers': ['console', 'mail_admins'],
             'propagate': True,
         },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
         'mozilla_django_oidc': {
             'handlers': ['console'],
             'level': 'DEBUG',
+        },
+        'uvicorn': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+        'uvicorn.access': {
+            'handlers': ['console'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
         },
         **{
             app.split('.')[0]: {

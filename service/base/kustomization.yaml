@@ -38,6 +38,7 @@ secretGenerator:
   - secret/TWILIO_AUTH_TOKEN
   - secret/TWILIO_MESSAGING_SERVICE_SID
   - secret/ZOOM_SIGN_IN_HELP
+  - secret/FORWARDED_ALLOW_IPS
   name: secrets
   type: Opaque
 - files:
