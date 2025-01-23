@@ -8,6 +8,7 @@ resources:
 - web-service.yaml
 - web-ingress.yaml
 - build.yaml
+- imagestream.yaml
 labels:
 - includeSelectors: true
   pairs:
