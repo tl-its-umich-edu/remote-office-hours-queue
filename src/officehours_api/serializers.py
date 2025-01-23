@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from officehours_api.models import Queue, Meeting, MeetingStatus, Attendee
+from officehours_api.models import Queue, Meeting, MeetingStatus, Attendee, get_backend_types
 
 
 class UserContext(TypedDict):
@@ -229,7 +229,7 @@ class QueueHostSerializer(QueueAttendeeSerializer):
             return host_ids
 
     def validate_allowed_backends(self, value):
-        valid_backends = dict(get_backend_types()).keys()
+        valid_backends = {backend_type for backend_type, _ in get_backend_types()}
         for backend in value:
             if backend not in valid_backends:
                 raise serializers.ValidationError(f'Invalid backend type: {backend}')
@@ -296,7 +296,7 @@ class MeetingSerializer(serializers.ModelSerializer):
         return queue
 
     def validate_backend_type(self, value):
-        valid_backends = dict(get_backend_types()).keys()
+        valid_backends = {backend_type for backend_type, _ in get_backend_types()}
         if value not in valid_backends:
             raise serializers.ValidationError(f'Invalid backend type: {value}')
         return value
