@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Optional, Set
+from typing import List, Optional, Set, Tuple
 
 from django.conf import settings
 from django.db import models
@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.core.validators import MaxLengthValidator
+from django.core.validators import MaxLengthValidator, ValidationError
 from safedelete.models import (
     SafeDeleteModel, SOFT_DELETE_CASCADE, HARD_DELETE,
 )
@@ -34,9 +34,12 @@ def get_default_allowed_backends():
     return settings.DEFAULT_ALLOWED_BACKENDS
 
 
-def get_backend_types():
+def get_backend_types() -> List[Tuple[IMPLEMENTED_BACKEND_NAME, str]]:
+    """
+    Returns a list of tuples containing (backend_name, friendly_name) for each enabled backend.
+    """
     return [
-        [key, value.friendly_name]
+        (key, value.friendly_name)
         for key, value in BACKEND_INSTANCES.items()
     ]
 
@@ -96,7 +99,7 @@ class Queue(SafeDeleteModel):
         default='open',
     )
     allowed_backends = ArrayField(
-        models.CharField(max_length=20, choices=get_backend_types(), blank=False),
+        models.CharField(max_length=20, blank=False),
         default=get_default_allowed_backends,
     )
     inperson_location = models.CharField(max_length=100, blank=True)
@@ -111,6 +114,10 @@ class Queue(SafeDeleteModel):
         if default_backend not in new_allowed_backends:
             new_allowed_backends.append(default_backend)
         self.allowed_backends = new_allowed_backends
+
+    def clean(self):
+        super().clean()
+        # No need for backend validation here as it's handled in serializers
 
     def __str__(self):
         return self.name
@@ -140,7 +147,6 @@ class Meeting(SafeDeleteModel):
 
     backend_type = models.CharField(
         max_length=20,
-        choices=get_backend_types(),
         null=False,
         default=get_default_backend,
     )
@@ -154,7 +160,7 @@ class Meeting(SafeDeleteModel):
         if new_backend_name:
             if new_backend_name not in get_enabled_backends():
                 raise DisabledBackendException(new_backend_name)
-            if new_backend_name not in self.queue.allowed_backend:
+            if new_backend_name not in self.queue.allowed_backends:
                 raise NotAllowedBackendException(new_backend_name)
             self.backend_type = new_backend_name
             return
@@ -167,6 +173,10 @@ class Meeting(SafeDeleteModel):
             # Otherwise use first of queue.allowed_backends
             # Dependent on queue.allowed_backends remaining not nullable.
             self.backend_type = self.queue.allowed_backends[0]
+
+    def clean(self):
+        super().clean()
+        # No need for backend validation here as it's handled in serializers
 
     def __init__(self, *args, **kwargs):
         super(Meeting, self).__init__(*args, **kwargs)
