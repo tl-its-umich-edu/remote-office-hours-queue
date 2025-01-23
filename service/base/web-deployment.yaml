@@ -31,7 +31,7 @@ spec:
           "officehours.asgi:application",
           "--host=0.0.0.0",
           "--port=8001",
-          "--forwarded-allow-ips=${FORWARDED_ALLOW_IPS}"  # Will be set via environment variable
+          "--forwarded-allow-ips=${FORWARDED_ALLOW_IPS}" 
         ]
         ports:
         - containerPort: 8001
