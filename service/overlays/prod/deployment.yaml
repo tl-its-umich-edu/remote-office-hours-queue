@@ -7,6 +7,5 @@
 - op: replace
   path: /spec/template/metadata/labels/variant
   value: prod
-- op: replace
-  path: /spec/triggers/0/imageChangeParams/from/namespace
-  value: officehours-prod
+- op: remove
+  path: /spec/triggers
