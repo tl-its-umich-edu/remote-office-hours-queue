@@ -27,21 +27,8 @@ updates:
     groups:
       all-npm-dependencies:
         patterns: ["*"]
-    ignore: # Ignore react packages version 19 or above
-      - dependency-name: "react"
-        versions:
-          - ">=19.0.0"
-      - dependency-name: "react-dom"
-        versions:
-          - ">=19.0.0"
-      - dependency-name: "@types/react"
-        versions:
-          - ">=19.0.0"
-      - dependency-name: "@types/react-dom"
-        versions:
-          - ">=19.0.0"
-      - dependency-name: "react-router-dom"
-        versions:
-          - ">=7.0.0"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
 
