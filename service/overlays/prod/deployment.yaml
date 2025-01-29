@@ -1,12 +1,11 @@
 - op: replace
   path: /spec/template/spec/containers/0/image
-  value: image-registry.openshift-image-registry.svc:5000/officehours-prod/officehours:latest
+  value: rohq-latest-at-ghcr:latest
 - op: replace
   path: /spec/selector/variant
   value: prod
 - op: replace
   path: /spec/template/metadata/labels/variant
   value: prod
-- op: replace
-  path: /spec/triggers/0/imageChangeParams/from/namespace
-  value: officehours-prod
+- op: remove
+  path: /spec/triggers
