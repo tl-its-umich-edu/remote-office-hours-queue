@@ -42,7 +42,7 @@ spec:
       automatic: false
       from:
         kind: "ImageStreamTag"
-        name: "officehours-rohq-latest-at-ghcr-test:latest"
+        name: "officehours-rohq-latest-at-ghcr-dev:latest"
         namespace: "officehours-dev"
       containerNames:
       - "web"
