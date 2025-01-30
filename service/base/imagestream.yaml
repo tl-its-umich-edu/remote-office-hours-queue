@@ -7,6 +7,6 @@ spec:
     - name: latest
       from:
         kind: DockerImage
-        name: ghcr.io/tl-its-umich-edu/remote-office-hours-queue:latest
+        name: ghcr.io/tl-its-umich-edu/remote-office-hours-queue:master
       importPolicy:
         scheduled: true

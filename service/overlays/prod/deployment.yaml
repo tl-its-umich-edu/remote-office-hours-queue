@@ -1,6 +1,6 @@
 - op: replace
   path: /spec/template/spec/containers/0/image
-  value: rohq-latest-at-ghcr:latest
+  value: image-registry.openshift-image-registry.svc:5000/officehours-rohq-latest-at-ghcr-test/officehours:latest 
 - op: replace
   path: /spec/selector/variant
   value: prod
