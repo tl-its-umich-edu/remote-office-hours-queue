@@ -7,7 +7,7 @@ from django.db.models import F
 from django.db.models.query import QuerySet
 from django.http import HttpResponse
 from django.urls import path
-from django.utils.http import urlquote
+from urllib.parse import quote
 
 
 # from main.models import Volume, ItemPage
@@ -39,7 +39,7 @@ class ModelAdminExporter(ModelAdmin):
         (formattedIndex, volumeTitle) = ExportFormatter().format()
 
         response = HttpResponse(formattedIndex, content_type='text/csv')
-        filename = urlquote(f'export.csv')
+        filename = quote(f'export.csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
         return response
 
