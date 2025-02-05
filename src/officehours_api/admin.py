@@ -1,6 +1,9 @@
+import csv
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from safedelete.admin import SafeDeleteAdmin, highlight_deleted
 
 from officehours_api.models import Queue, Meeting, Attendee, Profile
@@ -24,6 +27,24 @@ class MeetingAdmin(admin.ModelAdmin):
     list_filter = ('queue',)
     search_fields = ['id', 'queue__name']
     inlines = (AttendeeInline,)
+    actions = ['export_as_csv']
+
+    def export_as_csv(self, request, queryset):
+        meta = self.model._meta
+        field_names = [field.name for field in meta.fields]
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename={meta}.csv'
+        writer = csv.writer(response)
+
+        writer.writerow(field_names)
+        for obj in queryset:
+            row = writer.writerow([getattr(obj, field) for field in field_names])
+
+        return response
+
+    export_as_csv.short_description = "Export Selected"
+
 
 
 class ProfileInline(admin.StackedInline):
