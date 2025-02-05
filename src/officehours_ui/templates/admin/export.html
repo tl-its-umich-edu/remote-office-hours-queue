@@ -1,0 +1,10 @@
+{% extends 'admin/change_form.html' %}
+
+{% block object-tools-items %}
+    {% if has_view_permission %}
+        <li>
+            <a href="about:blank">Export meeting data</a>
+        </li>
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
