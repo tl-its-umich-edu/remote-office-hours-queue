@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: docker-registry.default.svc:5000/officehours-dev/officehours:latest
+        image: image-registry.openshift-image-registry.svc:5000/officehours-dev/officehours-rohq-latest-at-ghcr-test:latest
         ports:
         - containerPort: 8001
         envFrom:
@@ -42,7 +42,7 @@ spec:
       automatic: false
       from:
         kind: "ImageStreamTag"
-        name: "officehours:latest"
+        name: "officehours-rohq-latest-at-ghcr-dev:latest"
         namespace: "officehours-dev"
       containerNames:
       - "web"

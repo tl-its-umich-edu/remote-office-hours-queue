@@ -1,6 +1,6 @@
 - op: replace
   path: /spec/template/spec/containers/0/image
-  value: image-registry.openshift-image-registry.svc:5000/officehours-test/officehours:latest
+  value: image-registry.openshift-image-registry.svc:5000/officehours-test/officehours-rohq-latest-at-ghcr-test:latest
 - op: replace
   path: /spec/selector/variant
   value: test
@@ -10,6 +10,9 @@
 - op: replace
   path: /spec/triggers/0/imageChangeParams/from/namespace
   value: officehours-test
+- op: replace
+  path: /spec/triggers/0/imageChangeParams/from/name
+  value: officehours-rohq-latest-at-ghcr-test:latest
 - op: replace
   path: /spec/triggers/0/imageChangeParams/automatic
   value: true
