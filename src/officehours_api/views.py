@@ -324,11 +324,13 @@ class ExportMeetingStartLogs(APIView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
+        logger.info(f"User {username} successfully exported meeting start logs for queues {repr(queues_user_is_in)}.")
         self.extract_log(queues_user_is_in, response)
 
         return response
 
-    def extract_log(self, queues, response):
+    @staticmethod
+    def extract_log(queues, response):
         writer = csv.writer(response)
         with connection.cursor() as cursor:
             queue_ids = ', '.join(map(str, queues))
