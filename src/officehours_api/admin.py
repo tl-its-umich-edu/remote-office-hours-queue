@@ -8,25 +8,10 @@ from safedelete.admin import SafeDeleteAdmin, highlight_deleted
 
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 
+admin.site.site_title = admin.site.site_header = 'ROHQ Admin'
+admin.site.index_title = 'Home'
 
-@admin.register(Queue)
-class QueueAdmin(SafeDeleteAdmin):
-    list_display = ('id', highlight_deleted, 'created_at', 'status') + SafeDeleteAdmin.list_display
-    list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
-    search_fields = ['id', 'name']
-
-
-class AttendeeInline(admin.TabularInline):
-    model = Attendee
-    extra = 1
-
-
-@admin.register(Meeting)
-class MeetingAdmin(admin.ModelAdmin):
-    list_display = ('id', 'queue', 'created_at')
-    list_filter = ('queue',)
-    search_fields = ['id', 'queue__name']
-    inlines = (AttendeeInline,)
+class ExporterAdminMixin:
     actions = ['export_as_csv']
 
     def export_as_csv(self, request, queryset):
@@ -43,8 +28,26 @@ class MeetingAdmin(admin.ModelAdmin):
 
         return response
 
-    export_as_csv.short_description = "Export Selected"
+    export_as_csv.short_description = 'Export meeting data for selection'
 
+@admin.register(Queue)
+class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
+    list_display = ('id', highlight_deleted, 'created_at', 'status') + SafeDeleteAdmin.list_display
+    list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
+    search_fields = ['id', 'name']
+
+
+class AttendeeInline(admin.TabularInline):
+    model = Attendee
+    extra = 1
+
+
+@admin.register(Meeting)
+class MeetingAdmin(admin.ModelAdmin):
+    list_display = ('id', 'queue', 'created_at')
+    list_filter = ('queue',)
+    search_fields = ['id', 'queue__name']
+    inlines = (AttendeeInline,)
 
 
 class ProfileInline(admin.StackedInline):
@@ -53,7 +56,7 @@ class ProfileInline(admin.StackedInline):
     verbose_name_plural = 'profile'
 
 
-class UserAdmin(BaseUserAdmin):
+class UserAdmin(ExporterAdminMixin, BaseUserAdmin):
     inlines = (ProfileInline,)
 
 
