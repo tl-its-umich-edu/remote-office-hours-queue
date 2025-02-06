@@ -328,24 +328,16 @@ class ExportMeetingStartLogs(APIView):
 
         return response
 
-    def extract_log(self, queues_user_is_in, response):
+    def extract_log(self, queues, response):
         writer = csv.writer(response)
         with connection.cursor() as cursor:
-            # Generate a string of placeholders, one for each item in the list
-            queue_id_placeholders = ', '.join(['%s'] * len(queues_user_is_in))
+            queue_ids = ', '.join(map(str, queues))
 
-            # Add a query to just get the logs for the queues_user_is_in
             cursor.execute(
-                f"SELECT * FROM meeting_start_logs where queue_id in ({queue_id_placeholders})",
-                queues_user_is_in)
+                'SELECT * FROM meeting_start_logs '
+                f'where queue_id in ({queue_ids})')
             rows = cursor.fetchall()
 
-            # Get column names from the cursor description
-            column_names = [desc[0] for desc in cursor.description]
+            column_names = map(lambda c: c[0], cursor.description)
 
-            # Write the headers
-            writer.writerow(column_names)
-
-            # Write the data rows
-            for row in rows:
-                writer.writerow(row)
+            writer.writerows([column_names] + rows)
