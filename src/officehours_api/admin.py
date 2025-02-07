@@ -1,5 +1,6 @@
 import csv
 import logging
+from pickletools import long1
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
@@ -19,38 +20,39 @@ admin.site.index_title = 'Home'
 class ExporterAdminMixin:
     actions = ['export_as_csv']
 
-    @staticmethod
-    def queues_queryset(selection_queryset):
+    def queues_queryset(self, request, selection_queryset):
         """
         Return a queryset of queues related to the selection queryset.
 
+        :param request: Django request object.
         :param selection_queryset: A queryset of objects for which queues will
           be found.
         :return: A queryset of queues represented by the selection.
         """
         raise NotImplementedError
 
-    def export_as_csv(self, _, queryset):
+    def export_as_csv(self, request, queryset):
         """
         Generate a CSV file of meetings in the queues represented by the
         selection, then return it, triggering a download in the browser.
 
-        :param _: Django passes the request object in the first parameter,
-          but we don't need it.
+        :param request: Django request object.
         :param queryset: The queryset of selected objects.
         :return:  CSV file of the queues represented by the selection.
         """
 
         meta = self.model._meta
-        queues_queryset = self.queues_queryset(queryset)
-        queue_ids = map(lambda λ: λ.id, queues_queryset)
+        queues_queryset = self.queues_queryset(request, queryset)
+        queue_ids = list(map(lambda λ: λ.id, queues_queryset))
+        # logger.info(f'Exporting {meta} for queues {repr(list(queue_ids))}')
 
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = f'attachment; filename={meta}.csv'
+        if len(queue_ids) > 0:
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename={meta}.csv'
 
-        ExportMeetingStartLogs.extract_log(queue_ids, response)
+            ExportMeetingStartLogs.extract_log(queue_ids, response)
 
-        return response
+            return response
 
     export_as_csv.short_description = 'Export meeting data for selection'
 
@@ -60,8 +62,7 @@ class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
     list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
 
-    @staticmethod
-    def queues_queryset(selection_queryset):
+    def queues_queryset(self, request, selection_queryset):
         return selection_queryset
 
 
@@ -87,9 +88,18 @@ class ProfileInline(admin.StackedInline):
 class UserAdmin(ExporterAdminMixin, BaseUserAdmin):
     inlines = (ProfileInline,)
 
-    @staticmethod
-    def queues_queryset(selection_queryset):
-        return Queue.objects.filter(hosts__in=selection_queryset)
+    def queues_queryset(self, request, selection_queryset):
+        queues = Queue.objects.filter(hosts__in=selection_queryset)
+        if len(queues) == 0:
+            uniqnames = list(map(lambda λ: λ.username, selection_queryset))
+            self.message_user(
+                request=request,
+                message='No queues were found with the selected '
+                        f'user{'s' if len(uniqnames) > 1 else ''} as host: '
+                        f'({', '.join(uniqnames)})',
+                level='ERROR'
+            )
+        return queues
 
 
 admin.site.unregister(User)
