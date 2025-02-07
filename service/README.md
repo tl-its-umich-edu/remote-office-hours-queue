@@ -56,18 +56,35 @@ For debugging purposes, it may be helpful to get the output from `kustomize`
 as individual files, one for each artifact.  This can be done by splitting the
 output into files and then giving those files meaningful names.
 
-If using `csplit` included with macOS, it may be necessary to adjust the
-number of splits (7)…
+### Using the provided script
+
+The `service/out/run.sh` script can be used to run Kustomize and the commands
+to split its output and rename the files.  To run the script, use the
+following commands:
 
 ```sh
-kustomize build overlays/prod | csplit -s - /^---$/ '{7}'
+cd service/out
+./run.sh
 ```
+
+The script will make multiple YAML files in the `out` directory corresponding
+to the artifacts that `kustomize` generates.  The files will be named
+according to the kind of artifact and its internal name.
+
+### Manual steps
 
 Using `gcsplit`, installed via Homebrew `coreutils` package, an asterisk
 indicates splitting as many times as necessary
 
 ```sh
 kustomize build overlays/prod | gcsplit -s - /^---$/ '{*}'
+```
+
+If using `csplit` included with macOS, it may be necessary to adjust the
+number of splits (7)…
+
+```sh
+kustomize build overlays/prod | csplit -s - /^---$/ '{7}'
 ```
 
 Finally, rename the `xx` files created by `csplit` with meaningful names.  In

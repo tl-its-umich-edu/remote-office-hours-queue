@@ -1,0 +1,12 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: rohq-latest-at-ghcr
+spec:
+  tags:
+    - name: latest
+      from:
+        kind: DockerImage
+        name: ghcr.io/tl-its-umich-edu/remote-office-hours-queue:master
+      importPolicy:
+        scheduled: true

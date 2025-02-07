@@ -27,3 +27,8 @@ updates:
     groups:
       all-npm-dependencies:
         patterns: ["*"]
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+
