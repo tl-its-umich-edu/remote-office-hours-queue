@@ -19,31 +19,38 @@ admin.site.index_title = 'Home'
 class ExporterAdminMixin:
     actions = ['export_as_csv']
 
-    def export_as_csv(self, request, queryset):
-        meta = self.model._meta
-        field_names = [field.name for field in meta.fields]
+    @staticmethod
+    def queues_queryset(selection_queryset):
+        """
+        Return a queryset of queues related to the selection queryset.
 
-        logger.info(f'Exporting {meta} data for selection {queryset}')
+        :param selection_queryset: A queryset of objects for which queues will
+          be found.
+        :return: A queryset of queues represented by the selection.
+        """
+        raise NotImplementedError
+
+    def export_as_csv(self, _, queryset):
+        """
+        Generate a CSV file of meetings in the queues represented by the
+        selection, then return it, triggering a download in the browser.
+
+        :param _: Django passes the request object in the first parameter,
+          but we don't need it.
+        :param queryset: The queryset of selected objects.
+        :return:  CSV file of the queues represented by the selection.
+        """
+
+        meta = self.model._meta
+        queues_queryset = self.queues_queryset(queryset)
+        queue_ids = map(lambda λ: λ.id, queues_queryset)
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename={meta}.csv'
 
-        logger.info(f'Exporting {meta} data for selection {repr(queryset)}')
-
-        queue_ids = [queue.id for queue in queryset]
-
-        # ExportMeetingStartLogs.as_view()(request, queryset=queryset)
         ExportMeetingStartLogs.extract_log(queue_ids, response)
 
         return response
-
-        # writer = csv.writer(response)
-        #
-        # writer.writerow(field_names)
-        # for obj in queryset:
-        #     writer.writerow([getattr(obj, field) for field in field_names])
-        #
-        # return response
 
     export_as_csv.short_description = 'Export meeting data for selection'
 
@@ -52,6 +59,10 @@ class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
     list_display = ('id', highlight_deleted, 'created_at', 'status') + SafeDeleteAdmin.list_display
     list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
+
+    @staticmethod
+    def queues_queryset(selection_queryset):
+        return selection_queryset
 
 
 class AttendeeInline(admin.TabularInline):
@@ -75,6 +86,10 @@ class ProfileInline(admin.StackedInline):
 
 class UserAdmin(ExporterAdminMixin, BaseUserAdmin):
     inlines = (ProfileInline,)
+
+    @staticmethod
+    def queues_queryset(selection_queryset):
+        return Queue.objects.filter(hosts__in=selection_queryset)
 
 
 admin.site.unregister(User)
