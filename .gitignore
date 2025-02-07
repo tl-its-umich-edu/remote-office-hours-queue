@@ -70,3 +70,4 @@ db.sqlite3
 secret
 node_modules
 webpack-stats.json
+service/out/*
