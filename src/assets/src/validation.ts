@@ -67,7 +67,12 @@ export const uniqnameSchema = string().defined().trim().lowercase()
     .matches(/^[^@]*$/, "Please use uniqname instead of email address.")
     .matches(/^[a-z]+$/i, "Uniqnames cannot contain non-alphabetical characters.")
     .min(3, 'Uniqnames must be at least 3 characters long.')
-    .max(8, 'Uniqnames must be at most 8 characters long.');
+    .max(8, 'Uniqnames must be at most 8 characters long.')
+    .matches(/^[^@]*$/, "You need to use a uniqname and not an email address")
+    .matches(/^[a-z@]+$/i, "Uniqnames cannot contain non-alphabetical characters.");
+export const emailSchema = string().defined().trim()
+    .matches(/^[a-zA-Z]+@umich\.edu$/, "Email must consist of letters and end with @umich.edu")
+    .matches(/^[a-z@]+$/i, "Uniqnames cannot contain non-alphabetical characters.");
 
 // Type validator(s)
 

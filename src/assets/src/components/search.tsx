@@ -26,15 +26,17 @@ export function SearchPage(props: PageProps) {
     useEffect(() => {
         if (term !== undefined) {
             doSearch(term);
+            console.log("search results: ", searchResults);
+
         } else {
             setSearchResults([]);
         }
     }, []);
-    const loadingDisplay = <LoadingDisplay loading={searchLoading}/>
+    const loadingDisplay = <LoadingDisplay loading={searchLoading} />
     const errorSources = [
-        {source: 'Search', error: searchError}
+        { source: 'Search', error: searchError }
     ].filter(e => e.error) as FormError[];
-    const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
+    const errorDisplay = <ErrorDisplay formErrors={errorSources} />
     const resultsDisplay = searchResults === undefined
         ? undefined
         : searchResults.length === 0
@@ -44,9 +46,10 @@ export function SearchPage(props: PageProps) {
                 </p>
             )
             : <QueueTable queues={searchResults} />
+    console.log('search results: ', searchResults)
     return (
         <div>
-            <Breadcrumbs currentPageTitle="Search"/>
+            <Breadcrumbs currentPageTitle="Search" />
             {loadingDisplay}
             {errorDisplay}
             <h1>Search Results: "{term}"</h1>
