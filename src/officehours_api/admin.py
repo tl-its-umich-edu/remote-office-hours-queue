@@ -7,13 +7,13 @@ from django.http import HttpResponse
 from safedelete.admin import SafeDeleteAdmin, highlight_deleted
 
 from officehours_api.models import Queue, Meeting, Attendee, Profile
-
 from officehours_api.views import ExportMeetingStartLogs
 
 logger = logging.getLogger(__name__)
 
 admin.site.site_title = admin.site.site_header = 'ROHQ Admin'
 admin.site.index_title = 'Home'
+
 
 class ExporterAdminMixin:
     actions = ['export_as_csv']
@@ -53,10 +53,11 @@ class ExporterAdminMixin:
 
     export_as_csv.short_description = 'Export meeting data for selection'
 
+
 @admin.register(Queue)
 class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
-    list_display = (('id', highlight_deleted, 'created_at', 'status') +
-                    SafeDeleteAdmin.list_display)
+    list_display = (('id', highlight_deleted, 'created_at',
+                     'status') + SafeDeleteAdmin.list_display)
     list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
 
@@ -110,13 +111,10 @@ class UserAdmin(ExporterAdminMixin, BaseUserAdmin):
         queues = Queue.objects.filter(hosts__in=selection_queryset)
         if len(queues) == 0:
             uniqnames = list(map(lambda λ: λ.username, selection_queryset))
-            self.message_user(
-                request=request,
+            self.message_user(request=request,
                 message='No queues were found with the selected '
-                        f'user{'s' * (len(uniqnames) > 1)} as host: '
-                        f'({', '.join(uniqnames)})',
-                level='ERROR'
-            )
+                        f'user{'s' * (len(uniqnames) > 1)} '
+                        f'({', '.join(uniqnames)}) as host.', level='ERROR')
         return queues
 
 
