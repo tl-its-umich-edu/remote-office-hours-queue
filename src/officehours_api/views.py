@@ -37,10 +37,16 @@ from officehours_api.serializers import (ShallowUserSerializer,
 logger = logging.getLogger(__name__)
 
 
-@extend_schema(responses={200: inline_serializer('api_root', {
-    'users': serializers.CharField(), 'queues': serializers.CharField(),
-    'meetings': serializers.CharField(),
-    'attendees': serializers.CharField()})})
+@extend_schema(
+    responses={
+        200: inline_serializer('api_root', {
+            'users': serializers.CharField(),
+            'queues': serializers.CharField(),
+            'meetings': serializers.CharField(),
+            'attendees': serializers.CharField()
+        })
+    }
+)
 @api_view(['GET'])
 def api_root(request, format=None):
     """
@@ -56,7 +62,6 @@ def api_root(request, format=None):
 
 class DecoupledContextMixin:
     """Decouple the context from the view layer."""
-
     def get_serializer_context(self):
         action = {
             'POST': 'WRITE',
@@ -74,21 +79,20 @@ class UserList(DecoupledContextMixin, generics.ListAPIView):
     serializer_class = ShallowUserSerializer
 
 
-class UserDetail(DecoupledContextMixin, LoggingMixin,
-                 generics.RetrieveUpdateAPIView):
+class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
 
-    def get_serializer(self, instance=None, data=None, many=None,
-                       partial=None):
+    def get_serializer(self, instance=None, data=None, many=None, partial=None):
         ctx = self.get_serializer_context()
         kwargs = {}
         if data:
             kwargs['data'] = data
         return (
             MyUserSerializer(instance, context=ctx, **kwargs)
-            if instance == ctx['user'] else
-            ShallowUserSerializer(instance, context=ctx, **kwargs))
+            if instance == ctx['user']
+            else ShallowUserSerializer(instance, context=ctx, **kwargs)
+        )
 
     def check_change_permission(self, request, user):
         if user != request.user:
@@ -104,9 +108,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin,
         self.check_change_permission(request, user)
         return super().partial_update(request, *args, **kwargs)
 
-
-class UserOTP(DecoupledContextMixin, LoggingMixin,
-              generics.RetrieveUpdateAPIView):
+class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = PhoneOTPSerializer
@@ -117,45 +119,35 @@ class UserOTP(DecoupledContextMixin, LoggingMixin,
 
     def generate_otp(self, request):
         request.data["otp_token"] = randint(1000, 9999)
-        request.data["otp_expiration"] = datetime.now(
-            timezone.utc) + timedelta(minutes=5)
+        request.data["otp_expiration"] = datetime.now(timezone.utc) + timedelta(minutes=5)
 
     def verify_otp(self, request):
-        """
-        Returns True if the OTP is correct, and a string with an error
-        message otherwise
-        """
+        """Returns True if the OTP is correct, and a string with an error message otherwise"""
         user = self.request.user
         if user.profile.otp_expiration < datetime.now(timezone.utc):
-            return ("Your verification code has expired. "
-                    "Please request a new one.")
+            return "Your verification code has expired. Please request a new one."
 
         elif user.profile.otp_token != request.data["otp_token"]:
-            return "Incorrect Verification Code Entered."
+            return "Incorect Verification Code Entered."
         return True
 
     async def send_otp(self, request, *args, **kwargs):
         """
         Send the OTP to the user's phone number.
-        Returns True if the message was sent successfully, Error Response
-        otherwise.
+        Returns True if the message was sent successfully, Error Response otherwise.
         """
         msg = ''
         self.generate_otp(request)
         try:
-            if await send_one_time_password(request.data["otp_phone_number"],
-                                            request.data["otp_token"]):
+            if await send_one_time_password(request.data["otp_phone_number"], request.data["otp_token"]):
                 return True
         except Exception as e:
             if isinstance(e, TwilioClientNotInitializedException):
-                msg = ("Cannot send verification code. "
-                       "Twilio configuration is not set up properly.")
+                msg = "Cannot send verification code. Twilio configuration is not set up properly."
             else:
-                msg = ("Failed to send verification code; please check your "
-                       "phone number and try again.")
+                msg = "Failed to send verification code; please check your phone number and try again."
         return Response({"detail": msg},
-                        status=status.HTTP_400_BAD_REQUEST)
-
+                                status=status.HTTP_400_BAD_REQUEST)
     def update(self, request, *args, **kwargs):
         user = self.request.user
         self.check_change_permission(request, user)
@@ -172,31 +164,29 @@ class UserOTP(DecoupledContextMixin, LoggingMixin,
                 request.data["phone_number"] = user.profile.otp_phone_number
                 request.data["otp_token"] = ""
                 request.data["otp_phone_number"] = ""
-                request.data["otp_expiration"] = datetime.now(
-                    timezone.utc) - timedelta(minutes=1)
+                request.data["otp_expiration"] = datetime.now(timezone.utc) - timedelta(minutes=1)
                 return super().update(request, *args, **kwargs)
             else:
-                return Response({"detail": verified},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({"detail": verified}, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, *args, **kwargs):
         user = self.request.user
         self.check_change_permission(request, user)
         return super().partial_update(request, *args, **kwargs)
 
-
 class UserUniqnameDetail(UserDetail):
     lookup_field = 'username'
 
 
-class QueueList(DecoupledContextMixin, LoggingMixin,
-                generics.ListCreateAPIView):
+class QueueList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
     serializer_class = QueueHostSerializer
 
     def get_queryset(self):
         user = (
-            self.request.user if self.request.user.is_authenticated else None)
+            self.request.user
+            if self.request.user.is_authenticated else None
+        )
         return Queue.objects.filter(hosts__in=list(filter(None, [user])))
 
 
@@ -208,8 +198,7 @@ class QueueListSearch(DecoupledContextMixin, generics.ListAPIView):
     filterset_fields = ['status']
 
 
-class QueueDetail(DecoupledContextMixin, LoggingMixin,
-                  generics.RetrieveUpdateDestroyAPIView):
+class QueueDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Queue.objects.all()
     serializer_class = QueueHostSerializer
@@ -218,11 +207,9 @@ class QueueDetail(DecoupledContextMixin, LoggingMixin,
     def get(self, request, pk, format=None):
         queue = self.get_object()
         if is_host(request.user, queue):
-            serializer = QueueHostSerializer(queue,
-                                             context={'user': request.user})
+            serializer = QueueHostSerializer(queue, context={'user': request.user})
         else:
-            serializer = QueueAttendeeSerializer(queue, context={
-                'user': request.user})
+            serializer = QueueAttendeeSerializer(queue, context={'user': request.user})
         return Response(serializer.data)
 
 
@@ -242,11 +229,9 @@ class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
         try:
             host = queue.hosts.get(pk=user_id)
         except ObjectDoesNotExist:
-            return Response({'detail': 'Host not found.'},
-                            status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Host not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = ShallowUserSerializer(host,
-                                           context={'user': request.user})
+        serializer = ShallowUserSerializer(host, context={'user': request.user})
         return Response(serializer.data)
 
     def post(self, request, pk, user_id, format=None):
@@ -254,8 +239,7 @@ class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
         self.check_queue_permission(request, queue)
         host = get_object_or_404(User, pk=user_id)
         queue.hosts.add(host)
-        serializer = ShallowUserSerializer(host,
-                                           context={'user': request.user})
+        serializer = ShallowUserSerializer(host, context={'user': request.user})
         return Response(serializer.data)
 
     def delete(self, request, pk, user_id, format=None):
@@ -266,8 +250,7 @@ class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class MeetingList(DecoupledContextMixin, LoggingMixin,
-                  generics.ListCreateAPIView):
+class MeetingList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
     serializer_class = MeetingSerializer
 
@@ -276,8 +259,7 @@ class MeetingList(DecoupledContextMixin, LoggingMixin,
         return Meeting.objects.filter(attendees__in=[user])
 
 
-class MeetingDetail(DecoupledContextMixin, LoggingMixin,
-                    generics.RetrieveUpdateDestroyAPIView):
+class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Meeting.objects.all()
     serializer_class = MeetingSerializer
@@ -287,8 +269,7 @@ class MeetingDetail(DecoupledContextMixin, LoggingMixin,
         try:
             return super().update(request, *args, **kwargs)
         except MeetingStartedException as e:
-            return Response({'Meeting Detail': e.message},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Meeting Detail': e.message}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
@@ -302,8 +283,7 @@ class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
         try:
             m.start()
         except DisabledBackendException as e:
-            return Response({'Start Meeting': e.message},
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Start Meeting': e.message}, status=status.HTTP_400_BAD_REQUEST)
         m.save()
         serializer = MeetingSerializer(m)
         return Response(serializer.data)
@@ -321,28 +301,23 @@ class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
 
-
 class ExportMeetingStartLogs(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, queue_id=None, format=None):
         username = request.user.username
 
-        # Query the Queue table to find all queues of which the user is a host
-        queues_user_is_in = Queue.all_objects.filter(
-            hosts__in=[request.user]).values_list('id', flat=True)
+        # Query from the Queue hosts table to find all the queues the user is a host of, include deleted
+        queues_user_is_in = Queue.all_objects.filter(hosts__in=[request.user]).values_list('id', flat=True)
 
         # If the user isn't in any queues return a 204 error
         if not queues_user_is_in:
-            return Response({'detail': 'You are not a host of any queues.'},
-                            status=status.HTTP_204_NO_CONTENT)
-        # If a single queue id specified, check user is a host and return that
+            return Response({'detail': 'You are not a host of any queues.'}, status=status.HTTP_204_NO_CONTENT)
+        # If they specify a single queue id, check if they're actually in it and return that
         elif queue_id:
             # Security check that they are actually in this queue
             if queue_id not in queues_user_is_in:
-                return Response(
-                    {'detail': 'You are not a host of this queue.'},
-                    status=status.HTTP_403_FORBIDDEN)
+                return Response({'detail': 'You are not a host of this queue.'}, status=status.HTTP_403_FORBIDDEN)
             else:
                 queues_user_is_in = [queue_id]
                 filename = f"meeting_start_logs_{username}_queue_{queue_id}.csv"
@@ -350,13 +325,11 @@ class ExportMeetingStartLogs(APIView):
         else:
             filename = f"meeting_start_logs_{username}.csv"
 
-        logger.info(f"User {username} requested to export meeting start logs "
-                    f"for queues {queues_user_is_in}.")
+        logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-        logger.info(f"User {username} successfully exported meeting start "
-                    f"logs for queues {repr(queues_user_is_in)}.")
+        logger.info(f"User {username} successfully exported meeting start logs for queues {repr(queues_user_is_in)}.")
         self.extract_log(queues_user_is_in, response)
 
         return response
@@ -367,8 +340,9 @@ class ExportMeetingStartLogs(APIView):
         with connection.cursor() as cursor:
             queue_ids = ', '.join(map(str, queues))
 
-            cursor.execute('select * from meeting_start_logs '
-                           f'where queue_id in ({queue_ids})')
+            cursor.execute(
+                'SELECT * FROM meeting_start_logs '
+                f'where queue_id in ({queue_ids})')
             rows = cursor.fetchall()
 
             column_names = map(lambda λ: λ[0], cursor.description)
