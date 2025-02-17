@@ -15,9 +15,9 @@ fontawesomefree==6.6.0
 django-safedelete==1.4.0
 django-redirect-to-non-www==0.1.1
 drf-api-tracking==1.8.4
-django-filter==24.3
+django-filter==25.1
 channels==4.2.0
 channels-redis==4.2.1
-twilio==9.4.4
+twilio==9.4.5
 debugpy==1.8.12
 pyzoom==1.0.8
