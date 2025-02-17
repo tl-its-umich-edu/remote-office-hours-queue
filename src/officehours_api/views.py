@@ -2,35 +2,40 @@ import csv
 import logging
 from datetime import datetime, timezone, timedelta
 from random import randint
-from django.db import connection
+
+from asgiref.sync import async_to_sync
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.core.exceptions import ObjectDoesNotExist
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import generics, serializers, status, filters
+from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework_tracking.mixins import LoggingMixin
-from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
-from asgiref.sync import async_to_sync, sync_to_async
 
-from officehours_api.notifications import send_one_time_password
-from officehours_api.exceptions import DisabledBackendException, MeetingStartedException, TwilioClientNotInitializedException
+from officehours_api.exceptions import DisabledBackendException, \
+    MeetingStartedException, TwilioClientNotInitializedException
 from officehours_api.models import Attendee, Meeting, Queue
-from officehours_api.serializers import (
-    ShallowUserSerializer, MyUserSerializer, ShallowQueueSerializer, QueueAttendeeSerializer,
-    QueueHostSerializer, MeetingSerializer, AttendeeSerializer, PhoneOTPSerializer
-)
-from officehours_api.permissions import (
-    IsAssignee, IsHostOrReadOnly, IsHostOrAttendee, is_host
-)
+from officehours_api.notifications import send_one_time_password
+from officehours_api.permissions import (IsAssignee, IsHostOrReadOnly,
+                                         IsHostOrAttendee, is_host)
+from officehours_api.serializers import (ShallowUserSerializer,
+                                         MyUserSerializer,
+                                         ShallowQueueSerializer,
+                                         QueueAttendeeSerializer,
+                                         QueueHostSerializer,
+                                         MeetingSerializer, AttendeeSerializer,
+                                         PhoneOTPSerializer)
 
 logger = logging.getLogger(__name__)
+
 
 @extend_schema(
     responses={
@@ -44,9 +49,9 @@ logger = logging.getLogger(__name__)
 )
 @api_view(['GET'])
 def api_root(request, format=None):
-    '''
+    """
     View available endpoints.
-    '''
+    """
     return Response({
         'users': reverse('user-list', request=request, format=format),
         'queues': reverse('queue-list', request=request, format=format),
@@ -127,10 +132,10 @@ class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIVie
         return True
 
     async def send_otp(self, request, *args, **kwargs):
-        '''
+        """
         Send the OTP to the user's phone number.
         Returns True if the message was sent successfully, Error Response otherwise.
-        '''
+        """
         msg = ''
         self.generate_otp(request)
         try:
@@ -324,23 +329,22 @@ class ExportMeetingStartLogs(APIView):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
-        writer = csv.writer(response)
-        with connection.cursor() as cursor:
-            # Generate a string of placeholders, one for each item in the list
-            queue_id_placeholders = ', '.join(['%s'] * len(queues_user_is_in))
-
-            # Add a query to just get the logs for the queues_user_is_in
-            cursor.execute(f"SELECT * FROM meeting_start_logs where queue_id in ({queue_id_placeholders})", queues_user_is_in)
-            rows = cursor.fetchall()
-
-            # Get column names from the cursor description
-            column_names = [desc[0] for desc in cursor.description]
-
-            # Write the headers
-            writer.writerow(column_names)
-
-           # Write the data rows
-            for row in rows:
-                writer.writerow(row)
+        logger.info(f"User {username} successfully exported meeting start logs for queues {repr(queues_user_is_in)}.")
+        self.extract_log(queues_user_is_in, response)
 
         return response
+
+    @staticmethod
+    def extract_log(queues, response):
+        writer = csv.writer(response)
+        with connection.cursor() as cursor:
+            queue_ids = ', '.join(map(str, queues))
+
+            cursor.execute(
+                'SELECT * FROM meeting_start_logs '
+                f'where queue_id in ({queue_ids})')
+            rows = cursor.fetchall()
+
+            column_names = map(lambda λ: λ[0], cursor.description)
+
+            writer.writerows([column_names] + rows)
