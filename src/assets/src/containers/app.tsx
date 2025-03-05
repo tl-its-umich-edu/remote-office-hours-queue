@@ -11,7 +11,7 @@ import { QueuePage } from "../components/queue";
 import { QueueManagerPage } from "../components/queueManager";
 import { ManageQueueSettingsPage } from "../components/queueSettings";
 import { SearchPage } from "../components/search";
-import { useGoogleAnalytics } from "@tl-its-umich-edu/react-ga-onetrust-consent";
+import { InitializeConsentManagerParams, useGoogleAnalytics, useUmConsent } from "@tl-its-umich-edu/react-ga-onetrust-consent";
 
 
 interface AppProps {
@@ -19,11 +19,21 @@ interface AppProps {
 }
 
 export function App(props: AppProps) {
-    useGoogleAnalytics({
+    const { gaInitialized, gaHandlers } = useGoogleAnalytics({
         googleAnalyticsId: props.globals.ga_tracking_id, 
         debug: props.globals.debug,
-        oneTrustScriptDomain: props.globals.one_trust_script_domain
     });
+
+    const { umConsentInitialize, umConsentInitialized } = useUmConsent();    
+    if (!umConsentInitialized && gaInitialized && gaHandlers.onConsentApprove && gaHandlers.onConsentReject) {
+        const consentParams: InitializeConsentManagerParams = {
+            developmentMode: false,
+            alwaysShow: false,
+            onConsentApprove: gaHandlers.onConsentApprove,
+            onConsentReject: gaHandlers.onConsentReject,
+        }
+        umConsentInitialize(consentParams);
+    }
 
     const commonProps: PageProps = {
         user: props.globals.user,
