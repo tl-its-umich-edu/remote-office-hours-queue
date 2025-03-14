@@ -50,7 +50,8 @@ export function App(props: AppProps) {
                                 cookie_flags: "SameSite=None; Secure"
                             }
                         },
-                        externalLinkBlank: true
+                        externalLinkBlank: true,
+                        privacyUrl: false,
                         }
                     `}  
                     </script>
