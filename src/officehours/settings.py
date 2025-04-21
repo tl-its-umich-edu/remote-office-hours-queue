@@ -40,7 +40,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = str_to_bool(os.getenv('DEBUG', 'off'))
 
-ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', None))
+ALLOWED_HOSTS = csv_to_list(os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1'))
 
 
 # Application definition
@@ -65,11 +65,11 @@ INSTALLED_APPS = [
     'safedelete',
     'watchman',
     'webpack_loader',
-    'rest_framework_tracking',
+    #'rest_framework_tracking',
     'django_filters',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'fontawesomefree'
+    #'fontawesomefree'
 ]
 
 if DEBUG:
@@ -135,7 +135,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'redirect_to_non_www.middleware.RedirectToNonWww',
+    #'redirect_to_non_www.middleware.RedirectToNonWww',
     'officehours_api.middleware.FilteredBrokenLinkEmailsMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
 ]

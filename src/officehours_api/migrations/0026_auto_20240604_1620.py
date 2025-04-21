@@ -45,11 +45,11 @@ class Migration(migrations.Migration):
             name='deleted',
             field=models.DateTimeField(db_index=True, editable=False, null=True),
         ),
-        migrations.AlterField(
-            model_name='queue',
-            name='allowed_backends',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[['inperson', 'In Person']], max_length=20), default=officehours_api.models.get_default_allowed_backends, size=None),
-        ),
+        #migrations.AlterField(
+         #   model_name='queue',
+          #  name='allowed_backends',
+           # field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[['inperson', 'In Person']], max_length=20), default=officehours_api.models.get_default_allowed_backends, size=None),
+        #),
         migrations.AlterField(
             model_name='queue',
             name='deleted',

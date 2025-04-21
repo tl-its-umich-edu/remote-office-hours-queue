@@ -1,5 +1,11 @@
 import logging
 
+#Added for custom host filter
+from django.contrib.admin import SimpleListFilter
+from django.contrib.auth import get_user_model
+from officehours_api.admin_filters import ActualHostsFilter
+from officehours_api.admin_filters import ActualQueuesFilter
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
@@ -53,12 +59,28 @@ class ExporterAdminMixin:
 
     export_as_csv.short_description = 'Export meeting data for selection'
 
+#Custom admin filter to only show users who are actual hosts
+User = get_user_model()
+
+class HostOnlyFilter(SimpleListFilter):
+    title = 'host'
+    parameter_name = 'host'
+
+    def lookups(self, request, model_admin):
+        hosts = User.objects.filter(queue__isnull=False).distinct()
+        return [(host.id, host.username) for host in hosts]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(hosts__id=self.value())
+        return queryset
 
 @admin.register(Queue)
 class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
     list_display = (('id', highlight_deleted, 'created_at',
                      'status') + SafeDeleteAdmin.list_display)
-    list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
+    #Replaced default 'hosts' filter with custom filter for real hosts only
+    list_filter = (ActualHostsFilter, 'status') + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
 
     def queues_queryset(self, request, selection_queryset):
@@ -82,7 +104,7 @@ class AttendeeInline(admin.TabularInline):
 @admin.register(Meeting)
 class MeetingAdmin(admin.ModelAdmin):
     list_display = ('id', 'queue', 'created_at')
-    list_filter = ('queue',)
+    list_filter = (ActualQueuesFilter,) # Updated to use custom filter
     search_fields = ['id', 'queue__name']
     inlines = (AttendeeInline,)
 
@@ -113,8 +135,8 @@ class UserAdmin(ExporterAdminMixin, BaseUserAdmin):
             uniqnames = list(map(lambda λ: λ.username, selection_queryset))
             self.message_user(request=request,
                 message='No queues were found with the selected '
-                        f'user{'s' * (len(uniqnames) > 1)} '
-                        f'({', '.join(uniqnames)}) as host.', level='ERROR')
+                        f"user{'s' * (len(uniqnames) > 1)} "
+                        f"({', '.join(uniqnames)}) as host.", level='ERROR')
         return queues
 
 

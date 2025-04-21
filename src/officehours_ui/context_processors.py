@@ -65,7 +65,7 @@ def get_git_version_info(request):
     commit = os.getenv("GIT_COMMIT", None)
 
     if not repo or not branch or not commit:
-        return None
+        return {}
 
     # Only include the branch name and not remote info
     branch = branch.split('/')[-1]
