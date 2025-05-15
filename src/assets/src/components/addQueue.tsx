@@ -12,8 +12,7 @@ import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
-import { Helmet } from "react-helmet-async";
-import { createTitle } from "../title";
+import { HelmetTitle } from "../title";
 
 
 enum AvailableTabs {
@@ -227,9 +226,7 @@ export function AddQueuePage(props: PageProps) {
 
     return (
         <div>
-            <Helmet>
-                <title>{createTitle("Add Queue")}</title>
-            </Helmet>
+            <HelmetTitle title="Add Queue" />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs
                 intermediatePages={[{ title: 'Manage', href: '/manage/' }]}

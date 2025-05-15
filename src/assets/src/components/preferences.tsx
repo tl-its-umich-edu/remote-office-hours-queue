@@ -12,8 +12,8 @@ import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 import { validatePhoneNumber } from "../validation";
 import { PhoneVerification } from "./PhoneVerification";
-import { Helmet } from "react-helmet-async";
-import { createTitle } from "../title";
+import { HelmetTitle } from "../title";
+
 interface PreferencesEditorProps {
     user: MyUser;
     disabled: boolean;
@@ -119,9 +119,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
 
     return (
         <div>
-            <Helmet>
-                <title>{createTitle("Preferences")}</title>
-            </Helmet>
+            <HelmetTitle title="Preferences" />
             <h1>View/Update Preferences</h1>
             {alertBlock}
             <Form onSubmit={validateAndSubmit}>

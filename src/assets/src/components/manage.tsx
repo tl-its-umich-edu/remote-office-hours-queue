@@ -11,8 +11,7 @@ import { redirectToLogin } from "../utils";
 import * as api from "../services/api";
 import DownloadQueueHistoryModal from "./DownloadQueueHistoryModal";
 import { usePromise } from "../hooks/usePromise";
-import { Helmet } from "react-helmet-async";
-import { createTitle } from "../title";
+import { HelmetTitle } from "../title";
 
 interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
@@ -65,9 +64,7 @@ export function ManagePage(props: PageProps) {
             onAllQueueHistoryDownload={doExportAllQueues}/>
     return (
         <div>
-            <Helmet>
-                <title>{createTitle("Manage")}</title>
-            </Helmet>
+            <HelmetTitle title="Manage" />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs currentPageTitle="Manage"/>
             {errorDisplay}

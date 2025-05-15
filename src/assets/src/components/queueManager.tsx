@@ -24,8 +24,7 @@ import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
-import { Helmet } from "react-helmet-async";
-import { createTitle } from "../title";
+import { HelmetTitle } from "../title";
 
 interface AddAttendeeFormProps {
     allowedBackends: Set<string>;
@@ -134,9 +133,7 @@ function QueueManager(props: QueueManagerProps) {
 
     return (
         <div>
-            <Helmet>
-                <title>{createTitle("Manage Queue")}</title>
-            </Helmet>
+            <HelmetTitle title="Manage Queue" />
             <div className="float-end">
                 <Link to={`/manage/${props.queue.id}/settings`} tabIndex={-1}>
                     <Button variant="primary" aria-label="Settings">
