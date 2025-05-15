@@ -11,7 +11,7 @@ import { redirectToLogin } from "../utils";
 import * as api from "../services/api";
 import DownloadQueueHistoryModal from "./DownloadQueueHistoryModal";
 import { usePromise } from "../hooks/usePromise";
-import { HelmetTitle } from "../title";
+import { HelmetTitle } from "./pageTitle";
 
 interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;

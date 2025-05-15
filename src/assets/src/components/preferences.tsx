@@ -12,7 +12,7 @@ import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 import { validatePhoneNumber } from "../validation";
 import { PhoneVerification } from "./PhoneVerification";
-import { HelmetTitle } from "../title";
+import { HelmetTitle } from "./pageTitle";
 
 interface PreferencesEditorProps {
     user: MyUser;

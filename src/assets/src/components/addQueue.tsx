@@ -12,7 +12,7 @@ import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
-import { HelmetTitle } from "../title";
+import { HelmetTitle } from "./pageTitle";
 
 
 enum AvailableTabs {

@@ -24,7 +24,7 @@ import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
-import { HelmetTitle } from "../title";
+import { HelmetTitle } from "./pageTitle";
 
 interface AddAttendeeFormProps {
     allowedBackends: Set<string>;

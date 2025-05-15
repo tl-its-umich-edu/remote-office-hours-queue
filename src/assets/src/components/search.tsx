@@ -8,7 +8,7 @@ import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs, QueueTable } from "./common";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
-import { HelmetTitle } from "../title";
+import { HelmetTitle } from "./pageTitle";
 
 
 export function SearchPage(props: PageProps) {
