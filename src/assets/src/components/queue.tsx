@@ -21,6 +21,8 @@ import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, redirectToLogin } from "../utils";
 import { meetingAgendaSchema } from "../validation";
+import { Helmet } from "react-helmet-async";
+import { createTitle } from "../title";
 
 
 interface JoinQueueProps {
@@ -573,6 +575,15 @@ export function QueuePage(props: PageProps) {
             onChangeBackend={setSelectedBackend}/>
     return (
         <div>
+            {/* FIXME: What should the title be? Should it be the queue name? Or just, "Queue"
+            For ex:
+            1. Remote Office Hours Queue - Queue
+            2. Remote Office Hours Queue - Queue Name
+            Current implementation is supporting option 2
+            */}
+            <Helmet>
+                <title>{createTitle(queue?.name ?? queue_id.toString())}</title>
+            </Helmet>
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             {meetingTypeDialog}
