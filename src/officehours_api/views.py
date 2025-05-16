@@ -194,7 +194,7 @@ class QueueListSearch(DecoupledContextMixin, generics.ListAPIView):
     queryset = Queue.objects.all()
     serializer_class = ShallowQueueSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    search_fields = ['name', '=hosts__username', '=hosts__email']
+    search_fields = ['name', '=hosts__username']
     filterset_fields = ['status']
 
 

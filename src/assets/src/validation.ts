@@ -64,10 +64,10 @@ export const queueDescriptSchema = string().defined().trim().max(1000, createRem
 export const meetingAgendaSchema = string().defined().trim().max(100, createRemainingCharsMessage);
 export const queueLocationSchema = string().defined().trim().max(100, createRemainingCharsMessage);
 export const uniqnameSchema = string().defined().trim().lowercase()
-    .matches(/^[a-z@.]+$/i, "Uniqnames or emails can only contain letters, @, and dots.")
+    .matches(/^[^@]*$/, "Please use uniqname instead of email address.")
+    .matches(/^[a-z]+$/i, "Uniqnames cannot contain non-alphabetical characters.")
     .min(3, 'Uniqnames must be at least 3 characters long.')
-    // FIXME: Not sure is the best "max" length
-    .max(50, 'Uniqnames or emails must be at most 50 characters long.');
+    .max(8, 'Uniqnames must be at most 8 characters long.');
 
 // Type validator(s)
 
