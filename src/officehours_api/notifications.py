@@ -53,7 +53,6 @@ def should_send_to_number(phone_number):
         return True
 
 # `reverse()` at the module level breaks `/admin`, so defer it by wrapping it in a function.
-
 def build_addendum(domain: str):
     pref_url = f"{domain}{reverse('preferences')}"
     return (

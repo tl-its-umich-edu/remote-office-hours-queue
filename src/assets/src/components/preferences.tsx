@@ -12,6 +12,40 @@ import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
 import { validatePhoneNumber } from "../validation";
 import { PhoneVerification } from "./PhoneVerification";
+
+interface PhoneStatusAlertProps {
+    user: MyUser;
+    onGetOneTimePassword: (phoneNumberToSubmit: string) => Promise<unknown>;
+}
+
+function PhoneStatusAlert(props: PhoneStatusAlertProps) {
+    const { user, onGetOneTimePassword } = props;
+    
+    if (user.phone_number_status !== 'NEEDS_VERIFICATION') {
+        return null;
+    }
+
+    const handleVerifyClick = () => {
+        if (user.phone_number) {
+            onGetOneTimePassword(user.phone_number);
+        }
+    };
+
+    return (
+        <Alert variant="warning" className="mb-3">
+            <Alert.Heading>Your phone number needs verification</Alert.Heading>
+            <p>
+                We encountered an issue sending messages to your phone number
+                {user.twilio_error_message ? `: ${user.twilio_error_message}` : ""}.
+                Please verify your phone number again to receive notifications.
+            </p>
+            <Button variant="primary" onClick={handleVerifyClick}>
+                Verify Phone Number
+            </Button>
+        </Alert>
+    );
+}
+
 interface PreferencesEditorProps {
     user: MyUser;
     disabled: boolean;
@@ -118,6 +152,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     return (
         <div>
             <h1>View/Update Preferences</h1>
+            <PhoneStatusAlert user={props.user} onGetOneTimePassword={props.onGetOneTimePassword} />
             {alertBlock}
             <Form onSubmit={validateAndSubmit}>
                 <p>Enter a phone number in order to opt in to SMS notifications.</p>

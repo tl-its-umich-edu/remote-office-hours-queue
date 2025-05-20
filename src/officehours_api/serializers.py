@@ -132,12 +132,16 @@ class MyUserSerializer(serializers.ModelSerializer):
     notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
     notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
     authorized_backends = serializers.DictField(source='profile.authorized_backends', read_only=True)
+    phone_number_status = serializers.CharField(source='profile.phone_number_status', read_only=True)
+    twilio_error_code = serializers.CharField(source='profile.twilio_error_code', read_only=True, allow_null=True)
+    twilio_error_message = serializers.CharField(source='profile.twilio_error_message', read_only=True, allow_null=True)
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues',
             'phone_number', 'notify_me_attendee', 'notify_me_host', 'authorized_backends',
+            'phone_number_status', 'twilio_error_code', 'twilio_error_message',
         ]
 
     @extend_schema_field(QueueAttendeeSerializer)
