@@ -8,6 +8,10 @@ from officehours.settings import ENABLED_BACKENDS
 from officehours_api.models import User, Queue, Meeting
 from officehours_api.serializers import MeetingSerializer
 
+from django.utils import timezone
+from datetime import timedelta
+from rest_framework import status
+
 
 @override_settings(TWILIO_ACCOUNT_SID='aaa', TWILIO_AUTH_TOKEN='bbb', TWILIO_MESSAGING_SERVICE_SID='ccc')
 class NotificationTestCase(TestCase):
@@ -245,3 +249,67 @@ class MeetingSerializerTestCase(TestCase):
             serializer.is_valid(raise_exception=True)
         error = str(cm.exception.detail['non_field_errors'][0])
         self.assertEqual(error, "zoom is not one of the queue's allowed backend types (['inperson'])")
+
+
+class TestTwilioPhoneErrorHandling(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='twiliotest', email='twiliotest@example.com')
+        self.user.set_password('pw')
+        self.user.save()
+        self.user.profile.phone_number = '+15555559999'
+        self.user.profile.notify_me_attendee = True
+        self.user.profile.save()
+        self.queue = Queue.objects.create(name='TwilioTest')
+        self.queue.hosts.set([self.user])
+        self.queue.save()
+
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_marks_needs_verification_on_30003(self, mock_twilio):
+        from twilio.base.exceptions import TwilioRestException
+        def fail(*a, **k):
+            e = TwilioRestException(500, '')
+            e.code = '30003'
+            e.msg = 'Unreachable destination handset'
+            raise e
+        mock_twilio.messages.create.side_effect = fail
+        from officehours_api.notifications import notify_meeting_started
+        m = Meeting.objects.create(queue=self.queue, backend_type='inperson')
+        m.attendees.set([self.user])
+        m.assignee = self.user
+        m.start()
+        m.save()
+        notify_meeting_started(m)
+        self.user.profile.refresh_from_db()
+        assert self.user.profile.phone_number_status == 'NEEDS_VERIFICATION'
+        assert self.user.profile.twilio_error_code == '30003'
+        assert 'Unreachable destination handset' in (self.user.profile.twilio_error_message or '')
+
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_no_notification_if_needs_verification(self, mock_twilio):
+        self.user.profile.phone_number_status = 'NEEDS_VERIFICATION'
+        self.user.profile.save()
+        from officehours_api.notifications import notify_meeting_started
+        m = Meeting.objects.create(queue=self.queue, backend_type='inperson')
+        m.attendees.set([self.user])
+        m.assignee = self.user
+        m.start()
+        m.save()
+        notify_meeting_started(m)
+        assert mock_twilio.messages.create.call_count == 0
+
+    def test_verification_resets_status(self):
+        self.user.profile.phone_number_status = 'NEEDS_VERIFICATION'
+        self.user.profile.twilio_error_code = '30003'
+        self.user.profile.twilio_error_message = 'fail msg'
+        self.user.profile.otp_phone_number = '+15555559999'
+        self.user.profile.otp_token = '1234'
+        self.user.profile.otp_expiration = timezone.now() + timedelta(minutes=5)
+        self.user.profile.save()
+        self.client.login(username='twiliotest', password='pw')
+        url = f'/api/users/{self.user.id}/otp/'
+        resp = self.client.patch(url, {"action": "verify", "otp_token": "1234"}, content_type='application/json')
+        self.user.profile.refresh_from_db()
+        assert resp.status_code == 200
+        assert self.user.profile.phone_number_status == 'VALID'
+        assert not self.user.profile.twilio_error_code
+        assert not self.user.profile.twilio_error_message

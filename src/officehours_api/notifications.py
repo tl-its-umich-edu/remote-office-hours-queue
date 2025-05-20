@@ -11,8 +11,9 @@ from django.urls import reverse
 
 from officehours_api.exceptions import TwilioClientNotInitializedException
 from twilio.rest import Client as TwilioClient
+from twilio.base.exceptions import TwilioRestException
 
-from officehours_api.models import Queue, Meeting, MeetingStatus
+from officehours_api.models import Queue, Meeting, MeetingStatus, Profile
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,32 @@ def initialize_twilio():
 
 twilio = initialize_twilio()
 
+def mark_phone_number_problem(phone_number, error_code, error_message):
+    try:
+        profiles = Profile.objects.filter(phone_number=phone_number)
+        for profile in profiles:
+            profile.phone_number_status = 'NEEDS_VERIFICATION'
+            profile.twilio_error_code = error_code
+            profile.twilio_error_message = error_message
+            profile.save()
+            logger.info(f"Marked phone number {phone_number} as needing verification due to error {error_code}")
+    except Exception as e:
+        logger.exception(f"Failed to mark phone problem for {phone_number}: {e}")
+
+def should_send_to_number(phone_number):
+    try:
+        profiles = Profile.objects.filter(phone_number=phone_number)
+        for profile in profiles:
+            if profile.phone_number_status != 'VALID':
+                logger.info(f"Skipping notification to {phone_number} due to status: {profile.phone_number_status}")
+                return False
+        return True
+    except Exception as e:
+        logger.exception(f"Error checking phone status for {phone_number}: {e}")
+        return True
+
 # `reverse()` at the module level breaks `/admin`, so defer it by wrapping it in a function.
+
 def build_addendum(domain: str):
     pref_url = f"{domain}{reverse('preferences')}"
     return (
@@ -60,6 +86,11 @@ async def send_one_time_password(phone_number: str, otp_token: str):
             ),
         )
         return True
+    except TwilioRestException as e:
+        logger.exception(f"Error while sending OTP to {phone_number}:{e}")
+        if e.code in ['30003', '21211', '30006']:
+            mark_phone_number_problem(phone_number, e.code, str(e))
+        raise e
     except Exception as e:
         logger.exception(f"Error while sending OTP to {phone_number}:{e}")
         raise e
@@ -74,6 +105,8 @@ def notify_meeting_started(started: Meeting):
     queue_url = f"{domain}{queue_path}"
     for p in phone_numbers:
         try:
+            if not should_send_to_number(p):
+                continue
             logger.info('notify_meeting_started: %s', p)
             twilio.messages.create(
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
@@ -83,9 +116,12 @@ def notify_meeting_started(started: Meeting):
                     f"{build_addendum(domain)}"
                 ),
             )
-        except:
+        except TwilioRestException as e:
             logger.exception(f"Error while sending attendee notification to {p} for queue {started.queue.id}")
-
+            if e.code in ['30003', '21211', '30006']:
+                mark_phone_number_problem(p, e.code, str(e))
+        except Exception as e:
+            logger.exception(f"Error while sending attendee notification to {p} for queue {started.queue.id}")
 
 def notify_queue_no_longer_empty(first: Meeting):
     phone_numbers = list(
@@ -97,6 +133,8 @@ def notify_queue_no_longer_empty(first: Meeting):
     edit_url = f"{domain}{edit_path}"
     for p in phone_numbers:
         try:
+            if not should_send_to_number(p):
+                continue
             logger.info('notify_queue_no_longer_empty: %s', p)
             twilio.messages.create(
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
@@ -106,9 +144,12 @@ def notify_queue_no_longer_empty(first: Meeting):
                     f"{build_addendum(domain)}"
                 ),
             )
-        except:
+        except TwilioRestException as e:
             logger.exception(f"Error while sending host notification to {p} for queue {first.queue.id}")
-
+            if e.code in ['30003', '21211', '30006']:
+                mark_phone_number_problem(p, e.code, str(e))
+        except Exception as e:
+            logger.exception(f"Error while sending host notification to {p} for queue {first.queue.id}")
 
 @receiver(post_save, sender=Meeting)
 def trigger_notification_create(sender, instance: Meeting, created, **kwargs):

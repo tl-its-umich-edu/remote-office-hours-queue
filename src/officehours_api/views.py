@@ -148,31 +148,30 @@ class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIVie
                 msg = "Failed to send verification code; please check your phone number and try again."
         return Response({"detail": msg},
                                 status=status.HTTP_400_BAD_REQUEST)
-    def update(self, request, *args, **kwargs):
-        user = self.request.user
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
         self.check_change_permission(request, user)
 
-        if request.data["action"] == "send":
-            otp_sent = async_to_sync(self.send_otp)(request, *args, **kwargs)
-            if otp_sent == True:
-                return super().update(request, *args, **kwargs)
-            else:
-                return otp_sent
-        elif request.data["action"] == "verify":
+        if request.data.get("action") == "send":
+            return async_to_sync(self.send_otp)(request, *args, **kwargs)
+        elif request.data.get("action") == "verify":
             verified = self.verify_otp(request)
             if verified == True:
                 request.data["phone_number"] = user.profile.otp_phone_number
-                request.data["otp_token"] = ""
-                request.data["otp_phone_number"] = ""
-                request.data["otp_expiration"] = datetime.now(timezone.utc) - timedelta(minutes=1)
-                return super().update(request, *args, **kwargs)
+                user.profile.phone_number_status = 'VALID'
+                user.profile.twilio_error_code = None
+                user.profile.twilio_error_message = None
+                serializer = self.get_serializer(user, data=request.data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                self.perform_update(serializer)
+                return Response(serializer.data)
             else:
-                return Response({"detail": verified}, status=status.HTTP_400_BAD_REQUEST)
-
-    def partial_update(self, request, *args, **kwargs):
-        user = self.request.user
-        self.check_change_permission(request, user)
-        return super().partial_update(request, *args, **kwargs)
+                return Response({"detail": verified},
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"detail": "Invalid action"},
+                                status=status.HTTP_400_BAD_REQUEST)
 
 class UserUniqnameDetail(UserDetail):
     lookup_field = 'username'

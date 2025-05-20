@@ -11,9 +11,12 @@ import { uniqnameSchema, queueNameSchema } from "../validation";
 
 function QueueLookup() {
     const [lookup, setLookup] = useState("");
+    const [emailError, setEmailError] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setLookup(e.target.value);
+        const value = e.target.value;
+        setLookup(value);
+        setEmailError(value.includes('@'));
     }
     return (
         <Row className="mt-3">
@@ -29,8 +32,13 @@ function QueueLookup() {
                             value={lookup}
                             onChange={handleChange}
                         />
-                        <Button type="submit" variant="primary">Search Queues</Button>
+                        <Button type="submit" variant="primary" disabled={emailError}>Search Queues</Button>
                     </InputGroup>
+                    {emailError && (
+                        <div style={{ margin: '5px'}}>
+                            <span style={{ color: 'red' }}>Emails cannot be used to search queue. Please use uniqname instead.</span>
+                        </div>
+                    )}
                 </Form>
             </Col>
         </Row>
