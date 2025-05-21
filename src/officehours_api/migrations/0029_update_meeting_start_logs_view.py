@@ -3,7 +3,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('officehours_api', '0028_alter_meeting_backend_type_and_more.py'),
+        ('officehours_api', '0028_alter_meeting_backend_type_and_more'),
     ]
 
     operations = [
