@@ -339,17 +339,11 @@ class ExportMeetingStartLogs(APIView):
     def extract_log(queue_ids: List[int], response: HttpResponse) -> None:
         writer = csv.writer(response)
         with connection.cursor() as cursor:
-            cursor.execute(
-                f'''SELECT
-                  meeting_start_logs.*,
-                  officehours_api_queue.name AS queue_name,
-                  officehours_api_queue.status AS queue_status
-                FROM
-                  meeting_start_logs
-                JOIN officehours_api_queue ON
-                  meeting_start_logs.queue_id = officehours_api_queue.id
-                WHERE queue_id IN ({', '.join(map(str, queue_ids))})'''
-            )
+            cursor.execute('''
+                SELECT * FROM meeting_start_logs
+                WHERE queue_id = ANY(%s)
+                ''', [queue_ids])
+
             rows = cursor.fetchall()
 
             column_names = map(lambda λ: λ[0], cursor.description)
