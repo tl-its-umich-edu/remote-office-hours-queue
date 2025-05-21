@@ -154,6 +154,8 @@ class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIVie
         self.check_change_permission(request, user)
 
         if request.data.get("action") == "send":
+            user.profile.phone_number_status = 'NEEDS_VERIFICATION'
+            user.profile.save(update_fields=["phone_number_status"])
             return async_to_sync(self.send_otp)(request, *args, **kwargs)
         elif request.data.get("action") == "verify":
             verified = self.verify_otp(request)

@@ -70,7 +70,7 @@ class Profile(models.Model):
     phone_number_status = models.CharField(
         max_length=20,
         choices=PHONE_STATUS_CHOICES,
-        default='VALID',
+        default='NEEDS_VERIFICATION',
     )
     twilio_error_code = models.CharField(max_length=10, blank=True, null=True)
     twilio_error_message = models.TextField(blank=True, null=True)
