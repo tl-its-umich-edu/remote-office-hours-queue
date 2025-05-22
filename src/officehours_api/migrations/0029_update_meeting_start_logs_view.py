@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 JOIN officehours_api_queue q ON pr.queue_id = q.id
             """,
             reverse_sql="""
-                CREATE VIEW meeting_start_logs AS
+                CREATE OR REPLACE VIEW meeting_start_logs AS
                 WITH parsed_response AS (
                     SELECT
                         response::jsonb AS response
