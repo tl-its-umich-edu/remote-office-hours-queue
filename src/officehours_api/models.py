@@ -49,6 +49,12 @@ def get_enabled_backends() -> Set[IMPLEMENTED_BACKEND_NAME]:
 
 
 class Profile(models.Model):
+    # Added phone status to track the status of the phone number
+    PHONE_STATUS_CHOICES = [
+        ('VALID', 'Valid'),
+        ('INVALID', 'Invalid'),
+        ('NEEDS_VERIFICATION', 'Needs Verification'),
+    ]
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -60,6 +66,14 @@ class Profile(models.Model):
     otp_phone_number = models.CharField(max_length=20, default="", blank=True, null=True)
     otp_token = models.CharField(max_length=4, default="", blank=True, null=True)
     otp_expiration = models.DateTimeField(null=True, blank=True, default=None)
+    # 
+    phone_number_status = models.CharField(
+        max_length=20,
+        choices=PHONE_STATUS_CHOICES,
+        default='NEEDS_VERIFICATION',
+    )
+    twilio_error_code = models.CharField(max_length=10, blank=True, null=True)
+    twilio_error_message = models.TextField(blank=True, null=True)
 
     @property
     def authorized_backends(self):

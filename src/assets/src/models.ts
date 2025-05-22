@@ -26,6 +26,9 @@ export interface MyUser extends User {
     phone_number: string;
     notify_me_attendee: boolean;
     notify_me_host: boolean;
+    phone_number_status: string;
+    twilio_error_code: string | null;
+    twilio_error_message: string | null;
     authorized_backends: {[backend: string]: boolean};
 }
 
