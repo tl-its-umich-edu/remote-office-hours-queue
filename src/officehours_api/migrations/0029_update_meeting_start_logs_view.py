@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                         view::text = 'officehours_api.views.MeetingStart'
                         AND (response::jsonb ->> 'created_at') IS NOT NULL
                 )
-                SELECT
+                SELECT DISTINCT
                     pr.queue_id AS queue_id,
                     (response -> 'attendees' -> 0 ->> 'id')::int AS attendee_id,
                     (response -> 'attendees' -> 0 ->> 'user_id')::int AS attendee_user_id,
