@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 const BaseTitle = "Remote Office Hours Queue";
 
 export const createTitle = (title: string) => {
-    return `${BaseTitle} - ${title}`;
+    return `${title} - ${BaseTitle}`;
 }
 
 interface HelmetTitleProps {
