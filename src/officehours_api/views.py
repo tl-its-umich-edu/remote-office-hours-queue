@@ -2,6 +2,7 @@ import csv
 import logging
 from datetime import datetime, timezone, timedelta
 from random import randint
+from typing import List
 
 from asgiref.sync import async_to_sync
 from django.conf import settings
@@ -335,14 +336,14 @@ class ExportMeetingStartLogs(APIView):
         return response
 
     @staticmethod
-    def extract_log(queues, response):
+    def extract_log(queue_ids: List[int], response: HttpResponse) -> None:
         writer = csv.writer(response)
         with connection.cursor() as cursor:
-            queue_ids = ', '.join(map(str, queues))
+            cursor.execute('''
+                SELECT * FROM meeting_start_logs
+                WHERE queue_id = ANY(%s)
+                ''', [queue_ids])
 
-            cursor.execute(
-                'SELECT * FROM meeting_start_logs '
-                f'where queue_id in ({queue_ids})')
             rows = cursor.fetchall()
 
             column_names = map(lambda λ: λ[0], cursor.description)
