@@ -80,8 +80,9 @@ if DEBUG:
 WATCHMAN_TOKENS = os.getenv('WATCHMAN_TOKENS')
 WATCHMAN_TOKEN_NAME = os.getenv('WATCHMAN_TOKEN_NAME', 'officehours-watchman-token')
 WATCHMAN_CHECKS = ('watchman.checks.caches', 'watchman.checks.databases')
-WATCHMAN_DISABLE_APM = True
-EXPOSE_WATCHMAN_VERSION = True
+# WATCHMAN_DISABLE_APM = True
+# Uncomment to expose the version number in development
+# EXPOSE_WATCHMAN_VERSION = True
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
