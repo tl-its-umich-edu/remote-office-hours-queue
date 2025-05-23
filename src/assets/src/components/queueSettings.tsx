@@ -18,7 +18,7 @@ import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
 import { checkIfSetsAreDifferent, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
-
+import { HelmetTitle } from "./pageTitle";
 
 const buttonSpacing = 'me-3 mb-3';
 
@@ -296,6 +296,7 @@ export function ManageQueueSettingsPage(props: PageProps) {
 
     return (
         <div>
+            <HelmetTitle title="Settings" />
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs

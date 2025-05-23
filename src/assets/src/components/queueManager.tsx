@@ -24,7 +24,7 @@ import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
-
+import { HelmetTitle } from "./pageTitle";
 
 interface AddAttendeeFormProps {
     allowedBackends: Set<string>;
@@ -133,6 +133,7 @@ function QueueManager(props: QueueManagerProps) {
 
     return (
         <div>
+            <HelmetTitle title="Manage Queue" />
             <div className="float-end">
                 <Link to={`/manage/${props.queue.id}/settings`} tabIndex={-1}>
                     <Button variant="primary" aria-label="Settings">

@@ -12,6 +12,7 @@ import { QueueHost, User } from "../models";
 import * as api from "../services/api";
 import { recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
+import { HelmetTitle } from "./pageTitle";
 
 
 enum AvailableTabs {
@@ -225,6 +226,7 @@ export function AddQueuePage(props: PageProps) {
 
     return (
         <div>
+            <HelmetTitle title="Add Queue" />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
             <Breadcrumbs
                 intermediatePages={[{ title: 'Manage', href: '/manage/' }]}
