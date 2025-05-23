@@ -1,0 +1,27 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+dj-database-url = "*"
+channels = "*"
+whitenoise = "*"
+djangorestframework = "*"
+django-safedelete = "*"
+django-watchman = "*"
+django-webpack-loader = "*"
+drf-tracking = "*"
+django-filter = "*"
+psycopg2-binary = "*"
+requests = "*"
+pyzoom = "*"
+drf-spectacular = "*"
+twilio = "*"
+mozilla-django-oidc = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.8"

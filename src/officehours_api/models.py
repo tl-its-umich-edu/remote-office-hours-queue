@@ -98,10 +98,10 @@ class Queue(SafeDeleteModel):
         ],
         default='open',
     )
-    allowed_backends = ArrayField(
-        models.CharField(max_length=20, blank=False),
-        default=get_default_allowed_backends,
-    )
+    #allowed_backends = ArrayField(
+     #   models.CharField(max_length=20, blank=False),
+      #  default=get_default_allowed_backends,
+    #)
     inperson_location = models.CharField(max_length=100, blank=True)
 
     @property

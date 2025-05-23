@@ -2,7 +2,6 @@
 
 # Edited manually on 2023-03-06 to remove jsonfield references
 
-import django.contrib.postgres.fields
 from django.db import migrations, models
 import officehours_api.models
 
@@ -22,11 +21,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='meeting',
             name='backend_type',
-            field=models.CharField(choices=[['bluejeans', 'BlueJeans'], ['inperson', 'In Person'], ['zoom', 'Zoom']], default=officehours_api.models.get_default_backend, max_length=20),
+            field=models.CharField(
+                choices=[('bluejeans', 'BlueJeans'), ('inperson', 'In Person'), ('zoom', 'Zoom')],
+                default=officehours_api.models.get_default_backend,
+                max_length=20
+            ),
         ),
-        migrations.AlterField(
-            model_name='queue',
-            name='allowed_backends',
-            field=django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[['bluejeans', 'BlueJeans'], ['inperson', 'In Person'], ['zoom', 'Zoom']], max_length=20), default=officehours_api.models.get_default_allowed_backends, size=None),
-        ),
+        # Removed allowed_backends ArrayField — not supported in SQLite
     ]
