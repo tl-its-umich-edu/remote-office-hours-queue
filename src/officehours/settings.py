@@ -336,6 +336,7 @@ TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 TWILIO_MESSAGING_SERVICE_SID = os.getenv('TWILIO_MESSAGING_SERVICE_SID')
 OTP_REQUEST_BUFFER = int(os.getenv('OTP_REQUEST_BUFFER', "30"))
+UM_SMS_IDENTIFIER = os.getenv('UM_SMS_IDENTIFIER', '[U-M Office Hours]')
 
 # Backends
 DOCS_BASE_URL = 'https://its.umich.edu/communication/videoconferencing/'

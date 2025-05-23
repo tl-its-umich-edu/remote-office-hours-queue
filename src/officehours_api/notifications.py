@@ -35,6 +35,9 @@ def build_addendum(domain: str):
         f"Opt out at {pref_url}"
     )
 
+def build_message_body(message: str, domain: str) -> str:
+    """Build a complete SMS message with U-M identifier and opt-out info."""
+    return f"{settings.UM_SMS_IDENTIFIER} {message}{build_addendum(domain)}"
 
 async def send_one_time_password(phone_number: str, otp_token: str):
     '''
@@ -54,10 +57,7 @@ async def send_one_time_password(phone_number: str, otp_token: str):
         twilio.messages.create(
             messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
             to=phone_number,
-            body=(
-                f"Your verification code is {otp_token}"
-                f"{build_addendum(domain)}"
-            ),
+            body=build_message_body(f"Your verification code is {otp_token}", domain),
         )
         return True
     except Exception as e:
@@ -78,10 +78,7 @@ def notify_meeting_started(started: Meeting):
             twilio.messages.create(
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
-                body=(
-                    f"It's your turn in queue {queue_url}"
-                    f"{build_addendum(domain)}"
-                ),
+                body=build_message_body(f"It's your turn in queue {queue_url}", domain),
             )
         except:
             logger.exception(f"Error while sending attendee notification to {p} for queue {started.queue.id}")
@@ -101,10 +98,7 @@ def notify_queue_no_longer_empty(first: Meeting):
             twilio.messages.create(
                 messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
                 to=p,
-                body=(
-                    f"Someone joined your queue {edit_url}"
-                    f"{build_addendum(domain)}"
-                ),
+                body=build_message_body(f"Someone joined your queue {edit_url}", domain),
             )
         except:
             logger.exception(f"Error while sending host notification to {p} for queue {first.queue.id}")
