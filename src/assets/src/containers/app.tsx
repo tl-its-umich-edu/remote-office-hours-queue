@@ -29,18 +29,18 @@ export function App(props: AppProps) {
     };
 
     return (
-        <>
-            <Routes>
-                <Route path="/" element={<HomePage {...commonProps} />} />
-                <Route path="/manage" element={<ManagePage {...commonProps} />} />
-                <Route path="/manage/:queue_id" element={<QueueManagerPage {...commonProps} />} />
-                <Route path="/manage/:queue_id/settings" element={<ManageQueueSettingsPage {...commonProps} />} />
-                <Route path="/queue/:queue_id" element={<QueuePage {...commonProps} />} />
-                <Route path="/search/" element={<SearchPage {...commonProps} />} />
-                <Route path="/preferences" element={<PreferencesPage {...commonProps} />} />
-                <Route path="/add_queue" element={<AddQueuePage {...commonProps} />} />
-            </Routes>
-            <HelmetProvider>
+        <HelmetProvider>
+            <>
+                <Routes>
+                    <Route path="/" element={<HomePage {...commonProps} />} />
+                    <Route path="/manage" element={<ManagePage {...commonProps} />} />
+                    <Route path="/manage/:queue_id" element={<QueueManagerPage {...commonProps} />} />
+                    <Route path="/manage/:queue_id/settings" element={<ManageQueueSettingsPage {...commonProps} />} />
+                    <Route path="/queue/:queue_id" element={<QueuePage {...commonProps} />} />
+                    <Route path="/search/" element={<SearchPage {...commonProps} />} />
+                    <Route path="/preferences" element={<PreferencesPage {...commonProps} />} />
+                    <Route path="/add_queue" element={<AddQueuePage {...commonProps} />} />
+                </Routes>
                 <Helmet>
                     <script type="text/javascript">
                     {`window.umConsentManager = {
@@ -57,7 +57,7 @@ export function App(props: AppProps) {
                     </script>
                     <script async src="https://umich.edu/apis/umconsentmanager/consentmanager.js"/>
                 </Helmet>
-            </HelmetProvider>
-        </>
+            </>
+        </HelmetProvider>
     );
 }
