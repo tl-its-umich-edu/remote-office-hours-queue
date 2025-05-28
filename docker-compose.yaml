@@ -1,7 +1,5 @@
 ---
-
 services:
-
   web:
     build:
       context: .
@@ -47,6 +45,17 @@ services:
     volumes:
       - officehours-redis-ro:/data:ro
 
+  test:
+    build:
+      context: .
+      dockerfile: src/Dockerfile
+      target: node-webpack
+    command: npm run test:watch
+    volumes:
+      - ./src:/usr/src/app:z
+      - /usr/src/app/node_modules/
+    environment:
+      - CI=true
   webpack_watcher:
     build:
       context: .
