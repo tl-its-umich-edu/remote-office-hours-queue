@@ -8,6 +8,7 @@ import { searchQueue as apiSearchQueue } from "../services/api";
 import { LoadingDisplay, ErrorDisplay, FormError, Breadcrumbs, QueueTable } from "./common";
 import { redirectToLogin } from "../utils";
 import { PageProps } from "./page";
+import { HelmetTitle } from "./pageTitle";
 
 
 export function SearchPage(props: PageProps) {
@@ -46,6 +47,7 @@ export function SearchPage(props: PageProps) {
             : <QueueTable queues={searchResults} />
     return (
         <div>
+            <HelmetTitle title="Search" />
             <Breadcrumbs currentPageTitle="Search"/>
             {loadingDisplay}
             {errorDisplay}
