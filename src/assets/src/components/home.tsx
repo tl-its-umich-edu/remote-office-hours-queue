@@ -3,6 +3,7 @@ import { useState } from "react";
 import { MyUser } from "../models";
 import { Link } from "react-router-dom";
 import { Button, Col, Form, InputGroup, Row, Alert } from "react-bootstrap";
+import { HelmetTitle } from "./pageTitle";
 
 import { ErrorDisplay, FormError, JoinedQueueAlert, Breadcrumbs } from "./common";
 import { PageProps } from "./page";
@@ -77,6 +78,7 @@ export function HomePage(props: PageProps) {
         );
     return (
         <div>
+            <HelmetTitle title="Office Hours" />
             <Breadcrumbs currentPageTitle="Home" />
             <div>
                 {errorDisplay}

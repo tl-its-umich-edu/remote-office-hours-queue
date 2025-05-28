@@ -16,7 +16,7 @@
 	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700"/>
 	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto:700i"/>
   {% block styles %}{% endblock %}
-  <title>Remote Office Hours Queue - {% block title %}{% endblock %}</title>
+  <title>{% block title %}{% endblock %} - Remote Office Hours Queue</title>
   {{ spa_globals|json_script:"spa_globals" }}
   {% endblock %}
   </head>
