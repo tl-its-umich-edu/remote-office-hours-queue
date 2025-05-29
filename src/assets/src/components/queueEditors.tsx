@@ -1,16 +1,13 @@
 import * as React from "react";
-import { Alert, ListGroup } from "react-bootstrap";
+import { Alert, ListGroup, Form } from "react-bootstrap";
 
 import {
-    ErrorDisplay, FormError, RemoveButton, SingleInputField, StatelessInputGroupForm, StatelessTextAreaForm,
+    ErrorDisplay, FormError, RemoveButton, SingleInputField, StatelessInputGroupForm,
     UserDisplay, userLoggedOnWarning
 } from "./common";
 import { AllowedBackendsForm } from "./meetingType";
 import { MeetingBackend, User } from "../models";
 import { MeetingTypesValidationResult, uniqnameSchema, ValidationResult } from "../validation";
-
-
-const requiredSymbol = <span className='text-danger'>*</span>;
 
 interface QueueEditorProps {
     disabled: boolean;
@@ -47,28 +44,38 @@ export function GeneralEditor(props: GeneralEditorProps) {
             <h2>General</h2>
             {props.showSuccessMessage ? <Alert variant='success'>{successMessage}</Alert> : undefined}
             {props.showCorrectGeneralMessage ? <Alert variant='danger'>{correctMessage}</Alert> : undefined}
-            <p>{requiredSymbol} Required field</p>
-            <h3>Name {requiredSymbol}</h3>
-            <StatelessInputGroupForm
-                id='name'
-                value={props.name}
-                formLabel='Queue Name'
-                placeholder='Queue name...'
-                disabled={props.disabled}
-                validationResult={props.nameValidationResult}
-                onChangeValue={props.onChangeName}
-            />
+            <h3>Name</h3>
+            <Form.Group controlId="formQueueName">
+                <Form.Label>Queue Name</Form.Label>
+                <Form.Control
+                    type="text"
+                    placeholder="Queue name..."
+                    value={props.name}
+                    onChange={(e) => props.onChangeName(e.target.value)}
+                    isInvalid={props.nameValidationResult?.isInvalid}
+                    disabled={props.disabled}
+                    required
+                />
+                <Form.Control.Feedback type="invalid">
+                    Please provide a valid queue name.
+                </Form.Control.Feedback>
+            </Form.Group>
             <h3>Description</h3>
-            <StatelessTextAreaForm
-                id='description'
-                value={props.description}
-                formLabel='Queue Description'
-                placeholder='Queue description...'
-                disabled={props.disabled}
-                validationResult={props.descriptValidationResult}
-                onChangeValue={props.onChangeDescription}
-            />
-            <h3>Meeting Types {requiredSymbol}</h3>
+            <Form.Group controlId='description'>
+                <Form.Label>Queue Description</Form.Label>
+                <Form.Control
+                    as="textarea"
+                    value={props.description}
+                    placeholder='Queue description...'
+                    disabled={props.disabled}
+                    isInvalid={props.descriptValidationResult?.isInvalid}
+                    onChange={(e) => props.onChangeDescription(e.target.value)}
+                />
+                <Form.Control.Feedback type="invalid">
+                    {props.descriptValidationResult?.messages.join(', ')}
+                </Form.Control.Feedback>
+            </Form.Group>
+            <h3>Meeting Types</h3>
             <p>Allow the following meeting types (select at least one):</p>
             <div>{allowedFeedbackMessages}</div>
             <AllowedBackendsForm
@@ -84,15 +91,20 @@ export function GeneralEditor(props: GeneralEditorProps) {
                         Attendees who select to meet in-person will be instructed to meet at this location. 
                         Enter all information an attendee would need to know, such as a street address, building name, and/or room number.
                     </p>
-                    <StatelessInputGroupForm 
-                        id='inpersonLocation'
-                        value={props.inpersonLocation}
-                        formLabel='In-Person Meeting Location'
-                        placeholder='In-person meeting location...'
-                        disabled={props.disabled}
-                        validationResult={props.locationValidationResult}
-                        onChangeValue={props.onChangeLocation}
-                    />
+                    <Form.Group controlId='inpersonLocation'>
+                        <Form.Label>In-Person Meeting Location</Form.Label>
+                        <Form.Control
+                            type="text"
+                            value={props.inpersonLocation}
+                            placeholder='In-person meeting location...'
+                            disabled={props.disabled}
+                            isInvalid={props.locationValidationResult?.isInvalid}
+                            onChange={(e) => props.onChangeLocation(e.target.value)}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                            {props.locationValidationResult?.messages.join(', ')}
+                        </Form.Control.Feedback>
+                    </Form.Group>
                 </>
             }
         </div>
