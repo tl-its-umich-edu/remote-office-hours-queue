@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 
 from officehours_api.backends.backend_base import BackendBase
 from officehours_api.backends.types import IMPLEMENTED_BACKEND_NAME
+from officehours_api.patches import pyzoom_patch
 
 from pyzoom import ZoomClient
 from pyzoom.err import APIError as ZoomAPIError
@@ -24,7 +25,7 @@ class ZoomMeeting(TypedDict):
     id: str
     host_id: str
     topic: str
-    type: Literal[1, 2, 3, 4, 8]  # instant, scheduled, recurring/unfixed, PMI, recurring/fixed
+    type: Literal[1, 2, 3, 4, 8]
     status: str
     start_time: str
     duration: int
@@ -33,7 +34,6 @@ class ZoomMeeting(TypedDict):
     agenda: str
     start_url: str
     join_url: str
-
 
 class ZoomUser(TypedDict):
     id: str
@@ -141,6 +141,7 @@ class Backend(BackendBase):
     def _create_meeting(cls, user: User) -> ZoomMeeting:
         """Creates a Zoom meeting for the given user."""
         client = cls._get_client(user)
+        zoom_user_id = user.profile.backend_metadata.get('zoom', {}).get('user_id')
         meeting_settings = ZoomMeetingSettings(
             approval_type=2,
             audio='both',
@@ -159,27 +160,24 @@ class Backend(BackendBase):
             use_pmi=False,
             waiting_room=True,
             watermark=False)
-
-        # invoke the create_meeting method of the ZoomClient instance
         try:
-            meeting = client.meetings.create_meeting(
+            created_meeting_dict = client.meetings.create_meeting(
+                user_id=zoom_user_id, # Need this for the patched_create_meeting method
                 topic='Remote Office Hours Queue Meeting',
                 start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 duration_min=60,
                 timezone='America/Detroit',
-                password=' ',
+                password=None,
+                default_password=False,
                 settings=meeting_settings
             )
         except ZoomAPIError:
             logger.info(f'Access token for user {user.id} seems to be invalid, attempting to clear.')
             cls._clear_backend_metadata(user)
             raise
-
-        # The return value of meeting.json() is a string object
-        meeting_json = json.loads(meeting.json())
-        logger.info("Created meeting: %s", meeting_json)
-        return meeting_json
-
+        logger.info("Created meeting: %s", created_meeting_dict)
+        return created_meeting_dict
+    
     @classmethod
     def _get_me(cls, user: User) -> ZoomUser:
         """Get the Zoom user info for the given user.
