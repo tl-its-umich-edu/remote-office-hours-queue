@@ -1,5 +1,5 @@
 # build react components for production mode
-FROM node:18-alpine AS node-webpack
+FROM node:20-alpine AS node-webpack
 WORKDIR /usr/src/app
 
 # NOTE: package.json and webpack.config.js not likely to change between dev builds
@@ -12,7 +12,7 @@ RUN npm run prod
 
 #####################################################################
 
-FROM python:3.13-slim-bullseye
+FROM python:3.13-slim-bookworm
 
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
