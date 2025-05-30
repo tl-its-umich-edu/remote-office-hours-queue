@@ -20,11 +20,9 @@ export const useWebSocket = <T>(
     });
     ws.onmessage = (e: MessageEvent) => {
       const m = JSON.parse(e.data) as OfficeHoursMessage<T>;
-      console.log(m);
+      console.debug(m);
       switch (m.type) {
         case "init":
-          onUpdate(m.content as T);
-          break;
         case "update":
           onUpdate(m.content as T);
           break;
