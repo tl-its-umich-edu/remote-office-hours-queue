@@ -63,11 +63,23 @@ export const queueNameSchema = string().trim().required(blankText).max(100, crea
 export const queueDescriptSchema = string().defined().trim().max(1000, createRemainingCharsMessage);
 export const meetingAgendaSchema = string().defined().trim().max(100, createRemainingCharsMessage);
 export const queueLocationSchema = string().defined().trim().max(100, createRemainingCharsMessage);
-export const uniqnameSchema = string().defined().trim().lowercase()
-    .matches(/^[^@]*$/, "Please use uniqname instead of email address.")
-    .matches(/^[a-z]+$/i, "Uniqnames cannot contain non-alphabetical characters.")
-    .min(3, 'Uniqnames must be at least 3 characters long.')
-    .max(8, 'Uniqnames must be at most 8 characters long.');
+export const searchQuerySchema = string().defined().trim().lowercase()
+    .when({
+        is: (value: string) => value && value.includes('@'),
+        then: (schema) => schema
+            .email('Must be a valid email address format (e.g., user@example.com).')
+            .min(5, 'Email addresses must be at least 5 characters long.')
+            // Standard email length limit
+            .max(254, 'Email addresses must be at most 254 characters long.'),
+        otherwise: (schema) => schema
+            .matches(/^[a-z]+$/, 'Uniqnames must consist of 3-8 alphabetic characters only.')
+            .min(3, 'Uniqnames must be at least 3 characters long.')
+            .max(8, 'Uniqnames must be at most 8 characters long.'),
+    });
+
+// If you wish to keep the original name `uniqnameSchema` for broader compatibility
+// in your codebase without refactoring its name everywhere, you can define it as:
+export const uniqnameSchema = searchQuerySchema;
 
 // Type validator(s)
 
