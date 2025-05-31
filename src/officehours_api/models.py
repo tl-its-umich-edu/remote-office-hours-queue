@@ -201,8 +201,16 @@ class Meeting(SafeDeleteModel):
         if not backend:
             raise DisabledBackendException(self.backend_type)
         try:
+            attendee = self.attendees.first()
+            if attendee:
+                attendee_name = attendee.get_full_name()
+                if not attendee_name.strip():
+                    attendee_name = attendee.email
+                metadata = {'attendee_name': attendee_name}
+            else:
+                metadata = {}
             self.backend_metadata = backend.save_user_meeting(
-                self.backend_metadata,
+                metadata,
                 self.assignee,
             )
         except RequestException as ex:
