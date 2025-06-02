@@ -549,6 +549,17 @@ export function QueuePage(props: PageProps) {
     const loginDialogVisible = errorSources.some(checkForbiddenError);
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
+
+    let queueTitle = queue?.name ?? queue_id.toString();
+    if (queue) {
+        if (!queue.my_meeting) {
+            queueTitle = `Join Queue: ${queue.name}`;
+        } else if (queue.my_meeting && queue.my_meeting.status === MeetingStatus.STARTED) {
+            queueTitle = `${queue.name} - In Meeting`;
+        } else {
+            queueTitle = `Queue: ${queue.name}`;
+        }
+    }
     const queueDisplay = queue && selectedBackend
         && (
             <QueueAttending
@@ -574,7 +585,7 @@ export function QueuePage(props: PageProps) {
             onChangeBackend={setSelectedBackend}/>
     return (
         <div>
-            <HelmetTitle title={queue?.name ?? queue_id.toString()} />
+            <HelmetTitle title={queueTitle} />
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl}/>
             {meetingTypeDialog}
