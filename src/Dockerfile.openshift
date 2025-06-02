@@ -12,7 +12,7 @@ RUN npm run prod
 
 #####################################################################
 
-FROM image-registry.openshift-image-registry.svc:5000/openshift/python:3.13-slim-boomworm
+FROM image-registry.openshift-image-registry.svc:5000/openshift/python:3.13-slim-bookworm
 
 ENV PYTHONUNBUFFERED=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
