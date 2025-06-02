@@ -60,6 +60,7 @@ class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
                      'status') + SafeDeleteAdmin.list_display)
     list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
+    filter_horizontal = ('hosts',)
 
     def queues_queryset(self, request, selection_queryset):
         """
