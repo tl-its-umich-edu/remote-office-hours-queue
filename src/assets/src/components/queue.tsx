@@ -550,14 +550,27 @@ export function QueuePage(props: PageProps) {
     const loadingDisplay = <LoadingDisplay loading={isChanging}/>
     const errorDisplay = <ErrorDisplay formErrors={errorSources}/>
 
-    let queueTitle = queue?.name ?? queue_id.toString();
-    if (queue) {
+    let queueTitle: string;
+
+    if (!queue) {
+        // Queue data is not available or not yet loaded.
+        queueTitle = queue_id ? `Queue ${queue_id}` : "Loading Queue...";
+    } else {
+        // Queue data IS available.
+        const displayName = queue.name || (queue_id ? `Queue ${queue_id}` : "Unnamed Queue");
+
         if (!queue.my_meeting) {
-            queueTitle = `Join Queue: ${queue.name}`;
-        } else if (queue.my_meeting && queue.my_meeting.status === MeetingStatus.STARTED) {
-            queueTitle = `${queue.name} - In Meeting`;
+            // User is viewing the queue but hasn't joined or isn't in a meeting for this queue.
+            queueTitle = `Join Queue: ${displayName}`;
         } else {
-            queueTitle = `Queue: ${queue.name}`;
+            // User has a meeting associated with this queue (queue.my_meeting exists).
+            if (queue.my_meeting.status === MeetingStatus.STARTED) {
+                // The meeting has started.
+                queueTitle = `${displayName} - In Meeting`;
+            } else {
+                // User is in line, but the meeting hasn't started yet.
+                queueTitle = `${displayName} - In Line`;
+            }
         }
     }
     const queueDisplay = queue && selectedBackend
