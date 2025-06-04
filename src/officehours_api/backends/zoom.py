@@ -138,7 +138,7 @@ class Backend(BackendBase):
         return ZoomClient(cls._get_access_token(user))
 
     @classmethod
-    def _create_meeting(cls, user: User) -> ZoomMeeting:
+    def _create_meeting(cls, user: User, attendee_names=None) -> ZoomMeeting:
         """Creates a Zoom meeting for the given user."""
         client = cls._get_client(user)
         meeting_settings = ZoomMeetingSettings(
@@ -159,11 +159,11 @@ class Backend(BackendBase):
             use_pmi=False,
             waiting_room=True,
             watermark=False)
-        
+
+        # Set topic, optionally with attendee_names
         topic = 'Remote Office Hours Queue Meeting'
-        attendee_name = user.get_full_name()
-        if attendee_name:
-            topic = f'{topic} with {attendee_name}'
+        if attendee_names:
+            topic = f'{topic} with {attendee_names}'
         try:
             meeting = client.meetings.create_meeting(
                 topic=topic,
@@ -178,7 +178,6 @@ class Backend(BackendBase):
             cls._clear_backend_metadata(user)
             raise
 
-        # The return value of meeting.json() is a string object
         meeting_json = json.loads(meeting.json())
         logger.info("Created meeting: %s", meeting_json)
         return meeting_json
@@ -200,7 +199,7 @@ class Backend(BackendBase):
             backend_metadata = {}
         if backend_metadata.get('meeting_id'):
             return backend_metadata
-        meeting = cls._create_meeting(assignee)
+        meeting = cls._create_meeting(assignee, attendee_names=attendee_names)
         backend_metadata.update({
             'user_id': meeting['host_id'],
             'meeting_id': meeting['id'],
