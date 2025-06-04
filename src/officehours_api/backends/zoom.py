@@ -138,7 +138,7 @@ class Backend(BackendBase):
         return ZoomClient(cls._get_access_token(user))
 
     @classmethod
-    def _create_meeting(cls, user: User, attendee_name: str = None) -> ZoomMeeting:
+    def _create_meeting(cls, user: User, attendee_names=None) -> ZoomMeeting:
         """Creates a Zoom meeting for the given user."""
         client = cls._get_client(user)
         meeting_settings = ZoomMeetingSettings(
@@ -160,11 +160,10 @@ class Backend(BackendBase):
             waiting_room=True,
             watermark=False)
 
+        # Set topic, optionally with attendee_names
         topic = 'Remote Office Hours Queue Meeting'
-        if attendee_name:
-            topic = f'Remote Office Hours Queue Meeting with {attendee_name}'
-
-        # invoke the create_meeting method of the ZoomClient instance
+        if attendee_names:
+            topic = f'{topic} with {attendee_names}'
         try:
             meeting = client.meetings.create_meeting(
                 topic=topic,
@@ -179,7 +178,6 @@ class Backend(BackendBase):
             cls._clear_backend_metadata(user)
             raise
 
-        # The return value of meeting.json() is a string object
         meeting_json = json.loads(meeting.json())
         logger.info("Created meeting: %s", meeting_json)
         return meeting_json
@@ -196,14 +194,12 @@ class Backend(BackendBase):
         return resp.json()
 
     @classmethod
-    def save_user_meeting(cls, backend_metadata: dict, assignee: User):
+    def save_user_meeting(cls, backend_metadata: dict, assignee: User, attendee_names=None):
         if not backend_metadata:
             backend_metadata = {}
         if backend_metadata.get('meeting_id'):
             return backend_metadata
-
-        attendee_name = backend_metadata.get('attendee_name')
-        meeting = cls._create_meeting(assignee, attendee_name)
+        meeting = cls._create_meeting(assignee, attendee_names=attendee_names)
         backend_metadata.update({
             'user_id': meeting['host_id'],
             'meeting_id': meeting['id'],

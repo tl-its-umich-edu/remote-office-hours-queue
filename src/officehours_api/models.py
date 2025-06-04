@@ -200,18 +200,15 @@ class Meeting(SafeDeleteModel):
         backend = BACKEND_INSTANCES.get(self.backend_type)
         if not backend:
             raise DisabledBackendException(self.backend_type)
+        attendee_names = ", ".join([
+            f"{user.first_name} {user.last_name}".strip() or user.username
+            for user in self.attendees.all()
+        ])
         try:
-            attendee = self.attendees.first()
-            if attendee:
-                attendee_name = attendee.get_full_name()
-                if not attendee_name.strip():
-                    attendee_name = attendee.email
-                metadata = {'attendee_name': attendee_name}
-            else:
-                metadata = {}
             self.backend_metadata = backend.save_user_meeting(
-                metadata,
+                self.backend_metadata,
                 self.assignee,
+                attendee_names=attendee_names
             )
         except RequestException as ex:
             raise BackendException(self.backend_type) from ex
@@ -279,8 +276,7 @@ def post_save_user_signal_handler(sender, instance: User, created, **kwargs):
 if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN and settings.TWILIO_MESSAGING_SERVICE_SID:
     import officehours_api.notifications
 
-# This is a proxy model so Django avoids dropping the table
 class MeetingStartLogsView(models.Model):
     class Meta:
-        managed = False  # No migrations will be created for this model
+        managed = False
         db_table = 'meeting_start_logs'
