@@ -159,11 +159,14 @@ class Backend(BackendBase):
             use_pmi=False,
             waiting_room=True,
             watermark=False)
-
-        # invoke the create_meeting method of the ZoomClient instance
+        
+        topic = 'Remote Office Hours Queue Meeting'
+        attendee_name = user.get_full_name()
+        if attendee_name:
+            topic = f'{topic} with {attendee_name}'
         try:
             meeting = client.meetings.create_meeting(
-                topic='Remote Office Hours Queue Meeting',
+                topic=topic,
                 start_time=datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 duration_min=60,
                 timezone='America/Detroit',
