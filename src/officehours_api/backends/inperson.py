@@ -15,7 +15,7 @@ class Backend(BackendBase):
     telephone_num = None
     intl_telephone_url = None
 
-    def save_user_meeting(self, backend_metadata: dict, assignee: User):
+    def save_user_meeting(self, backend_metadata: dict, assignee: User, attendee_names=None):
         return {'started': True}
 
     @classmethod
