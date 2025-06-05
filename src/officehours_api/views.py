@@ -19,7 +19,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
-from rest_framework_tracking.mixins import LoggingMixin
+#from rest_framework_tracking.mixins import LoggingMixin
 
 from officehours_api.exceptions import DisabledBackendException, \
     MeetingStartedException, TwilioClientNotInitializedException
@@ -80,7 +80,7 @@ class UserList(DecoupledContextMixin, generics.ListAPIView):
     serializer_class = ShallowUserSerializer
 
 
-class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
+class UserDetail(DecoupledContextMixin, generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
 
@@ -109,7 +109,7 @@ class UserDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPI
         self.check_change_permission(request, user)
         return super().partial_update(request, *args, **kwargs)
 
-class UserOTP(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateAPIView):
+class UserOTP(DecoupledContextMixin, generics.RetrieveUpdateAPIView):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticated,)
     serializer_class = PhoneOTPSerializer
@@ -179,7 +179,7 @@ class UserUniqnameDetail(UserDetail):
     lookup_field = 'username'
 
 
-class QueueList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
+class QueueList(DecoupledContextMixin,generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
     serializer_class = QueueHostSerializer
 
@@ -199,7 +199,7 @@ class QueueListSearch(DecoupledContextMixin, generics.ListAPIView):
     filterset_fields = ['status']
 
 
-class QueueDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
+class QueueDetail(DecoupledContextMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Queue.objects.all()
     serializer_class = QueueHostSerializer
@@ -214,7 +214,7 @@ class QueueDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDe
         return Response(serializer.data)
 
 
-class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
+class QueueHostDetail(DecoupledContextMixin, APIView):
     logging_methods = settings.LOGGING_METHODS
 
     serializer_class = ShallowUserSerializer  # For DRF Spectacular
@@ -251,7 +251,7 @@ class QueueHostDetail(DecoupledContextMixin, LoggingMixin, APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class MeetingList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIView):
+class MeetingList(DecoupledContextMixin, generics.ListCreateAPIView):
     logging_methods = settings.LOGGING_METHODS
     serializer_class = MeetingSerializer
 
@@ -260,7 +260,7 @@ class MeetingList(DecoupledContextMixin, LoggingMixin, generics.ListCreateAPIVie
         return Meeting.objects.filter(attendees__in=[user])
 
 
-class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdateDestroyAPIView):
+class MeetingDetail(DecoupledContextMixin, generics.RetrieveUpdateDestroyAPIView):
     logging_methods = settings.LOGGING_METHODS
     queryset = Meeting.objects.all()
     serializer_class = MeetingSerializer
@@ -273,7 +273,7 @@ class MeetingDetail(DecoupledContextMixin, LoggingMixin, generics.RetrieveUpdate
             return Response({'Meeting Detail': e.message}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MeetingStart(DecoupledContextMixin, LoggingMixin, APIView):
+class MeetingStart(DecoupledContextMixin, APIView):
     permission_classes = (IsAuthenticated, IsAssignee,)
 
     serializer_class = MeetingSerializer  # For DRF Spectacular
