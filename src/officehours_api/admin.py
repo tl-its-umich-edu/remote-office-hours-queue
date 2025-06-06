@@ -4,10 +4,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.http import HttpResponse
-from safedelete.admin import SafeDeleteAdmin, highlight_deleted
-
+from officehours_api.admin_filters import ActiveHosts, ActiveQueues
 from officehours_api.models import Queue, Meeting, Attendee, Profile
 from officehours_api.views import ExportMeetingStartLogs
+from safedelete.admin import SafeDeleteAdmin, highlight_deleted
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +58,8 @@ class ExporterAdminMixin:
 class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
     list_display = (('id', highlight_deleted, 'created_at',
                      'status') + SafeDeleteAdmin.list_display)
-    list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
+    # list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
+    list_filter = (ActiveHosts, 'status') + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
 
     def queues_queryset(self, request, selection_queryset):
@@ -82,7 +83,8 @@ class AttendeeInline(admin.TabularInline):
 @admin.register(Meeting)
 class MeetingAdmin(admin.ModelAdmin):
     list_display = ('id', 'queue', 'created_at')
-    list_filter = ('queue',)
+    # list_filter = ('queue',)
+    list_filter = (ActiveQueues,)
     search_fields = ['id', 'queue__name']
     inlines = (AttendeeInline,)
 
