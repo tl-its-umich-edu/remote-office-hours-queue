@@ -362,3 +362,6 @@ DEFAULT_ALLOWED_BACKENDS = (
     if os.getenv('DEFAULT_ALLOWED_BACKENDS', None)
     else [DEFAULT_BACKEND]
 )
+
+# CSRF trusted origins configuration
+CSRF_TRUSTED_ORIGINS = csv_to_list(os.getenv('CSRF_TRUSTED_ORIGINS', ''))
