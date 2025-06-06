@@ -58,7 +58,6 @@ class ExporterAdminMixin:
 class QueueAdmin(ExporterAdminMixin, SafeDeleteAdmin):
     list_display = (('id', highlight_deleted, 'created_at',
                      'status') + SafeDeleteAdmin.list_display)
-    # list_filter = ('hosts', 'status',) + SafeDeleteAdmin.list_filter
     list_filter = (ActiveHosts, 'status') + SafeDeleteAdmin.list_filter
     search_fields = ['id', 'name']
 
@@ -83,7 +82,6 @@ class AttendeeInline(admin.TabularInline):
 @admin.register(Meeting)
 class MeetingAdmin(admin.ModelAdmin):
     list_display = ('id', 'queue', 'created_at')
-    # list_filter = ('queue',)
     list_filter = (ActiveQueues,)
     search_fields = ['id', 'queue__name']
     inlines = (AttendeeInline,)
