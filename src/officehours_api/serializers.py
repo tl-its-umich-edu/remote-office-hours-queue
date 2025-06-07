@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
-from officehours_api.models import Queue, Meeting, MeetingStatus, Attendee, get_backend_types
+from officehours_api.models import Queue, QueueAnnouncement, Meeting, MeetingStatus, Attendee, get_backend_types
 
 
 class UserContext(TypedDict):
@@ -88,6 +88,15 @@ class ShallowUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name']
 
 
+class QueueAnnouncementSerializer(serializers.ModelSerializer):
+    created_by = NestedUserSerializer(read_only=True)
+
+    class Meta:
+        model = QueueAnnouncement
+        fields = ['id', 'text', 'created_at', 'created_by', 'active']
+        read_only_fields = ['id', 'created_at', 'created_by']
+
+
 class QueueAttendeeSerializer(serializers.ModelSerializer):
     '''
     Serializer used when viewing queue as an attendee.
@@ -98,11 +107,12 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
     line_length = serializers.SerializerMethodField(read_only=True)
     my_meeting = serializers.SerializerMethodField(read_only=True)
     allowed_backends = serializers.ListField(child=serializers.CharField())
+    current_announcement = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Queue
         fields = ['id', 'name', 'created_at', 'description', 'hosts', 'line_length', 'my_meeting', 'status',
-                  'allowed_backends', 'inperson_location']
+                  'allowed_backends', 'inperson_location', 'current_announcement']
 
     @extend_schema_field(serializers.IntegerField)
     def get_line_length(self, obj):
@@ -119,6 +129,28 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
             return None
         serializer = NestedMyMeetingSerializer(my_meeting, context=self.context)
         return serializer.data
+
+    @extend_schema_field(QueueAnnouncementSerializer(many=True))
+    def get_current_announcement(self, obj):
+        user = self.context['user']
+        
+        if not user.is_authenticated:
+            # Not authenticated users see all active announcements
+            announcements = obj.announcements.filter(active=True).order_by('-created_at')
+        else:
+            my_meeting = obj.meeting_set.filter(attendees__in=[user]).first()
+            
+            if my_meeting and my_meeting.assignee:
+                # User is in queue with assigned host - only see that host's announcements
+                announcements = obj.announcements.filter(
+                    active=True, 
+                    created_by=my_meeting.assignee
+                ).order_by('-created_at')
+            else:
+                # User is not in queue or no assigned host - see all active announcements
+                announcements = obj.announcements.filter(active=True).order_by('-created_at')
+        
+        return [QueueAnnouncementSerializer(announcement).data for announcement in announcements]
 
 
 class MyUserSerializer(serializers.ModelSerializer):
@@ -162,8 +194,8 @@ class MyUserSerializer(serializers.ModelSerializer):
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
-        instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me_attendee)
-        instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me_host)
+        instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me.attendee)
+        instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me.host)
         instance.profile.save()
         return instance
 
@@ -212,11 +244,33 @@ class QueueHostSerializer(QueueAttendeeSerializer):
         write_only=True,
     )
     allowed_backends = serializers.ListField(child=serializers.CharField())
+    
+    @extend_schema_field(QueueAnnouncementSerializer(many=True))
+    def get_current_announcement(self, obj):
+        user = self.context['user']
+        
+        if not user.is_authenticated:
+            # Not authenticated users see all active announcements
+            announcements = obj.announcements.filter(active=True).order_by('-created_at')
+        else:
+            my_meeting = obj.meeting_set.filter(attendees__in=[user]).first()
+            
+            if my_meeting and my_meeting.assignee:
+                # User is in queue with assigned host - only see that host's announcements
+                announcements = obj.announcements.filter(
+                    active=True, 
+                    created_by=my_meeting.assignee
+                ).order_by('-created_at')
+            else:
+                # User is not in queue or no assigned host - see all active announcements
+                announcements = obj.announcements.filter(active=True).order_by('-created_at')
+        
+        return [QueueAnnouncementSerializer(announcement).data for announcement in announcements]
 
     class Meta:
         model = Queue
         fields = ['id', 'name', 'created_at', 'description', 'hosts', 'host_ids',
-                 'meeting_set', 'line_length', 'my_meeting', 'status', 'allowed_backends', 'inperson_location']
+                 'meeting_set', 'line_length', 'my_meeting', 'status', 'allowed_backends', 'inperson_location', 'current_announcement']
 
     def validate_host_ids(self, host_ids):
         '''

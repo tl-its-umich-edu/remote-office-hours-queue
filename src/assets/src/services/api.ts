@@ -1,4 +1,4 @@
-import { QueueBase, QueueHost, QueueAttendee, User, MyUser, Meeting } from "../models";
+import { QueueBase, QueueHost, QueueAttendee, User, MyUser, Meeting, QueueAnnouncement } from "../models";
 
 const getCsrfToken = () => {
     return (document.querySelector("[name='csrfmiddlewaretoken']") as HTMLInputElement).value;
@@ -313,4 +313,63 @@ export const exportAllQueueHistoryLogs = async () => {
         throw new Error("You have no queues with meeting history.");
     }
     await downloadCsv(resp);
+}
+
+// Queue Announcement API functions
+
+export const createAnnouncement = async (queue_id: number, text: string) => {
+    const resp = await fetch(`/api/queues/${queue_id}/announcements/`, {
+        method: "POST",
+        body: JSON.stringify({
+            text: text,
+        }),
+        headers: getPostHeaders(),
+    });
+    await handleErrors(resp);
+    return await resp.json() as QueueAnnouncement;
+}
+
+export const updateAnnouncement = async (queue_id: number, announcement_id: number, text: string, active?: boolean) => {
+    const announcementPatched: any = { text };
+    if (active !== undefined) {
+        announcementPatched.active = active;
+    }
+
+    const resp = await fetch(`/api/queues/${queue_id}/announcements/${announcement_id}/`, {
+        method: "PATCH",
+        headers: getPatchHeaders(),
+        body: JSON.stringify(announcementPatched)
+    });
+    await handleErrors(resp);
+    return await resp.json() as QueueAnnouncement;
+}
+
+export const deleteAnnouncement = async (queue_id: number, announcement_id: number) => {
+    const resp = await fetch(`/api/queues/${queue_id}/announcements/${announcement_id}/`, {
+        method: "DELETE",
+        headers: getDeleteHeaders(),
+    });
+    await handleErrors(resp);
+    return resp;
+}
+
+export const deactivateCurrentAnnouncement = async (queue_id: number, announcement_id: number) => {
+    return updateAnnouncement(queue_id, announcement_id, "", false);
+}
+
+export const getAllActiveAnnouncements = async (queue_id: number) => {
+    const resp = await fetch(`/api/queues/${queue_id}/announcements/`, {
+        method: "GET",
+    });
+    await handleErrors(resp);
+    return await resp.json() as QueueAnnouncement[];
+}
+
+export const getMyActiveAnnouncement = async (queue_id: number) => {
+    const resp = await fetch(`/api/queues/${queue_id}/announcements/?created_by=me`, {
+        method: "GET",
+    });
+    await handleErrors(resp);
+    const announcements = await resp.json() as QueueAnnouncement[];
+    return announcements.length > 0 ? announcements[0] : null;
 }

@@ -280,3 +280,17 @@ class MeetingStartLogsView(models.Model):
     class Meta:
         managed = False
         db_table = 'meeting_start_logs'
+
+
+class QueueAnnouncement(models.Model):
+    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, related_name='announcements')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Announcement for {self.queue.name} by {self.created_by.username} at {self.created_at}"
+
+    class Meta:
+        ordering = ['-created_at']
