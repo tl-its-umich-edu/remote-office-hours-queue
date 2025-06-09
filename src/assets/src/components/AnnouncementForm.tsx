@@ -169,10 +169,10 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
                                         onChange={(e) => setText(e.target.value)}
                                         placeholder="Enter announcement for queue participants..."
                                         disabled={disabled || operationLoading}
-                                        maxLength={500}
+                                        maxLength={160}
                                     />
                                     <Form.Text className="text-muted">
-                                        {text.length}/500 characters
+                                        {text.length}/160 characters
                                     </Form.Text>
                                 </Form.Group>
                             </Col>

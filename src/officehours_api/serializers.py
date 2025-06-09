@@ -194,8 +194,8 @@ class MyUserSerializer(serializers.ModelSerializer):
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
-        instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me.attendee)
-        instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me.host)
+        instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me_attendee)
+        instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me_host)
         instance.profile.save()
         return instance
 

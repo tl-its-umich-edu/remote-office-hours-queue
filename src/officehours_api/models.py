@@ -6,7 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
 from django.core.validators import MaxLengthValidator
 from safedelete.models import (
     SafeDeleteModel, SOFT_DELETE_CASCADE, HARD_DELETE,
@@ -294,3 +294,16 @@ class QueueAnnouncement(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+@receiver(m2m_changed, sender=Queue.hosts.through)
+def handle_queue_hosts_changed(sender, instance, action, pk_set, **kwargs):
+    """
+    Handle when hosts are added or removed from a queue.
+    When hosts are removed, delete their announcements for that queue.
+    """
+    if action == "post_remove" and pk_set:
+        QueueAnnouncement.objects.filter(
+            queue=instance,
+            created_by__id__in=pk_set
+        ).delete()
