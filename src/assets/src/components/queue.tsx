@@ -553,12 +553,11 @@ export function QueuePage(props: PageProps) {
     let queueTitle: string;
 
     if (!queue) {
-        // Queue data is not available or not yet loaded.
-        queueTitle = queue_id ? `Queue ${queue_id}` : "Loading Queue...";
+    // Queue data is not available or not yet loaded.
+    queueTitle = `Queue ${queue_id}`
     } else {
         // Queue data IS available.
-        const displayName = queue.name || (queue_id ? `Queue ${queue_id}` : "Unnamed Queue");
-
+        const displayName = queue.name || `Queue ${queue_id}`;
         if (!queue.my_meeting) {
             // User is viewing the queue but hasn't joined or isn't in a meeting for this queue.
             queueTitle = `Join Queue: ${displayName}`;
