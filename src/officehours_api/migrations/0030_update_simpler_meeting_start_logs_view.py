@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
             sql="""
                 DROP VIEW meeting_start_logs;
 
-                CREATE OR REPLACE VIEW meeting_start_logs AS
+                CREATE VIEW meeting_start_logs AS
                 WITH parsed_response AS (
                     SELECT
                         response::jsonb AS response
@@ -42,8 +42,11 @@ class Migration(migrations.Migration):
                     parsed_response
                 JOIN officehours_api_queue q ON (response -> 'queue')::int = q.id
             """,
+            # NOTE: This SQL reverts the view to its state BEFORE migration 0029.
             reverse_sql="""
-                CREATE OR REPLACE VIEW meeting_start_logs AS
+                DROP VIEW meeting_start_logs;
+
+                CREATE VIEW meeting_start_logs AS
                 WITH parsed_response AS (
                     SELECT
                         response::jsonb AS response
