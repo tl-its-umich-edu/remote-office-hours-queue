@@ -9,6 +9,8 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunSQL(
             sql="""
+                DROP VIEW meeting_start_logs;
+
                 CREATE OR REPLACE VIEW meeting_start_logs AS
                 WITH parsed_response AS (
                     SELECT
@@ -21,6 +23,8 @@ class Migration(migrations.Migration):
                 )
                 SELECT DISTINCT
                     (response -> 'queue')::int AS queue_id,
+                    q.name AS queue_name,
+                    q.status AS queue_status,
                     (response -> 'attendees' -> 0 ->> 'id')::int AS attendee_id,
                     (response -> 'attendees' -> 0 ->> 'user_id')::int AS attendee_user_id,
                     response -> 'attendees' -> 0 ->> 'username' AS attendee_uniqname,
@@ -33,9 +37,7 @@ class Migration(migrations.Migration):
                     response -> 'backend_type' AS meeting_type,
                     response -> 'backend_metadata' ->> 'meeting_url' AS meeting_url,
                     response -> 'agenda' AS agenda,
-                    to_timestamp(response::jsonb ->> 'created_at'::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text) AS meeting_created_at,
-                    q.name AS queue_name,
-                    q.status AS queue_status
+                    to_timestamp(response::jsonb ->> 'created_at'::text, 'YYYY-MM-DD"T"HH24:MI:SS.US'::text) AS meeting_created_at
                 FROM
                     parsed_response
                 JOIN officehours_api_queue q ON (response -> 'queue')::int = q.id
