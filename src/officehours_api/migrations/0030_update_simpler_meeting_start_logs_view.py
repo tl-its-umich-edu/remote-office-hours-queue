@@ -1,9 +1,9 @@
-from django.db import migrations, models
+from django.db import migrations
+
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('officehours_api', '0028_alter_meeting_backend_type_and_more'),
+        ('officehours_api', '0029_update_meeting_start_logs_view'),
     ]
 
     operations = [
@@ -12,8 +12,7 @@ class Migration(migrations.Migration):
                 CREATE OR REPLACE VIEW meeting_start_logs AS
                 WITH parsed_response AS (
                     SELECT
-                        response::jsonb AS response,
-                        (response::jsonb -> 'queue')::int AS queue_id
+                        response::jsonb AS response
                     FROM
                         rest_framework_tracking_apirequestlog
                     WHERE
@@ -21,7 +20,7 @@ class Migration(migrations.Migration):
                         AND (response::jsonb ->> 'created_at') IS NOT NULL
                 )
                 SELECT DISTINCT
-                    pr.queue_id AS queue_id,
+                    (response -> 'queue')::int AS queue_id,
                     (response -> 'attendees' -> 0 ->> 'id')::int AS attendee_id,
                     (response -> 'attendees' -> 0 ->> 'user_id')::int AS attendee_user_id,
                     response -> 'attendees' -> 0 ->> 'username' AS attendee_uniqname,
@@ -38,8 +37,8 @@ class Migration(migrations.Migration):
                     q.name AS queue_name,
                     q.status AS queue_status
                 FROM
-                    parsed_response pr
-                JOIN officehours_api_queue q ON pr.queue_id = q.id
+                    parsed_response
+                JOIN officehours_api_queue q ON (response -> 'queue')::int = q.id
             """,
             reverse_sql="""
                 CREATE OR REPLACE VIEW meeting_start_logs AS
