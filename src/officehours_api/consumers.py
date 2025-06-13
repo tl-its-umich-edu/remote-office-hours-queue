@@ -10,7 +10,7 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from channels.layers import get_channel_layer
 from safedelete.signals import post_softdelete
 
-from officehours_api.models import Queue, Meeting, Profile
+from officehours_api.models import Queue, Meeting, Profile, QueueAnnouncement
 from officehours_api.permissions import is_host
 from officehours_api.serializers import (
     QueueHostSerializer, QueueAttendeeSerializer, MyUserSerializer
@@ -107,6 +107,25 @@ class QueueConsumer(JsonWebsocketConsumer):
             'type': 'deleted',
         })
 
+    def announcement_update(self, event):
+        try:
+            queue = Queue.objects.get(pk=self.queue_id)
+        except Queue.DoesNotExist:
+            return
+        QueueSerializer = (
+            QueueHostSerializer
+            if is_host(self.user, queue)
+            else QueueAttendeeSerializer
+        )
+        queue_data = QueueSerializer(
+            queue,
+            context={'user': self.user},
+        ).data
+        self.send_json({
+            'type': 'announcement_update',
+            'content': queue_data.get('current_announcement'),
+        })
+
 
 def send_queue_update(queue_id: int, channel_layer=None):
     channel_layer = channel_layer or get_channel_layer()
@@ -124,6 +143,16 @@ def send_queue_delete(queue_id: int, channel_layer=None):
         QueueConsumer.get_group_name(queue_id),
         {
             'type': 'queue.deleted',
+        }
+    )
+
+
+def send_announcement_update(queue_id: int, channel_layer=None):
+    channel_layer = channel_layer or get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        QueueConsumer.get_group_name(queue_id),
+        {
+            'type': 'announcement.update',
         }
     )
 
@@ -160,10 +189,19 @@ def trigger_queue_update_for_hosts(sender, instance, action, pk_set, **kwargs):
         transaction.on_commit(lambda: send_queue_update(instance.id))
         for host_id in pk_set:
             transaction.on_commit(lambda: send_user_update(host_id))
-    else:  # is User
+    else:
         transaction.on_commit(lambda: send_user_update(instance.id))
         for queue_id in pk_set:
             transaction.on_commit(lambda: send_queue_update(queue_id))
+
+
+@receiver(post_save, sender=QueueAnnouncement)
+@receiver(post_delete, sender=QueueAnnouncement)
+def trigger_queue_update_for_announcement(sender, instance: QueueAnnouncement, **kwargs):
+    if instance.queue_id is None:
+        return
+    transaction.on_commit(lambda: send_queue_update(instance.queue_id))
+    transaction.on_commit(lambda: send_announcement_update(instance.queue_id))
 
 
 class UserConsumer(JsonWebsocketConsumer):

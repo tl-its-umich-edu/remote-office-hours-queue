@@ -13,7 +13,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import generics, serializers, status, filters
+from rest_framework import generics, serializers, status, filters, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -23,17 +23,17 @@ from rest_framework_tracking.mixins import LoggingMixin
 
 from officehours_api.exceptions import DisabledBackendException, \
     MeetingStartedException, TwilioClientNotInitializedException
-from officehours_api.models import Attendee, Meeting, Queue
+from officehours_api.models import Attendee, Meeting, Queue, QueueAnnouncement
 from officehours_api.notifications import send_one_time_password
 from officehours_api.permissions import (IsAssignee, IsHostOrReadOnly,
-                                         IsHostOrAttendee, is_host)
+                                         IsHostOrAttendee, IsHostOfQueue, is_host)
 from officehours_api.serializers import (ShallowUserSerializer,
                                          MyUserSerializer,
                                          ShallowQueueSerializer,
                                          QueueAttendeeSerializer,
                                          QueueHostSerializer,
                                          MeetingSerializer, AttendeeSerializer,
-                                         PhoneOTPSerializer)
+                                         PhoneOTPSerializer, QueueAnnouncementSerializer)
 
 logger = logging.getLogger(__name__)
 
@@ -301,6 +301,49 @@ class AttendeeList(DecoupledContextMixin, generics.ListAPIView):
 class AttendeeDetail(DecoupledContextMixin, generics.RetrieveAPIView):
     queryset = Attendee.objects.all()
     serializer_class = AttendeeSerializer
+
+
+class QueueAnnouncementViewSet(DecoupledContextMixin, LoggingMixin, viewsets.ModelViewSet):
+    serializer_class = QueueAnnouncementSerializer
+    permission_classes = [IsAuthenticated, IsHostOfQueue]
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete']
+    
+    def get_queryset(self):
+        queue_pk = self.kwargs.get('queue_pk')
+        if not queue_pk:
+            return QueueAnnouncement.objects.none()
+        
+        queue = get_object_or_404(Queue, pk=queue_pk)
+        if self.action == 'list':
+            queryset = queue.announcements.filter(active=True).order_by('-created_at')
+            # Support filtering by current user's announcements
+            created_by = self.request.query_params.get('created_by')
+            if created_by == 'me':
+                queryset = queryset.filter(created_by=self.request.user)
+            return queryset
+        return queue.announcements.all().order_by('-created_at')
+
+    def perform_create(self, serializer):
+        queue = get_object_or_404(Queue, pk=self.kwargs['queue_pk'])
+        # Deactivate any existing active announcements by this user
+        QueueAnnouncement.objects.filter(
+            queue=queue, 
+            active=True, 
+            created_by=self.request.user
+        ).update(active=False)
+        serializer.save(created_by=self.request.user, queue=queue, active=True)
+
+    def perform_update(self, serializer):
+        queue = get_object_or_404(Queue, pk=self.kwargs['queue_pk'])
+        # If setting this announcement to active, deactivate other announcements by this user
+        if serializer.validated_data.get('active', False):
+            QueueAnnouncement.objects.filter(
+                queue=queue, 
+                active=True, 
+                created_by=self.request.user
+            ).exclude(pk=serializer.instance.pk).update(active=False)
+        serializer.save()
+
 
 class ExportMeetingStartLogs(APIView):
     permission_classes = [IsAuthenticated]
