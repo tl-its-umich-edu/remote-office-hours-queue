@@ -13,13 +13,16 @@ on:
         required: true
         default: 'MAJOR.MINOR.MICRO'
     description: 'Manually trigger the workflow to create a new version tag and draft a release. This must be run from a tag that is pre-created.'
-          
+
+# Define reusable runner config
+env:
+  SHARED_RUNNER: ${{ github.repository_owner == 'tl-its-umich-edu' && 'shared-linux-x64' || 'ubuntu-latest' }}
 
 jobs:
   build:
     # to test a feature, change the repo name to your github id. I'm not sure of a better way to check this.
     if: github.repository_owner == 'tl-its-umich-edu' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ${{ env.SHARED_RUNNER }}
     steps:
   
       - name: Checkout code 
@@ -48,7 +51,7 @@ jobs:
     # Making sure that release only runs for tag pushes
     if: startsWith(github.ref, 'refs/tags/') 
     needs: build # This ensures the build job finishes successfully before starting this job
-    runs-on: ubuntu-latest
+    runs-on: ${{ env.SHARED_RUNNER }}
     steps:
       - uses: actions/checkout@v4
 
