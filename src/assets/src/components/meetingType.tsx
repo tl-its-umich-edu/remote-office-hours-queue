@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Form, FormGroup } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 
 import { EnabledBackendName, MeetingBackend } from "../models";
 
@@ -29,19 +29,19 @@ export function AllowedBackendsForm(props: AllowedMeetingBackendsFormProps) {
     }
     const allowedMeetingTypeEditors = enabledBackends
         .map((b) =>
-            <FormGroup key={b.name} controlId={b.name} className="mb-3">
+            <Form.Group key={b.name} controlId={b.name} className="mb-3">
                 <Form.Check
                     type="checkbox"
                     label={b.friendly_name}
                     checked={props.allowed.has(b.name)}
                     onChange={() => toggleAllowed(b.name)}
                 />
-            </FormGroup>
+            </Form.Group>
         );
     return (
-        <Form>
+        <>
             {allowedMeetingTypeEditors}
-        </Form>
+        </>
     );
 }
 
@@ -53,7 +53,7 @@ interface BackendSelectorProps {
     onChange: (backend: string) => void;
 }
 
-export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {  
+export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
     const enabledAllowedBackends = props.backends.filter(
         (b) => b.enabled && props.allowedBackends.has(b.name)
     );
@@ -66,7 +66,7 @@ export const BackendSelector: React.FC<BackendSelectorProps> = (props) => {
         props.onChange(event.currentTarget.value);
     }
     return (
-        <Form.Select className="select-dropdown" onChange={handleChange} value={props.selectedBackend}>
+        <Form.Select className="select-dropdown" onChange={handleChange} value={props.selectedBackend} required>
             {options}
         </Form.Select>
     );
