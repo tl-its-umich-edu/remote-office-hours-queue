@@ -25,6 +25,8 @@ import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
 import { HelmetTitle } from "./pageTitle";
+import { AnnouncementForm } from "./AnnouncementForm";
+import { MultipleAnnouncementsDisplay } from "./MultipleAnnouncementsDisplay";
 
 interface AddAttendeeFormProps {
     allowedBackends: Set<string>;
@@ -106,6 +108,8 @@ interface QueueManagerProps {
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     onStartMeeting: (m: Meeting) => void;
+    onAnnouncementChange: () => void;
+    announcementRefreshTrigger: number;
 }
 
 function QueueManager(props: QueueManagerProps) {
@@ -164,6 +168,25 @@ function QueueManager(props: QueueManagerProps) {
             <Row className={spacingClass}>
                 <Col md={2}><div id='created'>Created</div></Col>
                 <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
+            </Row>
+            <Row className={spacingClass}>
+                <Col md={12}>
+                    <AnnouncementForm
+                        queueId={props.queue.id}
+                        onAnnouncementChange={props.onAnnouncementChange}
+                        disabled={props.disabled}
+                        currentUser={{ id: props.user.id, username: props.user.username }}
+                    />
+                </Col>
+            </Row>
+            <Row className={spacingClass}>
+                <Col md={12}>
+                    <MultipleAnnouncementsDisplay
+                        queueId={props.queue.id}
+                        currentUser={{ id: props.user.id, username: props.user.username }}
+                        refreshTrigger={props.announcementRefreshTrigger}
+                    />
+                </Col>
             </Row>
             <h2 className={spacingClass}>Meetings in Progress</h2>
             <Row className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
@@ -255,6 +278,7 @@ export function QueueManagerPage(props: PageProps) {
     // Set up basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
+    const [announcementRefreshTrigger, setAnnouncementRefreshTrigger] = useState(0);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
             setQueue(q);
@@ -346,6 +370,10 @@ export function QueueManagerPage(props: PageProps) {
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
                 onStartMeeting={doStartMeeting}
+                onAnnouncementChange={() => {
+                    setAnnouncementRefreshTrigger(prev => prev + 1);
+                }}
+                announcementRefreshTrigger={announcementRefreshTrigger}
             />
         );
     return (

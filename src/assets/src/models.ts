@@ -77,6 +77,15 @@ export interface QueueHost extends QueueAttendee {
 export interface QueueAttendee extends QueueFull {
     my_meeting: Meeting | null;
     line_length: number;
+    current_announcement: QueueAnnouncement | null;
+}
+
+export interface QueueAnnouncement {
+    id: number;
+    text: string;
+    created_at: string;
+    created_by: User;
+    active: boolean;
 }
 
 export const isQueueHost = (q: QueueAttendee | QueueHost): q is QueueHost => {

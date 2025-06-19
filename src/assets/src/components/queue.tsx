@@ -22,6 +22,7 @@ import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, redirectToLogin } from "../utils";
 import { meetingAgendaSchema } from "../validation";
 import { HelmetTitle } from "./pageTitle";
+import { QueueAnnouncementsDisplay } from "./QueueAnnouncement";
 
 
 interface JoinQueueProps {
@@ -118,6 +119,7 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
     return (
         <>
         {closedAlert}
+        <QueueAnnouncementsDisplay announcements={props.queue.current_announcement} />
         <Row>
             <Col>
                 <ul>
@@ -329,6 +331,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     return (
         <>
         {closedAlert}
+        <QueueAnnouncementsDisplay announcements={props.queue.current_announcement} />
         {turnAlert}
         <h3>{headText}</h3>
         <Card className='card-middle card-width center-align'>

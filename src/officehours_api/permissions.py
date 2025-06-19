@@ -58,3 +58,36 @@ class IsAssignee(permissions.BasePermission):
         return (
             is_assignee(request.user, obj)
         )
+
+
+class IsHostOfQueue(permissions.BasePermission):
+    '''
+    Custom permission to only allow hosts of a queue to perform write actions
+    on queue-related resources like announcements.
+    '''
+    message = 'You must be a host of this queue to perform this action.'
+
+    def has_permission(self, request, view):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        
+        queue_pk = view.kwargs.get('queue_pk')
+        if not queue_pk:
+            return False 
+        
+        try:
+            from .models import Queue
+            queue = Queue.objects.get(pk=queue_pk)
+        except Queue.DoesNotExist:
+            return False
+            
+        return is_host(request.user, queue)
+
+    def has_object_permission(self, request, view, obj):
+        if not request.user or not request.user.is_authenticated:
+            return False
+        
+        if hasattr(obj, 'queue') and obj.queue:
+            return is_host(request.user, obj.queue)
+        
+        return False
