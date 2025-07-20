@@ -49,3 +49,26 @@ describe("confirmUserExists", () => {
     await expect(confirmUserExists("testuser")).rejects.toEqual(unknownError);
   });
 })
+
+describe("validatePhoneNumber", () => {
+  it('should not return an error for valid US/Canada phone number', () => {
+    const dummyDialCode = '1';
+    const dummyPhone = '12345678901'; // 11 digits
+    expect(validatePhoneNumber(dummyPhone, dummyDialCode)).toEqual([]);
+  });
+
+  it('should return an error for invalid US/Canada phone number', () => {
+    const dummyDialCode = '1';
+    const dummyPhone = '1234567890'; // 10 digits (missing country code)
+    expect(validatePhoneNumber(dummyPhone, dummyDialCode)).toEqual([
+      new Error('Please enter a valid US/Canada phone number with area code ' +
+        '(11 digits including +1 country code) that can receive SMS messages.')
+    ]);
+  });
+
+  it('should not return an error for non-US/Canada country codes', () => {
+    const dummyDialCode = '44'; // UK
+    const dummyPhone = '123456789'; // Any length should be valid for non-US/Canada
+    expect(validatePhoneNumber(dummyPhone, dummyDialCode)).toEqual([]);
+  });
+});
