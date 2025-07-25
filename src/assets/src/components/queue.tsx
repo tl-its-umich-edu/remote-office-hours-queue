@@ -246,12 +246,16 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
 
     const notificationBlurb = !inProgress
         && (
-            <Alert variant="info" className="fs-6">
-                Did you know? You can receive an SMS (text) message when
-                it's your turn by adding your cell phone number and
-                enabling attendee notifications in
-                your <Link to="/preferences">User Preferences</Link>.
-            </Alert>
+            <div className="d-flex align-items-start mb-0 p-3">
+                <i className="fa-solid fa-message me-3" style={{ fontSize: '1.2rem', marginTop: '1.5rem' }}></i>
+                <div className="flex-grow-1">
+                    <h5 className="mb-1 fw-bold">Get Notified by Text</h5>
+                    <p className="mb-0 text-dark">
+                        To receive an SMS (text) message when it's your turn:<br />
+                        add your cell phone number and enable attendee notifications in your <Link to="/preferences">User Preferences</Link>.
+                    </p>
+                </div>
+            </div>
         );
 
     const agendaBlock = !inProgress
@@ -329,37 +333,47 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
     const meetingInfo = isVideoMeeting && <VideoMeetingInfo metadata={meeting.backend_metadata!} backend={meetingBackend} />;
 
     return (
-        <>
+      <>
         {closedAlert}
-        <QueueAnnouncementsDisplay announcements={props.queue.current_announcement} />
         {turnAlert}
         <h3>{headText}</h3>
-        <Card className='card-middle card-width center-align'>
-            <Card.Body>
-                {meeting.line_place !== null && <Card.Text><strong>Your Number in Line</strong>: {meeting.line_place + 1}</Card.Text>}
-                {notificationBlurb}
-                <Card.Text><strong>Time Joined</strong>: <DateTimeDisplay dateTime={props.queue.my_meeting!.created_at}/></Card.Text>
-                <Card.Text>
-                    <strong>Meeting Via</strong>: {meetingBackend.friendly_name} {!inProgress && changeMeetingType}
-                </Card.Text>
-                {
-                    meetingBackend.name === 'inperson' &&
-                    <Card.Text>
-                        <strong>Meet At</strong>: {joinedInpersonMeetingText}
-                    </Card.Text>
-                }
-                {agendaBlock}
-            </Card.Body>
+        <Card className="card-middle card-width center-align">
+          <Card.Body>
+            {meeting.line_place !== null && (
+              <Card.Text>
+                <strong>Your Number in Line</strong>: {meeting.line_place + 1}
+              </Card.Text>
+            )}
+            {notificationBlurb}
+            <hr className="my-3" />
+            <QueueAnnouncementsDisplay
+              announcements={props.queue.current_announcement}
+            />
+            <Card.Text>
+              <strong>Time Joined</strong>:{" "}
+              <DateTimeDisplay dateTime={props.queue.my_meeting!.created_at} />
+            </Card.Text>
+            <Card.Text>
+              <strong>Meeting Via</strong>: {meetingBackend.friendly_name}{" "}
+              {!inProgress && changeMeetingType}
+            </Card.Text>
+            {meetingBackend.name === "inperson" && (
+              <Card.Text>
+                <strong>Meet At</strong>: {joinedInpersonMeetingText}
+              </Card.Text>
+            )}
+            {agendaBlock}
+          </Card.Body>
         </Card>
         {joinText && <p>{joinText}</p>}
-        <Row className='mb-3'>
-            <Col>
-                {joinLink}
-                {leave}
-            </Col>
+        <Row className="mb-3">
+          <Col>
+            {joinLink}
+            {leave}
+          </Col>
         </Row>
         {meetingInfo}
-        </>
+      </>
     );
 }
 

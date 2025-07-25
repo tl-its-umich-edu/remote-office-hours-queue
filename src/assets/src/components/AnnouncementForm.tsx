@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
-import { Alert, Button, Card, Col, Form, Row } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import { QueueAnnouncement } from "../models";
 import { ErrorDisplay } from "./common";
 import { usePromise } from "../hooks/usePromise";
@@ -21,7 +21,7 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
 }) => {
     const [myAnnouncement, setMyAnnouncement] = useState<QueueAnnouncement | null>(null);
     const [text, setText] = useState("");
-    const [isEditing, setIsEditing] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
 
     // Fetch the current user's own announcement
@@ -86,18 +86,18 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
             } else {
                 doCreateAnnouncement(text.trim());
             }
-            setIsEditing(false);
+            setShowForm(false);
         }
     };
 
     const handleEdit = () => {
         setText(myAnnouncement?.text || "");
-        setIsEditing(true);
+        setShowForm(true);
     };
 
     const handleCancel = () => {
         setText(myAnnouncement?.text || "");
-        setIsEditing(false);
+        setShowForm(false);
     };
 
     const handleDelete = () => {
@@ -107,115 +107,96 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
     };
 
     if (loading) {
-        return (
-            <Card className="mb-3">
-                <Card.Header>
-                    <Card.Title className="mb-0">Queue Announcement</Card.Title>
-                </Card.Header>
-                <Card.Body>
-                    <div>Loading...</div>
-                </Card.Body>
-            </Card>
-        );
+        return <div>Loading...</div>;
     }
 
     return (
-        <Card className="mb-3">
-            <Card.Header>
-                <Card.Title className="mb-0">Queue Announcement</Card.Title>
-            </Card.Header>
-            <Card.Body>
-                {error && <ErrorDisplay formErrors={[{source: 'Announcement', error}]} />}
-                
-                {myAnnouncement && !isEditing ? (
-                    <div>
-                        <Alert variant="info" className="mb-3">
-                            <p className="mb-0">{myAnnouncement.text}</p>
-                            <small className="text-muted">
-                               Posted {myAnnouncement.created_by.first_name || myAnnouncement.created_by.last_name ? `from ${myAnnouncement.created_by.first_name} ${myAnnouncement.created_by.last_name} (${myAnnouncement.created_by.username})` : `by ${myAnnouncement.created_by.username}`}
-                            </small>
-                        </Alert>
-                        {myAnnouncement.created_by.id === currentUser.id && (
-                            <div className="d-flex gap-2">
-                                <Button
-                                    variant="outline-primary"
-                                    size="sm"
-                                    onClick={handleEdit}
-                                    disabled={disabled || operationLoading}
-                                >
-                                    Edit
-                                </Button>
-                                <Button
-                                    variant="outline-danger"
-                                    size="sm"
-                                    onClick={handleDelete}
-                                    disabled={disabled || operationLoading}
-                                >
-                                    Remove
-                                </Button>
-                            </div>
-                        )}
+        <>
+            {!myAnnouncement && !showForm && (
+                <Button 
+                    variant="primary" 
+                    onClick={() => setShowForm(true)}
+                    disabled={disabled || operationLoading}
+                >
+                    Add Announcement
+                </Button>
+            )}
+
+            {showForm && (
+                <div className="border rounded p-3 mb-3" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="border-bottom pb-2 mb-3">
+                        <h6 className="mb-0 text-muted">{myAnnouncement ? 'Edit Announcement' : 'Add Announcement'}</h6>
                     </div>
-                ) : (
+                    
+                    {error && <ErrorDisplay formErrors={[{source: 'Announcement', error}]} />}
+                    
+                    <p className="mb-3">
+                        Announcements display on:<br />
+                        • the initial queue screen (before a person has joined it)<br />
+                        • the queue screens of those waiting
+                    </p>
+                    
                     <Form onSubmit={handleSubmit}>
-                        <Row>
-                            <Col>
-                                <Form.Group>
-                                    <Form.Label>Announcement Text</Form.Label>
-                                    <Form.Control
-                                        as="textarea"
-                                        rows={3}
-                                        value={text}
-                                        onChange={(e) => setText(e.target.value)}
-                                        placeholder="Enter announcement for queue participants..."
-                                        disabled={disabled || operationLoading}
-                                        maxLength={160}
-                                    />
-                                    <Form.Text className="text-muted">
-                                        {text.length}/160 characters
-                                    </Form.Text>
-                                </Form.Group>
-                            </Col>
-                        </Row>
-                        <Row className="mt-3">
-                            <Col>
-                                <div className="d-flex gap-2">
-                                    <Button
-                                        type="submit"
-                                        variant="primary"
-                                        disabled={disabled || operationLoading || !text.trim()}
-                                    >
-                                        {myAnnouncement ? "Update" : "Post"} Announcement
-                                    </Button>
-                                    {isEditing && (
-                                        <Button
-                                            type="button"
-                                            variant="secondary"
-                                            onClick={handleCancel}
-                                            disabled={disabled || operationLoading}
-                                        >
-                                            Cancel
-                                        </Button>
-                                    )}
-                                </div>
-                            </Col>
-                        </Row>
+                        <Form.Group className="mb-3">
+                            <Form.Control
+                                as="textarea"
+                                rows={4}
+                                value={text}
+                                onChange={(e) => setText(e.target.value)}
+                                placeholder="Text here"
+                                disabled={disabled || operationLoading}
+                            />
+                        </Form.Group>
+                        <div className="d-flex gap-2">
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                onClick={handleCancel}
+                                disabled={disabled || operationLoading}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                variant="primary"
+                                disabled={disabled || operationLoading || !text.trim()}
+                            >
+                                Save
+                            </Button>
+                        </div>
                     </Form>
-                )}
-                
-                {!myAnnouncement && !isEditing && (
-                    <div className="text-muted">
-                        <p className="mb-2">No active announcement for this queue.</p>
+                </div>
+            )}
+
+            {myAnnouncement && !showForm && (
+                <div className="border rounded p-3 mb-3" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="border-bottom pb-2 mb-3">
+                        <h6 className="mb-0 text-muted">Message from Host</h6>
+                    </div>
+                    <div className="bg-info bg-opacity-25 border border-info rounded p-3 mb-3" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                        <p className="mb-0 text-dark" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>{myAnnouncement.text}</p>
+                    </div>
+                    <div className="d-flex gap-2">
                         <Button
-                            variant="outline-primary"
-                            onClick={() => setIsEditing(true)}
+                            variant="link"
+                            className="text-danger p-0"
+                            onClick={handleDelete}
+                            disabled={disabled || operationLoading}
+                            style={{ textDecoration: 'none' }}
+                        >
+                            Delete
+                        </Button>
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={handleEdit}
                             disabled={disabled || operationLoading}
                         >
-                            Create Announcement
+                            Edit
                         </Button>
                     </div>
-                )}
-            </Card.Body>
-        </Card>
+                </div>
+            )}
+        </>
     );
 };

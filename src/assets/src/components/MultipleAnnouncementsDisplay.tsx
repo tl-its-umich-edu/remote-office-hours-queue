@@ -45,38 +45,24 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
     }
 
     if (announcements.length === 0) {
-        return (
-            <Alert variant="info">
-                No active announcements from any hosts.
-            </Alert>
-        );
+        return null;
     }
 
     return (
         <div>
-            <h5>All Active Announcements</h5>
             {announcements.map((announcement) => (
-                <Card key={announcement.id} className="mb-3">
-                    <Card.Header className="d-flex justify-content-between align-items-center">
-                        <span>
-                            <strong>
-                                {announcement.created_by.first_name} {announcement.created_by.last_name}
-                            </strong>
-                            {announcement.created_by.username && (
-                                <small className="text-muted ms-2">({announcement.created_by.username})</small>
-                            )}
-                        </span>
-                        {announcement.created_by.id === currentUser.id && (
-                            <Badge bg="primary">Your announcement</Badge>
-                        )}
-                    </Card.Header>
-                    <Card.Body>
-                        <Card.Text>{announcement.text}</Card.Text>
-                        <small className="text-muted">
-                            Posted at <DateTimeDisplay dateTime={announcement.created_at} />
-                        </small>
-                    </Card.Body>
-                </Card>
+                <div key={announcement.id} className="border rounded p-3 mb-3" style={{ backgroundColor: '#f8f9fa' }}>
+                    <div className="border-bottom pb-2 mb-3">
+                        <h6 className="mb-0 text-muted">Message from Host</h6>
+                    </div>
+                    <div className="bg-info bg-opacity-25 border border-info rounded p-3 mb-3">
+                        <p className="mb-0 text-dark">{announcement.text}</p>
+                    </div>
+                    <small className="text-muted">
+                        Posted by {announcement.created_by.first_name || announcement.created_by.last_name ? `${announcement.created_by.first_name} ${announcement.created_by.last_name}` : announcement.created_by.username} on{' '}
+                        <DateTimeDisplay dateTime={announcement.created_at} />
+                    </small>
+                </div>
             ))}
         </div>
     );
