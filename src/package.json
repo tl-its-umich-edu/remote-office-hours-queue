@@ -4,8 +4,8 @@
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
-    "@fortawesome/react-fontawesome": "^0.2.2",
-    "@testing-library/jest-dom": "^6.6.3",
+    "@fortawesome/react-fontawesome": "^0.2.3",
+    "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
@@ -19,8 +19,8 @@
     "react-helmet-async": "^2.0.5",
     "react-phone-input-2": "^2.15.1",
     "react-router-dom": "^6.30.1",
-    "ts-jest": "^29.4.0",
-    "yup": "^1.6.1"
+    "ts-jest": "^29.4.1",
+    "yup": "^1.7.0"
   },
   "scripts": {
     "prod": "webpack --config webpack.config.js --mode production",
@@ -36,7 +36,7 @@
     "style-loader": "~3.3.4",
     "ts-loader": "^9.5.2",
     "typescript": "^4.9.5",
-    "webpack": "^5.99.9",
+    "webpack": "^5.101.0",
     "webpack-bundle-tracker": "^1.8.1",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.2"
