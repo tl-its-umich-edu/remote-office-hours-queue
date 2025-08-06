@@ -163,13 +163,14 @@ class MyUserSerializer(serializers.ModelSerializer):
     phone_number = serializers.CharField(source='profile.phone_number', allow_blank=True)
     notify_me_attendee = serializers.BooleanField(source='profile.notify_me_attendee')
     notify_me_host = serializers.BooleanField(source='profile.notify_me_host')
+    notify_me_announcement = serializers.BooleanField(source='profile.notify_me_announcement')
     authorized_backends = serializers.DictField(source='profile.authorized_backends', read_only=True)
 
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name', 'my_queue', 'hosted_queues',
-            'phone_number', 'notify_me_attendee', 'notify_me_host', 'authorized_backends',
+            'phone_number', 'notify_me_attendee', 'notify_me_host', 'notify_me_announcement', 'authorized_backends',
         ]
 
     @extend_schema_field(QueueAttendeeSerializer)
@@ -196,6 +197,7 @@ class MyUserSerializer(serializers.ModelSerializer):
         instance.profile.phone_number = profile.get('phone_number', instance.profile.phone_number)
         instance.profile.notify_me_attendee = profile.get('notify_me_attendee', instance.profile.notify_me_attendee)
         instance.profile.notify_me_host = profile.get('notify_me_host', instance.profile.notify_me_host)
+        instance.profile.notify_me_announcement = profile.get('notify_me_announcement', instance.profile.notify_me_announcement)
         instance.profile.save()
         return instance
 

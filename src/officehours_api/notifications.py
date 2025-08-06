@@ -106,16 +106,25 @@ def notify_queue_no_longer_empty(first: Meeting):
 
 
 def notify_announcement_posted(announcement):
-    waiting_meetings = Meeting.objects.filter(
+    assigned_meetings = Meeting.objects.filter(
         queue=announcement.queue,
         assignee=announcement.created_by,
     ).filter(
         Q(backend_metadata__isnull=True) | Q(backend_metadata={})
     )
     
+    unassigned_meetings = Meeting.objects.filter(
+        queue=announcement.queue,
+        assignee__isnull=True,
+    ).filter(
+        Q(backend_metadata__isnull=True) | Q(backend_metadata={})
+    )
+    
+    all_relevant_meetings = assigned_meetings.union(unassigned_meetings)
+    
     phone_numbers = []
-    for meeting in waiting_meetings:
-        for attendee in meeting.attendees_with_phone_numbers.filter(profile__notify_me_attendee__exact=True):
+    for meeting in all_relevant_meetings:
+        for attendee in meeting.attendees_with_phone_numbers.filter(profile__notify_me_announcement__exact=True):
             phone_numbers.append(attendee.profile.phone_number)
     
     if not phone_numbers:
@@ -128,6 +137,13 @@ def notify_announcement_posted(announcement):
         creator_name = creator.username
     else:
         creator_name += f" ({creator.username})"
+    
+    # Check if attendees are assigned to this host
+    assigned_attendees = set()
+    for meeting in all_relevant_meetings:
+        for attendee in meeting.attendees.all():
+            if meeting.assignee == announcement.created_by:
+                assigned_attendees.add(attendee.profile.phone_number)
     
     message = f"Announcement from {creator_name} - {announcement.text}"
     domain = Site.objects.get_current().domain
