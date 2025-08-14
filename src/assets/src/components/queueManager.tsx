@@ -245,6 +245,7 @@ function QueueManager(props: QueueManagerProps) {
 interface MeetingInfoDialogProps {
     backends: MeetingBackend[];
     meeting?: Meeting;  // Hide if undefined
+    queue?: QueueHost;  // Need queue for location info
     onClose: () => void;
 }
 
@@ -266,16 +267,25 @@ const MeetingInfoDialog = (props: MeetingInfoDialogProps) => {
 
     const meetingType = props.meeting?.backend_type;
     let metadataInfo;
-    if (props.meeting && meetingType && props.meeting.backend_metadata) {
-        const meetingBackend = getBackendByName(meetingType, props.backends);
-        metadataInfo = VideoBackendNames.includes(meetingType)
-            ? (
+    if (props.meeting && meetingType) {
+        if (VideoBackendNames.includes(meetingType) && props.meeting.backend_metadata) {
+            const meetingBackend = getBackendByName(meetingType, props.backends);
+            metadataInfo = (
                 <>
                 <p>This meeting will be via <strong>{meetingBackend.friendly_name}</strong>.</p>
                 <DialInContent metadata={props.meeting.backend_metadata} backend={meetingBackend} isHost />
                 </>
-            )
-            : <div><p>This meeting will be <strong>In Person</strong>.</p></div>;
+            );
+        } else if (meetingType === 'inperson') {
+            metadataInfo = (
+                <div>
+                    <p>This meeting will be <strong>In Person</strong>.</p>
+                    {props.queue?.inperson_location && (
+                        <p>Location: <strong>{props.queue.inperson_location}</strong></p>
+                    )}
+                </div>
+            );
+        }
     }
 
     return (
@@ -408,7 +418,7 @@ export function QueueManagerPage(props: PageProps) {
         <>
             <Dialog {...dialogState} />
             <LoginDialog visible={loginDialogVisible} loginUrl={props.loginUrl} />
-            <MeetingInfoDialog backends={props.backends} meeting={visibleMeetingDialog} onClose={() => setVisibleMeetingDialog(undefined)} />
+            <MeetingInfoDialog backends={props.backends} meeting={visibleMeetingDialog} queue={queue} onClose={() => setVisibleMeetingDialog(undefined)} />
             <Breadcrumbs currentPageTitle={queue?.name ?? queue_id.toString()} intermediatePages={[{title: "Manage", href: "/manage"}]} />
             {loadingDisplay}
             {errorDisplay}
