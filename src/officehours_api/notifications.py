@@ -11,6 +11,7 @@ from django.urls import reverse
 
 from officehours_api.exceptions import TwilioClientNotInitializedException
 from twilio.rest import Client as TwilioClient
+from django.db.models import Q
 
 from officehours_api.models import Queue, Meeting, MeetingStatus
 
@@ -104,6 +105,65 @@ def notify_queue_no_longer_empty(first: Meeting):
             logger.exception(f"Error while sending host notification to {p} for queue {first.queue.id}")
 
 
+def notify_announcement_posted(announcement):
+    assigned_meetings = Meeting.objects.filter(
+        queue=announcement.queue,
+        assignee=announcement.created_by,
+    ).filter(
+        Q(backend_metadata__isnull=True) | Q(backend_metadata={})
+    )
+    
+    unassigned_meetings = Meeting.objects.filter(
+        queue=announcement.queue,
+        assignee__isnull=True,
+    ).filter(
+        Q(backend_metadata__isnull=True) | Q(backend_metadata={})
+    )
+    
+    all_relevant_meetings = assigned_meetings.union(unassigned_meetings)
+    
+    phone_numbers = []
+    for meeting in all_relevant_meetings:
+        for attendee in meeting.attendees_with_phone_numbers.filter(profile__notify_me_announcement__exact=True):
+            phone_numbers.append(attendee.profile.phone_number)
+    
+    if not phone_numbers:
+        logger.info(f"No attendees to notify for announcement {announcement.id}")
+        return
+    
+    creator = announcement.created_by
+    creator_name = f"{creator.first_name} {creator.last_name}".strip()
+    if not creator_name:
+        creator_name = creator.username
+    else:
+        creator_name += f" ({creator.username})"
+    
+    # Check if attendees are assigned to this host
+    assigned_attendees = set()
+    for meeting in all_relevant_meetings:
+        for attendee in meeting.attendees.all():
+            if meeting.assignee == announcement.created_by:
+                assigned_attendees.add(attendee.profile.phone_number)
+    
+    message = f"Announcement from {creator_name} - {announcement.text}"
+    domain = Site.objects.get_current().domain
+    
+    for phone_number in phone_numbers:
+        try:
+            logger.info(f'notify_announcement_posted: sending to {phone_number}')
+            if twilio is None:
+                logger.warning(f"Twilio not configured, skipping SMS to {phone_number}")
+                continue
+                
+            twilio.messages.create(
+                messaging_service_sid=settings.TWILIO_MESSAGING_SERVICE_SID,
+                to=phone_number,
+                body=build_message_body(message, domain),
+            )
+        except Exception as e:
+            logger.exception(f"Error while sending announcement notification to {phone_number} for announcement {announcement.id}: {e}")
+
+
 @receiver(post_save, sender=Meeting)
 def trigger_notification_create(sender, instance: Meeting, created, **kwargs):
     if instance.deleted:
@@ -115,3 +175,13 @@ def trigger_notification_create(sender, instance: Meeting, created, **kwargs):
         and instance.status.value >= MeetingStatus.STARTED.value
     ):
         notify_meeting_started(instance)
+
+
+@receiver(post_save, sender='officehours_api.QueueAnnouncement')
+def trigger_announcement_notification(sender, instance, created, **kwargs):
+    """
+    Trigger SMS notifications when an announcement is created or updated.
+    Sends notifications for both newly created announcements and updates to existing ones.
+    """
+    if instance.active:
+        notify_announcement_posted(instance)

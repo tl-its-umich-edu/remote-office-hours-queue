@@ -25,6 +25,8 @@ import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, uniqnameSchema } from "../validation";
 import { HelmetTitle } from "./pageTitle";
+import { AnnouncementForm } from "./AnnouncementForm";
+import { MultipleAnnouncementsDisplay } from "./MultipleAnnouncementsDisplay";
 
 interface AddAttendeeFormProps {
     allowedBackends: Set<string>;
@@ -106,6 +108,8 @@ interface QueueManagerProps {
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     onStartMeeting: (m: Meeting) => void;
+    onAnnouncementChange: () => void;
+    announcementRefreshTrigger: number;
 }
 
 function QueueManager(props: QueueManagerProps) {
@@ -132,62 +136,109 @@ function QueueManager(props: QueueManagerProps) {
     );
 
     return (
-        <div>
-            <HelmetTitle title="Manage Queue" />
-            <div className="float-end">
-                <Link to={`/manage/${props.queue.id}/settings`} tabIndex={-1}>
-                    <Button variant="primary" aria-label="Settings">
-                        <FontAwesomeIcon icon={faCog} />
-                        <span className="ms-2">Settings</span>
-                    </Button>
-                </Link>
-            </div>
-            <h1>Manage: {props.queue.name}</h1>
-            <p><Link to={"/queue/" + props.queue.id}>View as visitor</Link></p>
-            <Row className={spacingClass}>
-                <Col md={2}><Form.Label htmlFor='queue-url'>Queue URL</Form.Label></Col>
-                <Col md={6}><CopyField text={absoluteUrl} id="queue-url"/></Col>
-            </Row>
-            <Row className={spacingClass}>
-                <Col md={2}><Form.Label htmlFor='queue-status'>Queue Status</Form.Label></Col>
-                <Col md={6}>
-                    <Form.Check
-                        className='switch'
-                        id='queue-status'
-                        type='switch'
-                        label={currentStatus ? 'Open' : 'Closed'}
-                        checked={props.queue.status === 'open'}
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => props.onSetStatus(!currentStatus)}
-                    />
-                </Col>
-            </Row>
-            <Row className={spacingClass}>
-                <Col md={2}><div id='created'>Created</div></Col>
-                <Col md={6}><div aria-labelledby='created'><DateDisplay date={props.queue.created_at} /></div></Col>
-            </Row>
-            <h2 className={spacingClass}>Meetings in Progress</h2>
-            <Row className={spacingClass}><Col md={8}>{cannotReassignHostWarning}</Col></Row>
-            <Row className={spacingClass}>
-                <Col md={12}><MeetingsInProgressTable meetings={startedMeetings} {...props} /></Col>
-            </Row>
-            <h2 className={spacingClass}>Meetings in Queue</h2>
-            <Row className={spacingClass}>
-                <Col md={8}>
-                    {userLoggedOnWarning}
-                    {props.addMeetingError && <ErrorDisplay formErrors={[props.addMeetingError]} />}
-                    <AddAttendeeForm
-                        allowedBackends={new Set(props.queue.allowed_backends)}
-                        backends={props.backends}
-                        defaultBackend={props.defaultBackend}
-                        disabled={props.disabled}
-                        onSubmit={props.onAddMeeting}
-                    />
-                </Col>
-            </Row>
-            <Row className={spacingClass}>
-                <Col md={12}><MeetingsInQueueTable meetings={unstartedMeetings} {...props} /></Col>
-            </Row>
+      <div>
+        <HelmetTitle title="Manage Queue" />
+        <div className="float-end">
+          <Link to={`/manage/${props.queue.id}/settings`} tabIndex={-1}>
+            <Button variant="primary" aria-label="Settings">
+              <FontAwesomeIcon icon={faCog} />
+              <span className="ms-2">Settings</span>
+            </Button>
+          </Link>
         </div>
+        <h1>Manage: {props.queue.name}</h1>
+        <p>
+          <Link to={"/queue/" + props.queue.id}>View as visitor</Link>
+        </p>
+        <Row className={spacingClass}>
+          <Col md={2}>
+            <Form.Label htmlFor="queue-url">Queue URL</Form.Label>
+          </Col>
+          <Col md={6}>
+            <CopyField text={absoluteUrl} id="queue-url" />
+          </Col>
+        </Row>
+        <Row className={spacingClass}>
+          <Col md={2}>
+            <Form.Label htmlFor="queue-status">Queue Status</Form.Label>
+          </Col>
+          <Col md={6}>
+            <Form.Check
+              className="switch"
+              id="queue-status"
+              type="switch"
+              label={currentStatus ? "Open" : "Closed"}
+              checked={props.queue.status === "open"}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                props.onSetStatus(!currentStatus)
+              }
+            />
+          </Col>
+        </Row>
+        <Row className={spacingClass}>
+          <Col md={2}>
+            <div id="created">Created</div>
+          </Col>
+          <Col md={6}>
+            <div aria-labelledby="created">
+              <DateDisplay date={props.queue.created_at} />
+            </div>
+          </Col>
+        </Row>
+        <Row className={spacingClass}>
+          <Col md={12}>
+            <AnnouncementForm
+              queueId={props.queue.id}
+              onAnnouncementChange={props.onAnnouncementChange}
+              disabled={props.disabled}
+              currentUser={{ id: props.user.id, username: props.user.username }}
+            />
+          </Col>
+        </Row>
+        {/*
+        This displays all the annoucements in the queue,
+        including announcements from co-hosts
+             <Row className={spacingClass}>
+                <Col md={12}>
+                    <MultipleAnnouncementsDisplay
+                        queueId={props.queue.id}
+                        currentUser={{ id: props.user.id, username: props.user.username }}
+                        refreshTrigger={props.announcementRefreshTrigger}
+                    />
+                </Col>
+            </Row>
+        */}
+        <h2 className={spacingClass}>Meetings in Progress</h2>
+        <Row className={spacingClass}>
+          <Col md={8}>{cannotReassignHostWarning}</Col>
+        </Row>
+        <Row className={spacingClass}>
+          <Col md={12}>
+            <MeetingsInProgressTable meetings={startedMeetings} {...props} />
+          </Col>
+        </Row>
+        <h2 className={spacingClass}>Meetings in Queue</h2>
+        <Row className={spacingClass}>
+          <Col md={8}>
+            {userLoggedOnWarning}
+            {props.addMeetingError && (
+              <ErrorDisplay formErrors={[props.addMeetingError]} />
+            )}
+            <AddAttendeeForm
+              allowedBackends={new Set(props.queue.allowed_backends)}
+              backends={props.backends}
+              defaultBackend={props.defaultBackend}
+              disabled={props.disabled}
+              onSubmit={props.onAddMeeting}
+            />
+          </Col>
+        </Row>
+        <Row className={spacingClass}>
+          <Col md={12}>
+            <MeetingsInQueueTable meetings={unstartedMeetings} {...props} />
+          </Col>
+        </Row>
+      </div>
     );
 }
 
@@ -255,6 +306,7 @@ export function QueueManagerPage(props: PageProps) {
     // Set up basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
+    const [announcementRefreshTrigger, setAnnouncementRefreshTrigger] = useState(0);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
             setQueue(q);
@@ -346,6 +398,10 @@ export function QueueManagerPage(props: PageProps) {
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
                 onStartMeeting={doStartMeeting}
+                onAnnouncementChange={() => {
+                    setAnnouncementRefreshTrigger(prev => prev + 1);
+                }}
+                announcementRefreshTrigger={announcementRefreshTrigger}
             />
         );
     return (
