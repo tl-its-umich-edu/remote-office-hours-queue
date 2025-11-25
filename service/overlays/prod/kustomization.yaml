@@ -17,12 +17,9 @@ patches:
     version: v1
 - path: deployment.yaml
   target:
-    kind: DeploymentConfig
     name: web
     version: v1
-- path: build.yaml
   target:
-    kind: BuildConfig
     name: web
     version: v1
 - path: web-autoscaler.yaml
