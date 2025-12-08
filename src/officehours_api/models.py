@@ -31,8 +31,15 @@ def get_default_backend():
 
 
 def get_default_allowed_backends():
-    return settings.DEFAULT_ALLOWED_BACKENDS
+    """
+    Return a static default list of allowed backends for new queues.
 
+    This is intentionally NOT based on deployment settings or environment
+    variables so that the database default does not change when configuration
+    changes. Queue allowed_backends should be adjusted per queue via Django
+    Admin instead.
+    """
+    return ['inperson']
 
 def get_backend_types() -> List[Tuple[IMPLEMENTED_BACKEND_NAME, str]]:
     """
