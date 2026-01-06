@@ -13,9 +13,12 @@ def feedback(request):
     return {'FEEDBACK_EMAIL': getattr(settings, 'FEEDBACK_EMAIL', None)}
 
 
-def login_url(request):
-    return {'LOGIN_URL': getattr(settings, 'LOGIN_URL', None)}
-
+def context_urls(request):
+    return {
+        'LOGIN_URL': getattr(settings, 'LOGIN_URL', None),
+        'RESOURCES_AND_SUPPORT_URL': getattr(settings, 'RESOURCES_AND_SUPPORT_URL', None),
+        'WHATS_NEW_URL': getattr(settings, 'WHATS_NEW_URL', None),
+    }
 
 def debug(request):
     return {'DEBUG': settings.DEBUG}
