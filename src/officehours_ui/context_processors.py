@@ -10,12 +10,15 @@ import os
 
 
 def feedback(request):
-    return {'FEEDBACK_EMAIL': getattr(settings, 'FEEDBACK_EMAIL', None)}
+    return {'FEEDBACK_EMAIL': settings.FEEDBACK_EMAIL}
 
 
-def login_url(request):
-    return {'LOGIN_URL': getattr(settings, 'LOGIN_URL', None)}
-
+def context_urls(request):
+    return {
+        'LOGIN_URL': settings.LOGIN_URL,
+        'RESOURCES_AND_SUPPORT_URL': settings.RESOURCES_AND_SUPPORT_URL,
+        'WHATS_NEW_URL': settings.WHATS_NEW_URL,
+    }
 
 def debug(request):
     return {'DEBUG': settings.DEBUG}
@@ -37,7 +40,7 @@ def spa_globals(request):
     return {
         'spa_globals': {
             'user': user_data,
-            'feedback_email': getattr(settings, 'FEEDBACK_EMAIL', None),
+            'feedback_email': settings.FEEDBACK_EMAIL,
             'debug': settings.DEBUG,
             'ga_tracking_id': settings.GA_TRACKING_ID,
             'login_url': settings.LOGIN_URL,

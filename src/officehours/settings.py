@@ -87,6 +87,8 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+WHATS_NEW_URL = os.getenv('WHATS_NEW_URL', 'https://its.umich.edu/communication/videoconferencing/remote-office-hours-queue/release-notes')
+RESOURCES_AND_SUPPORT_URL = os.getenv('RESOURCES_AND_SUPPORT_URL', 'https://documentation.its.umich.edu/office-hours')
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
@@ -162,7 +164,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'officehours_ui.context_processors.feedback',
                 'officehours_ui.context_processors.debug',
-                'officehours_ui.context_processors.login_url',
+                'officehours_ui.context_processors.context_urls',
                 'officehours_ui.context_processors.spa_globals',
                 'officehours_ui.context_processors.get_git_version_info',
             ],
