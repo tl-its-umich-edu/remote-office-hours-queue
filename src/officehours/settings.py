@@ -88,7 +88,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 WHATS_NEW_URL = os.getenv('WHATS_NEW_URL', 'https://its.umich.edu/communication/videoconferencing/remote-office-hours-queue/release-notes')
-RESOURCES_AND_SUPPORT_URL = os.getenv('RESOURCES_AND_SUPPORT_URL', 'https://its.umich.edu/communication/videoconferencing/remote-office-hours-queue/')
+RESOURCES_AND_SUPPORT_URL = os.getenv('RESOURCES_AND_SUPPORT_URL', 'https://documentation.its.umich.edu/office-hours')
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
