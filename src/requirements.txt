@@ -1,8 +1,8 @@
 gunicorn==23.0.0
 uvicorn[standard]==0.40.0
-psycopg2~=2.9.11
+psycopg2==2.9.11
 
-Django==4.2.27
+Django==5.2.10
 djangorestframework==3.16.1
 drf-spectacular==0.29.0
 mozilla-django-oidc==5.0.2
@@ -15,7 +15,7 @@ fontawesomefree==6.6.0
 django-safedelete==1.4.1
 django-redirect-to-non-www==0.1.1
 drf-api-tracking==1.8.4
-django-filter==25.1
+django-filter==25.2
 channels==4.3.2
 channels-redis==4.3.0
 twilio==9.9.1
