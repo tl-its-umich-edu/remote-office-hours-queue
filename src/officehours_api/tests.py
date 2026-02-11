@@ -42,6 +42,7 @@ class NotificationTestCase(TestCase):
         user.profile.phone_number = phone_number
         user.profile.notify_me_attendee = not opt_out
         user.profile.notify_me_host = not opt_out
+        user.profile.notify_me_announcement = not opt_out
         user.profile.save()
 
     def create_meeting(self, attendees, start=False):
@@ -165,6 +166,73 @@ class NotificationTestCase(TestCase):
             receivers >=
             {'+15555550000', '+15555550001'}
         )
+
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_announcement_notifies_assigned_attendees(self, mock_twilio: mock.MagicMock):
+        """Test that announcements notify attendees assigned to the announcing host"""
+        from officehours_api.models import QueueAnnouncement
+        
+        self.configure_profile(self.foo, '+15555550000')
+        self.foo.profile.notify_me_announcement = True
+        self.foo.profile.save()
+        
+        meeting = self.create_meeting([self.foo])
+        meeting.assignee = self.hostie
+        meeting.save()
+        
+        announcement = QueueAnnouncement.objects.create(
+            queue=self.queue,
+            text="Test announcement",
+            created_by=self.hostie,
+            active=True
+        )
+        
+        receivers = self.get_receivers(mock_twilio)
+        self.assertTrue('+15555550000' in receivers)
+
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_announcement_notifies_unassigned_attendees(self, mock_twilio: mock.MagicMock):
+        """Test that announcements notify unassigned attendees from any host"""
+        from officehours_api.models import QueueAnnouncement
+        
+        self.configure_profile(self.foo, '+15555550000')
+        self.foo.profile.notify_me_announcement = True
+        self.foo.profile.save()
+        
+        meeting = self.create_meeting([self.foo])
+        
+        announcement = QueueAnnouncement.objects.create(
+            queue=self.queue,
+            text="Test announcement for unassigned",
+            created_by=self.hostie,
+            active=True
+        )
+        
+        receivers = self.get_receivers(mock_twilio)
+        self.assertTrue('+15555550000' in receivers)
+
+    @mock.patch('officehours_api.notifications.twilio')
+    def test_announcement_doesnt_notify_different_assigned_attendees(self, mock_twilio: mock.MagicMock):
+        """Test that announcements don't notify attendees assigned to different hosts"""
+        from officehours_api.models import QueueAnnouncement
+        
+        self.configure_profile(self.foo, '+15555550000')
+        self.foo.profile.notify_me_announcement = True
+        self.foo.profile.save()
+        
+        meeting = self.create_meeting([self.foo])
+        meeting.assignee = self.hostacular
+        meeting.save()
+        
+        announcement = QueueAnnouncement.objects.create(
+            queue=self.queue,
+            text="Test announcement from different host",
+            created_by=self.hostie,
+            active=True
+        )
+        
+        receivers = self.get_receivers(mock_twilio)
+        self.assertFalse('+15555550000' in receivers)
 
 
 class MeetingSerializerTestCase(TestCase):

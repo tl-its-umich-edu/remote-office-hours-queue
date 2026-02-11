@@ -6,7 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.fields import ArrayField
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, m2m_changed
 from django.core.validators import MaxLengthValidator
 from safedelete.models import (
     SafeDeleteModel, SOFT_DELETE_CASCADE, HARD_DELETE,
@@ -56,6 +56,7 @@ class Profile(models.Model):
     phone_number = models.CharField(max_length=20, default="", blank=True, null=False)
     notify_me_attendee = models.BooleanField(default=False)
     notify_me_host = models.BooleanField(default=False)
+    notify_me_announcement = models.BooleanField(default=False)
     backend_metadata = models.JSONField(null=True, default=dict, blank=True)
     otp_phone_number = models.CharField(max_length=20, default="", blank=True, null=True)
     otp_token = models.CharField(max_length=4, default="", blank=True, null=True)
@@ -280,3 +281,30 @@ class MeetingStartLogsView(models.Model):
     class Meta:
         managed = False
         db_table = 'meeting_start_logs'
+
+
+class QueueAnnouncement(models.Model):
+    queue = models.ForeignKey(Queue, on_delete=models.CASCADE, related_name='announcements')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Announcement for {self.queue.name} by {self.created_by.username} at {self.created_at}"
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+@receiver(m2m_changed, sender=Queue.hosts.through)
+def handle_queue_hosts_changed(sender, instance, action, pk_set, **kwargs):
+    """
+    Handle when hosts are added or removed from a queue.
+    When hosts are removed, delete their announcements for that queue.
+    """
+    if action == "post_remove" and pk_set:
+        QueueAnnouncement.objects.filter(
+            queue=instance,
+            created_by__id__in=pk_set
+        ).delete()
