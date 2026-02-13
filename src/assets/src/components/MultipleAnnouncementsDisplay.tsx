@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Alert, Accordion } from "react-bootstrap";
 import { QueueAnnouncement } from "../models";
 import { DateTimeDisplay } from "./common";
@@ -44,19 +44,21 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
         }
     }, [queueId, refreshTrigger, propAnnouncements]);
 
-    // Determine which announcements to display
-    let announcementArray: QueueAnnouncement[] = [];
-    if (propAnnouncements) {
-        // Use provided announcements
-        if (Array.isArray(propAnnouncements)) {
-            announcementArray = propAnnouncements.filter((ann) => ann.active);
-        } else if (propAnnouncements.active) {
-            announcementArray = [propAnnouncements];
+    // Determine which announcements to display (memoized to prevent infinite re-renders)
+    const announcementArray = useMemo(() => {
+        if (propAnnouncements) {
+            // Use provided announcements
+            if (Array.isArray(propAnnouncements)) {
+                return propAnnouncements.filter((ann) => ann.active);
+            } else if (propAnnouncements.active) {
+                return [propAnnouncements];
+            }
+            return [];
+        } else {
+            // Use fetched announcements
+            return fetchedAnnouncements;
         }
-    } else {
-        // Use fetched announcements
-        announcementArray = fetchedAnnouncements;
-    }
+    }, [propAnnouncements, fetchedAnnouncements]);
 
     // Auto-expand new announcements
     useEffect(() => {
@@ -91,7 +93,7 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
 
     return (
         <div role="alert" aria-live="assertive" aria-atomic="true">
-            <Accordion activeKey={activeKey} onSelect={(key) => setActiveKey(key as string | null)}>
+            <Accordion activeKey={activeKey} onSelect={(key) => setActiveKey(key as string | null)} className="border border-dark border-2 rounded">
                 {announcementArray.map((announcement, index) => {
                     const authorName = announcement.created_by.first_name || announcement.created_by.last_name
                         ? `${announcement.created_by.first_name} ${announcement.created_by.last_name}`.trim()
