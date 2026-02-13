@@ -100,6 +100,8 @@ class QueueAnnouncementAdmin(admin.ModelAdmin):
         if not change and not getattr(obj, 'created_by_id', None):
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+
 class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
