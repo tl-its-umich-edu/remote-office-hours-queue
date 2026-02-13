@@ -112,10 +112,10 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
                     
                     return (
                         <Accordion.Item key={announcement.id} eventKey={index.toString()}>
-                            <Accordion.Header as="h5">
+                            <Accordion.Header>
                                 <div className="d-flex align-items-center w-100">
                                     <i className="fa-solid fa-bullhorn me-2" aria-hidden="true"></i>
-                                    <span className="fw-semibold">{messageTitle} ({authorName})</span>
+                                    <span className="fw-semibold h5 mb-0">{messageTitle} ({authorName})</span>
                                     <small className="text-muted ms-auto me-2">
                                         <DateTimeDisplay dateTime={announcement.created_at} />
                                     </small>
