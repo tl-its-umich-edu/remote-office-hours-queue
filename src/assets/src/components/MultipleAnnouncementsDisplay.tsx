@@ -25,20 +25,20 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
     const previousAnnouncementIdsRef = useRef<Set<number>>(new Set());
     const isInitialLoadRef = useRef(true);
 
-    const fetchAllAnnouncements = async () => {
-        if (!queueId) return;
-        try {
-            setLoading(true);
-            const announcements = await api.getAllActiveAnnouncements(queueId);
-            setFetchedAnnouncements(announcements);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Unknown error');
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchAllAnnouncements = async () => {
+            if (!queueId) return;
+            try {
+                setLoading(true);
+                const announcements = await api.getAllActiveAnnouncements(queueId);
+                setFetchedAnnouncements(announcements);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Unknown error');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         if (!propAnnouncements && queueId) {
             fetchAllAnnouncements();
         }
@@ -68,8 +68,13 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
             
             // Only auto-expand if it's not the initial load and there are new announcements
             if (!isInitialLoadRef.current && newAnnouncements.length > 0) {
-                // New announcement detected, expand the first one
-                setActiveKey('0');
+                // Find the index of the first new announcement in the array
+                const firstNewAnnouncementIndex = announcementArray.findIndex(
+                    a => a.id === newAnnouncements[0].id
+                );
+                if (firstNewAnnouncementIndex !== -1) {
+                    setActiveKey(firstNewAnnouncementIndex.toString());
+                }
             }
             
             previousAnnouncementIdsRef.current = currentIds;
