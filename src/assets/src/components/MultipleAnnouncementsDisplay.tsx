@@ -73,8 +73,10 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
             }
             
             setPreviousAnnouncementIds(currentIds);
-            setIsInitialLoad(false);
         }
+        
+        // Mark as initialized after first run, regardless of whether there are announcements
+        setIsInitialLoad(false);
     }, [announcementArray]);
 
     if (loading) {
