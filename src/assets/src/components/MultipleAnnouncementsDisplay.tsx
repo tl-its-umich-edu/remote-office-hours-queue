@@ -105,7 +105,7 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
                     
                     return (
                         <Accordion.Item key={announcement.id} eventKey={index.toString()}>
-                            <Accordion.Header as="h4">
+                            <Accordion.Header as="h5">
                                 <div className="d-flex align-items-center w-100">
                                     <i className="fa-solid fa-bullhorn me-2" aria-hidden="true"></i>
                                     <span className="fw-semibold">{messageTitle} ({authorName})</span>
