@@ -200,7 +200,6 @@ function QueueManager(props: QueueManagerProps) {
             <h3>Active Announcements (Only host who posted can manage)</h3>
             <MultipleAnnouncementsDisplay
               queueId={props.queue.id}
-              currentUser={{ id: props.user.id, username: props.user.username }}
               refreshTrigger={props.announcementRefreshTrigger}
             />
           </Col>

@@ -7,7 +7,6 @@ import * as api from "../services/api";
 
 interface MultipleAnnouncementsDisplayProps {
     queueId?: number;
-    currentUser?: { id: number; username: string };
     refreshTrigger?: number;
     announcements?: QueueAnnouncement[] | QueueAnnouncement | null;
     isUserAssignedToHost?: boolean;
@@ -15,7 +14,6 @@ interface MultipleAnnouncementsDisplayProps {
 
 export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplayProps> = ({ 
     queueId, 
-    currentUser,
     refreshTrigger,
     announcements: propAnnouncements,
     isUserAssignedToHost = false
