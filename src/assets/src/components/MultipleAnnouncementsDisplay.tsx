@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Alert, Accordion } from "react-bootstrap";
 import { QueueAnnouncement } from "../models";
 import { DateTimeDisplay } from "./common";
@@ -22,8 +22,8 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
     const [loading, setLoading] = useState(!!queueId && !propAnnouncements);
     const [error, setError] = useState<string | null>(null);
     const [activeKey, setActiveKey] = useState<string | null>(null);
-    const [previousAnnouncementIds, setPreviousAnnouncementIds] = useState<Set<number>>(new Set());
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const previousAnnouncementIdsRef = useRef<Set<number>>(new Set());
+    const isInitialLoadRef = useRef(true);
 
     const fetchAllAnnouncements = async () => {
         if (!queueId) return;
@@ -64,19 +64,19 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
     useEffect(() => {
         if (announcementArray.length > 0) {
             const currentIds = new Set(announcementArray.map(a => a.id));
-            const newAnnouncements = announcementArray.filter(a => !previousAnnouncementIds.has(a.id));
+            const newAnnouncements = announcementArray.filter(a => !previousAnnouncementIdsRef.current.has(a.id));
             
             // Only auto-expand if it's not the initial load and there are new announcements
-            if (!isInitialLoad && newAnnouncements.length > 0) {
+            if (!isInitialLoadRef.current && newAnnouncements.length > 0) {
                 // New announcement detected, expand the first one
                 setActiveKey('0');
             }
             
-            setPreviousAnnouncementIds(currentIds);
+            previousAnnouncementIdsRef.current = currentIds;
         }
         
         // Mark as initialized after first run, regardless of whether there are announcements
-        setIsInitialLoad(false);
+        isInitialLoadRef.current = false;
     }, [announcementArray]);
 
     if (loading) {
