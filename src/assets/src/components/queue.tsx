@@ -449,7 +449,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
           )}
           {notificationBlurb}
           <hr className="my-3" />
-          <h4 className="mb-3">Active Announcements</h5>
+          <h4 className="mb-3">Active Announcements</h4>
           <MultipleAnnouncementsDisplay
             announcements={props.queue.current_announcement}
             isUserAssignedToHost={!!props.queue.my_meeting?.assignee}
