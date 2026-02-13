@@ -195,19 +195,16 @@ function QueueManager(props: QueueManagerProps) {
             />
           </Col>
         </Row>
-        {/*
-        This displays all the annoucements in the queue,
-        including announcements from co-hosts
-             <Row className={spacingClass}>
-                <Col md={12}>
-                    <MultipleAnnouncementsDisplay
-                        queueId={props.queue.id}
-                        currentUser={{ id: props.user.id, username: props.user.username }}
-                        refreshTrigger={props.announcementRefreshTrigger}
-                    />
-                </Col>
-            </Row>
-        */}
+        <Row className={spacingClass}>
+          <Col md={12}>
+            <h3>Active Announcements (Only host who posted can manage)</h3>
+            <MultipleAnnouncementsDisplay
+              queueId={props.queue.id}
+              currentUser={{ id: props.user.id, username: props.user.username }}
+              refreshTrigger={props.announcementRefreshTrigger}
+            />
+          </Col>
+        </Row>
         <h2 className={spacingClass}>Meetings in Progress</h2>
         <Row className={spacingClass}>
           <Col md={8}>{cannotReassignHostWarning}</Col>

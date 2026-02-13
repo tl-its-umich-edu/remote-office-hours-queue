@@ -39,7 +39,7 @@ import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, redirectToLogin } from "../utils";
 import { meetingAgendaSchema } from "../validation";
 import { HelmetTitle } from "./pageTitle";
-import { QueueAnnouncementsDisplay } from "./QueueAnnouncement";
+import { MultipleAnnouncementsDisplay } from "./MultipleAnnouncementsDisplay";
 
 interface JoinQueueProps {
   queue: QueueAttendee;
@@ -154,10 +154,12 @@ function QueueAttendingNotJoined(props: QueueAttendingProps) {
   return (
     <>
       {closedAlert}
-      <QueueAnnouncementsDisplay
+      <h3>Active Announcements</h3>
+      <MultipleAnnouncementsDisplay
         announcements={props.queue.current_announcement}
         isUserAssignedToHost={false}
       />
+      <h3>Queue Information</h3>
       <Row>
         <Col>
           <ul>
@@ -447,7 +449,8 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
           )}
           {notificationBlurb}
           <hr className="my-3" />
-          <QueueAnnouncementsDisplay
+          <h5 className="mb-3">Active Announcements</h5>
+          <MultipleAnnouncementsDisplay
             announcements={props.queue.current_announcement}
             isUserAssignedToHost={!!props.queue.my_meeting?.assignee}
           />
