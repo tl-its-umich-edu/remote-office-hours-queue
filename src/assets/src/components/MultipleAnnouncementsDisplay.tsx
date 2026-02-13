@@ -101,7 +101,7 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
                         <Accordion.Item key={announcement.id} eventKey={index.toString()}>
                             <Accordion.Header as="h4">
                                 <div className="d-flex align-items-center w-100">
-                                    <i className="fa-solid fa-bullhorn me-2"></i>
+                                    <i className="fa-solid fa-bullhorn me-2" aria-hidden="true"></i>
                                     <span className="fw-semibold">{messageTitle} ({authorName})</span>
                                     <small className="text-muted ms-auto me-2">
                                         <DateTimeDisplay dateTime={announcement.created_at} />
