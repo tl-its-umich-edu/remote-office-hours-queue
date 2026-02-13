@@ -86,7 +86,11 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
     }
 
     if (announcementArray.length === 0) {
-        return <p className="text-muted">No current announcements</p>;
+        return (
+            <div role="status" aria-live="polite" aria-atomic="true">
+                <p className="text-muted">No current announcements</p>
+            </div>
+        );
     }
 
     const messageTitle = isUserAssignedToHost ? "Message From Your Host" : "Message From Host";
