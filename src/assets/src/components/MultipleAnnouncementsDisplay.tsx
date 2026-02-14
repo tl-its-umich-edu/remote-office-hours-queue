@@ -3,62 +3,36 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { Alert, Accordion } from "react-bootstrap";
 import { QueueAnnouncement } from "../models";
 import { DateTimeDisplay } from "./common";
-import * as api from "../services/api";
 
 interface MultipleAnnouncementsDisplayProps {
-    queueId?: number;
-    refreshTrigger?: number;
     announcements?: QueueAnnouncement[] | QueueAnnouncement | null;
     isUserAssignedToHost?: boolean;
+    loading?: boolean;
+    error?: string | null;
 }
 
 export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplayProps> = ({ 
-    queueId, 
-    refreshTrigger,
-    announcements: propAnnouncements,
-    isUserAssignedToHost = false
+    announcements,
+    isUserAssignedToHost = false,
+    loading = false,
+    error = null
 }) => {
-    const [fetchedAnnouncements, setFetchedAnnouncements] = useState<QueueAnnouncement[]>([]);
-    const [loading, setLoading] = useState(!!queueId && !propAnnouncements);
-    const [error, setError] = useState<string | null>(null);
     const [activeKey, setActiveKey] = useState<string | null>(null);
     const previousAnnouncementIdsRef = useRef<Set<number>>(new Set());
     const isInitialLoadRef = useRef(true);
 
-    useEffect(() => {
-        const fetchAllAnnouncements = async () => {
-            if (!queueId) return;
-            try {
-                setLoading(true);
-                const announcements = await api.getAllActiveAnnouncements(queueId);
-                setFetchedAnnouncements(announcements);
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Unknown error');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (!propAnnouncements && queueId) {
-            fetchAllAnnouncements();
-        }
-    }, [queueId, refreshTrigger, propAnnouncements]);
-
     // Determine which announcements to display (memoized to prevent infinite re-renders)
     const announcementArray = useMemo(() => {
-        if (propAnnouncements) {
-            // Use provided announcements
-            if (Array.isArray(propAnnouncements)) {
-                return propAnnouncements.filter((ann) => ann.active);
-            } else if (propAnnouncements.active) {
-                return [propAnnouncements];
+        if (announcements) {
+            if (Array.isArray(announcements)) {
+                return announcements.filter((ann) => ann.active);
+            } else if (announcements.active) {
+                return [announcements];
             }
             return [];
-        } else {
-            // Use fetched announcements
-            return fetchedAnnouncements;
         }
-    }, [propAnnouncements, fetchedAnnouncements]);
+        return [];
+    }, [announcements]);
 
     // Auto-expand new announcements
     useEffect(() => {

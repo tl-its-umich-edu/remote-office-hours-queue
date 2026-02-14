@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -17,7 +17,7 @@ import { useDialogState } from "../hooks/useDialogState";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
 import {
-    isQueueHost, Meeting, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, QueueHost,
+    isQueueHost, Meeting, MeetingBackend, MeetingStatus, MyUser, QueueAnnouncement, QueueAttendee, QueueHost,
     User, VideoBackendNames
 } from "../models";
 import * as api from "../services/api";
@@ -109,7 +109,9 @@ interface QueueManagerProps {
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     onStartMeeting: (m: Meeting) => void;
     onAnnouncementChange: () => void;
-    announcementRefreshTrigger: number;
+    announcements: QueueAnnouncement[];
+    announcementsLoading: boolean;
+    announcementsError: string | null;
 }
 
 function QueueManager(props: QueueManagerProps) {
@@ -199,8 +201,9 @@ function QueueManager(props: QueueManagerProps) {
           <Col md={12}>
             <h3>Active Announcements (Only host who posted can manage)</h3>
             <MultipleAnnouncementsDisplay
-              queueId={props.queue.id}
-              refreshTrigger={props.announcementRefreshTrigger}
+              announcements={props.announcements}
+              loading={props.announcementsLoading}
+              error={props.announcementsError}
             />
           </Col>
         </Row>
@@ -313,6 +316,9 @@ export function QueueManagerPage(props: PageProps) {
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
     const [announcementRefreshTrigger, setAnnouncementRefreshTrigger] = useState(0);
+    const [announcements, setAnnouncements] = useState<QueueAnnouncement[]>([]);
+    const [announcementsLoading, setAnnouncementsLoading] = useState(false);
+    const [announcementsError, setAnnouncementsError] = useState<string | null>(null);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
             setQueue(q);
@@ -333,6 +339,24 @@ export function QueueManagerPage(props: PageProps) {
     if (myUser && queue) {
         checkBackendAuth(myUser, queue);
     }
+
+    // Fetch announcements when trigger changes
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            if (!queue?.id) return;
+            try {
+                setAnnouncementsLoading(true);
+                const data = await api.getAllActiveAnnouncements(queue.id);
+                setAnnouncements(data);
+                setAnnouncementsError(null);
+            } catch (err) {
+                setAnnouncementsError(err instanceof Error ? err.message : 'Unknown error');
+            } finally {
+                setAnnouncementsLoading(false);
+            }
+        };
+        fetchAnnouncements();
+    }, [queue?.id, announcementRefreshTrigger]);
 
     // Set up API interactions
     const removeMeeting = async (m: Meeting) => {
@@ -407,7 +431,9 @@ export function QueueManagerPage(props: PageProps) {
                 onAnnouncementChange={() => {
                     setAnnouncementRefreshTrigger(prev => prev + 1);
                 }}
-                announcementRefreshTrigger={announcementRefreshTrigger}
+                announcements={announcements}
+                announcementsLoading={announcementsLoading}
+                announcementsError={announcementsError}
             />
         );
     return (
