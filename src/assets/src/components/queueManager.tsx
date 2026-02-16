@@ -199,7 +199,7 @@ function QueueManager(props: QueueManagerProps) {
         </Row>
         <Row className={spacingClass}>
           <Col md={12}>
-            <h3>Active Announcements (Only host who posted can manage)</h3>
+            <h2>Active Announcements (Only host who posted can manage)</h2>
             <MultipleAnnouncementsDisplay
               announcements={props.announcements}
               loading={props.announcementsLoading}
