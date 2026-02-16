@@ -78,7 +78,7 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
 
     return (
         <div role="alert" aria-live="assertive" aria-atomic="true">
-            <Accordion activeKey={activeKey} onSelect={(key) => setActiveKey(key as string | null)} className="border border-dark border-2 rounded">
+            <Accordion activeKey={activeKey} onSelect={(key) => setActiveKey(key as string | null)} className="border border-secondary border-2 rounded">
                 {announcementArray.map((announcement, index) => {
                     const authorName = announcement.created_by.first_name || announcement.created_by.last_name
                         ? `${announcement.created_by.first_name} ${announcement.created_by.last_name}`.trim()
