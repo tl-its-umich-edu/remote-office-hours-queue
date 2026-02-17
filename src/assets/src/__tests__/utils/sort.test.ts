@@ -1,5 +1,5 @@
-import { sortQueues } from "../sort";
-import { QueueBase } from "../models";
+import { sortQueues } from "../../sort";
+import { QueueBase } from "../../models";
 
 describe("sortQueues", () => {
   it("should sort queues by status (open first) then by ID descending", () => {
