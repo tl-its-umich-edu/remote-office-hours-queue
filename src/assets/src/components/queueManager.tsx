@@ -6,7 +6,7 @@ import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { Alert, Button, Col, Form, InputGroup, Modal, Row } from "react-bootstrap";
 
 import {
-    UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, DateDisplay, Dialog,
+    UserDisplay, ErrorDisplay, FormError, checkForbiddenError, LoadingDisplay, Dialog,
     CopyField, LoginDialog, Breadcrumbs, DateTimeDisplay, userLoggedOnWarning
 } from "./common";
 import { DialInContent } from './dialIn';
@@ -183,7 +183,7 @@ function QueueManager(props: QueueManagerProps) {
           </Col>
           <Col md={6}>
             <div aria-labelledby="created">
-              <DateDisplay date={props.queue.created_at} />
+              <DateTimeDisplay dateTime={props.queue.created_at} />
             </div>
           </Col>
         </Row>

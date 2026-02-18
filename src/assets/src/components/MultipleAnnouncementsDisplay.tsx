@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Alert, Accordion } from "react-bootstrap";
 import { QueueAnnouncement } from "../models";
-import { DateTimeDisplay } from "./common";
+import { DateTimeDisplay, formatDateTimeConcise } from "./common";
 
 interface MultipleAnnouncementsDisplayProps {
     announcements?: QueueAnnouncement[] | QueueAnnouncement | null;
@@ -75,9 +75,21 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
     }
 
     const messageTitle = isUserAssignedToHost ? "Message From Your Host" : "Message From Host";
+    const latestAnnouncement = announcementArray[0];
+    const latestCreatedBy = latestAnnouncement?.created_by;
 
     return (
-        <div role="alert" aria-live="assertive" aria-atomic="true">
+        <>
+            {/* Live region for announcement notifications */}
+            <div role="status" aria-live="assertive" aria-atomic="false" className="visually-hidden">
+                {latestAnnouncement && latestCreatedBy && (() => {
+                    const author = latestCreatedBy.first_name || latestCreatedBy.last_name
+                        ? `${latestCreatedBy.first_name} ${latestCreatedBy.last_name}`.trim()
+                        : latestCreatedBy.username;
+                    return `New announcement from ${author} at ${formatDateTimeConcise(latestAnnouncement.created_at)}: ${latestAnnouncement.text}`;
+                })()}
+            </div>
+            
             <Accordion activeKey={activeKey} onSelect={(key) => setActiveKey(key as string | null)} className="border border-secondary border-2 rounded">
                 {announcementArray.map((announcement, index) => {
                     const authorName = announcement.created_by.first_name || announcement.created_by.last_name
@@ -104,6 +116,6 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
                     );
                 })}
             </Accordion>
-        </div>
+        </>
     );
 };
