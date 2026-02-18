@@ -89,14 +89,14 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
                             <Accordion.Header>
                                 <div className="d-flex align-items-center w-100">
                                     <i className="fa-solid fa-bullhorn me-2" aria-hidden="true"></i>
-                                    <span className="fw-semibold h5 mb-0">{messageTitle} ({authorName})</span>
+                                    <span className="fw-semibold mb-0">{messageTitle} ({authorName})</span>
                                     <small className="text-muted ms-auto me-2">
                                         <DateTimeDisplay dateTime={announcement.created_at} />
                                     </small>
                                 </div>
                             </Accordion.Header>
                             <Accordion.Body>
-                                <div className="bg-info bg-opacity-25 border border-info rounded p-3">
+                                <div className="bg-warning bg-opacity-25 border border-warning rounded p-3">
                                     <p className="mb-0 text-dark">{announcement.text}</p>
                                 </div>
                             </Accordion.Body>
