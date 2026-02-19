@@ -98,7 +98,7 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
                         : announcement.created_by.username;
                     const title = isHost ? "Message From Your Host" : "Message From Host";
                     return (
-                        <Accordion.Item key={announcement.id} eventKey={isHost ? "host" : index.toString()}>
+                        <Accordion.Item key={announcement.id} eventKey={index.toString()}>
                             <Accordion.Header>
                                 <div className="d-flex align-items-center w-100">
                                     <i className="fa-solid fa-bullhorn me-2" aria-hidden="true"></i>
