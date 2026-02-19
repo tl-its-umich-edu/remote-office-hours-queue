@@ -173,7 +173,7 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
                     <div className="border-bottom pb-2 mb-3">
                         <h6 className="mb-0 text-muted">Message from Host</h6>
                     </div>
-                    <div className="bg-info bg-opacity-25 border border-info rounded p-3 mb-3" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                    <div className="bg-warning bg-opacity-25 border border-warning rounded p-3 mb-3" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
                         <p className="mb-0 text-dark" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>{myAnnouncement.text}</p>
                     </div>
                     <div className="d-flex gap-2">

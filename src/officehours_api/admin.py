@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from officehours_api.admin_filters import ActiveHosts, ActiveQueues
-from officehours_api.models import Queue, Meeting, Attendee, Profile
+from officehours_api.models import Queue, Meeting, Attendee, Profile, QueueAnnouncement
 from officehours_api.views import ExportMeetingStartLogs
 from safedelete.admin import SafeDeleteAdmin, highlight_deleted
 
@@ -86,6 +86,20 @@ class MeetingAdmin(admin.ModelAdmin):
     list_filter = (ActiveQueues,)
     search_fields = ['id', 'queue__name']
     inlines = (AttendeeInline,)
+
+
+@admin.register(QueueAnnouncement)
+class QueueAnnouncementAdmin(admin.ModelAdmin):
+    list_display = ('id', 'queue', 'created_by', 'created_at', 'active')
+    list_filter = ('active', 'created_at', ActiveQueues)
+    search_fields = ['text', 'queue__name', 'created_by__username']
+    readonly_fields = ('created_by', 'created_at')
+    list_select_related = ('queue', 'created_by')
+
+    def save_model(self, request, obj, form, change):
+        if not change and not getattr(obj, 'created_by_id', None):
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
 
 
 class ProfileInline(admin.StackedInline):

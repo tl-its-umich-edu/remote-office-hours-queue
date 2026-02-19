@@ -111,36 +111,52 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = (props) => {
 }
 
 
-interface DateDisplayProps {
-    date: string;
-}
 
-export const DateDisplay = (props: DateDisplayProps) =>
-    <span>{
-        new Intl.DateTimeFormat('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        }).format(new Date(props.date))
-    }</span>
 
 interface DateTimeDisplayProps {
     dateTime: string;
 }
 
-export const DateTimeDisplay = (props: DateTimeDisplayProps) =>
-    <span>{
-        new Intl.DateTimeFormat('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric'
-        }).format(new Date(props.dateTime))
-    }</span>
+export const formatDateTimeConcise = (dateTime: string): string => {
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+    }).format(new Date(dateTime));
+};
+
+const formatDateTimeVerbose = (dateTime: string): string => {
+    return new Intl.DateTimeFormat('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit'
+    }).format(new Date(dateTime));
+};
+
+export const DateTimeDisplay = (props: DateTimeDisplayProps) => {
+    const date = new Date(props.dateTime);
+    const isoDateTime = date.toISOString();
+    const verboseFormat = formatDateTimeVerbose(props.dateTime);
+    const conciseFormat = formatDateTimeConcise(props.dateTime);
+    
+    return (
+        <>
+            <time 
+                dateTime={isoDateTime} 
+                aria-hidden="true"
+            >
+                {verboseFormat}
+            </time>
+            <span className="visually-hidden">{conciseFormat}</span>
+        </>
+    );
+};
 
 
 interface CopyFieldProps {
