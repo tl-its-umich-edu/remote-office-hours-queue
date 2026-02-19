@@ -133,23 +133,18 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
     @extend_schema_field(QueueAnnouncementSerializer(many=True))
     def get_current_announcement(self, obj):
         user = self.context['user']
-        
-        if not user.is_authenticated:
-            # Not authenticated users see all active announcements
-            announcements = obj.announcements.filter(active=True).order_by('-created_at')
-        else:
-            my_meeting = obj.meeting_set.filter(attendees__in=[user]).first()
-            
-            if my_meeting and my_meeting.assignee:
-                # User is in queue with assigned host - only see that host's announcements
-                announcements = obj.announcements.filter(
-                    active=True, 
-                    created_by=my_meeting.assignee
-                ).order_by('-created_at')
-            else:
-                # User is not in queue or no assigned host - see all active announcements
-                announcements = obj.announcements.filter(active=True).order_by('-created_at')
-        
+        # Get all active announcements
+        announcements = list(obj.announcements.filter(active=True).order_by('-created_at'))
+
+        # If user is assigned to a host, sort so that host's announcements are first
+        my_meeting = obj.meeting_set.filter(attendees__in=[user]).first() if user.is_authenticated else None
+        assigned_host_id = my_meeting.assignee.id if my_meeting and my_meeting.assignee else None
+
+        if assigned_host_id:
+            announcements.sort(
+                key=lambda ann: (ann.created_by.id != assigned_host_id, -ann.created_at.timestamp())
+            )
+
         return [QueueAnnouncementSerializer(announcement).data for announcement in announcements]
 
 
@@ -249,24 +244,8 @@ class QueueHostSerializer(QueueAttendeeSerializer):
     
     @extend_schema_field(QueueAnnouncementSerializer(many=True))
     def get_current_announcement(self, obj):
-        user = self.context['user']
-        
-        if not user.is_authenticated:
-            # Not authenticated users see all active announcements
-            announcements = obj.announcements.filter(active=True).order_by('-created_at')
-        else:
-            my_meeting = obj.meeting_set.filter(attendees__in=[user]).first()
-            
-            if my_meeting and my_meeting.assignee:
-                # User is in queue with assigned host - only see that host's announcements
-                announcements = obj.announcements.filter(
-                    active=True, 
-                    created_by=my_meeting.assignee
-                ).order_by('-created_at')
-            else:
-                # User is not in queue or no assigned host - see all active announcements
-                announcements = obj.announcements.filter(active=True).order_by('-created_at')
-        
+        # Hosts see all active announcements in chronological order
+        announcements = obj.announcements.filter(active=True).order_by('-created_at')
         return [QueueAnnouncementSerializer(announcement).data for announcement in announcements]
 
     class Meta:
