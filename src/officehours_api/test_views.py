@@ -136,12 +136,12 @@ class MeetingTestCase(TestCase):
         # We need two queues to test this, so we'll login, start the meeting then create another one
         self.client.login(username='hosttwo', password='rohqtest')
         # Start the meeting through the api to generate logs
-        response = self.client.post(f'/api/meetings/{self.meeting.id}/start')
+        response = self.client.post(f'/api/meetings/{self.meeting.id}/start/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.create_test_queue()
         self.client.login(username='hosttwo', password='rohqtest')
         # Start the meeting through the api to generate logs
-        response = self.client.post(f'/api/meetings/{self.meeting.id}/start')
+        response = self.client.post(f'/api/meetings/{self.meeting.id}/start/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_export_meeting_start_logs(self):
@@ -155,7 +155,7 @@ class MeetingTestCase(TestCase):
         self.assertEqual(len(response_csv), 3)
         self.client.login(username='hosttwo', password='rohqtest')
         # Start the meeting through the api to generate logs
-        response = self.client.post(f'/api/meetings/{self.meeting.id}/start')
+        response = self.client.post(f'/api/meetings/{self.meeting.id}/start/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_export_meeting_start_logs_for_queue(self):
