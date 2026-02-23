@@ -2,7 +2,7 @@ gunicorn==23.0.0
 uvicorn[standard]==0.40.0
 psycopg2==2.9.11
 
-Django==5.2.10
+Django==5.2.11
 djangorestframework==3.16.1
 drf-spectacular==0.29.0
 mozilla-django-oidc==5.0.2
