@@ -133,11 +133,16 @@ class QueueAttendeeSerializer(serializers.ModelSerializer):
     @extend_schema_field(QueueAnnouncementSerializer(many=True))
     def get_current_announcement(self, obj):
         user = self.context['user']
+        
+        # Only authenticated users can see announcements
+        if not user.is_authenticated:
+            return []
+        
         # Get all active announcements
         announcements = list(obj.announcements.filter(active=True).order_by('-created_at'))
 
         # If user is assigned to a host, sort so that host's announcements are first
-        my_meeting = obj.meeting_set.filter(attendees__in=[user]).first() if user.is_authenticated else None
+        my_meeting = obj.meeting_set.filter(attendees__in=[user]).first()
         assigned_host_id = my_meeting.assignee.id if my_meeting and my_meeting.assignee else None
 
         if assigned_host_id:
