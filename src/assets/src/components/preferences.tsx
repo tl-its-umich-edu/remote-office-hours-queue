@@ -98,7 +98,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
       disabled={props.disabled}
       checked={notifyMeAnnouncement}
       onChange={() => setNotifyMeAnnouncement(!notifyMeAnnouncement)}
-      label="As an attendee, I want to be notified via SMS when there is an announcement posted."
+      label="As an attendee, I want to be notified via SMS when there is an announcement posted from my host. Announcements from other hosts are visible but not sent via SMS."
     />
   );
 
