@@ -249,6 +249,9 @@ class QueueHostSerializer(QueueAttendeeSerializer):
     
     @extend_schema_field(QueueAnnouncementSerializer(many=True))
     def get_current_announcement(self, obj):
+        user = self.context.get('user')
+        if not user.is_authenticated:
+            return []
         # Hosts see all active announcements in chronological order
         announcements = obj.announcements.filter(active=True).order_by('-created_at')
         return [QueueAnnouncementSerializer(announcement).data for announcement in announcements]

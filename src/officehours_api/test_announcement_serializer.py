@@ -234,3 +234,21 @@ class AnnouncementSerializerTestCase(TestCase):
         
         # Should see no announcements
         self.assertEqual(len(announcements), 0)
+
+    def test_unauthenticated_host_sees_no_announcements(self):
+        """
+        Test that an unauthenticated user cannot see any announcements
+        even through QueueHostSerializer.
+        """
+        # Use Django's AnonymousUser for unauthenticated users
+        unauthenticated_user = AnonymousUser()
+        
+        # Get announcements for unauthenticated user via QueueHostSerializer
+        serializer = QueueHostSerializer(
+            self.queue,
+            context={'user': unauthenticated_user}
+        )
+        announcements = serializer.data['current_announcement']
+        
+        # Should see no announcements
+        self.assertEqual(len(announcements), 0)
