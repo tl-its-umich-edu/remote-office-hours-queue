@@ -453,6 +453,7 @@ function QueueAttendingJoined(props: QueueAttendingProps) {
           <MultipleAnnouncementsDisplay
             announcements={props.queue.current_announcement}
             isUserAssignedToHost={!!props.queue.my_meeting?.assignee}
+            assignedHostId={props.queue.my_meeting?.assignee?.id}
           />
           <Card.Text>
             <strong>Time Joined</strong>:{" "}
