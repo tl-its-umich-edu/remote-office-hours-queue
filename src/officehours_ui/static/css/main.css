@@ -166,11 +166,11 @@ h3, .h3 {
 }
 
 a:not(.btn), a:link:not(.btn), a:visited:not(.btn) {
-	color: #0060ba;
+	color: #61B3FF;
 }
 
 a:hover {
-	color: #0060ba;
+	color: #61B3FF;
 }
 
 .alert a:not(.btn) {
