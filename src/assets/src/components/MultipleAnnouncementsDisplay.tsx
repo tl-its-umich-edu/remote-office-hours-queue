@@ -7,6 +7,7 @@ import { DateTimeDisplay, formatDateTimeConcise } from "./common";
 interface MultipleAnnouncementsDisplayProps {
     announcements?: QueueAnnouncement[] | QueueAnnouncement | null;
     isUserAssignedToHost?: boolean;
+    assignedHostId?: number | null;
     loading?: boolean;
     error?: string | null;
 }
@@ -14,6 +15,7 @@ interface MultipleAnnouncementsDisplayProps {
 export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplayProps> = ({ 
     announcements,
     isUserAssignedToHost = false,
+    assignedHostId = null,
     loading = false,
     error = null
 }) => {
@@ -74,7 +76,7 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
         );
     }
 
-    const messageTitle = isUserAssignedToHost ? "Message From Your Host" : "Message From Host";
+    // Announcements are already sorted by backend; just use announcementArray
     const latestAnnouncement = announcementArray[0];
     const latestCreatedBy = latestAnnouncement?.created_by;
 
@@ -89,19 +91,20 @@ export const MultipleAnnouncementsDisplay: React.FC<MultipleAnnouncementsDisplay
                     return `New announcement from ${author} at ${formatDateTimeConcise(latestAnnouncement.created_at)}: ${latestAnnouncement.text}`;
                 })()}
             </div>
-            
+
             <Accordion activeKey={activeKey} onSelect={(key) => setActiveKey(key as string | null)} className="border border-secondary border-2 rounded">
                 {announcementArray.map((announcement, index) => {
+                    const isFromAssignedHost = assignedHostId !== null && announcement.created_by.id === assignedHostId;
                     const authorName = announcement.created_by.first_name || announcement.created_by.last_name
                         ? `${announcement.created_by.first_name} ${announcement.created_by.last_name}`.trim()
                         : announcement.created_by.username;
-                    
+                    const title = isFromAssignedHost ? "Message From Your Host" : "Message From Host";
                     return (
                         <Accordion.Item key={announcement.id} eventKey={index.toString()}>
                             <Accordion.Header>
                                 <div className="d-flex align-items-center w-100">
                                     <i className="fa-solid fa-bullhorn me-2" aria-hidden="true"></i>
-                                    <span className="fw-semibold mb-0">{messageTitle} ({authorName})</span>
+                                    <span className="fw-semibold mb-0">{title} ({authorName})</span>
                                     <small className="text-muted ms-auto me-2">
                                         <DateTimeDisplay dateTime={announcement.created_at} />
                                     </small>
