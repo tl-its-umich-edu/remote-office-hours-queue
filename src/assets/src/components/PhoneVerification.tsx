@@ -71,12 +71,22 @@ export function PhoneVerification(props: PhoneVerificationProps) {
                         autoFocus={i === 0}
                         aria-label={`digit ${i+1} of 4`}
                         aria-required={true}
+                        inputMode="numeric"
                     />
                 </Col>
             </div>);
     }
 
     const updateDigits = (index: number, value: string) => {
+        // Handle pasting 4-digit code
+        if (value.length === 4 && /^\d{4}$/.test(value)) {
+            setDigits(value.split(""));
+            const lastInput = document.getElementById(`otp-digit-3`);
+            lastInput && lastInput.focus();
+            return;
+        }
+
+        // Handle single digit input
         const regex = /^[0-9]?$/;
         if (!regex.test(value)) return;
 
