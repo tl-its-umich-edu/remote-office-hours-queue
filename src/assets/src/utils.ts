@@ -57,3 +57,28 @@ export const addMeetingAutoAssigned = async (queue: QueueFull, userId: number, b
             : undefined;
     await api.addMeeting(queue.id, userId, backendType, assignee);
 }
+
+export const handleTabArrowKeys = (
+    e: React.KeyboardEvent,
+    currentTab: string,
+    tabs: string[],
+    setActiveTab: (tab: string) => void
+) => {
+    const currentIndex = tabs.indexOf(currentTab);
+
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIndex = (currentIndex + 1) % tabs.length;
+        setActiveTab(tabs[nextIndex]);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+        setActiveTab(tabs[nextIndex]);
+    } else if (e.key === 'Home') {
+        e.preventDefault();
+        setActiveTab(tabs[0]);
+    } else if (e.key === 'End') {
+        e.preventDefault();
+        setActiveTab(tabs[tabs.length - 1]);
+    }
+}
