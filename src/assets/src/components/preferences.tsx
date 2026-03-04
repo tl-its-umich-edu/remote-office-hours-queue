@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { Alert, Button, Form, FormGroup } from "react-bootstrap";
-import PhoneInput from "react-phone-input-2";
+
 
 import * as api from "../services/api";
 import { MyUser } from "../models";
@@ -218,7 +218,7 @@ function PreferencesEditor(props: PreferencesEditorProps) {
               setFormStatus={setFormStatus}
             />
           }
-          {notifyMeHostInput /* host settings, then attendee settings */} 
+          {notifyMeHostInput /* host settings, then attendee settings */}
           {notifyMeAttendeeInput}
           {notifyMeAnnouncementInput}
         </FormGroup>
