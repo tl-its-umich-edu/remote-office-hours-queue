@@ -10,7 +10,7 @@ import { usePromise } from "../hooks/usePromise";
 import { useMeetingTypesValidation, useStringValidation } from "../hooks/useValidation";
 import { QueueHost, User } from "../models";
 import * as api from "../services/api";
-import { recordQueueManagementEvent, redirectToLogin, handleTabArrowKeys } from "../utils";
+import { recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
 import { HelmetTitle } from "./pageTitle";
 
@@ -48,47 +48,19 @@ interface AddQueueEditorProps extends MultiTabEditorProps {
     onFinishClick: () => void;
 }
 
-// The 'tab-custom' role is used to override a default 'tab' role that resulted in tab links not being keyboard accessible.
 function AddQueueEditor(props: AddQueueEditorProps) {
-    const tabs = ['general', 'hosts'];
-
-    const handleArrowKeyDown = (e: React.KeyboardEvent, currentTab: string) => {
-        handleTabArrowKeys(e, currentTab, tabs, (newTab) => {
-            // Direct tab switch via arrow keys without validation
-            if (newTab === 'general') {
-                props.onTabSelect?.('general', e);
-            } else if (newTab === 'hosts') {
-                props.onTabSelect?.('hosts', e);
-            }
-        });
-    };
-
     return (
         <Tab.Container id='add-queue-editor' defaultActiveKey='general' activeKey={props.activeKey} onSelect={props.onTabSelect}>
             <Row>
                 <Col md={3} sm={3}>
-                    <Nav variant='pills' role='tablist' className='flex-column mt-5'>
-                        <Nav.Item role="presentation">
-                            <Nav.Link
-                                eventKey='general'
-                                role='tab'
-                                tabIndex={0}
-                                aria-selected={props.activeKey === AvailableTabs.General}
-                                aria-label='General Tab'
-                                onKeyDown={(e) => handleArrowKeyDown(e, 'general')}
-                            >
+                    <Nav variant='pills' className='flex-column mt-5'>
+                        <Nav.Item>
+                            <Nav.Link eventKey='general' role='tab' tabIndex={0} aria-label='General Tab'>
                                 General
                             </Nav.Link>
                         </Nav.Item>
-                        <Nav.Item role="presentation">
-                            <Nav.Link
-                                eventKey='hosts'
-                                role='tab'
-                                tabIndex={0}
-                                aria-selected={props.activeKey === AvailableTabs.Hosts}
-                                aria-label='Manage Hosts Tab'
-                                onKeyDown={(e) => handleArrowKeyDown(e, 'hosts')}
-                            >
+                        <Nav.Item>
+                            <Nav.Link eventKey='hosts' role='tab' tabIndex={0} aria-label='Manage Hosts Tab'>
                                 Manage Hosts
                             </Nav.Link>
                         </Nav.Item>
@@ -97,7 +69,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                 <Col md={6} sm={9}>
                     <h1>Add Queue</h1>
                     <Tab.Content aria-live='polite'>
-                        <Tab.Pane eventKey='general' role='tabpanel' aria-labelledby='general-tab'>
+                        <Tab.Pane eventKey='general'>
                             <GeneralEditor {...props} />
                             <div className='mt-4'>
                                 <Button
@@ -112,7 +84,7 @@ function AddQueueEditor(props: AddQueueEditorProps) {
                                 <CancelAddButton disabled={props.disabled} />
                             </div>
                         </Tab.Pane>
-                        <Tab.Pane eventKey='hosts' role='tabpanel' aria-labelledby='hosts-tab'>
+                        <Tab.Pane eventKey='hosts'>
                             <ManageHostsEditor {...props} />
                             <div className='mt-4'>
                                 <Button
@@ -233,9 +205,7 @@ export function AddQueuePage(props: PageProps) {
         if (eventKey === AvailableTabs.General) {
             setActiveKey(AvailableTabs.General);
         } else if (eventKey === AvailableTabs.Hosts) {
-            // Allow direct tab switch for keyboard navigation (arrow keys)
-            // Validation only happens when clicking the Next button
-            setActiveKey(AvailableTabs.Hosts);
+            handleGeneralNextClick();  // Use same logic as Next button click handler
         }
     };
 

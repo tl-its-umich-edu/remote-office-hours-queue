@@ -16,7 +16,7 @@ import { useMeetingTypesValidation, useStringValidation} from "../hooks/useValid
 import { QueueAttendee, QueueHost, User, isQueueHost } from "../models";
 import * as api from "../services/api";
 import { useQueueWebSocket } from "../services/sockets";
-import { checkIfSetsAreDifferent, handleTabArrowKeys, recordQueueManagementEvent, redirectToLogin } from "../utils";
+import { checkIfSetsAreDifferent, recordQueueManagementEvent, redirectToLogin } from "../utils";
 import { confirmUserExists, queueDescriptSchema, queueNameSchema, queueLocationSchema } from "../validation";
 import { HelmetTitle } from "./pageTitle";
 
@@ -33,12 +33,8 @@ interface QueueSettingsProps extends MultiTabEditorProps {
 }
 
 function QueueSettingsEditor(props: QueueSettingsProps) {
-    const [activeTab, setActiveTab] = React.useState('general');
-
-    const tabs = ['general', 'hosts', 'delete'];
-
     return (
-        <Tab.Container id='add-queue-editor' activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'general')}>
+        <Tab.Container id='add-queue-editor' defaultActiveKey='general'>
             <Row>
                 <Col md={3} sm={3}>
                     <div className='mt-4'>
@@ -46,40 +42,19 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                             <FontAwesomeIcon icon={faChevronLeft} /> Back to Queue
                         </Link>
                     </div>
-                    <Nav variant='pills' role="tablist" className='flex-column mt-4'>
-                        <Nav.Item role="presentation">
-                            <Nav.Link
-                                eventKey='general'
-                                role='tab'
-                                tabIndex={0}
-                                aria-selected={activeTab === 'general'}
-                                aria-label='General Tab'
-                                onKeyDown={(e) => handleTabArrowKeys(e, 'general', tabs, setActiveTab)}
-                            >
+                    <Nav variant='pills' className='flex-column mt-4'>
+                        <Nav.Item>
+                            <Nav.Link eventKey='general' role='tab' tabIndex={0} aria-label='General Tab'>
                                 General
                             </Nav.Link>
                         </Nav.Item>
-                        <Nav.Item role="presentation">
-                            <Nav.Link
-                                eventKey='hosts'
-                                role='tab'
-                                tabIndex={0}
-                                aria-selected={activeTab === 'hosts'}
-                                aria-label='Manage Hosts Tab'
-                                onKeyDown={(e) => handleTabArrowKeys(e, 'hosts', tabs, setActiveTab)}
-                            >
+                        <Nav.Item>
+                            <Nav.Link eventKey='hosts' role='tab' tabIndex={0} aria-label='Manage Hosts Tab'>
                                 Manage Hosts
                             </Nav.Link>
                         </Nav.Item>
-                        <Nav.Item role="presentation">
-                            <Nav.Link
-                                eventKey='delete'
-                                role='tab'
-                                tabIndex={0}
-                                aria-selected={activeTab === 'delete'}
-                                aria-label='Delete Queue Tab'
-                                onKeyDown={(e) => handleTabArrowKeys(e, 'delete', tabs, setActiveTab)}
-                            >
+                        <Nav.Item>
+                            <Nav.Link eventKey='delete' role='tab' tabIndex={0} aria-label='Delete Queue Tab'>
                                 Delete Queue
                             </Nav.Link>
                         </Nav.Item>
@@ -88,7 +63,7 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                 <Col md={6} sm={9}>
                     <h1>Settings</h1>
                     <Tab.Content aria-live='polite'>
-                        <Tab.Pane eventKey='general' role='tabpanel' aria-labelledby='general-tab'>
+                        <Tab.Pane eventKey='general'>
                             <GeneralEditor {...props} />
                             <div className='mt-4'>
                                 <Button
@@ -111,10 +86,10 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                                 </Button>
                             </div>
                         </Tab.Pane>
-                        <Tab.Pane eventKey='hosts' role='tabpanel' aria-labelledby='hosts-tab'>
+                        <Tab.Pane eventKey='hosts'>
                             <ManageHostsEditor {...props} />
                         </Tab.Pane>
-                        <Tab.Pane eventKey='delete' role='tabpanel' aria-labelledby='delete-tab'>
+                        <Tab.Pane eventKey='delete'>
                             <h2>Delete Queue</h2>
                             <p>Delete the entire queue, including all hosts and current meetings in queue. <strong>This cannot be undone.</strong></p>
                             <div className='mt-4'>
