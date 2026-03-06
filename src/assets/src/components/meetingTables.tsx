@@ -267,7 +267,7 @@ export function AttendeesInQueueTable (props: AttendeesInQueueTableProps) {
 
             if (sizeDelta !== 0) {
                 const changedCount = Math.abs(sizeDelta);
-                let activityMessage;
+                let activityMessage: string;
                 const attendeeName = sizeDelta === 1
                     ? getAttendeeLabel(sortedMeetings[sortedMeetings.length - 1])
                     : undefined;
@@ -344,7 +344,7 @@ export function AttendeesInQueueTable (props: AttendeesInQueueTableProps) {
         );
     return (
         <>
-        <div role="status" aria-live="assertive" aria-atomic="true" className="sr-only">
+        <div role="status" aria-live="assertive" aria-atomic="true" className="visually-hidden">
             {queueAnnouncement}
         </div>
         {attendeesInQueueTable}
