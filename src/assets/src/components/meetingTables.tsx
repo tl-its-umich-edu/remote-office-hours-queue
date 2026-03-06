@@ -257,8 +257,7 @@ export function AttendeesInQueueTable (props: AttendeesInQueueTableProps) {
         const sortedMeetings = [...props.meetings].sort((a, b) => a.id - b.id);
 
         const getAttendeeLabel = (m?: Meeting): string | undefined => {
-            if (!m) return undefined;
-            const attendee = m.attendees[0];
+            const attendee = m?.attendees[0];
             if (!attendee) return undefined;
             return `${attendee.first_name} ${attendee.last_name}`.trim() || attendee.username;
         };
