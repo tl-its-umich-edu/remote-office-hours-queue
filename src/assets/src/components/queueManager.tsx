@@ -10,7 +10,7 @@ import {
     CopyField, LoginDialog, Breadcrumbs, DateTimeDisplay, userLoggedOnWarning
 } from "./common";
 import { DialInContent } from './dialIn';
-import { MeetingsInProgressTable, MeetingsInQueueTable } from "./meetingTables";
+import { MeetingsInProgressTable, AttendeesInQueueTable } from "./meetingTables";
 import { BackendSelector as MeetingBackendSelector, getBackendByName } from "./meetingType";
 import { PageProps } from "./page";
 import { useDialogState } from "../hooks/useDialogState";
@@ -216,7 +216,7 @@ function QueueManager(props: QueueManagerProps) {
             <MeetingsInProgressTable meetings={startedMeetings} {...props} />
           </Col>
         </Row>
-        <h2 className={spacingClass}>Meetings in Queue</h2>
+        <h2 className={spacingClass}>Attendees in Queue</h2>
         <Row className={spacingClass}>
           <Col md={8}>
             {userLoggedOnWarning}
@@ -234,7 +234,7 @@ function QueueManager(props: QueueManagerProps) {
         </Row>
         <Row className={spacingClass}>
           <Col md={12}>
-            <MeetingsInQueueTable meetings={unstartedMeetings} {...props} />
+            <AttendeesInQueueTable meetings={unstartedMeetings} {...props} />
           </Col>
         </Row>
       </div>
