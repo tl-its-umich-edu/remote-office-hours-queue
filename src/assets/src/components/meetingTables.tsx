@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Badge, Button, Col, Form, Row, Table } from "react-bootstrap";
 
@@ -233,14 +233,71 @@ interface MeetingTableProps {
     disabled: boolean;
 }
 
-interface MeetingsInQueueTableProps extends MeetingTableProps {
+interface AttendeesInQueueTableProps extends MeetingTableProps {
     queue: QueueHost;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     onStartMeeting: (m: Meeting) => void;
 }
 
-export function MeetingsInQueueTable (props: MeetingsInQueueTableProps) {
-    const unstartedMeetingRows = props.meetings
+export function AttendeesInQueueTable (props: AttendeesInQueueTableProps) {
+    const [queueAnnouncement, setQueueAnnouncement] = useState('');
+    const previousQueueSize = useRef<number | undefined>(undefined);
+    const announcementTimer = useRef<number | undefined>(undefined);
+
+    useEffect(() => {
+        return () => {
+            if (announcementTimer.current !== undefined) {
+                window.clearTimeout(announcementTimer.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        const currentQueueSize = props.meetings.length;
+        const sortedMeetings = [...props.meetings].sort((a, b) => a.id - b.id);
+
+        const getAttendeeLabel = (m?: Meeting): string | undefined => {
+            const attendee = m?.attendees[0];
+            if (!attendee) return undefined;
+            return `${attendee.first_name} ${attendee.last_name}`.trim() || attendee.username;
+        };
+
+        if (previousQueueSize.current !== undefined) {
+            const sizeDelta = currentQueueSize - previousQueueSize.current;
+
+            if (sizeDelta !== 0) {
+                const changedCount = Math.abs(sizeDelta);
+                let activityMessage: string;
+                const attendeeName = sizeDelta === 1
+                    ? getAttendeeLabel(sortedMeetings[sortedMeetings.length - 1])
+                    : undefined;
+
+                if (sizeDelta === 1 && attendeeName) {
+                    activityMessage = `${attendeeName} joined the queue.`;
+                } else {
+                    activityMessage = sizeDelta > 0
+                        ? `${changedCount} ${changedCount === 1 ? 'attendee joined' : 'attendees joined'} the queue.`
+                        : `${changedCount} ${changedCount === 1 ? 'attendee left' : 'attendees left'} the queue.`;
+                }
+
+                const attendeeNoun = currentQueueSize === 1 ? 'attendee' : 'attendees';
+                const nextAnnouncement = `${activityMessage} ${currentQueueSize} ${attendeeNoun} currently in queue.`;
+
+                // Clear then set to ensure assistive tech detects each update.
+                setQueueAnnouncement('');
+                if (announcementTimer.current !== undefined) {
+                    window.clearTimeout(announcementTimer.current);
+                }
+                announcementTimer.current = window.setTimeout(() => {
+                    setQueueAnnouncement(nextAnnouncement);
+                }, 50);
+            }
+        }
+
+        previousQueueSize.current = currentQueueSize;
+    }, [props.meetings]);
+
+    const queuedAttendeeRows = [...props.meetings]
         .sort((a, b) => a.id - b.id)
         .map(
             (m, i) => (
@@ -257,8 +314,9 @@ export function MeetingsInQueueTable (props: MeetingsInQueueTableProps) {
             )
         );
 
-    const unstartedMeetingsTable = props.meetings.length
+    const attendeesInQueueTable = props.meetings.length
         ? (
+            <>
             <Table bordered responsive>
                 <thead>
                     <tr>
@@ -270,24 +328,35 @@ export function MeetingsInQueueTable (props: MeetingsInQueueTableProps) {
                         <th scope="col">Meeting Actions</th>
                     </tr>
                 </thead>
-                <tbody>{unstartedMeetingRows}</tbody>
+                <tbody>{queuedAttendeeRows}</tbody>
             </Table>
+            </>
         )
         : (
             <>
             <hr/>
-            <p>There are currently no meetings in queue.</p>
+            <p>There are currently no attendees in queue.</p>
             <p>
                 <strong>Did you know?</strong> You can get notified by SMS (text) message when someone joins your empty queue
                 by adding your cell phone number and enabling host notifications in your <Link to="/preferences">User Preferences</Link>. 
             </p>
             </>
         );
-    return unstartedMeetingsTable;
+    return (
+        <>
+        <div role="status" aria-live="assertive" aria-atomic="true" className="visually-hidden">
+            {queueAnnouncement}
+        </div>
+        {attendeesInQueueTable}
+        </>
+    );
 }
 
+// Backward-compatible alias for existing imports.
+export const MeetingsInQueueTable = AttendeesInQueueTable;
+
 export function MeetingsInProgressTable (props: MeetingTableProps) {
-    const startedMeetingRows = props.meetings
+    const startedMeetingRows = [...props.meetings]
         .sort((a, b) => a.id - b.id)
         .map((m) => (
             <tr key={m.id}>
