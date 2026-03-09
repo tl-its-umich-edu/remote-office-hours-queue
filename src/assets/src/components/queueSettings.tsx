@@ -32,7 +32,6 @@ interface QueueSettingsProps extends MultiTabEditorProps {
     onDeleteClick: () => void;
 }
 
-// The 'tab-custom' role is used to override a default 'tab' role that resulted in tab links not being keyboard accessible.
 function QueueSettingsEditor(props: QueueSettingsProps) {
     return (
         <Tab.Container id='add-queue-editor' defaultActiveKey='general'>
@@ -45,17 +44,17 @@ function QueueSettingsEditor(props: QueueSettingsProps) {
                     </div>
                     <Nav variant='pills' className='flex-column mt-4'>
                         <Nav.Item>
-                            <Nav.Link eventKey='general' role='tab-custom' tabIndex={0} aria-label='General Tab'>
+                            <Nav.Link eventKey='general' role='tab' tabIndex={0} aria-label='General Tab'>
                                 General
                             </Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link eventKey='hosts' role='tab-custom' tabIndex={0} aria-label='Manage Hosts Tab'>
+                            <Nav.Link eventKey='hosts' role='tab' tabIndex={0} aria-label='Manage Hosts Tab'>
                                 Manage Hosts
                             </Nav.Link>
                         </Nav.Item>
                         <Nav.Item>
-                            <Nav.Link eventKey='delete' role='tab-custom' tabIndex={0} aria-label='Delete Queue Tab'>
+                            <Nav.Link eventKey='delete' role='tab' tabIndex={0} aria-label='Delete Queue Tab'>
                                 Delete Queue
                             </Nav.Link>
                         </Nav.Item>
