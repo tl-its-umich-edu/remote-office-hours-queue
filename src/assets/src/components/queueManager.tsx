@@ -385,13 +385,13 @@ export function QueueManagerPage(props: PageProps) {
         return await api.setStatus(queue!.id, open);
     }
     const [doSetStatus, setStatusLoading, setStatusError] = usePromise(setStatus, setQueueChecked);
-    
+
     const changeAssignee = async (assignee: User | undefined, meeting: Meeting) => {
         recordQueueManagementEvent("Changed Assignee");
         await api.changeMeetingAssignee(meeting.id, assignee?.id);
     }
     const [doChangeAssignee, changeAssigneeLoading, changeAssigneeError] = usePromise(changeAssignee);
-    
+
     const startMeeting = async (meeting: Meeting) => {
         recordQueueManagementEvent("Started Meeting");
         await api.startMeeting(meeting.id);
@@ -399,7 +399,7 @@ export function QueueManagerPage(props: PageProps) {
     const [doStartMeeting, startMeetingLoading, startMeetingError] = usePromise(startMeeting);
 
     // Render
-    const isChanging = removeMeetingLoading || addMeetingLoading || setStatusLoading || changeAssigneeLoading || startMeetingLoading;
+    const isChanging = removeMeetingLoading || addMeetingLoading || setStatusLoading || startMeetingLoading;
     const globalErrorSources = [
         {source: 'Access Denied', error: authError},
         {source: 'Queue Connection', error: queueWebSocketError},

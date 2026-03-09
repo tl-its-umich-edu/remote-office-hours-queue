@@ -50,14 +50,10 @@ const AssigneeSelector = (props: AssigneeSelectorProps) => {
                 .sort((a, b) => a.id === props.user.id ? -1 : b.id === props.user.id ? 1 : 0)
                 .map(a => <option key={a.id} value={a.id}>{a.first_name} {a.last_name} ({a.username})</option>)
         );
-    const assigneeMenu = React.useRef<HTMLSelectElement>(null);
     const onChangeAssignee = (e: React.ChangeEvent<HTMLSelectElement>) => {
         e.target.value === ""
             ? props.onChangeAssignee(undefined)
             : props.onChangeAssignee(props.potentialAssignees.find(a => a.id === +e.target.value));
-        if (assigneeMenu.current) {
-          assigneeMenu.current.focus();
-        }
     }
 
     return (
