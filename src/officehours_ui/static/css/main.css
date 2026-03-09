@@ -113,12 +113,19 @@ body {
 	background: #004881;
 }
 
-#aux-nav .nav-item a:focus {
-	outline: 1px dotted #5a5454;
+#aux-nav .nav-item a:focus-visible {
+	outline: 3px solid #ffffff;
+	outline-offset: 2px;
 	background: #004881;
 }
 
 #aux-nav .nav-item a:hover {
+	background: #004881;
+}
+
+#aux-nav .nav-item a:focus {
+	outline: 3px solid #ffffff;
+	outline-offset: 2px;
 	background: #004881;
 }
 
