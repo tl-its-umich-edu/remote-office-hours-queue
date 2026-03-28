@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react"; // no longer use useEffect
 import { Button, Form } from "react-bootstrap";
 import { QueueAnnouncement } from "../models";
 import { ErrorDisplay } from "./common";
@@ -8,66 +8,38 @@ import * as api from "../services/api";
 
 interface AnnouncementFormProps {
     queueId: number;
-    onAnnouncementChange: () => void;
     disabled?: boolean;
     currentUser: { id: number; username: string };
+    myAnnouncement: QueueAnnouncement | null;
 }
 
 export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
     queueId,
-    onAnnouncementChange,
     disabled = false,
-    currentUser
+    currentUser,
+    myAnnouncement
 }) => {
-    const [myAnnouncement, setMyAnnouncement] = useState<QueueAnnouncement | null>(null);
+   
     const [text, setText] = useState("");
     const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // Fetch the current user's own announcement
-    useEffect(() => {
-        const fetchMyAnnouncement = async () => {
-            try {
-                setLoading(true);
-                const announcement = await api.getMyActiveAnnouncement(queueId);
-                setMyAnnouncement(announcement);
-                setText(announcement?.text || "");
-            } catch (error) {
-                console.error("Error fetching my announcement:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        fetchMyAnnouncement();
-    }, [queueId]);
-
     const createAnnouncement = async (announcementText: string) => {
         await api.createAnnouncement(queueId, announcementText);
-        onAnnouncementChange();
-        // Refresh the form by fetching the new announcement
-        const newAnnouncement = await api.getMyActiveAnnouncement(queueId);
-        setMyAnnouncement(newAnnouncement);
-        setText(newAnnouncement?.text || "");
+        // remove trigger based callback, since after API call, django signal fires send_queue_update that pushes data through websocket, myAnnouncement prop is updataed automatically 
     };
 
     const updateAnnouncement = async (announcementText: string) => {
         if (myAnnouncement) {
             await api.updateAnnouncement(queueId, myAnnouncement.id, announcementText);
-            onAnnouncementChange();
-            // Refresh the form by fetching the updated announcement
-            const updatedAnnouncement = await api.getMyActiveAnnouncement(queueId);
-            setMyAnnouncement(updatedAnnouncement);
-            setText(updatedAnnouncement?.text || "");
+            // remove trigger based callback, since after API call, django signal fires send_queue_update that pushes data through websocket, myAnnouncement prop is updataed automatically 
         }
     };
 
     const deleteAnnouncement = async () => {
         if (myAnnouncement) {
             await api.deleteAnnouncement(queueId, myAnnouncement.id);
-            onAnnouncementChange();
-            setMyAnnouncement(null);
-            setText("");
+            // remove trigger based callback, since after API call, django signal fires send_queue_update that pushes data through websocket, myAnnouncement prop is updataed automatically 
         }
     };
 
@@ -115,7 +87,7 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
             {!myAnnouncement && !showForm && (
                 <Button 
                     variant="primary" 
-                    onClick={() => setShowForm(true)}
+                    onClick={() => { setText(""); setShowForm(true); }} // myAnnouncement is a prop, not a local state so the internal text state is only w=use whil the form is open for edits
                     disabled={disabled || operationLoading}
                 >
                     Add Announcement

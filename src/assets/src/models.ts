@@ -78,7 +78,7 @@ export interface QueueHost extends QueueAttendee {
 export interface QueueAttendee extends QueueFull {
   my_meeting: Meeting | null;
   line_length: number;
-  current_announcement: QueueAnnouncement | null;
+  current_announcement: QueueAnnouncement[]; // changed from  QueueAnnouncement | null to better align with the type the Django serializer actually returns
 }
 
 export interface QueueAnnouncement {
