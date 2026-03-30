@@ -4,6 +4,7 @@ import { FormStatus } from "./preferences";
 import { validatePhoneNumber } from "../validation";
 import { Button, Col, Form, FormGroup, Row, Spinner } from "react-bootstrap";
 import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/bootstrap.css";
 
 interface PhoneVerificationProps {
     phoneField: string;
@@ -39,7 +40,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
     const phoneInput = (
         <PhoneInput
             country={'us'}
-            onlyCountries={['us', 'ca']}
+            onlyCountries={['us']}
             countryCodeEditable={false}
             value={props.phoneField}
             onChange={(value: any, data: any) => {
@@ -50,6 +51,7 @@ export function PhoneVerification(props: PhoneVerificationProps) {
             disabled={props.disabled}
             inputProps={{id: 'phone'}}
             placeholder=""
+            disableDropdown
         />
     );
 
@@ -67,12 +69,24 @@ export function PhoneVerification(props: PhoneVerificationProps) {
                         onKeyUp={handleOtpEnter}
                         disabled={otpStatus === OtpStatusValue.Verifying}
                         autoFocus={i === 0}
+                        aria-label={`digit ${i+1} of 4`}
+                        aria-required={true}
+                        inputMode="numeric"
                     />
                 </Col>
             </div>);
     }
 
     const updateDigits = (index: number, value: string) => {
+        // Handle pasting 4-digit code
+        if (value.length === 4 && /^\d{4}$/.test(value)) {
+            setDigits(value.split(""));
+            const lastInput = document.getElementById(`otp-digit-3`);
+            lastInput && lastInput.focus();
+            return;
+        }
+
+        // Handle single digit input
         const regex = /^[0-9]?$/;
         if (!regex.test(value)) return;
 

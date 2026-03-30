@@ -1,8 +1,7 @@
 import * as React from "react";
 import { useState, useEffect } from "react";
 import { Alert, Button, Form, FormGroup } from "react-bootstrap";
-import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/bootstrap.css";
+
 
 import * as api from "../services/api";
 import { MyUser } from "../models";
@@ -68,26 +67,26 @@ function PreferencesEditor(props: PreferencesEditorProps) {
     phoneField.length <= countryDialCode.length ? "" : phoneField;
   const changedPhoneNumber = props.user.phone_number !== phoneNumberToSubmit;
 
-  const notifyMeAttendeeInput = (
-    <Form.Check
-      type="checkbox"
-      id="notify-me-attendee"
-      className="mt-3"
-      disabled={props.disabled}
-      checked={notifyMeAttendee}
-      onChange={() => setNotifyMeAttendee(!notifyMeAttendee)}
-      label="As an attendee, I want to be notified via SMS when it becomes my turn."
-    />
-  );
   const notifyMeHostInput = (
     <Form.Check
       type="checkbox"
       id="notify-me-host"
-      className="mt-2"
+      className="mt-3"
       disabled={props.disabled}
       checked={notifyMeHost}
       onChange={() => setNotifyMeHost(!notifyMeHost)}
       label="As a host, I want to be notified via SMS when someone joins my empty queue."
+    />
+  );
+  const notifyMeAttendeeInput = (
+    <Form.Check
+      type="checkbox"
+      id="notify-me-attendee"
+      className="mt-2"
+      disabled={props.disabled}
+      checked={notifyMeAttendee}
+      onChange={() => setNotifyMeAttendee(!notifyMeAttendee)}
+      label="As an attendee, I want to be notified via SMS when it becomes my turn."
     />
   );
   const notifyMeAnnouncementInput = (
@@ -219,8 +218,8 @@ function PreferencesEditor(props: PreferencesEditorProps) {
               setFormStatus={setFormStatus}
             />
           }
+          {notifyMeHostInput /* host settings, then attendee settings */}
           {notifyMeAttendeeInput}
-          {notifyMeHostInput}
           {notifyMeAnnouncementInput}
         </FormGroup>
         <Button
