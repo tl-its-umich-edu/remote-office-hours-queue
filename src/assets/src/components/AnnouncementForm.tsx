@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react"; // no longer use useEffect
+import { useState } from "react"; 
 import { Button, Form } from "react-bootstrap";
 import { QueueAnnouncement } from "../models";
 import { ErrorDisplay } from "./common";
@@ -26,20 +26,17 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
 
     const createAnnouncement = async (announcementText: string) => {
         await api.createAnnouncement(queueId, announcementText);
-        // remove trigger based callback, since after API call, django signal fires send_queue_update that pushes data through websocket, myAnnouncement prop is updataed automatically 
     };
 
     const updateAnnouncement = async (announcementText: string) => {
         if (myAnnouncement) {
-            await api.updateAnnouncement(queueId, myAnnouncement.id, announcementText);
-            // remove trigger based callback, since after API call, django signal fires send_queue_update that pushes data through websocket, myAnnouncement prop is updataed automatically 
+            await api.updateAnnouncement(queueId, myAnnouncement.id, announcementText); 
         }
     };
 
     const deleteAnnouncement = async () => {
         if (myAnnouncement) {
             await api.deleteAnnouncement(queueId, myAnnouncement.id);
-            // remove trigger based callback, since after API call, django signal fires send_queue_update that pushes data through websocket, myAnnouncement prop is updataed automatically 
         }
     };
 
@@ -62,7 +59,7 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         }
     };
 
-    const handleEdit = () => {
+    const handleOpenEditor = () => {
         setText(myAnnouncement?.text || "");
         setShowForm(true);
     };
@@ -78,16 +75,12 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
         }
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     return (
         <>
             {!myAnnouncement && !showForm && (
                 <Button 
                     variant="primary" 
-                    onClick={() => { setText(""); setShowForm(true); }} // myAnnouncement is a prop, not a local state so the internal text state is only w=use whil the form is open for edits
+                    onClick={handleOpenEditor} 
                     disabled={disabled || operationLoading}
                 >
                     Add Announcement
@@ -161,7 +154,7 @@ export const AnnouncementForm: React.FC<AnnouncementFormProps> = ({
                         <Button
                             variant="primary"
                             size="sm"
-                            onClick={handleEdit}
+                            onClick={handleOpenEditor}
                             disabled={disabled || operationLoading}
                         >
                             Edit
