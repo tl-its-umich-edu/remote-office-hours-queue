@@ -2,7 +2,7 @@ import csv
 import logging
 from datetime import datetime, timezone, timedelta
 from random import randint
-from typing import Iterable
+from typing import Iterable, Optional
 
 from asgiref.sync import async_to_sync
 from django.conf import settings
@@ -368,18 +368,30 @@ class ExportMeetingStartLogs(APIView):
         # Otherwise, get all the logs for the queues the user is a host of
         else:
             filename = f"meeting_start_logs_{username}.csv"
-
+        # Parse optional start_date queury parameter in order to filter by date
+        start_date_str = request.query_params.get('start_date')
+        start_date = None
+        # If no filter chosen, return everything
+        if start_date_str:
+            try:
+                # attach UTC to avoid issues with postgres and comparing timezone-aware column against a naive datetime
+                start_date = datetime.strptime(start_date_str, '%Y-%M-%d').replace(tzinfo=timezone.utc)
+            except ValueError:
+                return response(
+                    {'detail': 'Invalid start_date formate. Use YYYY-MM-DD.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
         logger.info(f"User {username} successfully exported meeting start logs for queues {repr(queues_user_is_in)}.")
-        self.extract_log(queues_user_is_in, response)
+        self.extract_log(queues_user_is_in, response, start_date)
 
         return response
 
     @staticmethod
-    def extract_log(queue_ids: Iterable[int], response: HttpResponse) -> None:
+    def extract_log(queue_ids: Iterable[int], response: HttpResponse, start_date: Optional[datetime] = None) -> None:
         writer = csv.writer(response)
         with connection.cursor() as cursor:
             cursor.execute('''
