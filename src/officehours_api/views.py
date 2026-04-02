@@ -394,10 +394,19 @@ class ExportMeetingStartLogs(APIView):
     def extract_log(queue_ids: Iterable[int], response: HttpResponse, start_date: Optional[datetime] = None) -> None:
         writer = csv.writer(response)
         with connection.cursor() as cursor:
-            cursor.execute('''
+            query = '''
                 SELECT * FROM meeting_start_logs
                 WHERE queue_id = ANY(%s)
-                ''', [list(queue_ids)])
+            '''
+            params = [list(queue_ids)]
+
+            # Only add the date filter if user asked for one 
+            if start_date:
+                query += ' AND meeting_created_at >= %s'
+                # Add datetime object to param list, Django should handle converting it to postgres compatible timestamp
+                params.append(start_date)
+
+            cursor.execute(query, params)
 
             rows = cursor.fetchall()
 
