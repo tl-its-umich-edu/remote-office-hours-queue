@@ -364,8 +364,15 @@ export const exportQueueHistoryLogs = async (queue_id: number, days?: number) =>
   await downloadCsv(resp);
 };
 
-export const exportAllQueueHistoryLogs = async () => {
-  const resp = await fetch(`/api/export_meeting_start_logs/`, {
+export const exportAllQueueHistoryLogs = async (days?: number) => {
+  let url = '/api/export_meeting_start_logs/';
+  if (days) {
+    const start_date = new Date();
+    start_date.setDate(start_date.getDate() - days);
+    // Convert date and grab only YYYY-MM-DD that backend is expecting
+    url += '?start_date=${start_date.toISOString().split('T')[0]}';
+  }
+  const resp = await fetch(url, {
     method: "GET",
   });
   await handleErrors(resp);
