@@ -61,8 +61,8 @@ export function ManagePage(props: PageProps) {
     }
     const [queues, setQueues] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
-    const [ doExportAllQueues, exportAllLoading, exportAllError ] = usePromise(() => api.exportAllQueueHistoryLogs() as Promise<void>);
-    const [ doExportQueue, exportQueueLoading, exportQueueError ] = usePromise((queueId: number) => api.exportQueueHistoryLogs(queueId) as Promise<void>);
+    const [ doExportAllQueues, exportAllLoading, exportAllError ] = usePromise((days?: number) => api.exportAllQueueHistoryLogs(days) as Promise<void>);
+    const [ doExportQueue, exportQueueLoading, exportQueueError ] = usePromise((queueId: number, days?: number) => api.exportQueueHistoryLogs(queueId, days) as Promise<void>);
 
     
     const errorSources = [
