@@ -527,9 +527,11 @@ interface QueueTableProps {
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
+    // Track which dropdown option is selected: undefined = all history, 90 = 90 days, etc
+    const [selectedDays, setSelectedDays] = useState<number | undefined>(undefined);
     const handleQueueHistoryExportSubmit = async (queueId: number) => {
         if (props.handleCSVDownload === undefined) return;
-        await props.handleCSVDownload(queueId);
+        await props.handleCSVDownload(queueId, selectedDays);
     }
 
     const sortedQueues = sortQueues(props.queues.slice());
