@@ -16,7 +16,7 @@ type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "altern
 
 export const DisabledMessage = <em></em>
 
-
+ 
 interface UserDisplayProps {
     user: User;
 }
@@ -522,14 +522,16 @@ interface QueueTableProps {
     queues: readonly QueueBase[];
     manageLink?: boolean | undefined;
     includeCSVDownload?: boolean | undefined;
-    handleCSVDownload?: (queueId: number) => Promise<void>;
+    handleCSVDownload?: (queueId: number, days?: number) => Promise<void>;
 }
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
+    // Track which dropdown option is selected: undefined = all history, 90 = 90 days, etc
+    const [selectedDays, setSelectedDays] = useState<number | undefined>(undefined);
     const handleQueueHistoryExportSubmit = async (queueId: number) => {
         if (props.handleCSVDownload === undefined) return;
-        await props.handleCSVDownload(queueId);
+        await props.handleCSVDownload(queueId, selectedDays);
     }
 
     const sortedQueues = sortQueues(props.queues.slice());
@@ -552,10 +554,23 @@ export function QueueTable (props: QueueTableProps) {
             </td>
             {props.includeCSVDownload && props.handleCSVDownload && (
                 <td className="align-middle" aria-label={`History for Queue ID ${q.id}`}>
-                    <Button onClick={() => handleQueueHistoryExportSubmit(q.id)}>
-                        <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
-                        Download
-                    </Button>
+                    <div style={{display: "flex", alignItems: "center", flexWrap: "nowrap"}}>
+                        <Form.Select
+                            aria-label={`Date range filter for Queue ID ${q.id}`}
+                            value={selectedDays ?? ''}
+                            onChange={(e) => setSelectedDays(e.target.value ? Number(e.target.value) : undefined)}
+                            style={{width: "auto", flex: "0 0 auto", marginRight: "8px"}}
+                        >
+                            <option value="">All history</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="180">Last 180 days</option>
+                            <option value="365">Last 365 days</option>
+                        </Form.Select>
+                        <Button style={{whiteSpace: "nowrap"}} onClick={() => handleQueueHistoryExportSubmit(q.id)}>
+                            <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
+                            Download
+                        </Button>
+                    </div>
                 </td>
             )}
         </tr>
