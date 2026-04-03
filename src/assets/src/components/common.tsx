@@ -16,7 +16,7 @@ type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "altern
 
 export const DisabledMessage = <em></em>
 
-
+ 
 interface UserDisplayProps {
     user: User;
 }
@@ -522,7 +522,7 @@ interface QueueTableProps {
     queues: readonly QueueBase[];
     manageLink?: boolean | undefined;
     includeCSVDownload?: boolean | undefined;
-    handleCSVDownload?: (queueId: number) => Promise<void>;
+    handleCSVDownload?: (queueId: number, days?: number) => Promise<void>;
 }
 
 export function QueueTable (props: QueueTableProps) {
