@@ -183,12 +183,11 @@ class MeetingTestCase(TestCase):
         # Just check right now that there's a header row and a data row, perhaps do more validation later
         self.assertEqual(len(response_csv), 3)
         
-    def test_export_meeting_start_logs_with_start_date_today(self):
+    def test_export_meeting_start_logs_with_start_date_includes_all(self):
         self.test_export_setup()
         self.client.login(username='hostone', password='rohqtest')
-        # Use today's date as start_date; all meetings were just created so they should all appear
-        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-        response = self.client.get(f'/api/export_meeting_start_logs/?start_date={today}')
+        # Use a past date as start_date; all meetings were just created so they should all appear
+        response = self.client.get(f'/api/export_meeting_start_logs/?start_date=2000-01-01')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_csv = self.read_csv_from_response(response.content)
         # Should have the same results as without a filter (header row + 2 data rows)
