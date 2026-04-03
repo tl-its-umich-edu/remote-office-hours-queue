@@ -554,6 +554,19 @@ export function QueueTable (props: QueueTableProps) {
             </td>
             {props.includeCSVDownload && props.handleCSVDownload && (
                 <td className="align-middle" aria-label={`History for Queue ID ${q.id}`}>
+                    <div className="d-flex align-items-center">
+                        <Form.Select
+                            aria-label={`Date range filter for Queue ID ${q.id}`}
+                            value={selectedDays ?? ''}
+                            onChange={(e) => setSelectedDays(e.target.value ? Number(e.target.value) : undefined)}
+                            style={{width: "auto", marginRight: "8px"}}
+                        >
+                            <option value="">All history</option>
+                            <option value="90">Last 90 days</option>
+                            <option value="180">Last 180 days</option>
+                            <option value="365">Last 365 days</option>
+                        </Form.Select>
+                    </div>
                     <Button onClick={() => handleQueueHistoryExportSubmit(q.id)}>
                         <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
                         Download
