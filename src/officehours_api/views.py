@@ -375,9 +375,9 @@ class ExportMeetingStartLogs(APIView):
         if start_date_str:
             try:
                 # attach UTC to avoid issues with postgres and comparing timezone-aware column against a naive datetime
-                start_date = datetime.strptime(start_date_str, '%Y-%M-%d').replace(tzinfo=timezone.utc)
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(tzinfo=timezone.utc)
             except ValueError:
-                return response(
+                return Response(
                     {'detail': 'Invalid start_date formate. Use YYYY-MM-DD.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
