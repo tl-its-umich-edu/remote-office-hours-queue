@@ -346,12 +346,12 @@ export const startMeeting = async (meeting_id: number) => {
 };
 
 export const exportQueueHistoryLogs = async (queue_id: number, days?: number) => {
-  let url = '/api/export_meeting_start_logs/${queue_id}';
+  let url = `/api/export_meeting_start_logs/${queue_id}`;
   if (days) {
     const start_date = new Date();
     start_date.setDate(start_date.getDate() - days);
     // Convert date and grab only YYYY-MM-DD that backend is expecting
-    url += '?start_date=${start_date.toISOString().split('T')[0]}';
+    url += `?start_date=${start_date.toISOString().split('T')[0]}`;
   }
   const resp = await fetch(url, {
     method: "GET",
@@ -365,12 +365,12 @@ export const exportQueueHistoryLogs = async (queue_id: number, days?: number) =>
 };
 
 export const exportAllQueueHistoryLogs = async (days?: number) => {
-  let url = '/api/export_meeting_start_logs/';
+  let url = `/api/export_meeting_start_logs/`;
   if (days) {
     const start_date = new Date();
     start_date.setDate(start_date.getDate() - days);
     // Convert date and grab only YYYY-MM-DD that backend is expecting
-    url += '?start_date=${start_date.toISOString().split('T')[0]}';
+    url += `?start_date=${start_date.toISOString().split('T')[0]}`;
   }
   const resp = await fetch(url, {
     method: "GET",
