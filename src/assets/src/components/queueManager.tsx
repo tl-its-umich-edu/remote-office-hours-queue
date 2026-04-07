@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, ChangeEvent } from "react"; 
 import { Link, useParams } from "react-router-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
@@ -17,9 +17,9 @@ import { useDialogState } from "../hooks/useDialogState";
 import { usePromise } from "../hooks/usePromise";
 import { useStringValidation } from "../hooks/useValidation";
 import {
-    isQueueHost, Meeting, MeetingBackend, MeetingStatus, MyUser, QueueAnnouncement, QueueAttendee, QueueHost,
+    isQueueHost, Meeting, MeetingBackend, MeetingStatus, MyUser, QueueAttendee, QueueHost,
     User, VideoBackendNames
-} from "../models";
+} from "../models"; 
 import * as api from "../services/api";
 import { useQueueWebSocket, useUserWebSocket } from "../services/sockets";
 import { addMeetingAutoAssigned, checkBackendAuth, recordQueueManagementEvent, redirectToLogin } from "../utils";
@@ -108,10 +108,6 @@ interface QueueManagerProps {
     onShowMeetingInfo: (m: Meeting) => void;
     onChangeAssignee: (a: User | undefined, m: Meeting) => void;
     onStartMeeting: (m: Meeting) => void;
-    onAnnouncementChange: () => void;
-    announcements: QueueAnnouncement[];
-    announcementsLoading: boolean;
-    announcementsError: string | null;
 }
 
 function QueueManager(props: QueueManagerProps) {
@@ -189,21 +185,23 @@ function QueueManager(props: QueueManagerProps) {
         </Row>
         <Row className={spacingClass}>
           <Col md={12}>
-            <AnnouncementForm
+            <AnnouncementForm 
               queueId={props.queue.id}
-              onAnnouncementChange={props.onAnnouncementChange}
               disabled={props.disabled}
               currentUser={{ id: props.user.id, username: props.user.username }}
+              myAnnouncement={
+                props.queue.current_announcement?.find(
+                    (a) => a.created_by.id === props.user.id
+                ) ?? null
+              }
             />
           </Col>
         </Row>
         <Row className={spacingClass}>
           <Col md={12}>
             <h2>Active Announcements (Only host who posted can manage)</h2>
-            <MultipleAnnouncementsDisplay
-              announcements={props.announcements}
-              loading={props.announcementsLoading}
-              error={props.announcementsError}
+            <MultipleAnnouncementsDisplay 
+              announcements={props.queue.current_announcement}
             />
           </Col>
         </Row>
@@ -315,10 +313,6 @@ export function QueueManagerPage(props: PageProps) {
     // Set up basic state
     const [queue, setQueue] = useState(undefined as QueueHost | undefined);
     const [authError, setAuthError] = useState(undefined as Error | undefined);
-    const [announcementRefreshTrigger, setAnnouncementRefreshTrigger] = useState(0);
-    const [announcements, setAnnouncements] = useState<QueueAnnouncement[]>([]);
-    const [announcementsLoading, setAnnouncementsLoading] = useState(false);
-    const [announcementsError, setAnnouncementsError] = useState<string | null>(null);
     const setQueueChecked = (q: QueueAttendee | QueueHost | undefined) => {
         if (!q) {
             setQueue(q);
@@ -339,24 +333,6 @@ export function QueueManagerPage(props: PageProps) {
     if (myUser && queue) {
         checkBackendAuth(myUser, queue);
     }
-
-    // Fetch announcements when trigger changes
-    useEffect(() => {
-        const fetchAnnouncements = async () => {
-            if (!queue?.id) return;
-            try {
-                setAnnouncementsLoading(true);
-                const data = await api.getAllActiveAnnouncements(queue.id);
-                setAnnouncements(data);
-                setAnnouncementsError(null);
-            } catch (err) {
-                setAnnouncementsError(err instanceof Error ? err.message : 'Unknown error');
-            } finally {
-                setAnnouncementsLoading(false);
-            }
-        };
-        fetchAnnouncements();
-    }, [queue?.id, announcementRefreshTrigger]);
 
     // Set up API interactions
     const removeMeeting = async (m: Meeting) => {
@@ -428,12 +404,6 @@ export function QueueManagerPage(props: PageProps) {
                 onShowMeetingInfo={setVisibleMeetingDialog}
                 onChangeAssignee={doChangeAssignee}
                 onStartMeeting={doStartMeeting}
-                onAnnouncementChange={() => {
-                    setAnnouncementRefreshTrigger(prev => prev + 1);
-                }}
-                announcements={announcements}
-                announcementsLoading={announcementsLoading}
-                announcementsError={announcementsError}
             />
         );
     return (
