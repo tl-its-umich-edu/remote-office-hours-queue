@@ -17,7 +17,6 @@ type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "altern
 
 export const DisabledMessage = <em></em>
 
- 
 interface UserDisplayProps {
     user: User;
 }

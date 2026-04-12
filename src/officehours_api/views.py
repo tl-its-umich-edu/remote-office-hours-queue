@@ -368,7 +368,7 @@ class ExportMeetingStartLogs(APIView):
         # Otherwise, get all the logs for the queues the user is a host of
         else:
             filename = f"meeting_start_logs_{username}.csv"
-        # Parse optional start_date queury parameter in order to filter by date
+        # Parse optional start_date query parameter in order to filter by date
         start_date_str = request.query_params.get('start_date')
         start_date = None
         # If no filter chosen, return everything
@@ -378,7 +378,7 @@ class ExportMeetingStartLogs(APIView):
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%d').replace(tzinfo=timezone.utc)
             except ValueError:
                 return Response(
-                    {'detail': 'Invalid start_date formate. Use YYYY-MM-DD.'},
+                    {'detail': 'Invalid start_date format. Use YYYY-MM-DD.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
         logger.info(f"User {username} requested to export meeting start logs for queues {queues_user_is_in}.")
