@@ -11,6 +11,7 @@ import { useInitFocusRef } from "../hooks/useInitFocusRef";
 import { QueueAttendee, QueueBase, User } from "../models";
 import { sortQueues } from "../sort";
 import { ValidationResult } from "../validation";
+import SingleQueueHistoryDownload from "./SingleQueueHistoryDownload";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
@@ -527,12 +528,6 @@ interface QueueTableProps {
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
-    // Track which dropdown option is selected: undefined = all history, 90 = 90 days, etc
-    const [selectedDays, setSelectedDays] = useState<number | undefined>(undefined);
-    const handleQueueHistoryExportSubmit = async (queueId: number) => {
-        if (props.handleCSVDownload === undefined) return;
-        await props.handleCSVDownload(queueId, selectedDays);
-    }
 
     const sortedQueues = sortQueues(props.queues.slice());
     const queueItems = sortedQueues.map(q => (
@@ -554,27 +549,7 @@ export function QueueTable (props: QueueTableProps) {
             </td>
             {props.includeCSVDownload && props.handleCSVDownload && (
                 <td className="align-middle" aria-label={`History for Queue ID ${q.id}`}>
-                    <div className="queue-history-filter">
-                        <Form.Group>
-                            <Form.Label visuallyHidden>
-                                {`Date range filter for Queue ID ${q.id}`}
-                            </Form.Label>
-                            <Form.Select
-                                className="queue-history-filter-select"
-                                value={selectedDays ?? ''}
-                                onChange={(e) => setSelectedDays(e.target.value ? Number(e.target.value) : undefined)}
-                            >
-                                <option value="">All history</option>
-                                <option value="90">Last 90 days</option>
-                                <option value="180">Last 180 days</option>
-                                <option value="365">Last 365 days</option>
-                            </Form.Select>
-                        </Form.Group>
-                        <Button className="queue-history-filter-btn" onClick={() => handleQueueHistoryExportSubmit(q.id)}>
-                            <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
-                            Download
-                        </Button>
-                    </div>
+                    <SingleQueueHistoryDownload queueId={q.id} onDownload={props.handleCSVDownload} />
                 </td>
             )}
         </tr>
