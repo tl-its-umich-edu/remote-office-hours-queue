@@ -35,18 +35,22 @@ function ManageQueueTable(props: ManageQueueTableProps) {
                 </Link>
                 {props.onAllQueueHistoryDownload ? (
                     <>
-                        <Form.Select
-                            aria-label='Date range filter for all queue history'
-                            value={selectedAllDays ?? ''}
-                            onChange={(e) => setSelectedAllDays(e.target.value ? Number(e.target.value) : undefined)}
-                            style={{width: "auto", display: "inline-block", marginLeft: "4px"}}
-                            disabled={props.disabled}
-                        >
-                            <option value="">All history</option>
-                            <option value="90">Last 90 days</option>
-                            <option value="180">Last 180 days</option>
-                            <option value="365">Last 365 days</option>
-                        </Form.Select>
+                        <Form.Group className="d-inline">
+                            <Form.Label visuallyHidden>
+                                Date range filter for all queue history
+                            </Form.Label>
+                            <Form.Select
+                                className="queue-history-filter-all"
+                                value={selectedAllDays ?? ''}
+                                onChange={(e) => setSelectedAllDays(e.target.value ? Number(e.target.value) : undefined)}
+                                disabled={props.disabled}
+                            >
+                                <option value="">All history</option>
+                                <option value="90">Last 90 days</option>
+                                <option value="180">Last 180 days</option>
+                                <option value="365">Last 365 days</option>
+                            </Form.Select>
+                        </Form.Group>
                         <DownloadQueueHistoryModal disabled={props.disabled} onDownload={() => props.onAllQueueHistoryDownload!(selectedAllDays)} />
                     </>
                 ) : null}

@@ -793,3 +793,9 @@ body {
 .queue-history-filter-btn {
 	white-space: nowrap;
 }
+
+.queue-history-filter-all {
+	width: auto;
+	display: inline-block;
+	margin-left: 4px;
+}
