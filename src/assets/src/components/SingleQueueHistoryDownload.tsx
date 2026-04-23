@@ -17,7 +17,7 @@ const SingleQueueHistoryDownload: React.FC<SingleQueueHistoryDownloadProps> = ({
 
     return (
         <div className="queue-history-filter">
-            <Form.Group>
+            <Form.Group controlId={`queueHistoryFilter-${queueId}`}>
                 <Form.Label visuallyHidden>
                     {`Date range filter for Queue ID ${queueId}`}
                 </Form.Label>
