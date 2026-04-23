@@ -35,7 +35,7 @@ function ManageQueueTable(props: ManageQueueTableProps) {
                 </Link>
                 {props.onAllQueueHistoryDownload ? (
                     <>
-                        <Form.Group className="d-inline">
+                        <Form.Group className="d-inline" controlId="allQueueHistoryFilter">
                             <Form.Label visuallyHidden>
                                 Date range filter for all queue history
                             </Form.Label>
