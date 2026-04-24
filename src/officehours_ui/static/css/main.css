@@ -777,3 +777,25 @@ body {
 	text-align: center;
 	color: #9B9B9B
 }
+
+.queue-history-filter {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+
+.queue-history-filter-select {
+	width: auto;
+	flex: 0 0 auto;
+	margin-right: 8px;
+}
+
+.queue-history-filter-btn {
+	white-space: nowrap;
+}
+
+.queue-history-filter-all {
+	width: auto;
+	display: inline-block;
+	margin-left: 4px;
+}

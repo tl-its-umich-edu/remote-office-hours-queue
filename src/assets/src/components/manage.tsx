@@ -1,8 +1,8 @@
 import * as React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "react-bootstrap";
-
+import { Button, Form } from "react-bootstrap";
+ 
 import { Breadcrumbs, checkForbiddenError, ErrorDisplay, FormError, LoginDialog, QueueTable } from "./common";
 import { PageProps } from "./page";
 import { QueueBase } from "../models";
@@ -16,11 +16,13 @@ import { HelmetTitle } from "./pageTitle";
 interface ManageQueueTableProps {
     queues: ReadonlyArray<QueueBase>;
     disabled: boolean;
-    onSingleQueueHistoryDownload?: (queueId: number) => Promise<void>;
-    onAllQueueHistoryDownload?: () => Promise<void>;
+    onSingleQueueHistoryDownload?: (queueId: number, days?: number) => Promise<void>;
+    onAllQueueHistoryDownload?: (days?: number) => Promise<void>;
 }
 
 function ManageQueueTable(props: ManageQueueTableProps) {
+    // Track dropdown selection
+    const [selectedAllDays, setSelectedAllDays] = useState<number | undefined>(undefined);
     const queueResults = props.queues.length
         ? <QueueTable queues={props.queues} manageLink={true} includeCSVDownload={true} handleCSVDownload={props.onSingleQueueHistoryDownload} />
         : <p>No queues to display. Create a queue by clicking the "Add Queue" button below.</p>;
@@ -32,7 +34,25 @@ function ManageQueueTable(props: ManageQueueTableProps) {
                     <Button disabled={props.disabled} variant='success' aria-label='Add Queue'>+ Add Queue</Button>
                 </Link>
                 {props.onAllQueueHistoryDownload ? (
-                    <DownloadQueueHistoryModal disabled={props.disabled} onDownload={props.onAllQueueHistoryDownload} />
+                    <>
+                        <Form.Group className="d-inline" controlId="allQueueHistoryFilter">
+                            <Form.Label visuallyHidden>
+                                Date range filter for all queue history
+                            </Form.Label>
+                            <Form.Select
+                                className="queue-history-filter-all"
+                                value={selectedAllDays ?? ''}
+                                onChange={(e) => setSelectedAllDays(e.target.value ? Number(e.target.value) : undefined)}
+                                disabled={props.disabled}
+                            >
+                                <option value="">All history</option>
+                                <option value="90">Last 90 days</option>
+                                <option value="180">Last 180 days</option>
+                                <option value="365">Last 365 days</option>
+                            </Form.Select>
+                        </Form.Group>
+                        <DownloadQueueHistoryModal disabled={props.disabled} onDownload={() => props.onAllQueueHistoryDownload!(selectedAllDays)} />
+                    </>
                 ) : null}
             </div>
         </div>
@@ -45,8 +65,8 @@ export function ManagePage(props: PageProps) {
     }
     const [queues, setQueues] = useState(undefined as ReadonlyArray<QueueBase> | undefined);
     const userWebSocketError = useUserWebSocket(props.user!.id, (u) => setQueues(u.hosted_queues));
-    const [ doExportAllQueues, exportAllLoading, exportAllError ] = usePromise(() => api.exportAllQueueHistoryLogs() as Promise<void>);
-    const [ doExportQueue, exportQueueLoading, exportQueueError ] = usePromise((queueId: number) => api.exportQueueHistoryLogs(queueId) as Promise<void>);
+    const [ doExportAllQueues, exportAllLoading, exportAllError ] = usePromise((days?: number) => api.exportAllQueueHistoryLogs(days) as Promise<void>);
+    const [ doExportQueue, exportQueueLoading, exportQueueError ] = usePromise((queueId: number, days?: number) => api.exportQueueHistoryLogs(queueId, days) as Promise<void>);
 
     
     const errorSources = [

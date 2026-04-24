@@ -182,6 +182,34 @@ class MeetingTestCase(TestCase):
         response_csv = self.read_csv_from_response(response.content)
         # Just check right now that there's a header row and a data row, perhaps do more validation later
         self.assertEqual(len(response_csv), 3)
+        
+    def test_export_meeting_start_logs_with_start_date_includes_all(self):
+        self.test_export_setup()
+        self.client.login(username='hostone', password='rohqtest')
+        # Use a past date as start_date; all meetings were just created so they should all appear
+        response = self.client.get(f'/api/export_meeting_start_logs/?start_date=2000-01-01')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_csv = self.read_csv_from_response(response.content)
+        # Should have the same results as without a filter (header row + 2 data rows)
+        self.assertEqual(len(response_csv), 3)
+
+    def test_export_meeting_start_logs_with_start_date_future(self):
+        self.test_export_setup()
+        self.client.login(username='hostone', password='rohqtest')
+        # Use a future date as start_date; no meetings should match
+        future_date = (datetime.now(timezone.utc) + timedelta(days=1)).strftime('%Y-%m-%d')
+        response = self.client.get(f'/api/export_meeting_start_logs/?start_date={future_date}')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_csv = self.read_csv_from_response(response.content)
+        # Should only have the header row, no data rows
+        self.assertEqual(len(response_csv), 1)
+
+    def test_export_meeting_start_logs_with_invalid_start_date(self):
+        self.test_export_setup()
+        self.client.login(username='hostone', password='rohqtest')
+        # Pass an invalid date string
+        response = self.client.get(f'/api/export_meeting_start_logs/?start_date=not-a-date')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 @skipIf(notifications.twilio is None, 'Skipping because "twilio" is not configured')
 @override_settings(TWILIO_ACCOUNT_SID='fake', TWILIO_AUTH_TOKEN='fake', TWILIO_MESSAGING_SERVICE_SID='fake')
