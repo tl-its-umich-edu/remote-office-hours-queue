@@ -11,11 +11,11 @@ import { useInitFocusRef } from "../hooks/useInitFocusRef";
 import { QueueAttendee, QueueBase, User } from "../models";
 import { sortQueues } from "../sort";
 import { ValidationResult } from "../validation";
+import SingleQueueHistoryDownload from "./SingleQueueHistoryDownload";
 
 type BootstrapButtonTypes = "info" | "warning" | "success" | "primary" | "alternate" | "danger";
 
 export const DisabledMessage = <em></em>
-
 
 interface UserDisplayProps {
     user: User;
@@ -522,15 +522,11 @@ interface QueueTableProps {
     queues: readonly QueueBase[];
     manageLink?: boolean | undefined;
     includeCSVDownload?: boolean | undefined;
-    handleCSVDownload?: (queueId: number) => Promise<void>;
+    handleCSVDownload?: (queueId: number, days?: number) => Promise<void>;
 }
 
 export function QueueTable (props: QueueTableProps) {
     const linkBase = props.manageLink ? '/manage/' : '/queue/'
-    const handleQueueHistoryExportSubmit = async (queueId: number) => {
-        if (props.handleCSVDownload === undefined) return;
-        await props.handleCSVDownload(queueId);
-    }
 
     const sortedQueues = sortQueues(props.queues.slice());
     const queueItems = sortedQueues.map(q => (
@@ -552,10 +548,7 @@ export function QueueTable (props: QueueTableProps) {
             </td>
             {props.includeCSVDownload && props.handleCSVDownload && (
                 <td className="align-middle" aria-label={`History for Queue ID ${q.id}`}>
-                    <Button onClick={() => handleQueueHistoryExportSubmit(q.id)}>
-                        <span style={{paddingRight:"8px"}}><FontAwesomeIcon icon={faFileDownload} /></span>
-                        Download
-                    </Button>
+                    <SingleQueueHistoryDownload queueId={q.id} onDownload={props.handleCSVDownload} />
                 </td>
             )}
         </tr>
