@@ -24,6 +24,15 @@ spec:
       containers:
       - name: web
         image: image-registry.openshift-image-registry.svc:5000/officehours-dev/officehours-rohq-latest-at-ghcr-test:latest
+        command: ["python"]
+        args: [
+          "-m",
+          "uvicorn",
+          "officehours.asgi:application",
+          "--host=0.0.0.0",
+          "--port=8001",
+          "--forwarded-allow-ips=${FORWARDED_ALLOW_IPS}"  # Will be set via environment variable
+        ]
         ports:
         - containerPort: 8001
         envFrom:
