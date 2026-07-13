@@ -1,5 +1,11 @@
 /.env
 
+# qa-browser skill output (screenshots, snapshots)
+/artifacts/
+
+# Local Claude Code settings (user-specific permissions)
+.claude/settings.local.json
+
 # Ignore all files in the vscode directory
 .vscode/*
 
