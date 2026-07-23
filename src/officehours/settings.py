@@ -325,10 +325,11 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [(
-                os.getenv('REDIS_HOST', 'redis').strip(),
-                int(os.getenv('REDIS_PORT', '6379'))
-            )],
+            "hosts": [{
+                "host": os.getenv('REDIS_HOST', 'redis').strip(),
+                "port": int(os.getenv('REDIS_PORT', '6379')),
+                "socket_timeout": None, # NOTE: track channels_redis issue to determine if this is still needed https://github.com/django/channels_redis/issues/422
+            }],
         },
     },
 }
