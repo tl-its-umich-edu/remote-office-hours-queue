@@ -29,7 +29,6 @@ const root = createRoot(container!)
 root.render(
     (
         <Router
-            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
             basename='/'>
             <App globals={globals} />
         </Router>
