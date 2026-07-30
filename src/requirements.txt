@@ -1,5 +1,5 @@
 gunicorn==23.0.0
-uvicorn[standard]==0.51.0
+uvicorn[standard]==0.52.0
 psycopg2==2.9.12
 
 Django==5.2.16
