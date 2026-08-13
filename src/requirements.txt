@@ -1,9 +1,9 @@
 gunicorn==23.0.0
-uvicorn[standard]==0.51.0
+uvicorn[standard]==0.52.1
 psycopg2==2.9.12
 
-Django==5.2.16
-djangorestframework==3.17.1
+Django==5.2.17
+djangorestframework==3.18.0
 drf-spectacular==0.30.0
 mozilla-django-oidc==5.0.2
 whitenoise==6.12.0
