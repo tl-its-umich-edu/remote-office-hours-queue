@@ -3,7 +3,7 @@ uvicorn[standard]==0.52.4
 psycopg2==2.9.12
 
 Django==5.2.17
-djangorestframework==3.18.0
+djangorestframework==3.18.2
 drf-spectacular==0.30.0
 mozilla-django-oidc==5.0.2
 whitenoise==6.12.0
