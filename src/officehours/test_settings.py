@@ -99,8 +99,8 @@ class ChannelLayersConfigTest(TestCase):
             self.assertEqual(settings.GA_TRACKING_ID, settings.GA_TRACKING_ID.strip())
 
     def test_channel_layers(self):
-        redis_host = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0][0]
-        redis_port = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0][1]
+        redis_host = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0]['host']
+        redis_port = settings.CHANNEL_LAYERS['default']['CONFIG']['hosts'][0]['port']
         self.assertEqual(redis_host, redis_host.strip())
         self.assertIsInstance(redis_port, int)  
 
