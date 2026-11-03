@@ -41,6 +41,10 @@ class QueueConsumer(JsonWebsocketConsumer):
         return self._user
 
     def connect(self):
+        if not self.user.is_authenticated:
+            self.close()
+            return
+        
         try:
             self._queue_id = int(self.scope['url_route']['kwargs']['queue_id'])
             self._user = self.scope["user"]
@@ -227,6 +231,11 @@ class UserConsumer(JsonWebsocketConsumer):
     def connect(self):
         self._user_id = int(self.scope['url_route']['kwargs']['user_id'])
         self._user = self.scope["user"]
+        
+        if not self.user.is_authenticated or self.user.id != self.user_id:
+            self.close()
+            return
+        
         async_to_sync(self.channel_layer.group_add)(
             self.group_name,
             self.channel_name
