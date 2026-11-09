@@ -41,13 +41,14 @@ class QueueConsumer(JsonWebsocketConsumer):
         return self._user
 
     def connect(self):
+        self._user = self.scope["user"]
+        
         if not self.user.is_authenticated:
             self.close()
             return
         
         try:
             self._queue_id = int(self.scope['url_route']['kwargs']['queue_id'])
-            self._user = self.scope["user"]
             queue = Queue.objects.get(pk=self.queue_id)
         except (Queue.DoesNotExist):
             self.accept()
