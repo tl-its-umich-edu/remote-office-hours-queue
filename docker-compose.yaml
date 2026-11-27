@@ -18,7 +18,11 @@ services:
       - ./src:/usr/src/app:z
     command: >
       python -m debugpy --listen 0.0.0.0:5678
-      -m uvicorn officehours.asgi:application --host=0.0.0.0 --port=8001 --reload
+      -m uvicorn officehours.asgi:application 
+      --host=0.0.0.0 
+      --port=8001 
+      --reload 
+      --forwarded-allow-ips='*'  # Trust all IPs in development for testing
     depends_on:
       - database
       - redis
